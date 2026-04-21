@@ -71,7 +71,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
       )}
 
       {/* Main layout: content + right panel */}
-      <div className="flex gap-8 items-start">
+      <div className="flex gap-4 items-start">
 
         {/* ── Left: project + comments ── */}
         <div className="flex-1 min-w-0 space-y-6">
