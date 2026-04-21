@@ -34,13 +34,14 @@ export function OAuthButtons() {
   }
 
   async function handleLinkedIn() {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'linkedin_oidc',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         scopes: 'openid profile email',
       },
     })
+    if (error) console.error('LinkedIn OAuth error:', error)
   }
 
   return (

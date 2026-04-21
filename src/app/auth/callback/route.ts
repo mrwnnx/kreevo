@@ -6,9 +6,16 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const error = requestUrl.searchParams.get('error')
+  const errorDescription = requestUrl.searchParams.get('error_description')
   const origin = requestUrl.origin
 
-  console.log('Auth callback called, code:', code ? 'present' : 'missing')
+  console.log('Callback params:', { code: !!code, error, errorDescription })
+
+  if (error) {
+    console.error('OAuth error from provider:', error, errorDescription)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error)}`)
+  }
 
   if (code) {
     const cookieStore = await cookies()
@@ -29,11 +36,11 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    console.log('Exchange error:', error?.message ?? 'none')
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    console.log('Exchange error:', exchangeError?.message ?? 'none')
 
-    if (error) {
-      return NextResponse.redirect(`${origin}/login?error=oauth_failed`)
+    if (exchangeError) {
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(exchangeError.message)}`)
     }
 
     return NextResponse.redirect(`${origin}/dashboard`)
