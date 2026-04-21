@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { signInWithGoogle, signInWithLinkedIn } from '@/app/(auth)/actions'
+'use client'
+
+import { createClient } from '@/lib/supabase/client'
 
 function GoogleIcon() {
   return (
@@ -20,31 +21,45 @@ function LinkedInIcon() {
   )
 }
 
-async function googleAction() {
-  'use server'
-  await signInWithGoogle()
-}
-
-async function linkedinAction() {
-  'use server'
-  await signInWithLinkedIn()
-}
-
 export function OAuthButtons() {
+  const supabase = createClient()
+
+  async function handleGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  }
+
+  async function handleLinkedIn() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'linkedin_oidc',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  }
+
   return (
     <div className="grid grid-cols-2 gap-3">
-      <form action={googleAction}>
-        <Button type="submit" variant="outline" className="w-full gap-2">
-          <GoogleIcon />
-          Google
-        </Button>
-      </form>
-      <form action={linkedinAction}>
-        <Button type="submit" variant="outline" className="w-full gap-2">
-          <LinkedInIcon />
-          LinkedIn
-        </Button>
-      </form>
+      <button
+        type="button"
+        onClick={handleGoogle}
+        className="flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+      >
+        <GoogleIcon />
+        Google
+      </button>
+      <button
+        type="button"
+        onClick={handleLinkedIn}
+        className="flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+      >
+        <LinkedInIcon />
+        LinkedIn
+      </button>
     </div>
   )
 }
