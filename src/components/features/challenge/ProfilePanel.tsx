@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MapPin, Zap, ExternalLink } from 'lucide-react'
+import { Zap, ExternalLink, Clock, BarChart2, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { League } from '@/lib/utils/xp'
@@ -24,11 +24,21 @@ interface Author {
   plan?: string | null
 }
 
+interface Challenge {
+  id: string
+  title?: string | null
+  track?: string | null
+  level?: string | null
+  closes_at?: string | null
+  status?: string | null
+}
+
 interface Props {
   author: Author | null
   gradient: string
   league: League
   isOwn: boolean
+  challenge?: Challenge | null
 }
 
 const LINK_LABELS: Record<string, string> = {
@@ -40,9 +50,25 @@ const LINK_LABELS: Record<string, string> = {
   github: 'GitHub',
 }
 
-export function ProfilePanel({ author, gradient, league, isOwn }: Props) {
-  const [visible, setVisible] = useState(false)
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+      {children}
+    </p>
+  )
+}
 
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-foreground">{value}</span>
+    </div>
+  )
+}
+
+export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Props) {
+  const [visible, setVisible] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60)
     return () => clearTimeout(t)
@@ -52,30 +78,37 @@ export function ProfilePanel({ author, gradient, league, isOwn }: Props) {
 
   const links = author.links as Record<string, string> | null
   const activeLinks = links ? Object.entries(links).filter(([, v]) => v) : []
+  const lColor = leagueColor(league)
 
   return (
     <aside
       className={cn(
-        'w-64 shrink-0 sticky top-20 space-y-4 transition-all duration-500',
+        'w-64 shrink-0 sticky top-20 space-y-3 transition-all duration-500',
         visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
       )}
     >
-      {/* Avatar + name */}
-      <div className="rounded-2xl border border-border overflow-hidden">
-        {/* Gradient header */}
-        <div className={cn('h-16 bg-gradient-to-br', gradient)} />
+      {/* ── Card profil ── */}
+      <div className="rounded-2xl border border-border overflow-hidden bg-card">
+        {/* Header gradient */}
+        <div className={cn('h-[60px] bg-gradient-to-br', gradient)} />
 
-        <div className="px-4 pb-4 -mt-8 space-y-3">
-          <Avatar className="size-14 rounded-xl border-4 border-background shadow-sm">
-            <AvatarImage src={author.avatar_url ?? undefined} />
-            <AvatarFallback className="rounded-xl text-lg font-bold">
-              {(author.username ?? '?')[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        {/* Avatar chevauchant */}
+        <div className="px-4 pb-4">
+          <div className="-mt-[22px] mb-3">
+            <Avatar className="size-11 rounded-full border-2 border-background shadow-sm">
+              <AvatarImage src={author.avatar_url ?? undefined} />
+              <AvatarFallback className="text-sm font-bold">
+                {(author.username ?? '?')[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
 
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link href={`/u/${author.username}`} className="font-bold text-sm hover:underline">@{author.username}</Link>
+          {/* Name */}
+          <div className="mb-3">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Link href={`/u/${author.username}`} className="text-sm font-bold hover:underline">
+                @{author.username}
+              </Link>
               {isOwn && (
                 <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                   Vous
@@ -83,93 +116,124 @@ export function ProfilePanel({ author, gradient, league, isOwn }: Props) {
               )}
             </div>
             {author.full_name && (
-              <p className="text-xs text-muted-foreground">{author.full_name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{author.full_name}</p>
             )}
           </div>
 
-          {/* League + XP */}
-          <div className="flex items-center justify-between">
-            <span
-              className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full"
-              style={{
-                background: leagueColor(league) + '18',
-                color: leagueColor(league),
-              }}
-            >
-              {leagueLabel(league)}
-            </span>
+          {/* Badges plan + XP */}
+          <div className="flex items-center gap-2 flex-wrap mb-3">
+            {author.plan && (
+              <span className={cn(
+                'text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase',
+                author.plan === 'pro'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              )}>
+                {author.plan}
+              </span>
+            )}
             {author.xp != null && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono">
-                <Zap className="size-3 text-violet-500" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
+                <Zap className="size-3 text-amber-500" />
                 {author.xp.toLocaleString()} XP
-              </div>
+              </span>
             )}
           </div>
 
-          {/* Location */}
-          {(author.city || author.country) && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3 shrink-0" />
-              {[author.city, author.country].filter(Boolean).join(', ')}
-            </div>
-          )}
-
-          {/* Bio */}
-          {author.bio && (
-            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-              {author.bio}
-            </p>
-          )}
+          {/* Info rows */}
+          <div className="rounded-xl bg-muted/40 px-3 py-1">
+            <InfoRow
+              label="Ligue"
+              value={
+                <span className="font-semibold" style={{ color: lColor }}>
+                  {leagueLabel(league)}
+                </span>
+              }
+            />
+            {author.specialty && (
+              <InfoRow label="Spécialité" value={author.specialty} />
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Specialty + Tools */}
-      {(author.specialty || (author.tools && author.tools.length > 0)) && (
-        <div className="rounded-2xl border border-border p-4 space-y-3">
-          {author.specialty && (
-            <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">Spécialité</p>
-              <span className="text-xs bg-muted px-2.5 py-1 rounded-full">{author.specialty}</span>
-            </div>
-          )}
-          {author.tools && author.tools.length > 0 && (
-            <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">Outils</p>
-              <div className="flex flex-wrap gap-1.5">
-                {author.tools.map(t => (
-                  <span key={t} className="text-[11px] bg-muted px-2 py-0.5 rounded-full">{t}</span>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* ── Card tools ── */}
+      {author.tools && author.tools.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <Label>Outils</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {author.tools.map(t => (
+              <span key={t} className="text-[11px] bg-muted px-2 py-0.5 rounded-full">{t}</span>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Links */}
+      {/* ── Card links ── */}
       {activeLinks.length > 0 && (
-        <div className="rounded-2xl border border-border p-4 space-y-2">
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-2">Liens</p>
-          {activeLinks.map(([key, url]) => (
-            <a
-              key={key}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between text-xs text-foreground hover:text-primary transition-colors group"
-            >
-              <span>{LINK_LABELS[key] ?? key}</span>
-              <ExternalLink className="size-3 text-muted-foreground group-hover:text-primary transition-colors" />
-            </a>
-          ))}
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <Label>Liens</Label>
+          <div className="space-y-2">
+            {activeLinks.map(([key, url]) => (
+              <a
+                key={key}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between text-xs text-foreground hover:text-primary transition-colors group"
+              >
+                <span>{LINK_LABELS[key] ?? key}</span>
+                <ExternalLink className="size-3 text-muted-foreground group-hover:text-primary transition-colors" />
+              </a>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* View profile CTA */}
+      {/* ── Card challenge ── */}
+      {challenge && (
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <Label>Challenge</Label>
+          <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
+          <div className="space-y-1.5">
+            {challenge.level && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <BarChart2 className="size-3" />
+                <span className="capitalize">{challenge.level}</span>
+              </div>
+            )}
+            {challenge.track && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="size-3 text-center">🎨</span>
+                <span className="capitalize">{challenge.track.replace('_', '/')}</span>
+              </div>
+            )}
+            {challenge.closes_at && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="size-3" />
+                <span>
+                  {new Date(challenge.closes_at) > new Date()
+                    ? `Ferme le ${new Date(challenge.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}`
+                    : 'Terminé'}
+                </span>
+              </div>
+            )}
+          </div>
+          <Link
+            href={`/dashboard/challenges/${challenge.id}`}
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            Voir le challenge <ArrowRight className="size-3" />
+          </Link>
+        </div>
+      )}
+
+      {/* ── CTA profil ── */}
       <Link
         href={`/u/${author.username}`}
         className="flex items-center justify-center w-full h-9 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors"
       >
-        Voir le profil
+        Voir le profil →
       </Link>
     </aside>
   )

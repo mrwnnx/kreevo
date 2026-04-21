@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Heart, MapPin, Zap, ExternalLink } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ChevronLeft, ExternalLink, Clock, BarChart2 } from 'lucide-react'
 import { SubmissionComments } from '@/components/features/challenge/SubmissionComments'
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
@@ -11,6 +10,13 @@ import type { League } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
 
 interface Props { params: Promise<{ id: string }> }
+
+const TRACK_STYLE: Record<string, string> = {
+  ux_ui:   'bg-violet-100 text-violet-700',
+  graphic: 'bg-orange-100 text-orange-700',
+  motion:  'bg-blue-100 text-blue-700',
+  '3d':    'bg-green-100 text-green-700',
+}
 
 export default async function SubmissionDetailPage({ params }: Props) {
   const { id } = await params
@@ -21,7 +27,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const [{ data: submission }, { data: comments }, { data: liked }] = await Promise.all([
     (supabase as any)
       .from('submissions')
-      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, track, closes_at, reveal_at, status)')
+      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, track, level, closes_at, reveal_at, status)')
       .eq('id', id)
       .single(),
     (supabase as any)
@@ -43,18 +49,18 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const author = submission.profiles
   const isOwn = submission.user_id === user.id
 
-  // Blur check
   const isClosed = challenge?.closes_at ? new Date(challenge.closes_at) < new Date() : false
   const isRevealed = challenge?.reveal_at ? new Date(challenge.reveal_at) <= new Date() : isClosed
   const isBlurred = !isRevealed && !isOwn
 
   const league = (author?.league ?? 'rookie') as League
   const gradient = LEAGUE_COLORS[league] ?? LEAGUE_COLORS.rookie
-
   const figmaUrl = (submission.files as any)?.figma
+  const trackStyle = TRACK_STYLE[challenge?.track] ?? 'bg-muted text-muted-foreground'
+  const trackLabel = challenge?.track?.replace('_', '/').toUpperCase() ?? ''
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 pb-10">
+    <div className="max-w-4xl mx-auto px-6 py-8 pb-16">
 
       {/* Back */}
       <Link
@@ -62,48 +68,50 @@ export default async function SubmissionDetailPage({ params }: Props) {
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ChevronLeft className="size-4" />
-        {challenge?.title ?? 'Back to challenge'}
+        {challenge?.title ?? 'Retour'}
       </Link>
 
-      {/* Track badge */}
-      {challenge?.track && (
-        <p className="text-xs font-medium text-violet-600 uppercase tracking-widest mb-2">{challenge.track}</p>
-      )}
+      {/* 2-col layout */}
+      <div className="flex flex-col md:flex-row gap-4 items-start">
 
-      {/* Main layout: content + right panel */}
-      <div className="flex gap-4 items-start">
+        {/* ── Colonne gauche ── */}
+        <div className="flex-1 min-w-0 space-y-4">
 
-        {/* ── Left: project + comments ── */}
-        <div className="flex-1 min-w-0 space-y-6">
+          {/* Card image */}
+          <div className="rounded-2xl border border-border overflow-hidden bg-card">
+            {/* Header track */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              {trackLabel ? (
+                <span className={cn('text-[11px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest', trackStyle)}>
+                  {trackLabel}
+                </span>
+              ) : <span />}
+            </div>
 
-          {/* Cover image */}
-          <div className="relative rounded-2xl overflow-hidden border border-border bg-muted aspect-video">
-            {submission.cover_url ? (
-              <img
-                src={submission.cover_url}
-                alt="Submission cover"
-                className={cn(
-                  'w-full h-full object-cover',
-                  isBlurred && 'blur-2xl scale-110'
-                )}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                No preview
-              </div>
-            )}
-            {isBlurred && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                <p className="text-sm font-semibold text-foreground/70 bg-background/60 px-4 py-2 rounded-full backdrop-blur-sm">
-                  🔒 Hidden until reveal
-                </p>
-              </div>
-            )}
-          </div>
+            {/* Image */}
+            <div className="relative aspect-video bg-muted">
+              {submission.cover_url ? (
+                <img
+                  src={submission.cover_url}
+                  alt="Submission cover"
+                  className={cn('w-full h-full object-cover', isBlurred && 'blur-2xl scale-110')}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Pas de preview
+                </div>
+              )}
+              {isBlurred && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-sm font-semibold bg-background/70 backdrop-blur-sm px-4 py-2 rounded-full">
+                    🔒 Caché jusqu'à la révélation
+                  </p>
+                </div>
+              )}
+            </div>
 
-          {/* Meta: likes + figma */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-4">
+            {/* Footer : likes + commentaires */}
+            <div className="flex items-center gap-4 px-4 py-3 border-t border-border">
               <LikeButton
                 submissionId={id}
                 initialLikes={submission.likes_count ?? 0}
@@ -111,36 +119,39 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 currentUserId={user.id}
               />
               <span className="text-xs text-muted-foreground font-mono">
-                {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}
+                💬 {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}
               </span>
             </div>
-            {figmaUrl && (
-              <a
-                href={figmaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-lg hover:bg-muted transition-colors"
-              >
-                <ExternalLink className="size-3" /> Voir sur Figma
-              </a>
-            )}
           </div>
 
-          {/* Description */}
-          {submission.description && (
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold text-foreground">Description</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {submission.description}
-              </p>
+          {/* Card description */}
+          {(submission.description || figmaUrl) && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Description</p>
+              {submission.description && (
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {submission.description}
+                </p>
+              )}
+              {figmaUrl && (
+                <a
+                  href={figmaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                >
+                  <ExternalLink className="size-3" />
+                  Voir sur Figma →
+                </a>
+              )}
             </div>
           )}
 
-          {/* Comments */}
-          <div className="space-y-4 pt-4 border-t border-border">
-            <h2 className="text-sm font-semibold">
-              Commentaires <span className="text-muted-foreground font-normal">({comments?.length ?? 0})</span>
-            </h2>
+          {/* Card commentaires */}
+          <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+            <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
+              Commentaires ({comments?.length ?? 0})
+            </p>
             <SubmissionComments
               submissionId={id}
               initialComments={comments ?? []}
@@ -149,8 +160,14 @@ export default async function SubmissionDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ── Right: author profile panel ── */}
-        <ProfilePanel author={author} gradient={gradient} league={league} isOwn={isOwn} />
+        {/* ── Colonne droite ── */}
+        <ProfilePanel
+          author={author}
+          gradient={gradient}
+          league={league}
+          isOwn={isOwn}
+          challenge={challenge}
+        />
       </div>
     </div>
   )

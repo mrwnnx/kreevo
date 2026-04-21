@@ -22,7 +22,6 @@ export function LikeButton({ submissionId, initialLikes, initialLiked, currentUs
     const nextLiked = !liked
     setLiked(nextLiked)
     setLikes(prev => prev + (nextLiked ? 1 : -1))
-
     const res = await fetch('/api/likes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -44,12 +43,14 @@ export function LikeButton({ submissionId, initialLikes, initialLiked, currentUs
       onClick={toggle}
       disabled={!currentUserId || pending}
       className={cn(
-        'flex items-center gap-1.5 text-sm font-mono transition-colors',
-        liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
+        'inline-flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border transition-all',
+        liked
+          ? 'bg-red-50 border-red-200 text-red-500'
+          : 'border-border text-muted-foreground hover:border-red-200 hover:text-red-400',
         (!currentUserId || pending) && 'opacity-50 cursor-not-allowed'
       )}
     >
-      <Heart className={cn('size-4 transition-all', liked && 'fill-current scale-110')} />
+      <Heart className={cn('size-3.5 transition-all', liked && 'fill-current scale-110')} />
       {likes}
     </button>
   )
