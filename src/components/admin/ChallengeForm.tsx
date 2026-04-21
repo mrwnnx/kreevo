@@ -150,7 +150,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
             <button
               onClick={generateWithAI}
               disabled={aiLoading}
-              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
+              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground px-4 py-1.5 rounded-full hover:opacity-85 disabled:opacity-60"
             >
               {aiLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
               Générer
@@ -202,7 +202,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-lg hover:opacity-90 disabled:opacity-60"
+          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-full hover:opacity-85 disabled:opacity-60"
         >
           {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
           {id ? 'Enregistrer' : 'Créer le challenge'}

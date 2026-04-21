@@ -171,7 +171,7 @@ export default async function ChallengePage({ params }: Props) {
           )}
 
           {participationStatus === 'none' && isClosed && (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+            <div className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
               Ce challenge est fermé aux nouvelles participations.
             </div>
           )}
@@ -179,7 +179,7 @@ export default async function ChallengePage({ params }: Props) {
           {/* STATE 2 — Participé, deadline en cours */}
           {participationStatus === 'active' && (
             <div className="space-y-5">
-              <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
+              <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-2">
                     <span className="size-2.5 rounded-full bg-green-500 animate-pulse" />
@@ -217,7 +217,7 @@ export default async function ChallengePage({ params }: Props) {
 
           {/* STATE 3 — Deadline expirée, pas soumis */}
           {participationStatus === 'expired' && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-6 space-y-3">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="size-2.5 rounded-full bg-red-500" />
                 <span className="text-sm font-semibold text-red-700">Délai expiré</span>
@@ -238,7 +238,7 @@ export default async function ChallengePage({ params }: Props) {
           {/* STATE 4 — Soumis */}
           {participationStatus === 'submitted' && existingSubmission && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-green-200 bg-green-50 p-5 space-y-4">
+              <div className="rounded-xl border border-green-200 bg-green-50 p-4 space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="text-green-500 text-lg">✅</span>
                   <span className="text-sm font-semibold text-green-700">

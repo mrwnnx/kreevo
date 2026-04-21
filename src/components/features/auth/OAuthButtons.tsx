@@ -49,7 +49,7 @@ export function OAuthButtons() {
       <button
         type="button"
         onClick={handleGoogle}
-        className="flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+        className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
       >
         <GoogleIcon />
         Google
@@ -57,7 +57,7 @@ export function OAuthButtons() {
       <button
         type="button"
         onClick={handleLinkedIn}
-        className="flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+        className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
       >
         <LinkedInIcon />
         LinkedIn

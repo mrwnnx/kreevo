@@ -167,7 +167,7 @@ export function ProfilePanel({ author, gradient, league, isOwn }: Props) {
       {/* View profile CTA */}
       <Link
         href={`/u/${author.username}`}
-        className="flex items-center justify-center w-full h-9 rounded-xl border border-border text-xs font-medium hover:bg-muted transition-colors"
+        className="flex items-center justify-center w-full h-9 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors"
       >
         Voir le profil
       </Link>

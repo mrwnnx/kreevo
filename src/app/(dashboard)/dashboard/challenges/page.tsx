@@ -65,7 +65,7 @@ function ChallengeCard({ challenge, hasSubmitted }: { challenge: Challenge; hasS
             )}
             <Link
               href={`/dashboard/challenges/${challenge.id}`}
-              className="inline-flex items-center justify-center rounded-lg bg-violet-600 text-white px-3 h-7 text-xs font-medium hover:bg-violet-700 transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-violet-600 text-white px-3 h-7 text-xs font-medium hover:opacity-85 transition-opacity"
             >
               {hasSubmitted ? 'View' : 'Enter'}
             </Link>

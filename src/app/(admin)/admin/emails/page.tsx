@@ -51,7 +51,7 @@ export default function AdminEmails() {
         <p className="text-sm text-muted-foreground">Envoyer des emails manuels via Resend</p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-5">
         {/* Recipients */}
         <div className="space-y-2">
           <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Destinataires</label>

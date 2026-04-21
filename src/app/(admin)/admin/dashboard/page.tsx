@@ -8,7 +8,7 @@ function StatCard({ label, value, sub, icon: Icon, accent }: {
   icon: React.ElementType; accent?: string
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{label}</p>
         <Icon className={`size-4 ${accent ?? 'text-muted-foreground'}`} />

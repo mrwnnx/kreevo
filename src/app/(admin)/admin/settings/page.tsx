@@ -55,7 +55,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Maintenance mode */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <section className="rounded-xl border border-border bg-card p-4 space-y-4">
         <h2 className="text-sm font-semibold">Mode maintenance</h2>
         <div className="flex items-center justify-between">
           <div>
@@ -76,7 +76,7 @@ export default function AdminSettings() {
       </section>
 
       {/* XP Rewards */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <section className="rounded-xl border border-border bg-card p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Récompenses XP</h2>
           <SaveBtn saving={saving} onClick={() => save('xp_rewards', settings.xp_rewards)} />
@@ -97,7 +97,7 @@ export default function AdminSettings() {
       </section>
 
       {/* League thresholds */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <section className="rounded-xl border border-border bg-card p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Seuils de ligue (XP)</h2>
           <SaveBtn saving={saving} onClick={() => save('league_thresholds', settings.league_thresholds)} />
@@ -118,7 +118,7 @@ export default function AdminSettings() {
       </section>
 
       {/* Free brief limit */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <section className="rounded-xl border border-border bg-card p-4 space-y-4">
         <h2 className="text-sm font-semibold">Limites Free</h2>
         <div className="grid grid-cols-2 gap-5">
           <div className="space-y-2">

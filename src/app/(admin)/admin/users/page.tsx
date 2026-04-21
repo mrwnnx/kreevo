@@ -229,7 +229,7 @@ export default function AdminUsers() {
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setXpModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
             <button onClick={() => { action(xpModal, { xp_add: parseInt(xpAmount) }); setXpModal(null) }}
-              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90">
+              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85">
               Ajouter
             </button>
           </div>
@@ -246,7 +246,7 @@ export default function AdminUsers() {
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setLeagueModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
             <button onClick={() => { action(leagueModal, { league: leagueVal }); setLeagueModal(null) }}
-              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90">
+              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85">
               Confirmer
             </button>
           </div>
@@ -260,7 +260,7 @@ export default function AdminUsers() {
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setConfirmDelete(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
             <button onClick={() => deleteUser(confirmDelete)}
-              className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:opacity-90">
+              className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-full hover:opacity-85">
               Supprimer définitivement
             </button>
           </div>
@@ -276,7 +276,7 @@ export default function AdminUsers() {
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-xl">
+      <div className="bg-card border border-border rounded-2xl p-4 w-full max-w-sm shadow-xl">
         <h3 className="text-base font-semibold mb-4">{title}</h3>
         {children}
       </div>

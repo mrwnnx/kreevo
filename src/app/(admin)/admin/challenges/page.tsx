@@ -78,7 +78,7 @@ export default function AdminChallenges() {
         </div>
         <Link
           href="/admin/challenges/new"
-          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full hover:opacity-85 transition-opacity"
         >
           <Plus className="size-4" />
           Nouveau challenge

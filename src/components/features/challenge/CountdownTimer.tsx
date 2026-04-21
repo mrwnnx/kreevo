@@ -33,10 +33,11 @@ function calc(deadline: string): TimeLeft {
 function pad(n: number) { return String(n).padStart(2, '0') }
 
 export function CountdownTimer({ deadline, label, onExpired, compact = false }: CountdownTimerProps) {
-  const [time, setTime] = useState<TimeLeft>(() => calc(deadline))
+  const [time, setTime] = useState<TimeLeft | null>(null)
   const [fired, setFired] = useState(false)
 
   useEffect(() => {
+    setTime(calc(deadline))
     const tick = setInterval(() => {
       const t = calc(deadline)
       setTime(t)
@@ -48,6 +49,12 @@ export function CountdownTimer({ deadline, label, onExpired, compact = false }: 
     }, 1000)
     return () => clearInterval(tick)
   }, [deadline, fired, onExpired])
+
+  if (!time) {
+    return compact
+      ? <span className="font-mono text-xs font-semibold text-muted-foreground">--h --m --s</span>
+      : <div className="h-10" />
+  }
 
   const isExpired = time.total === 0
   const isUrgent = time.total > 0 && time.total < 3600000       // < 1h

@@ -54,7 +54,7 @@ function SelectField({
             type="button"
             onClick={() => onChange(opt)}
             className={cn(
-              'px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-150',
+              'px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150',
               value === opt
                 ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                 : 'bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
@@ -106,7 +106,7 @@ function BriefCard({ brief, briefId, onReset }: { brief: BriefData; briefId: str
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onReset}
-              className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:border-primary/40 hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground border border-border rounded-full px-3 py-1.5 hover:border-primary/40 hover:text-foreground transition-colors"
             >
               <RefreshCw className="size-3" />
               Autre
@@ -133,7 +133,7 @@ function BriefCard({ brief, briefId, onReset }: { brief: BriefData; briefId: str
         <button
           onClick={handleStart}
           disabled={starting}
-          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-full hover:opacity-85 transition-opacity disabled:opacity-60"
         >
           {starting ? <RefreshCw className="size-3.5 animate-spin" /> : <Play className="size-3.5" fill="currentColor" />}
           {starting ? 'Démarrage…' : 'Commencer ce brief'}
@@ -293,7 +293,7 @@ export function BriefClient() {
 
       {/* Generator */}
       <section className="space-y-6">
-        <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-5">
 
           <SelectField label="Domaine"   options={DOMAINS}      value={domain}     onChange={setDomain} />
           <SelectField label="Type"      options={TYPES}        value={type}       onChange={setType} />
@@ -320,9 +320,9 @@ export function BriefClient() {
               onClick={generate}
               disabled={loading || !canGenerate}
               className={cn(
-                'flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-xl transition-all',
+                'flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-full transition-all',
                 canGenerate
-                  ? 'bg-primary text-primary-foreground hover:opacity-90'
+                  ? 'bg-primary text-primary-foreground hover:opacity-85'
                   : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
               )}
             >
@@ -380,14 +380,14 @@ export function BriefClient() {
         )}
 
         {!isPro && monthCount >= 3 && (
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex items-center justify-between gap-4">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold">Limite mensuelle atteinte</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Passe en Pro pour générer des briefs illimités et débloquer tous les avantages.
               </p>
             </div>
-            <button className="shrink-0 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+            <button className="shrink-0 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full hover:opacity-85 transition-opacity">
               Passer Pro
             </button>
           </div>

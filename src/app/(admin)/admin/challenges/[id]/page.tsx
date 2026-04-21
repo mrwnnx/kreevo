@@ -137,7 +137,7 @@ export default async function EditChallenge({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
             Aucun participant pour l&apos;instant.
           </div>
         )}

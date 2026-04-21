@@ -25,7 +25,7 @@ export function SubmitForm({ challengeId, existing, isClosed, participationId, a
 
   if (isClosed) {
     return (
-      <div className="rounded-xl border bg-muted/20 p-6 text-center text-muted-foreground text-sm">
+      <div className="rounded-xl border bg-muted/20 p-4 text-center text-muted-foreground text-sm">
         Ce challenge est fermé.
       </div>
     )
@@ -45,7 +45,7 @@ export function SubmitForm({ challengeId, existing, isClosed, participationId, a
 
   if (success) {
     return (
-      <div className="rounded-xl border bg-green-50 p-8 text-center space-y-2">
+      <div className="rounded-xl border bg-green-50 p-4 text-center space-y-2">
         <CheckCircle className="size-10 text-green-500 mx-auto" />
         <p className="font-semibold text-green-700">
           {existing ? 'Soumission mise à jour !' : 'Soumission reçue !'}

@@ -42,7 +42,7 @@ export default async function UserDetail({ params }: Props) {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Info */}
-        <section className="rounded-xl border border-border bg-card p-5 space-y-3">
+        <section className="rounded-xl border border-border bg-card p-4 space-y-3">
           <h2 className="text-sm font-semibold">Informations</h2>
           {[
             ['Spécialité', user.specialty],
@@ -58,7 +58,7 @@ export default async function UserDetail({ params }: Props) {
         </section>
 
         {/* Badges */}
-        <section className="rounded-xl border border-border bg-card p-5 space-y-3">
+        <section className="rounded-xl border border-border bg-card p-4 space-y-3">
           <h2 className="text-sm font-semibold">Badges ({badges?.length ?? 0})</h2>
           <div className="flex flex-wrap gap-2">
             {(badges ?? []).map((b: any) => {

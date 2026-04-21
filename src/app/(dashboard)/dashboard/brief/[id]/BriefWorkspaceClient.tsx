@@ -115,7 +115,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
 
       {/* ── État active ── */}
       {status === 'active' && (
-        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center">
               <Play className="size-4 text-primary" fill="currentColor" />
@@ -131,7 +131,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
           <button
             onClick={handleStart}
             disabled={starting}
-            className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60"
+            className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-6 py-2.5 rounded-full hover:opacity-85 transition-opacity disabled:opacity-60"
           >
             {starting ? <RefreshCw className="size-4 animate-spin" /> : <Play className="size-4" fill="currentColor" />}
             {starting ? 'Démarrage…' : 'Commencer ce brief'}
@@ -142,12 +142,12 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
       {/* ── État started ── */}
       {status === 'started' && deadlineAt && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 space-y-3">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-3">
             <p className="text-xs font-mono text-amber-700 uppercase tracking-widest">Temps restant</p>
             <CountdownTimer deadline={deadlineAt} onExpired={() => setStatus('expired')} />
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+          <div className="rounded-2xl border border-border bg-card p-4 space-y-5">
             <div>
               <h2 className="font-semibold text-sm">Soumettre mon travail</h2>
               <p className="text-xs text-muted-foreground mt-0.5">+50 XP à la complétion</p>
@@ -189,7 +189,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
             <button
               onClick={handleSubmit}
               disabled={submitting || !coverUrl}
-              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-6 py-2.5 rounded-full hover:opacity-85 transition-opacity disabled:opacity-60"
             >
               {submitting && <RefreshCw className="size-4 animate-spin" />}
               {submitting ? 'Soumission en cours…' : 'Soumettre mon travail'}
@@ -200,7 +200,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
 
       {/* ── État submitted ── */}
       {status === 'submitted' && (
-        <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 space-y-4">
+        <div className="rounded-2xl border border-green-200 bg-green-50/50 p-4 space-y-4">
           <div className="flex items-center gap-3">
             <CheckCircle2 className="size-8 text-green-500 shrink-0" />
             <div>
@@ -224,7 +224,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
           )}
           <button
             onClick={() => router.push('/dashboard/brief')}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground border border-border rounded-lg px-4 py-2 hover:border-primary/40 hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground border border-border rounded-full px-4 py-2 hover:border-primary/40 hover:text-foreground transition-colors"
           >
             Générer un nouveau brief
           </button>
@@ -233,7 +233,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
 
       {/* ── État expired ── */}
       {status === 'expired' && (
-        <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 space-y-4">
+        <div className="rounded-2xl border border-red-200 bg-red-50/50 p-4 space-y-4">
           <div className="flex items-center gap-3">
             <AlertCircle className="size-8 text-red-500 shrink-0" />
             <div>
@@ -243,7 +243,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
           </div>
           <button
             onClick={() => router.push('/dashboard/brief')}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground border border-border rounded-lg px-4 py-2 hover:border-primary/40 hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground border border-border rounded-full px-4 py-2 hover:border-primary/40 hover:text-foreground transition-colors"
           >
             Générer un nouveau brief
           </button>

@@ -109,7 +109,7 @@
   --popover:              oklch(1 0 0);
   --popover-foreground:   oklch(0.12 0.008 265);
 
-  --primary:              oklch(0.52 0.22 275);   /* violet */
+  --primary:              oklch(0.12 0.008 265);
   --primary-foreground:   oklch(0.98 0 0);
 
   --secondary:            oklch(0.94 0.004 265);
@@ -124,7 +124,7 @@
   --destructive:          oklch(0.55 0.22 25);
   --border:               oklch(0.88 0.004 265);
   --input:                oklch(0.88 0.004 265);
-  --ring:                 oklch(0.52 0.22 275);
+  --ring:                 oklch(0.12 0.008 265);
 
   --radius: 0.5rem;
 

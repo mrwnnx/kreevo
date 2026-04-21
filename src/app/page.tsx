@@ -26,7 +26,7 @@ export default function Home() {
           </Link>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-opacity glow-primary"
+            className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-full hover:opacity-85 transition-opacity glow-primary"
           >
             Get started <ArrowRight className="size-3" />
           </Link>
@@ -58,7 +58,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 rounded-md hover:opacity-90 transition-opacity glow-primary"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 rounded-full hover:opacity-85 transition-opacity glow-primary"
             >
               Start for free <ArrowRight className="size-4" />
             </Link>
@@ -118,7 +118,7 @@ export default function Home() {
               accent: 'text-league-platinum',
             },
           ].map(({ icon: Icon, tag, title, desc, accent }) => (
-            <div key={title} className="card-sharp rounded-lg p-6 space-y-4 hover:border-primary/30 transition-colors group">
+            <div key={title} className="card-sharp rounded-lg p-4 space-y-4 hover:border-primary/30 transition-colors group">
               <div className="flex items-center justify-between">
                 <Icon className={`size-5 ${accent}`} />
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest border border-border px-2 py-0.5 rounded-full">
@@ -145,7 +145,7 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-8 py-3 rounded-md hover:opacity-90 transition-opacity glow-primary"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-8 py-3 rounded-full hover:opacity-85 transition-opacity glow-primary"
           >
             Create free account <ArrowRight className="size-4" />
           </Link>
