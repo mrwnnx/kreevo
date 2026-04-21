@@ -144,6 +144,7 @@ export default async function DashboardPage() {
         avatarUrl={p.avatar_url}
         specialty={p.specialty ?? null}
         bio={p.bio ?? null}
+        country={p.country ?? null}
         league={p.league as League}
         xp={p.xp}
         submissionCount={submissionCount ?? 0}
