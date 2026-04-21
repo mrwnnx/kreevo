@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
-import { Space_Grotesk, Space_Mono } from "next/font/google"
+import { Plus_Jakarta_Sans, Space_Mono } from "next/font/google"
 import "./globals.css"
 
-const spaceGrotesk = Space_Grotesk({
+const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 })
 
 const spaceMono = Space_Mono({
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${spaceMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${plusJakartaSans.variable} ${spaceMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
     </html>
   )

@@ -59,9 +59,9 @@
   --size-16: 64px;
 
   /* Fonts — resolved via next/font CSS variables injected on <html> */
-  --font-sans: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: var(--font-space-grotesk), 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: var(--font-space-mono), monospace;
-  --font-heading: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), 'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* Colors */
   --color-background: var(--background);
