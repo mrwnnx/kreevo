@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/(auth)/actions'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import type { Profile } from '@/types/database.types'
 import Link from 'next/link'
 
@@ -14,10 +15,10 @@ export function Header({ profile, title }: { profile: Profile; title?: string })
       className="sticky top-0 z-40 flex items-center px-6 gap-4"
       style={{
         height: '56px',
-        background: 'rgba(255, 255, 255, 0.85)',
+        background: 'var(--nav-bg-scrolled)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+        borderBottom: '1px solid var(--nav-border)',
       }}
     >
       {/* Title */}
@@ -62,6 +63,11 @@ export function Header({ profile, title }: { profile: Profile; title?: string })
             <DropdownMenuItem>
               <Link href="/dashboard/notifications" className="w-full text-xs">Notifications</Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5">
+              <p className="text-xs text-muted-foreground mb-2">Apparence</p>
+              <ThemeToggle />
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">

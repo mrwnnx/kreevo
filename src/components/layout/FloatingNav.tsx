@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/(auth)/actions'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import type { Profile } from '@/types/database.types'
 import { leagueLabel, leagueColor, levelFromXp, xpProgressInCurrentLevel } from '@/lib/utils/xp'
 
@@ -46,10 +47,11 @@ export function FloatingNav({ profile }: { profile: Profile }) {
     <div
       className={cn(
         'sticky top-0 z-40 flex items-center px-6 gap-4 h-14 transition-all duration-200',
-        scrolled ? 'border-b border-black/[0.06]' : 'border-b border-transparent'
+        scrolled ? 'border-b' : 'border-b border-transparent'
       )}
       style={{
-        background: scrolled ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.70)',
+        background: scrolled ? 'var(--nav-bg-scrolled)' : 'var(--nav-bg)',
+        borderColor: 'var(--nav-border)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
@@ -67,7 +69,7 @@ export function FloatingNav({ profile }: { profile: Profile }) {
             'flex items-center gap-0.5 px-1.5 py-1.5 rounded-full transition-opacity duration-300',
             mounted ? 'opacity-100' : 'opacity-0'
           )}
-          style={{ background: 'rgba(0,0,0,0.05)' }}
+          style={{ background: 'var(--nav-pill-bg)' }}
         >
           {NAV.map(({ href, label, icon: Icon, match }) => {
             const active = match(pathname)
@@ -78,8 +80,8 @@ export function FloatingNav({ profile }: { profile: Profile }) {
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-150',
                   active
-                    ? 'bg-black text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-black/[0.06]'
+                    ? 'bg-foreground text-background shadow-sm'
+                    : 'text-zinc-500 hover:text-foreground hover:bg-foreground/[0.06] dark:text-zinc-400 dark:hover:text-white'
                 )}
               >
                 <Icon className="size-[15px] shrink-0" strokeWidth={active ? 2.4 : 1.8} />
@@ -105,7 +107,7 @@ export function FloatingNav({ profile }: { profile: Profile }) {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full hover:bg-black/[0.04] transition-colors outline-none">
+          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
             <span className="flex items-center gap-1 text-xs text-muted-foreground font-mono">
               <Zap className="size-3 text-violet-500" />
               {profile.xp.toLocaleString()} XP
@@ -134,6 +136,11 @@ export function FloatingNav({ profile }: { profile: Profile }) {
             <DropdownMenuItem>
               <Link href="/dashboard/notifications" className="w-full text-xs">Notifications</Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5">
+              <p className="text-xs text-muted-foreground mb-2">Apparence</p>
+              <ThemeToggle />
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">

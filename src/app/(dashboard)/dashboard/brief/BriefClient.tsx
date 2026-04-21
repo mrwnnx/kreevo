@@ -34,9 +34,9 @@ const DIFFICULTIES = ['Rookie', 'Rising', 'Pro']
 const DURATIONS = ['1 heure', '3 heures', '1 jour', '3 jours']
 
 const DIFFICULTY_COLOR: Record<string, string> = {
-  Rookie: 'text-stone-500 bg-stone-100',
-  Rising: 'text-slate-600 bg-slate-100',
-  Pro:    'text-yellow-700 bg-yellow-100',
+  Rookie: 'text-stone-500 bg-stone-100 dark:text-stone-400 dark:bg-stone-900/40',
+  Rising: 'text-slate-600 bg-slate-100 dark:text-slate-400 dark:bg-slate-900/40',
+  Pro:    'text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30',
 }
 
 // ── Select component ────────────────────────────────────────────

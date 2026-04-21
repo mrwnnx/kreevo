@@ -139,7 +139,9 @@ export function AvatarUpload({ userId, value, name, league, onChange }: Props) {
       {toast && (
         <p className={cn(
           'text-xs font-medium px-3 py-1 rounded-full',
-          toast.ok ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
+          toast.ok
+            ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
+            : 'text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/30'
         )}>
           {toast.msg}
         </p>

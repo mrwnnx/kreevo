@@ -57,7 +57,7 @@ function Avatar({ url, name, league }: { url: string | null; name: string; leagu
         </div>
       </div>
       {/* Online dot */}
-      <span className="absolute bottom-1 right-1 size-3 rounded-full bg-green-400 border-2 border-white" />
+      <span className="absolute bottom-1 right-1 size-3 rounded-full bg-green-400 border-2 border-card" />
     </div>
   )
 }

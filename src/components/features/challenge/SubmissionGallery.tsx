@@ -26,11 +26,11 @@ interface GalleryProps {
 }
 
 const LEAGUE_COLOR: Record<string, string> = {
-  rookie:  'bg-stone-100 text-stone-600',
-  rising:  'bg-slate-100 text-slate-600',
-  pro:     'bg-yellow-100 text-yellow-700',
-  elite:   'bg-blue-100 text-blue-700',
-  legend:  'bg-red-100 text-red-600',
+  rookie:  'bg-stone-100  text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
+  rising:  'bg-slate-100  text-slate-600  dark:bg-slate-900/40  dark:text-slate-400',
+  pro:     'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  elite:   'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
+  legend:  'bg-red-100    text-red-600    dark:bg-red-900/30    dark:text-red-400',
 }
 
 export function SubmissionGallery({ submissions, currentUserId, isRevealed, challengeTitle }: GalleryProps) {

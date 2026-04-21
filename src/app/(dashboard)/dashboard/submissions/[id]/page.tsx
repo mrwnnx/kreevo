@@ -12,10 +12,10 @@ import { cn } from '@/lib/utils'
 interface Props { params: Promise<{ id: string }> }
 
 const TRACK_STYLE: Record<string, string> = {
-  ux_ui:   'bg-violet-100 text-violet-700',
-  graphic: 'bg-orange-100 text-orange-700',
-  motion:  'bg-blue-100 text-blue-700',
-  '3d':    'bg-green-100 text-green-700',
+  ux_ui:   'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  graphic: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  motion:  'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
+  '3d':    'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400',
 }
 
 export default async function SubmissionDetailPage({ params }: Props) {

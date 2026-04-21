@@ -198,18 +198,18 @@ export default async function DashboardPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold">Participations actives</h3>
-                <span className="size-5 rounded-full bg-green-100 text-green-700 text-xs flex items-center justify-center font-bold">
+                <span className="size-5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs flex items-center justify-center font-bold">
                   {activeParticipations.length}
                 </span>
               </div>
               {(activeParticipations as any[]).map(part => (
-                <div key={part.id} className="rounded-xl border border-green-200 bg-green-50/50 p-4 space-y-3">
+                <div key={part.id} className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10 p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-medium text-green-700 uppercase tracking-wide">{part.challenges?.track}</p>
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wide">{part.challenges?.track}</p>
                       <p className="text-sm font-semibold">{part.challenges?.title}</p>
                     </div>
-                    <span className="flex items-center gap-1 text-xs text-green-600 shrink-0">
+                    <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 shrink-0">
                       <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
                       En cours
                     </span>
@@ -217,7 +217,7 @@ export default async function DashboardPage() {
                   <CountdownTimer deadline={part.personal_deadline} label="Deadline personnelle" compact />
                   <Link
                     href={`/dashboard/challenges/${part.challenges?.id}`}
-                    className="inline-flex items-center justify-center w-full gap-2 rounded-full border border-green-300 bg-white px-3 h-8 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors"
+                    className="inline-flex items-center justify-center w-full gap-2 rounded-full border border-green-300 dark:border-green-800 bg-card px-3 h-8 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                   >
                     <Play className="size-3" fill="currentColor" />
                     Soumettre mon travail
@@ -232,7 +232,7 @@ export default async function DashboardPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold">Briefs en cours</h3>
-                <span className="size-5 rounded-full bg-amber-100 text-amber-700 text-xs flex items-center justify-center font-bold">
+                <span className="size-5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs flex items-center justify-center font-bold">
                   {startedBriefs.length}
                 </span>
               </div>

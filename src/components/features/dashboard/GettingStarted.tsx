@@ -19,10 +19,10 @@ export function GettingStarted({ steps }: GettingStartedProps) {
 
   if (completed === total) {
     return (
-      <div className="rounded-2xl border border-green-200 bg-green-50/60 p-4 text-center space-y-2">
+      <div className="rounded-2xl border border-green-200 dark:border-green-900/50 bg-green-50/60 dark:bg-green-900/20 p-4 text-center space-y-2">
         <p className="text-2xl">🎉</p>
-        <p className="font-semibold text-green-800">Profil complet !</p>
-        <p className="text-sm text-green-700">Tu as terminé toutes les étapes de démarrage.</p>
+        <p className="font-semibold text-green-800 dark:text-green-400">Profil complet !</p>
+        <p className="text-sm text-green-700 dark:text-green-500">Tu as terminé toutes les étapes de démarrage.</p>
       </div>
     )
   }
@@ -64,7 +64,7 @@ export function GettingStarted({ steps }: GettingStartedProps) {
                 className={cn(
                   'flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all',
                   isDone && 'bg-muted/60 text-muted-foreground cursor-default',
-                  isActive && 'bg-white border border-primary/30 shadow-sm font-semibold text-foreground hover:border-primary/60',
+                  isActive && 'bg-card border border-primary/30 shadow-sm font-semibold text-foreground hover:border-primary/60',
                   isLocked && 'text-muted-foreground/50 cursor-default'
                 )}
               >

@@ -149,44 +149,78 @@
   /* XP gradient */
   --xp-from: oklch(0.52 0.22 275);
   --xp-to:   oklch(0.62 0.18 310);
+
+  /* Nav backgrounds (light) */
+  --nav-bg:           rgba(255, 255, 255, 0.70);
+  --nav-bg-scrolled:  rgba(255, 255, 255, 0.92);
+  --nav-border:       rgba(0, 0, 0, 0.06);
+  --nav-pill-bg:      rgba(0, 0, 0, 0.05);
+
+  /* Extended surface tokens */
+  --surface:          oklch(0.96 0.002 265);
+  --surface-2:        oklch(0.92 0.004 265);
+  --border-hover:     oklch(0.75 0.004 265);
+  --text-primary:     oklch(0.12 0.008 265);
+  --text-secondary:   oklch(0.50 0.010 265);
+  --text-tertiary:    oklch(0.65 0.006 265);
+  --accent-hover:     oklch(0.45 0.22 275);
+  --card-bg:          oklch(1 0 0);
+  --card-border:      oklch(0.88 0.004 265);
 }
 
-/* ─── DARK THEME (opt-in via .dark class) ───────────────────── */
+/* ─── DARK THEME (.dark class on <html>) ────────────────────── */
 .dark {
-  --background:          oklch(0.08 0.008 265);
-  --foreground:          oklch(0.96 0.004 265);
+    --background:           #0A0A0A;
+    --foreground:           #FFFFFF;
 
-  --card:                oklch(0.11 0.008 265);
-  --card-foreground:     oklch(0.96 0.004 265);
+    --card:                 #141414;
+    --card-foreground:      #FFFFFF;
 
-  --popover:             oklch(0.13 0.008 265);
-  --popover-foreground:  oklch(0.96 0.004 265);
+    --popover:              #1C1C1C;
+    --popover-foreground:   #FFFFFF;
 
-  --primary:             oklch(0.58 0.22 275);
-  --primary-foreground:  oklch(0.98 0.004 265);
+    --primary:              #7C3AED;
+    --primary-foreground:   #FFFFFF;
 
-  --secondary:           oklch(0.15 0.008 265);
-  --secondary-foreground:oklch(0.75 0.008 265);
+    --secondary:            #1C1C1C;
+    --secondary-foreground: #A1A1AA;
 
-  --muted:               oklch(0.14 0.006 265);
-  --muted-foreground:    oklch(0.50 0.010 265);
+    --muted:                #141414;
+    --muted-foreground:     #71717A;
 
-  --accent:              oklch(0.58 0.22 275);
-  --accent-foreground:   oklch(0.98 0.004 265);
+    --accent:               #7C3AED;
+    --accent-foreground:    #FFFFFF;
 
-  --destructive:         oklch(0.60 0.22 25);
-  --border:              oklch(1 0 0 / 8%);
-  --input:               oklch(1 0 0 / 10%);
-  --ring:                oklch(0.58 0.22 275);
+    --destructive:          oklch(0.60 0.22 25);
+    --border:               rgba(255, 255, 255, 0.08);
+    --input:                rgba(255, 255, 255, 0.10);
+    --ring:                 #7C3AED;
 
-  --league-rookie:  oklch(0.65 0.02 60);
-  --league-rising:  oklch(0.70 0.01 265);
-  --league-pro:     oklch(0.78 0.16 85);
-  --league-elite:   oklch(0.65 0.18 240);
-  --league-legend:  oklch(0.68 0.22 15);
+    --league-rookie:  oklch(0.65 0.02 60);
+    --league-rising:  oklch(0.70 0.01 265);
+    --league-pro:     oklch(0.78 0.16 85);
+    --league-elite:   oklch(0.65 0.18 240);
+    --league-legend:  oklch(0.68 0.22 15);
 
-  --xp-from: oklch(0.58 0.22 275);
-  --xp-to:   oklch(0.68 0.18 310);
+    --xp-from: oklch(0.58 0.22 275);
+    --xp-to:   oklch(0.68 0.18 310);
+
+    /* Nav backgrounds (dark) */
+    --nav-bg:          rgba(10, 10, 10, 0.70);
+    --nav-bg-scrolled: rgba(10, 10, 10, 0.92);
+    --nav-border:      rgba(255, 255, 255, 0.08);
+    --nav-pill-bg:     rgba(255, 255, 255, 0.06);
+
+    /* Extended surface tokens */
+    --surface:        #141414;
+    --surface-2:      #1C1C1C;
+    --border-hover:   rgba(255, 255, 255, 0.15);
+    --text-primary:   #FFFFFF;
+    --text-secondary: #A1A1AA;
+    --text-tertiary:  #71717A;
+    --accent-hover:   #6D28D9;
+    --card-bg:        #141414;
+    --card-border:    rgba(255, 255, 255, 0.08);
 }
 
 /* ─── BASE STYLES ───────────────────────────────────────────── */

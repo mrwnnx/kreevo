@@ -8,26 +8,26 @@ import { cn } from '@/lib/utils'
 
 // ── Track config ─────────────────────────────────────────────
 const TRACK_CONFIG: Record<string, { icon: string; bg: string }> = {
-  ux_ui:   { icon: '📱', bg: 'bg-violet-100' },
-  graphic: { icon: '🎨', bg: 'bg-orange-100' },
-  motion:  { icon: '✨', bg: 'bg-pink-100'   },
-  '3d':    { icon: '🧊', bg: 'bg-green-100'  },
-  branding:{ icon: '💎', bg: 'bg-yellow-100' },
-  web:     { icon: '🌐', bg: 'bg-blue-100'   },
+  ux_ui:   { icon: '📱', bg: 'bg-violet-100 dark:bg-violet-900/30' },
+  graphic: { icon: '🎨', bg: 'bg-orange-100 dark:bg-orange-900/30' },
+  motion:  { icon: '✨', bg: 'bg-pink-100   dark:bg-pink-900/30'   },
+  '3d':    { icon: '🧊', bg: 'bg-green-100  dark:bg-green-900/30'  },
+  branding:{ icon: '💎', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
+  web:     { icon: '🌐', bg: 'bg-blue-100   dark:bg-blue-900/30'   },
 }
 
 const DEFAULT_TRACK = { icon: '🎨', bg: 'bg-muted' }
 
 // ── Level badge ───────────────────────────────────────────────
 const LEVEL_STYLE: Record<string, string> = {
-  rookie:        'bg-green-100 text-green-700',
-  rising:        'bg-blue-100 text-blue-700',
-  pro:           'bg-orange-100 text-orange-700',
-  elite:         'bg-red-100 text-red-700',
-  legend:        'bg-purple-100 text-purple-700',
-  beginner:      'bg-green-100 text-green-700',
-  intermediate:  'bg-orange-100 text-orange-700',
-  advanced:      'bg-red-100 text-red-700',
+  rookie:        'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400',
+  rising:        'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
+  pro:           'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  elite:         'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400',
+  legend:        'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  beginner:      'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400',
+  intermediate:  'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  advanced:      'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400',
 }
 
 // ── Deadline label ────────────────────────────────────────────
