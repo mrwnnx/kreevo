@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code')
   const origin = requestUrl.origin
 
+  console.log('Auth callback called, code:', code ? 'present' : 'missing')
+
   if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -26,8 +28,16 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    await supabase.auth.exchangeCodeForSession(code)
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    console.log('Exchange error:', error?.message ?? 'none')
+
+    if (error) {
+      return NextResponse.redirect(`${origin}/login?error=oauth_failed`)
+    }
+
+    return NextResponse.redirect(`${origin}/dashboard`)
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`)
+  return NextResponse.redirect(`${origin}/login?error=no_code`)
 }

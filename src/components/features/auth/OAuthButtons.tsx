@@ -38,6 +38,7 @@ export function OAuthButtons() {
       provider: 'linkedin_oidc',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'openid profile email',
       },
     })
   }
