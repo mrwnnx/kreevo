@@ -1,0 +1,108 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Send } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
+interface Comment {
+  id: string
+  content: string
+  created_at: string
+  profiles?: { username: string; avatar_url: string | null }
+}
+
+interface Props {
+  submissionId: string
+  initialComments: Comment[]
+  currentUserId: string | null
+}
+
+function timeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime()
+  const min = Math.floor(diff / 60000)
+  if (min < 1) return 'just now'
+  if (min < 60) return `${min}m`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `${h}h`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `${d}d`
+  return new Date(date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+}
+
+export function SubmissionComments({ submissionId, initialComments, currentUserId }: Props) {
+  const [comments, setComments] = useState<Comment[]>(initialComments)
+  const [text, setText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit() {
+    if (!text.trim() || !currentUserId || submitting) return
+    setSubmitting(true)
+    const res = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ submissionId, content: text }),
+    })
+    if (res.ok) {
+      const { comment } = await res.json()
+      setComments(prev => [...prev, comment])
+      setText('')
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Comments list */}
+      <div className="space-y-4">
+        {comments.length === 0 ? (
+          <p className="text-sm text-muted-foreground font-mono py-4 text-center">
+            Aucun commentaire. Sois le premier.
+          </p>
+        ) : (
+          comments.map(c => (
+            <div key={c.id} className="flex gap-3">
+              <Avatar className="size-7 rounded-lg shrink-0 mt-0.5">
+                <AvatarImage src={c.profiles?.avatar_url ?? undefined} />
+                <AvatarFallback className="rounded-lg text-[10px]">
+                  {(c.profiles?.username ?? '?')[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Link href={`/u/${c.profiles?.username}`} className="text-xs font-semibold hover:underline">@{c.profiles?.username}</Link>
+                  <span className="text-[11px] text-muted-foreground font-mono">{timeAgo(c.created_at)}</span>
+                </div>
+                <p className="text-sm text-foreground leading-relaxed">{c.content}</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Input */}
+      {currentUserId ? (
+        <div className="flex gap-2 pt-2 border-t border-border">
+          <input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
+            placeholder="Ajouter un commentaire…"
+            className="flex-1 text-sm bg-background border border-border rounded-xl px-4 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || !text.trim()}
+            className="flex items-center justify-center size-9 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-90 transition-opacity shrink-0"
+          >
+            <Send className="size-3.5" />
+          </button>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground pt-2 border-t border-border">
+          <a href="/login" className="underline">Connecte-toi</a> pour commenter.
+        </p>
+      )}
+    </div>
+  )
+}

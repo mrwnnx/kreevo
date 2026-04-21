@@ -1,26 +1,258 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ── Spacing scale — 4px base grid ─────────────────────────
+     p-1=4   p-2=8   p-3=12  p-4=16  p-5=20  p-6=24
+     p-7=28  p-8=32  p-10=40 p-12=48 p-16=64 p-20=80
+  ──────────────────────────────────────────────────────────── */
+  --spacing-0:  0px;
+  --spacing-1:  4px;
+  --spacing-2:  8px;
+  --spacing-3:  12px;
+  --spacing-4:  16px;
+  --spacing-5:  20px;
+  --spacing-6:  24px;
+  --spacing-7:  28px;
+  --spacing-8:  32px;
+  --spacing-9:  36px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-14: 56px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+  --spacing-32: 128px;
+  --spacing-40: 160px;
+  --spacing-48: 192px;
+
+  /* ── Type scale — 4px base grid ────────────────────────────
+     text-xs=12  text-sm=14  text-base=16  text-lg=18
+     text-xl=20  text-2xl=24 text-3xl=30   text-4xl=36
+     text-5xl=48 text-6xl=60 text-7xl=72   text-8xl=96
+  ──────────────────────────────────────────────────────────── */
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  36px;
+  --text-5xl:  48px;
+  --text-6xl:  60px;
+  --text-7xl:  72px;
+  --text-8xl:  96px;
+
+  /* ── Icon / component sizes ─────────────────────────────── */
+  --size-3:  12px;
+  --size-4:  16px;
+  --size-5:  20px;
+  --size-6:  24px;
+  --size-7:  28px;
+  --size-8:  32px;
+  --size-10: 40px;
+  --size-12: 48px;
+  --size-16: 64px;
+
+  /* Fonts — resolved via next/font CSS variables injected on <html> */
+  --font-sans: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), monospace;
+  --font-heading: var(--font-space-grotesk), system-ui, sans-serif;
+
+  /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* League colors */
+  --color-league-rookie:  var(--league-rookie);
+  --color-league-rising:  var(--league-rising);
+  --color-league-pro:     var(--league-pro);
+  --color-league-elite:   var(--league-elite);
+  --color-league-legend:  var(--league-legend);
+
+  /* Radii */
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── LIGHT THEME (default) ─────────────────────────────────── */
+:root {
+  --background:           oklch(0.98 0.002 265);
+  --foreground:           oklch(0.12 0.008 265);
+
+  --card:                 oklch(1 0 0);
+  --card-foreground:      oklch(0.12 0.008 265);
+
+  --popover:              oklch(1 0 0);
+  --popover-foreground:   oklch(0.12 0.008 265);
+
+  --primary:              oklch(0.52 0.22 275);   /* violet */
+  --primary-foreground:   oklch(0.98 0 0);
+
+  --secondary:            oklch(0.94 0.004 265);
+  --secondary-foreground: oklch(0.30 0.008 265);
+
+  --muted:                oklch(0.94 0.004 265);
+  --muted-foreground:     oklch(0.50 0.010 265);
+
+  --accent:               oklch(0.94 0.004 265);
+  --accent-foreground:    oklch(0.30 0.008 265);
+
+  --destructive:          oklch(0.55 0.22 25);
+  --border:               oklch(0.88 0.004 265);
+  --input:                oklch(0.88 0.004 265);
+  --ring:                 oklch(0.52 0.22 275);
+
+  --radius: 0.5rem;
+
+  /* ── Semantic spacing tokens ────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* League semantic colors */
+  --league-rookie:  oklch(0.45 0.02 60);
+  --league-rising:  oklch(0.45 0.01 265);
+  --league-pro:     oklch(0.55 0.16 85);
+  --league-elite:   oklch(0.45 0.18 240);
+  --league-legend:  oklch(0.50 0.22 15);
+
+  /* XP gradient */
+  --xp-from: oklch(0.52 0.22 275);
+  --xp-to:   oklch(0.62 0.18 310);
+}
+
+/* ─── DARK THEME (opt-in via .dark class) ───────────────────── */
+.dark {
+  --background:          oklch(0.08 0.008 265);
+  --foreground:          oklch(0.96 0.004 265);
+
+  --card:                oklch(0.11 0.008 265);
+  --card-foreground:     oklch(0.96 0.004 265);
+
+  --popover:             oklch(0.13 0.008 265);
+  --popover-foreground:  oklch(0.96 0.004 265);
+
+  --primary:             oklch(0.58 0.22 275);
+  --primary-foreground:  oklch(0.98 0.004 265);
+
+  --secondary:           oklch(0.15 0.008 265);
+  --secondary-foreground:oklch(0.75 0.008 265);
+
+  --muted:               oklch(0.14 0.006 265);
+  --muted-foreground:    oklch(0.50 0.010 265);
+
+  --accent:              oklch(0.58 0.22 275);
+  --accent-foreground:   oklch(0.98 0.004 265);
+
+  --destructive:         oklch(0.60 0.22 25);
+  --border:              oklch(1 0 0 / 8%);
+  --input:               oklch(1 0 0 / 10%);
+  --ring:                oklch(0.58 0.22 275);
+
+  --league-rookie:  oklch(0.65 0.02 60);
+  --league-rising:  oklch(0.70 0.01 265);
+  --league-pro:     oklch(0.78 0.16 85);
+  --league-elite:   oklch(0.65 0.18 240);
+  --league-legend:  oklch(0.68 0.22 15);
+
+  --xp-from: oklch(0.58 0.22 275);
+  --xp-to:   oklch(0.68 0.18 310);
+}
+
+/* ─── BASE STYLES ───────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html, body {
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: var(--font-space-mono), monospace;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── LEAGUE BADGE UTILITY CLASSES ─────────────────────────── */
+@layer utilities {
+  .league-rookie  { color: var(--league-rookie);  }
+  .league-rising  { color: var(--league-rising);  }
+  .league-pro     { color: var(--league-pro);     }
+  .league-elite   { color: var(--league-elite);   }
+  .league-legend  { color: var(--league-legend);  }
+
+  .league-bg-rookie  { background-color: color-mix(in oklch, var(--league-rookie)  15%, transparent); }
+  .league-bg-rising  { background-color: color-mix(in oklch, var(--league-rising)  15%, transparent); }
+  .league-bg-pro     { background-color: color-mix(in oklch, var(--league-pro)     15%, transparent); }
+  .league-bg-elite   { background-color: color-mix(in oklch, var(--league-elite)   15%, transparent); }
+  .league-bg-legend  { background-color: color-mix(in oklch, var(--league-legend)  15%, transparent); }
+
+  /* XP bar gradient */
+  .xp-gradient {
+    background: linear-gradient(90deg, var(--xp-from), var(--xp-to));
+  }
+
+  /* Noise texture overlay */
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Glow effect for primary elements */
+  .glow-primary {
+    box-shadow: 0 0 24px color-mix(in oklch, var(--primary) 35%, transparent);
+  }
+
+  /* Sharp card — no shadow, solid border */
+  .card-sharp {
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
 }
