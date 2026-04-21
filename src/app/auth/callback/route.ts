@@ -10,11 +10,11 @@ export async function GET(request: NextRequest) {
   const errorDescription = requestUrl.searchParams.get('error_description')
   const origin = requestUrl.origin
 
-  console.log('Callback params:', { code: !!code, error, errorDescription })
-
   if (error) {
-    console.error('OAuth error from provider:', error, errorDescription)
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error)}`)
+    console.error('OAuth error:', error, errorDescription)
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error)}`
+    )
   }
 
   if (code) {
@@ -28,23 +28,28 @@ export async function GET(request: NextRequest) {
             return cookieStore.getAll()
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // ignore
+            }
           },
         },
       }
     )
 
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-    console.log('Exchange error:', exchangeError?.message ?? 'none')
+    const { error: exchangeError } = await supabase.auth
+      .exchangeCodeForSession(code)
 
     if (exchangeError) {
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(exchangeError.message)}`)
+      console.error('Exchange error:', exchangeError)
+      return NextResponse.redirect(
+        `${origin}/login?error=${encodeURIComponent(exchangeError.message)}`
+      )
     }
-
-    return NextResponse.redirect(`${origin}/dashboard`)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=no_code`)
+  return NextResponse.redirect(`${origin}/dashboard`)
 }
