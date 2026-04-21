@@ -18,11 +18,17 @@ interface HeroProfileProps {
   avatarUrl: string | null
   specialty: string | null
   bio: string | null
+  country: string | null
   league: League
   xp: number
   submissionCount: number
   rank: number | null
   totalUsers: number
+}
+
+function countryFlag(code: string | null): string | null {
+  if (!code || code.length !== 2) return null
+  return [...code.toUpperCase()].map(c => String.fromCodePoint(0x1F1E6 - 65 + c.charCodeAt(0))).join('')
 }
 
 function Avatar({ url, name, league }: { url: string | null; name: string; league: League }) {
@@ -62,6 +68,7 @@ export function HeroProfile({
   avatarUrl,
   specialty,
   bio,
+  country,
   league,
   xp,
   submissionCount,
@@ -69,6 +76,7 @@ export function HeroProfile({
   totalUsers,
 }: HeroProfileProps) {
   const displayName = fullName || `@${username}`
+  const flag = countryFlag(country)
   const subtitle = specialty || bio || null
   const rankPercent = rank && totalUsers > 0
     ? Math.round((rank / totalUsers) * 100)
@@ -80,20 +88,16 @@ export function HeroProfile({
 
         {/* ── Gauche : Avatar + badge ligue ── */}
         <div className="flex flex-col items-center gap-2 shrink-0">
-          {/* Badge ligue pill */}
-          <span className={cn(
-            'text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full text-white bg-gradient-to-r',
-            LEAGUE_GRADIENT[league]
-          )}>
-            {leagueLabel(league).toUpperCase()}
-          </span>
           <Avatar url={avatarUrl} name={displayName} league={league} />
         </div>
 
         {/* ── Centre : Nom + spécialité + boutons ── */}
         <div className="flex-1 flex flex-col items-center md:items-start gap-3 min-w-0">
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold leading-tight tracking-tight">{displayName}</h1>
+            <h1 className="text-3xl font-bold leading-tight tracking-tight">
+              {displayName}
+              {flag && <span className="ml-2 text-2xl align-middle">{flag}</span>}
+            </h1>
             {subtitle && (
               <p className="text-base text-muted-foreground mt-1">{subtitle}</p>
             )}

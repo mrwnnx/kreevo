@@ -4,11 +4,54 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ImageUpload } from '@/components/ui/ImageUpload'
+import { AvatarUpload } from '@/components/features/dashboard/AvatarUpload'
 import { CheckCircle, Loader2 } from 'lucide-react'
 import type { Profile } from '@/types/database.types'
+import type { League } from '@/lib/utils/xp'
 
 const SPECIALTY_OPTIONS = ['Graphic Design', 'UX/UI', 'Motion', 'Branding', 'Illustration', '3D', 'Web Design', 'Product Design']
+
+const COUNTRIES: { code: string; name: string }[] = [
+  { code: 'DZ', name: 'Algérie' },
+  { code: 'BE', name: 'Belgique' },
+  { code: 'BJ', name: 'Bénin' },
+  { code: 'BF', name: 'Burkina Faso' },
+  { code: 'CM', name: 'Cameroun' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'CF', name: 'Centrafrique' },
+  { code: 'CI', name: "Côte d'Ivoire" },
+  { code: 'EG', name: 'Égypte' },
+  { code: 'FR', name: 'France' },
+  { code: 'GA', name: 'Gabon' },
+  { code: 'GN', name: 'Guinée' },
+  { code: 'DE', name: 'Allemagne' },
+  { code: 'GH', name: 'Ghana' },
+  { code: 'KE', name: 'Kenya' },
+  { code: 'LB', name: 'Liban' },
+  { code: 'LY', name: 'Libye' },
+  { code: 'ML', name: 'Mali' },
+  { code: 'MA', name: 'Maroc' },
+  { code: 'MR', name: 'Mauritanie' },
+  { code: 'MU', name: 'Maurice' },
+  { code: 'NL', name: 'Pays-Bas' },
+  { code: 'NE', name: 'Niger' },
+  { code: 'NG', name: 'Nigéria' },
+  { code: 'CD', name: 'RD Congo' },
+  { code: 'CG', name: 'Congo' },
+  { code: 'RW', name: 'Rwanda' },
+  { code: 'SN', name: 'Sénégal' },
+  { code: 'CH', name: 'Suisse' },
+  { code: 'TG', name: 'Togo' },
+  { code: 'TN', name: 'Tunisie' },
+  { code: 'GB', name: 'Royaume-Uni' },
+  { code: 'US', name: 'États-Unis' },
+  { code: 'ES', name: 'Espagne' },
+  { code: 'IT', name: 'Italie' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'AE', name: 'Émirats Arabes Unis' },
+  { code: 'SA', name: 'Arabie Saoudite' },
+  { code: 'QA', name: 'Qatar' },
+].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
 const TOOLS_OPTIONS = ['Figma', 'Adobe XD', 'Illustrator', 'Photoshop', 'After Effects', 'Blender', 'Framer', 'Sketch', 'InVision', 'Procreate']
 const OBJECTIVE_OPTIONS = ['Get hired', 'Build portfolio', 'Improve skills', 'Network', 'Freelance', 'Fun']
 
@@ -55,13 +98,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   return (
     <div className="space-y-8">
       {/* Avatar */}
-      <div className="space-y-3">
-        <Label>Avatar</Label>
-        <ImageUpload
-          bucket="avatars"
+      <div className="flex flex-col items-center">
+        <AvatarUpload
+          userId={profile.id}
           value={avatar}
-          onChange={setAvatar}
-          className="h-40"
+          name={fullName || username}
+          league={(profile.league as League) ?? 'rookie'}
+          onChange={url => setAvatar(url)}
         />
       </div>
 
@@ -93,8 +136,18 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
-          <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="France" />
+          <Label htmlFor="country">Pays</Label>
+          <select
+            id="country"
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+          >
+            <option value="">— Sélectionner —</option>
+            {COUNTRIES.map(c => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="city">City</Label>
