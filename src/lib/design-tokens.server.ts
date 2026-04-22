@@ -17,5 +17,5 @@ export const getDesignTokens = unstable_cache(
     }
   },
   ['design_tokens'],
-  { revalidate: 3600 }
+  { revalidate: 3600, tags: ['design_tokens'] }
 )

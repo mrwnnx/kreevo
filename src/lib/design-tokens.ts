@@ -121,7 +121,8 @@ export const DEFAULT_TOKENS: DesignTokens = {
 // ─── Migrate legacy tokens from DB (radius: string → radii: object) ───────────
 export function normalizeTokens(raw: unknown): DesignTokens {
   const t = raw as Record<string, unknown>
-  if (t && !t.radii && typeof t.radius === 'string') {
+  if (!t || !t.light || !t.dark) return DEFAULT_TOKENS
+  if (!t.radii && typeof t.radius === 'string') {
     const base = t.radius as string
     return {
       ...(t as unknown as DesignTokens),
@@ -134,22 +135,24 @@ export function normalizeTokens(raw: unknown): DesignTokens {
       },
     }
   }
-  return (t as unknown as DesignTokens) ?? DEFAULT_TOKENS
+  if (!t.radii) return { ...(t as unknown as DesignTokens), radii: DEFAULT_TOKENS.radii }
+  return t as unknown as DesignTokens
 }
 
 // ─── CSS builder ──────────────────────────────────────────────
 export function buildDesignCSS(tokens: DesignTokens): string {
+  const safe = tokens ?? DEFAULT_TOKENS
   const toVars = (obj: ModeTokens) =>
-    (Object.entries(obj) as [string, string][]).map(([k, v]) => `${k}:${v}`).join(';')
+    (Object.entries(obj ?? {}) as [string, string][]).map(([k, v]) => `${k}:${v}`).join(';')
 
-  const radii = tokens.radii ?? DEFAULT_TOKENS.radii
+  const radii = safe.radii ?? DEFAULT_TOKENS.radii
   const { button, card, input, badge, popover } = radii
   const radiiVars = `--radius-button:${button};--radius-card:${card};--radius-input:${input};--radius-badge:${badge};--radius-popover:${popover};--radius:${card}`
   const fontVar = `--font-space-grotesk:"${tokens.font}",system-ui,sans-serif`
 
   return [
-    `:root{${toVars(tokens.light)};${radiiVars};${fontVar}}`,
-    `.dark{${toVars(tokens.dark)};${radiiVars};${fontVar}}`,
+    `:root{${toVars(safe.light ?? DEFAULT_TOKENS.light)};${radiiVars};${fontVar}}`,
+    `.dark{${toVars(safe.dark ?? DEFAULT_TOKENS.dark)};${radiiVars};${fontVar}}`,
   ].join('')
 }
 

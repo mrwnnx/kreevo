@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/admin'
 import { DEFAULT_TOKENS, normalizeTokens } from '@/lib/design-tokens'
 
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
 
+  revalidateTag('design_tokens', {})
   revalidatePath('/', 'layout')
   return NextResponse.json({ ok: true })
 }
