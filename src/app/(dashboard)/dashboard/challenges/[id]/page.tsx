@@ -173,7 +173,7 @@ export default async function ChallengePage({ params }: Props) {
           {participationStatus === 'active' && (
             <section id="submit" className="space-y-5 pt-2">
               <div className="h-px bg-border" />
-              <div className="rounded-xl border border-border bg-muted/20 p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className="rounded-xl border border-border bg-zinc-50 dark:bg-zinc-900/20 p-4 flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="size-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-sm font-semibold">Ta participation — En cours</span>

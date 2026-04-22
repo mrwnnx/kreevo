@@ -44,7 +44,7 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
 
       {/* Plan & League */}
       <section className="rounded-xl border border-border overflow-hidden">
-        <div className="px-5 py-4 border-b border-border bg-muted/30">
+        <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
           <div className="flex items-center gap-2">
             <Zap className="size-4 text-primary" />
             <h2 className="text-sm font-semibold">Plan & League</h2>
@@ -100,7 +100,7 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
 
       {/* Account */}
       <section className="rounded-xl border border-border overflow-hidden">
-        <div className="px-5 py-4 border-b border-border bg-muted/30">
+        <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
           <div className="flex items-center gap-2">
             <Shield className="size-4 text-primary" />
             <h2 className="text-sm font-semibold">Account</h2>

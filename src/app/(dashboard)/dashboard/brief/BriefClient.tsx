@@ -129,7 +129,7 @@ function BriefCard({ brief, briefId, onReset }: { brief: BriefData; briefId: str
       </div>
 
       {/* CTA */}
-      <div className="px-6 py-4 bg-muted/30 flex items-center gap-3">
+      <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-900/30 flex items-center gap-3">
         <button
           onClick={handleStart}
           disabled={starting}
@@ -204,7 +204,7 @@ function SavedBriefRow({ brief }: { brief: SavedBrief }) {
       </button>
 
       {open && parsed && (
-        <div className="border-t border-border divide-y divide-border bg-muted/20">
+        <div className="border-t border-border divide-y divide-border bg-white dark:bg-zinc-900/20">
           {[
             { label: 'Contexte', value: parsed.context },
             { label: 'Objectif', value: parsed.objective },

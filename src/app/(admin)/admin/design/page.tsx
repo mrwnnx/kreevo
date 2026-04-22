@@ -522,8 +522,8 @@ export default function AdminDesignPage() {
       </div>
 
       {/* ── Right: Preview ── */}
-      <div className="hidden xl:flex flex-col w-80 shrink-0 border-l border-border bg-muted/30 overflow-y-auto">
-        <div className="sticky top-0 bg-muted/30 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-2">
+      <div className="hidden xl:flex flex-col w-80 shrink-0 border-l border-border bg-white dark:bg-zinc-900/20 overflow-y-auto">
+        <div className="sticky top-0 bg-white/80 dark:bg-zinc-900/20 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-2">
           <Eye className="size-4 text-muted-foreground" />
           <p className="text-sm font-semibold">Aperçu live</p>
         </div>

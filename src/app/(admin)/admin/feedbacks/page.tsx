@@ -80,7 +80,7 @@ function FeedbackCard({ fb, onSave, onPublish }: {
       <div className="p-5 space-y-4">
         {/* AI Draft */}
         {fb.ai_draft && (
-          <div className="rounded-lg bg-muted/50 border border-border p-4">
+          <div className="rounded-lg bg-white dark:bg-zinc-900/20 border border-border p-4">
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Draft IA</p>
             <p className="text-sm text-foreground leading-relaxed">{fb.ai_draft}</p>
           </div>

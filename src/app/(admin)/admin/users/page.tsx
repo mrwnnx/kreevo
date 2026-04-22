@@ -114,7 +114,7 @@ export default function AdminUsers() {
       {/* Table */}
       <div className="rounded-xl border border-border overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 border-b border-border">
+          <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
               {['User', 'Plan', 'Ligue', 'XP', 'Rôle', 'Statut', 'Inscrit', 'Actions'].map(h => (
                 <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>

@@ -55,14 +55,14 @@ export const FONT_OPTIONS = [
 // ─── Defaults ─────────────────────────────────────────────────
 export const DEFAULT_TOKENS: DesignTokens = {
   light: {
-    '--background':           '#f8f8fc',
+    '--background':           '#ffffff',
     '--foreground':           '#1a1924',
     '--card':                 '#ffffff',
     '--card-foreground':      '#1a1924',
     '--popover':              '#ffffff',
     '--popover-foreground':   '#1a1924',
     '--primary':              '#1a1924',
-    '--primary-foreground':   '#f8f8fc',
+    '--primary-foreground':   '#ffffff',
     '--secondary':            '#efeff4',
     '--secondary-foreground': '#3d3c4f',
     '--muted':                '#efeff4',

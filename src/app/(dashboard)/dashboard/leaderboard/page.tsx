@@ -96,7 +96,7 @@ export default async function LeaderboardPage({
       <div className="max-w-[960px] mx-auto px-6 py-8 space-y-8">
 
         {/* Track tabs */}
-        <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">
+        <div className="flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-fit">
           {TRACKS.map(t => (
             <Link
               key={t}
