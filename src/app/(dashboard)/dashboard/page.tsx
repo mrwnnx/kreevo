@@ -179,14 +179,16 @@ export default async function DashboardPage() {
                       En cours
                     </span>
                   </div>
-                  <CountdownTimer deadline={part.personal_deadline} label="Deadline personnelle" compact />
-                  <Link
-                    href={`/dashboard/challenges/${part.challenges?.id}`}
-                    className="inline-flex items-center justify-center w-full gap-2 rounded-full border border-green-300 dark:border-green-800 bg-card px-3 h-8 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                  >
-                    <Play className="size-3" fill="currentColor" />
-                    Soumettre mon travail
-                  </Link>
+                  <div className="flex items-center justify-between gap-3">
+                    <CountdownTimer deadline={part.personal_deadline} label="Deadline personnelle" compact />
+                    <Link
+                      href={`/dashboard/challenges/${part.challenges?.id}`}
+                      className="inline-flex items-center gap-2 rounded-full border border-green-300 dark:border-green-800 bg-card px-3 h-8 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors shrink-0"
+                    >
+                      <Play className="size-3" fill="currentColor" />
+                      Soumettre mon travail
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
