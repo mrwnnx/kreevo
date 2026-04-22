@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Clock, ChevronLeft, Users, CheckCircle2, Target, Package, AlertCircle, Star, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SubmitForm } from '@/components/features/challenge/SubmitForm'
@@ -26,6 +27,7 @@ export default async function ChallengePage({ params }: Props) {
     { data: existingSubmission },
     { data: allSubmissions },
     { count: participantCount },
+    { data: participantAvatars },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('challenges').select('*').eq('id', id).single(),
@@ -33,6 +35,7 @@ export default async function ChallengePage({ params }: Props) {
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).order('likes_count', { ascending: false }),
     (supabase as any).from('participations').select('*', { count: 'exact', head: true }).eq('challenge_id', id),
+    (supabase as any).from('participations').select('profiles(username, avatar_url)').eq('challenge_id', id).limit(6),
   ])
 
   if (!profile) redirect('/login')
@@ -56,6 +59,8 @@ export default async function ChallengePage({ params }: Props) {
   const currentAttempts = (existingSubmission as any)?.attempt_number ?? (existingSubmission ? 1 : 0)
   const attemptsLeft = maxAttempts - currentAttempts
   const canResubmit = participationStatus === 'active' && attemptsLeft > 0
+
+  const avatars = ((participantAvatars ?? []) as any[]).map(r => r.profiles).filter(Boolean)
 
   const TRACK_COLOR: Record<string, string> = {
     UX:      'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
@@ -239,6 +244,23 @@ export default async function ChallengePage({ params }: Props) {
                   </p>
                 </div>
                 <ParticipateButton challengeId={c.id} />
+                {avatars.length > 0 && (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex -space-x-2">
+                      {avatars.slice(0, 5).map((av: any, i: number) => (
+                        <Avatar key={i} className="size-6 ring-2 ring-background">
+                          <AvatarImage src={av.avatar_url ?? undefined} />
+                          <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
+                            {av.username?.[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                   <Zap className="size-3 text-yellow-500" />
                   <span>Gagne +150 XP à la soumission</span>
@@ -275,6 +297,23 @@ export default async function ChallengePage({ params }: Props) {
                 <Play className="size-3" fill="currentColor" />
                 Soumettre mon travail
               </a>
+              {avatars.length > 0 && (
+                <div className="flex items-center gap-2 pt-0.5">
+                  <div className="flex -space-x-2">
+                    {avatars.slice(0, 5).map((av: any, i: number) => (
+                      <Avatar key={i} className="size-6 ring-2 ring-green-50 dark:ring-green-900/20">
+                        <AvatarImage src={av.avatar_url ?? undefined} />
+                        <AvatarFallback className="text-[9px] font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
+                          {av.username?.[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    {totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {currentAttempts}/{maxAttempts} soumissions utilisées
               </p>
