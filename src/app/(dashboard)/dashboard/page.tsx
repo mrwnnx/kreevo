@@ -152,40 +152,6 @@ export default async function DashboardPage() {
         totalUsers={totalUsers ?? 0}
       />
 
-      {/* ── Stats cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Star className="size-4 text-yellow-500" /> XP Progress
-            </div>
-            <p className="text-xl font-bold">{xp.current} / {xp.required}</p>
-            <Progress value={xp.percent} className="h-1.5" />
-            <p className="text-xs text-muted-foreground">{xp.percent}% to level {level + 1}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Trophy className="size-4 text-violet-500" /> Submissions
-            </div>
-            <p className="text-xl font-bold">{submissionCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Challenges soumis</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Zap className="size-4 text-blue-500" /> League
-            </div>
-            <p className="text-xl font-bold" style={{ color: leagueColor(p.league) }}>
-              {leagueLabel(p.league)}
-            </p>
-            <p className="text-xs text-muted-foreground">{p.xp} XP total</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* ── Grid 2 colonnes : Getting Started + Participations | Streak + League ── */}
       <div className="grid lg:grid-cols-2 gap-6">
 
