@@ -100,7 +100,7 @@
 
 /* ─── LIGHT THEME (default) ─────────────────────────────────── */
 :root {
-  --background:           oklch(0.98 0.002 265);
+  --background:           #ffffff;
   --foreground:           oklch(0.12 0.008 265);
 
   --card:                 oklch(1 0 0);
