@@ -49,7 +49,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="flex gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
+    <div className="inline-flex w-fit gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-full p-1">
       {OPTIONS.map(({ value, Icon, label }) => (
         <button
           key={value}
