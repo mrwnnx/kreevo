@@ -153,7 +153,7 @@ export default async function DashboardPage() {
       />
 
       {/* ── Grid 2 colonnes : Getting Started + Participations | Streak + League ── */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
 
         {/* Colonne gauche */}
         <div className="space-y-6">
