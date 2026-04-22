@@ -121,30 +121,30 @@ export function FloatingNav({ profile }: { profile: Profile }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 rounded-xl mt-1">
             <div className="px-3 py-2 border-b border-border mb-1">
-              <p className="text-xs font-semibold">@{profile.username}</p>
-              <p className="text-[10px] text-muted-foreground font-mono capitalize">{profile.plan} plan</p>
+              <p className="text-sm font-semibold">@{profile.username}</p>
+              <p className="text-xs text-muted-foreground font-mono capitalize">{profile.plan} plan</p>
             </div>
             <DropdownMenuItem>
-              <Link href={`/u/${profile.username}`} className="w-full text-xs font-medium">Profil public</Link>
+              <Link href={`/u/${profile.username}`} className="w-full text-sm font-medium">Profil public</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/profile" className="w-full text-xs font-medium">Modifier le profil</Link>
+              <Link href="/dashboard/profile" className="w-full text-sm font-medium">Modifier le profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/settings" className="w-full text-xs font-medium">Paramètres</Link>
+              <Link href="/dashboard/settings" className="w-full text-sm font-medium">Paramètres</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/notifications" className="w-full text-xs font-medium">Notifications</Link>
+              <Link href="/dashboard/notifications" className="w-full text-sm font-medium">Notifications</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5">
-              <p className="text-xs text-muted-foreground mb-2">Apparence</p>
+              <p className="text-sm text-muted-foreground mb-2">Apparence</p>
               <ThemeToggle />
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">
-                <button type="submit" className="w-full text-left text-xs">Se déconnecter</button>
+                <button type="submit" className="w-full text-left text-sm">Se déconnecter</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
