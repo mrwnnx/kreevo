@@ -90,7 +90,7 @@ export function BriefWorkspaceClient({ brief: record }: { brief: BriefRecord }) 
   }
 
   return (
-    <div className="p-6 max-w-[920px] mx-auto space-y-8">
+    <div className="p-6 max-w-[960px] mx-auto space-y-8">
 
       {/* Brief card */}
       <div className="rounded-2xl border border-border overflow-hidden">

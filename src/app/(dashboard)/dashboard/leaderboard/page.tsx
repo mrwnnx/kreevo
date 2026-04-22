@@ -93,7 +93,7 @@ export default async function LeaderboardPage({
   return (
     <div className="pb-10">
       
-      <div className="max-w-[920px] mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-[960px] mx-auto px-6 py-8 space-y-8">
 
         {/* Track tabs */}
         <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">

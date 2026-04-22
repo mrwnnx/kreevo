@@ -66,7 +66,7 @@ export default async function ChallengePage({ params }: Props) {
   return (
     <div className="pb-10">
       
-      <div className="p-6 max-w-[920px] mx-auto space-y-6">
+      <div className="p-6 max-w-[960px] mx-auto space-y-6">
 
         {/* Back */}
         <Link href="/dashboard/challenges" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">

@@ -278,7 +278,7 @@ export function BriefClient() {
   const canGenerate = isPro || monthCount < 3
 
   return (
-    <div className="p-6 max-w-[920px] mx-auto space-y-10">
+    <div className="p-6 max-w-[960px] mx-auto space-y-10">
 
       {/* Header */}
       <div className="space-y-1">

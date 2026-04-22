@@ -15,7 +15,7 @@ export default async function SettingsPage() {
   return (
     <div className="pb-10">
       
-      <div className="max-w-[920px] mx-auto px-6 py-8">
+      <div className="max-w-[960px] mx-auto px-6 py-8">
         <SettingsClient profile={profile as Profile} email={user?.email ?? ''} />
       </div>
     </div>

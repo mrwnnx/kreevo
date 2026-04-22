@@ -117,7 +117,7 @@ export default function DesignSystemPage() {
         </aside>
 
         {/* ── Main ── */}
-        <main className="flex-1 min-w-0 p-8 max-w-[920px] space-y-16 pb-24">
+        <main className="flex-1 min-w-0 p-8 max-w-[960px] space-y-16 pb-24">
 
           {/* Header */}
           <div>

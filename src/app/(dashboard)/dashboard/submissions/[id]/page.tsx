@@ -60,7 +60,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const trackLabel = challenge?.track?.replace('_', '/').toUpperCase() ?? ''
 
   return (
-    <div className="max-w-[920px] mx-auto px-6 py-8 pb-16">
+    <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
 
       {/* Back */}
       <Link
