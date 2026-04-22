@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { type DesignTokens, DEFAULT_TOKENS } from '@/lib/design-tokens'
+import { type DesignTokens, DEFAULT_TOKENS, normalizeTokens } from '@/lib/design-tokens'
 
 export const getDesignTokens = unstable_cache(
   async (): Promise<DesignTokens> => {
@@ -11,7 +11,7 @@ export const getDesignTokens = unstable_cache(
         .select('value')
         .eq('key', 'design_tokens')
         .single()
-      return (data?.value as DesignTokens) ?? DEFAULT_TOKENS
+      return data?.value ? normalizeTokens(data.value) : DEFAULT_TOKENS
     } catch {
       return DEFAULT_TOKENS
     }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/admin'
-import { DEFAULT_TOKENS } from '@/lib/design-tokens'
+import { DEFAULT_TOKENS, normalizeTokens } from '@/lib/design-tokens'
 
 export async function GET() {
   const { error, admin } = await requireAdmin()
@@ -13,7 +13,7 @@ export async function GET() {
     .eq('key', 'design_tokens')
     .single()
 
-  return NextResponse.json({ tokens: data?.value ?? DEFAULT_TOKENS })
+  return NextResponse.json({ tokens: data?.value ? normalizeTokens(data.value) : DEFAULT_TOKENS })
 }
 
 export async function POST(req: Request) {

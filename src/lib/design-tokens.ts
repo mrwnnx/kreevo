@@ -118,12 +118,32 @@ export const DEFAULT_TOKENS: DesignTokens = {
   font:   'Plus Jakarta Sans',
 }
 
+// ─── Migrate legacy tokens from DB (radius: string → radii: object) ───────────
+export function normalizeTokens(raw: unknown): DesignTokens {
+  const t = raw as Record<string, unknown>
+  if (t && !t.radii && typeof t.radius === 'string') {
+    const base = t.radius as string
+    return {
+      ...(t as unknown as DesignTokens),
+      radii: {
+        button:  '9999px',
+        card:    base,
+        input:   base,
+        badge:   '9999px',
+        popover: base,
+      },
+    }
+  }
+  return (t as unknown as DesignTokens) ?? DEFAULT_TOKENS
+}
+
 // ─── CSS builder ──────────────────────────────────────────────
 export function buildDesignCSS(tokens: DesignTokens): string {
   const toVars = (obj: ModeTokens) =>
     (Object.entries(obj) as [string, string][]).map(([k, v]) => `${k}:${v}`).join(';')
 
-  const { button, card, input, badge, popover } = tokens.radii
+  const radii = tokens.radii ?? DEFAULT_TOKENS.radii
+  const { button, card, input, badge, popover } = radii
   const radiiVars = `--radius-button:${button};--radius-card:${card};--radius-input:${input};--radius-badge:${badge};--radius-popover:${popover};--radius:${card}`
   const fontVar = `--font-space-grotesk:"${tokens.font}",system-ui,sans-serif`
 
