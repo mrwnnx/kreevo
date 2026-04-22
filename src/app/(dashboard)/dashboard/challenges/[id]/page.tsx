@@ -1,9 +1,10 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 import { Clock, ChevronLeft, Users, CheckCircle2, Target, Package, AlertCircle, Star, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SubmitForm } from '@/components/features/challenge/SubmitForm'
@@ -34,9 +35,11 @@ export default async function ChallengePage({ params }: Props) {
     (supabase as any).from('participations').select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).order('likes_count', { ascending: false }),
-    (supabase as any).from('participations').select('*', { count: 'exact', head: true }).eq('challenge_id', id),
-    (supabase as any).from('participations').select('profiles(username, avatar_url)').eq('challenge_id', id).limit(6),
+    supabaseAdmin.from('participations' as any).select('*', { count: 'exact', head: true }).eq('challenge_id', id),
+    supabaseAdmin.from('participations' as any).select('profiles(username, avatar_url)').eq('challenge_id', id).limit(6),
   ])
+
+  console.log('[challenge page] participantCount:', participantCount, '| participantAvatars:', JSON.stringify(participantAvatars)?.slice(0, 200))
 
   if (!profile) redirect('/login')
   if (!challenge) notFound()
@@ -246,16 +249,17 @@ export default async function ChallengePage({ params }: Props) {
                 <ParticipateButton challengeId={c.id} />
                 {avatars.length > 0 && (
                   <div className="flex items-center justify-center gap-2">
-                    <div className="flex -space-x-2">
-                      {avatars.slice(0, 5).map((av: any, i: number) => (
-                        <Avatar key={i} className="size-6 ring-2 ring-background">
+                    <AvatarGroup>
+                      {avatars.slice(0, 4).map((av: any, i: number) => (
+                        <Avatar key={i} size="sm">
                           <AvatarImage src={av.avatar_url ?? undefined} />
-                          <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
-                            {av.username?.[0]?.toUpperCase()}
-                          </AvatarFallback>
+                          <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
                         </Avatar>
                       ))}
-                    </div>
+                      {totalParticipants > 4 && (
+                        <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
+                      )}
+                    </AvatarGroup>
                     <span className="text-xs text-muted-foreground">
                       {totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}
                     </span>
@@ -299,16 +303,17 @@ export default async function ChallengePage({ params }: Props) {
               </a>
               {avatars.length > 0 && (
                 <div className="flex items-center gap-2 pt-0.5">
-                  <div className="flex -space-x-2">
-                    {avatars.slice(0, 5).map((av: any, i: number) => (
-                      <Avatar key={i} className="size-6 ring-2 ring-green-50 dark:ring-green-900/20">
+                  <AvatarGroup>
+                    {avatars.slice(0, 4).map((av: any, i: number) => (
+                      <Avatar key={i} size="sm">
                         <AvatarImage src={av.avatar_url ?? undefined} />
-                        <AvatarFallback className="text-[9px] font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
-                          {av.username?.[0]?.toUpperCase()}
-                        </AvatarFallback>
+                        <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
                       </Avatar>
                     ))}
-                  </div>
+                    {totalParticipants > 4 && (
+                      <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
+                    )}
+                  </AvatarGroup>
                   <span className="text-[11px] text-muted-foreground">
                     {totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}
                   </span>
