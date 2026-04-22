@@ -152,12 +152,11 @@ export default async function DashboardPage() {
         totalUsers={totalUsers ?? 0}
       />
 
-      {/* ── Grid 2 colonnes : Getting Started + Participations | Streak + League ── */}
+      {/* ── Grid 3 colonnes : Participations/Briefs (×2) | Commencer + Streak + Ligue ── */}
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* Colonne gauche */}
-        <div className="space-y-6">
-          <GettingStarted steps={gettingStartedSteps} />
+        {/* Colonne gauche (×2) */}
+        <div className="lg:col-span-2 space-y-6">
 
           {/* Participations actives */}
           {activeParticipations && activeParticipations.length > 0 && (
@@ -234,8 +233,9 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Colonne droite */}
+        {/* Colonne droite — Commencer + Streak + Ligue */}
         <div className="space-y-6">
+          <GettingStarted steps={gettingStartedSteps} />
           <StreakCard
             streak={streak}
             activeDays={activeDays}
