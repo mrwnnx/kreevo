@@ -69,11 +69,15 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans texte av
     })
 
     const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
+      ? message.content[0].text.trim()
       : ''
-    briefData = JSON.parse(responseText)
+    // Strip markdown code fences if present
+    const cleaned = responseText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    briefData = JSON.parse(cleaned)
   } catch (err) {
-    return NextResponse.json({ error: 'Erreur génération brief' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[brief/generate]', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 
   // Save to DB
