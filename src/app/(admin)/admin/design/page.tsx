@@ -5,7 +5,7 @@ import { RotateCcw, Save, Check, Loader2, Sun, Moon, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DEFAULT_TOKENS, FONT_OPTIONS, buildDesignCSS } from '@/lib/design-tokens'
-import type { DesignTokens, ModeTokens } from '@/lib/design-tokens'
+import type { DesignTokens, ModeTokens, RadiiTokens } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 // ─── Token group config ───────────────────────────────────────
@@ -144,8 +144,12 @@ function PreviewPanel({ tokens }: { tokens: DesignTokens }) {
     '--muted-foreground': tokens.light['--muted-foreground'],
     '--border':      tokens.light['--border'],
     '--destructive': tokens.light['--destructive'],
-    '--radius':      tokens.radius,
-    '--font-sans':   `"${tokens.font}", system-ui, sans-serif`,
+    '--radius-button':  tokens.radii.button,
+    '--radius-card':    tokens.radii.card,
+    '--radius-input':   tokens.radii.input,
+    '--radius-badge':   tokens.radii.badge,
+    '--radius-popover': tokens.radii.popover,
+    '--font-sans':      `"${tokens.font}", system-ui, sans-serif`,
   } as React.CSSProperties
 
   return (
@@ -417,29 +421,51 @@ export default function AdminDesignPage() {
             <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground">
               Border Radius
             </h2>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="0" max="1.5" step="0.05"
-                value={parseFloat(tokens.radius)}
-                onChange={e => { setTokens(p => ({ ...p, radius: `${e.target.value}rem` })); setSaved(false) }}
-                className="flex-1 accent-primary"
-              />
-              <span className="text-sm font-mono w-16 text-right">{tokens.radius}</span>
-            </div>
-            {/* Radius preview */}
-            <div className="flex gap-3 items-center mt-1">
-              {['Bouton', 'Card', 'Input'].map((label, i) => (
-                <div key={label} className="flex flex-col items-center gap-1.5">
-                  <div
-                    className="px-4 py-2 bg-primary text-primary-foreground text-xs font-medium"
-                    style={{ borderRadius: tokens.radius }}
-                  >
-                    {label}
+            <div className="rounded-xl border border-border bg-card divide-y divide-border/40">
+              {(
+                [
+                  { key: 'button',  label: 'Bouton',   max: 9999, preview: (r: string) => (
+                    <div className="px-4 py-1.5 bg-primary text-primary-foreground text-xs font-medium" style={{ borderRadius: r }}>Soumettre</div>
+                  )},
+                  { key: 'card',    label: 'Card',     max: 2,    preview: (r: string) => (
+                    <div className="px-4 py-2 bg-card border border-border text-xs" style={{ borderRadius: r }}>Card</div>
+                  )},
+                  { key: 'input',   label: 'Input',    max: 2,    preview: (r: string) => (
+                    <div className="px-3 py-1.5 border border-input bg-background text-xs text-muted-foreground" style={{ borderRadius: r }}>Placeholder…</div>
+                  )},
+                  { key: 'badge',   label: 'Badge',    max: 9999, preview: (r: string) => (
+                    <div className="px-2.5 py-0.5 bg-primary text-primary-foreground text-[11px] font-medium" style={{ borderRadius: r }}>Pro</div>
+                  )},
+                  { key: 'popover', label: 'Popover',  max: 2,    preview: (r: string) => (
+                    <div className="px-3 py-2 bg-popover border border-border shadow-sm text-xs" style={{ borderRadius: r }}>Menu</div>
+                  )},
+                ] as { key: keyof RadiiTokens; label: string; max: number; preview: (r: string) => React.ReactNode }[]
+              ).map(({ key, label, max, preview }) => {
+                const raw = tokens.radii[key]
+                const isPill = raw === '9999px'
+                const numVal = isPill ? max : parseFloat(raw) || 0
+                return (
+                  <div key={key} className="flex items-center gap-4 px-4 py-3">
+                    <p className="text-sm font-medium w-20 shrink-0">{label}</p>
+                    <input
+                      type="range"
+                      min="0"
+                      max={max === 9999 ? 2 : max}
+                      step="0.05"
+                      value={isPill ? 2 : numVal}
+                      onChange={e => {
+                        const v = parseFloat(e.target.value)
+                        const val = max === 9999 && v >= 1.9 ? '9999px' : `${v}rem`
+                        setTokens(p => ({ ...p, radii: { ...p.radii, [key]: val } }))
+                        setSaved(false)
+                      }}
+                      className="flex-1 accent-primary"
+                    />
+                    <span className="text-xs font-mono w-16 text-right text-muted-foreground">{raw}</span>
+                    <div className="shrink-0">{preview(raw)}</div>
                   </div>
-                  {i === 0 && <span className="text-[10px] text-muted-foreground font-mono">{tokens.radius}</span>}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 

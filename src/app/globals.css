@@ -127,6 +127,11 @@
   --ring:                 oklch(0.12 0.008 265);
 
   --radius: 0.5rem;
+  --radius-button:  9999px;
+  --radius-card:    0.75rem;
+  --radius-input:   0.5rem;
+  --radius-badge:   9999px;
+  --radius-popover: 0.75rem;
 
   /* ── Semantic spacing tokens ────────────────────────────── */
   --space-1:  4px;

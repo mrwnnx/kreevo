@@ -27,10 +27,18 @@ export interface ModeTokens {
   '--xp-to':                 string
 }
 
+export interface RadiiTokens {
+  button:  string
+  card:    string
+  input:   string
+  badge:   string
+  popover: string
+}
+
 export interface DesignTokens {
   light:  ModeTokens
   dark:   ModeTokens
-  radius: string
+  radii:  RadiiTokens
   font:   string
 }
 
@@ -100,7 +108,13 @@ export const DEFAULT_TOKENS: DesignTokens = {
     '--xp-from':              '#7c3aed',
     '--xp-to':                '#c060d0',
   },
-  radius: '0.5rem',
+  radii: {
+    button:  '9999px',
+    card:    '0.75rem',
+    input:   '0.5rem',
+    badge:   '9999px',
+    popover: '0.75rem',
+  },
   font:   'Plus Jakarta Sans',
 }
 
@@ -109,12 +123,13 @@ export function buildDesignCSS(tokens: DesignTokens): string {
   const toVars = (obj: ModeTokens) =>
     (Object.entries(obj) as [string, string][]).map(([k, v]) => `${k}:${v}`).join(';')
 
-  const shared = `--radius:${tokens.radius}`
+  const { button, card, input, badge, popover } = tokens.radii
+  const radiiVars = `--radius-button:${button};--radius-card:${card};--radius-input:${input};--radius-badge:${badge};--radius-popover:${popover};--radius:${card}`
   const fontVar = `--font-space-grotesk:"${tokens.font}",system-ui,sans-serif`
 
   return [
-    `:root{${toVars(tokens.light)};${shared};${fontVar}}`,
-    `.dark{${toVars(tokens.dark)};${shared};${fontVar}}`,
+    `:root{${toVars(tokens.light)};${radiiVars};${fontVar}}`,
+    `.dark{${toVars(tokens.dark)};${radiiVars};${fontVar}}`,
   ].join('')
 }
 
