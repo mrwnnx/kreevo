@@ -125,16 +125,16 @@ export function FloatingNav({ profile }: { profile: Profile }) {
               <p className="text-[10px] text-muted-foreground font-mono capitalize">{profile.plan} plan</p>
             </div>
             <DropdownMenuItem>
-              <Link href={`/u/${profile.username}`} className="w-full text-xs">Profil public</Link>
+              <Link href={`/u/${profile.username}`} className="w-full text-xs font-medium">Profil public</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/profile" className="w-full text-xs">Modifier le profil</Link>
+              <Link href="/dashboard/profile" className="w-full text-xs font-medium">Modifier le profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/settings" className="w-full text-xs">Paramètres</Link>
+              <Link href="/dashboard/settings" className="w-full text-xs font-medium">Paramètres</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/notifications" className="w-full text-xs">Notifications</Link>
+              <Link href="/dashboard/notifications" className="w-full text-xs font-medium">Notifications</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5">
