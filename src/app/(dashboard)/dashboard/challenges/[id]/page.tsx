@@ -1,9 +1,9 @@
+'use server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Clock, ChevronLeft, Target, Package, AlertCircle, Star, Users } from 'lucide-react'
+import { Clock, ChevronLeft, Users, CheckCircle2, Target, Package, AlertCircle, Star, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SubmitForm } from '@/components/features/challenge/SubmitForm'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
@@ -44,165 +44,137 @@ export default async function ChallengePage({ params }: Props) {
   const isRevealed = c.reveal_at ? new Date(c.reveal_at) <= new Date() : isClosed
   const totalParticipants = participantCount ?? 0
 
-  // Resolve participation state
   const hasParticipation = !!participation
-  const deadlinePassed = hasParticipation
-    ? new Date(participation.personal_deadline) < new Date()
-    : false
+  const deadlinePassed = hasParticipation ? new Date(participation.personal_deadline) < new Date() : false
   const participationStatus: 'none' | 'active' | 'expired' | 'submitted' = !hasParticipation
     ? 'none'
-    : participation.status === 'submitted'
-    ? 'submitted'
-    : deadlinePassed || participation.status === 'expired'
-    ? 'expired'
+    : participation.status === 'submitted' ? 'submitted'
+    : deadlinePassed || participation.status === 'expired' ? 'expired'
     : 'active'
 
-  // Attempt limits: Free=2, Pro=3
   const maxAttempts = p.plan === 'pro' ? 3 : 2
   const currentAttempts = (existingSubmission as any)?.attempt_number ?? (existingSubmission ? 1 : 0)
   const attemptsLeft = maxAttempts - currentAttempts
   const canResubmit = participationStatus === 'active' && attemptsLeft > 0
 
+  const TRACK_COLOR: Record<string, string> = {
+    UX:      'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
+    UI:      'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
+    Graphic: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20 dark:text-pink-400',
+    Motion:  'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400',
+  }
+  const trackColor = TRACK_COLOR[c.track ?? ''] ?? 'text-muted-foreground bg-muted'
+
   return (
-    <div className="pb-10">
-      
-      <div className="p-6 max-w-[960px] mx-auto space-y-6">
+    <div className="p-6 max-w-[960px] mx-auto pb-16">
 
-        {/* Back */}
-        <Link href="/dashboard/challenges" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="size-4" /> All Challenges
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
+        <Link href="/dashboard/challenges" className="hover:text-foreground transition-colors flex items-center gap-1">
+          <ChevronLeft className="size-3.5" /> Challenges
         </Link>
+        <span>/</span>
+        <span className="text-foreground font-medium truncate max-w-[280px]">{c.title}</span>
+      </div>
 
-        {/* Header */}
-        <div className="space-y-3">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-xs font-medium text-violet-600 uppercase tracking-wide mb-1">{c.track}</p>
-              <h1 className="text-3xl font-bold">{c.title}</h1>
-            </div>
+      {/* 2-col layout */}
+      <div className="grid lg:grid-cols-[1fr_280px] gap-8 items-start">
+
+        {/* ── MAIN CONTENT ── */}
+        <div className="space-y-8 min-w-0">
+
+          {/* Header */}
+          <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${trackColor}`}>
+                {c.track}
+              </span>
               <Badge variant="secondary" className="capitalize">{c.level}</Badge>
               {isClosed ? (
                 <Badge variant="destructive">Fermé</Badge>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
-                  <Clock className="size-3.5" />
-                  {c.closes_at ? `Ferme le ${new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}` : ''}
+              ) : c.closes_at && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400 px-2.5 py-1 rounded-full">
+                  <Clock className="size-3" />
+                  Ferme le {new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
                 </span>
               )}
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Users className="size-3.5" />
+                {isRevealed
+                  ? `${allSubmissions?.length ?? 0} soumissions`
+                  : `${totalParticipants} participant${totalParticipants !== 1 ? 's' : ''}`}
+              </span>
             </div>
+
+            <h1 className="text-3xl font-bold leading-tight">{c.title}</h1>
+
+            {c.brief && (
+              <p className="text-base text-muted-foreground leading-relaxed">{c.brief}</p>
+            )}
           </div>
 
-          {/* Participant counter */}
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="size-4" />
-            <span>
-              {isRevealed
-                ? `${allSubmissions?.length ?? 0} travaux soumis`
-                : `${totalParticipants} designer${totalParticipants !== 1 ? 's' : ''} ${totalParticipants !== 1 ? 'participent' : 'participe'}`}
-            </span>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Brief */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <section className="space-y-2">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <span className="size-6 rounded-md bg-violet-100 flex items-center justify-center text-xs">📋</span>
-              Brief
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{c.brief}</p>
-          </section>
-
+          {/* Scenario / Context */}
           {c.context && (
-            <section className="space-y-2">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                <span className="size-6 rounded-md bg-blue-100 flex items-center justify-center text-xs">🔍</span>
-                Context
-              </h2>
+            <section className="space-y-3">
+              <h2 className="text-base font-semibold">Le scénario</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{c.context}</p>
             </section>
           )}
 
+          {/* Deliverable */}
           {c.deliverable && (
-            <section className="space-y-2">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                <Package className="size-4 text-green-600" />
-                Deliverable
+            <section className="space-y-3">
+              <h2 className="text-base font-semibold flex items-center gap-2">
+                <Package className="size-4 text-muted-foreground" />
+                Livrable attendu
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{c.deliverable}</p>
             </section>
           )}
 
+          {/* Constraints */}
           {c.constraints && (
-            <section className="space-y-2">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                <AlertCircle className="size-4 text-orange-500" />
-                Constraints
+            <section className="space-y-3">
+              <h2 className="text-base font-semibold flex items-center gap-2">
+                <AlertCircle className="size-4 text-muted-foreground" />
+                Contraintes
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">{c.constraints}</p>
             </section>
           )}
 
+          {/* Evaluation criteria */}
           {c.criteria && (
-            <section className="space-y-2 md:col-span-2">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                <Star className="size-4 text-yellow-500" />
-                Evaluation Criteria
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{c.criteria}</p>
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-base font-semibold">Critères d&apos;évaluation</h2>
+                <p className="text-sm text-muted-foreground mt-1">Ton travail sera évalué sur les critères suivants.</p>
+              </div>
+              <div className="space-y-3">
+                {c.criteria.split(/[.•\n]/).filter(s => s.trim().length > 10).map((criterion, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
+                    <p className="text-sm text-foreground leading-relaxed">{criterion.trim()}</p>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
-        </div>
 
-        <Separator />
-
-        {/* Participation section — 4 states */}
-        <section className="space-y-4">
-
-          {/* STATE 1 — Pas participé */}
-          {participationStatus === 'none' && !isClosed && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Rejoins ce challenge</h2>
-              <ParticipateButton challengeId={c.id} />
-            </div>
-          )}
-
-          {participationStatus === 'none' && isClosed && (
-            <div className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-              Ce challenge est fermé aux nouvelles participations.
-            </div>
-          )}
-
-          {/* STATE 2 — Participé, deadline en cours */}
+          {/* ── Submit form (state active) ── */}
           {participationStatus === 'active' && (
-            <div className="space-y-5">
-              <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-sm font-semibold">Ta participation — En cours</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    Soumission {currentAttempts}/{maxAttempts}
-                  </span>
+            <section id="submit" className="space-y-5 pt-2">
+              <div className="h-px bg-border" />
+              <div className="rounded-xl border border-border bg-muted/20 p-4 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-semibold">Ta participation — En cours</span>
+                  <span className="text-xs text-muted-foreground font-mono ml-2">{currentAttempts}/{maxAttempts} soumissions</span>
                 </div>
-
-                <CountdownTimer
-                  deadline={participation.personal_deadline}
-                  label="Il te reste"
-                />
-
-                <p className="text-xs text-muted-foreground">
-                  Deadline personnelle : {new Date(participation.personal_deadline).toLocaleDateString('fr', {
-                    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
-                  })}
-                </p>
+                <CountdownTimer deadline={participation.personal_deadline} label="Il te reste" compact />
               </div>
 
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-base font-semibold">
                 {existingSubmission ? 'Modifier ta soumission' : 'Soumettre ton travail'}
               </h2>
               <SubmitForm
@@ -212,88 +184,30 @@ export default async function ChallengePage({ params }: Props) {
                 participationId={participation.id}
                 attemptsLeft={attemptsLeft}
               />
-            </div>
+            </section>
           )}
 
-          {/* STATE 3 — Deadline expirée, pas soumis */}
-          {participationStatus === 'expired' && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-red-500" />
-                <span className="text-sm font-semibold text-red-700">Délai expiré</span>
-              </div>
-              <p className="text-sm text-red-600">
-                Tu n&apos;as pas soumis dans les 3 jours impartis.<br />
-                Rejoins le prochain challenge pour continuer à progresser !
-              </p>
-              <Link
-                href="/dashboard/challenges"
-                className="inline-flex items-center gap-2 text-sm font-medium text-red-700 underline underline-offset-2"
-              >
-                Voir les challenges disponibles →
-              </Link>
-            </div>
+          {/* ── Resubmit (submitted + can resubmit) ── */}
+          {participationStatus === 'submitted' && canResubmit && (
+            <section className="space-y-3 pt-2">
+              <div className="h-px bg-border" />
+              <h2 className="text-sm font-semibold">Modifier ta soumission</h2>
+              <SubmitForm
+                challengeId={c.id}
+                existing={existingSubmission as Submission | null}
+                isClosed={false}
+                participationId={participation.id}
+                attemptsLeft={attemptsLeft}
+              />
+            </section>
           )}
 
-          {/* STATE 4 — Soumis */}
-          {participationStatus === 'submitted' && existingSubmission && (
-            <div className="space-y-4">
-              <div className="rounded-xl border border-green-200 bg-green-50 p-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-green-500 text-lg">✅</span>
-                  <span className="text-sm font-semibold text-green-700">
-                    Soumission reçue ! {attemptsLeft > 0 && canResubmit && `(${attemptsLeft} modification${attemptsLeft > 1 ? 's' : ''} restante${attemptsLeft > 1 ? 's' : ''})`}
-                  </span>
-                </div>
-
-                {(existingSubmission as any).cover_url && (
-                  <div className="relative overflow-hidden rounded-lg border">
-                    <img
-                      src={(existingSubmission as any).cover_url}
-                      alt="Votre soumission"
-                      className={`w-full max-h-48 object-cover ${!isRevealed ? 'blur-md' : ''}`}
-                    />
-                    {!isRevealed && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <p className="text-white font-semibold bg-black/40 px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-                          Reveal collectif bientôt
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {!isRevealed && c.closes_at && (
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-2">Reveal dans</p>
-                    <CountdownTimer deadline={c.closes_at} compact />
-                  </div>
-                )}
-              </div>
-
-              {canResubmit && (
-                <div className="space-y-3">
-                  <h2 className="text-sm font-semibold">Modifier ta soumission</h2>
-                  <SubmitForm
-                    challengeId={c.id}
-                    existing={existingSubmission as Submission | null}
-                    isClosed={false}
-                    participationId={participation.id}
-                    attemptsLeft={attemptsLeft}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-
-        {/* Gallery */}
-        {allSubmissions && allSubmissions.length > 0 && (
-          <>
-            <Separator />
-            <section>
-              <h2 className="text-lg font-semibold mb-4">
-                {isRevealed ? `${allSubmissions.length} travaux` : 'Galerie'}
+          {/* ── Gallery ── */}
+          {allSubmissions && allSubmissions.length > 0 && (
+            <section className="space-y-4 pt-2">
+              <div className="h-px bg-border" />
+              <h2 className="text-base font-semibold">
+                {isRevealed ? `${allSubmissions.length} travaux soumis` : 'Galerie'}
               </h2>
               <SubmissionGallery
                 submissions={allSubmissions}
@@ -302,8 +216,157 @@ export default async function ChallengePage({ params }: Props) {
                 challengeTitle={c.title}
               />
             </section>
-          </>
-        )}
+          )}
+        </div>
+
+        {/* ── SIDEBAR ── */}
+        <div className="lg:sticky lg:top-6 space-y-4">
+
+          {/* STATE: none */}
+          {participationStatus === 'none' && !isClosed && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              {/* Decorative top */}
+              <div className="h-24 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center">
+                <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <Target className="size-6 text-primary" />
+                </div>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <p className="font-semibold text-sm">Soumettre ton travail</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Rejoins ce challenge et soumets ton design pour recevoir du feedback et progresser.
+                  </p>
+                </div>
+                <ParticipateButton challengeId={c.id} />
+                <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                  <Zap className="size-3 text-yellow-500" />
+                  <span>Gagne +150 XP à la soumission</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {participationStatus === 'none' && isClosed && (
+            <div className="rounded-xl border border-dashed p-4 text-center space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Challenge fermé</p>
+              <p className="text-xs text-muted-foreground">Ce challenge n&apos;accepte plus de nouvelles participations.</p>
+              <Link
+                href="/dashboard/challenges"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline mt-1"
+              >
+                Voir les challenges actifs →
+              </Link>
+            </div>
+          )}
+
+          {/* STATE: active */}
+          {participationStatus === 'active' && (
+            <div className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-semibold text-green-700 dark:text-green-400">Participation active</span>
+              </div>
+              <CountdownTimer deadline={participation.personal_deadline} label="Deadline dans" />
+              <a
+                href="#submit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green-600 text-white text-xs font-medium h-8 px-4 hover:bg-green-700 transition-colors"
+              >
+                <Play className="size-3" fill="currentColor" />
+                Soumettre mon travail
+              </a>
+              <p className="text-[11px] text-center text-muted-foreground font-mono">
+                {currentAttempts}/{maxAttempts} soumissions utilisées
+              </p>
+            </div>
+          )}
+
+          {/* STATE: submitted */}
+          {participationStatus === 'submitted' && existingSubmission && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              {(existingSubmission as any).cover_url && (
+                <div className="relative aspect-video overflow-hidden">
+                  <img
+                    src={(existingSubmission as any).cover_url}
+                    alt="Ta soumission"
+                    className={`w-full h-full object-cover ${!isRevealed ? 'blur-md scale-105' : ''}`}
+                  />
+                  {!isRevealed && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                      <p className="text-white text-xs font-semibold bg-black/40 px-3 py-1.5 rounded-full">
+                        Reveal bientôt
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-green-500" />
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-400">Soumission reçue !</span>
+                </div>
+                {!isRevealed && c.closes_at && (
+                  <div className="space-y-1">
+                    <p className="text-[11px] text-muted-foreground">Reveal collectif dans</p>
+                    <CountdownTimer deadline={c.closes_at} compact />
+                  </div>
+                )}
+                {canResubmit && (
+                  <p className="text-[11px] text-muted-foreground">
+                    {attemptsLeft} modification{attemptsLeft > 1 ? 's' : ''} restante{attemptsLeft > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STATE: expired */}
+          {participationStatus === 'expired' && (
+            <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-red-500" />
+                <span className="text-sm font-semibold text-red-700 dark:text-red-400">Délai expiré</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Tu n&apos;as pas soumis dans les 3 jours impartis.
+              </p>
+              <Link
+                href="/dashboard/challenges"
+                className="inline-flex items-center gap-1 text-xs font-medium text-red-700 dark:text-red-400 hover:underline"
+              >
+                Voir les challenges disponibles →
+              </Link>
+            </div>
+          )}
+
+          {/* Challenge meta card */}
+          <div className="rounded-xl border border-border p-4 space-y-3">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Détails</p>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Niveau</span>
+                <span className="font-medium capitalize">{c.level}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Track</span>
+                <span className="font-medium">{c.track}</span>
+              </div>
+              {c.closes_at && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Fermeture</span>
+                  <span className="font-medium">
+                    {new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Participants</span>
+                <span className="font-medium">{totalParticipants}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   )
