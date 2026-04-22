@@ -35,7 +35,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function ColorsPage() {
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-12 pb-20">
+    <div className="p-8 max-w-[920px] mx-auto space-y-12 pb-20">
 
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Design System — Colors</h1>

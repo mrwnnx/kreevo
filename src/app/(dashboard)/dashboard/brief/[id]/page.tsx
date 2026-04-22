@@ -23,7 +23,7 @@ export default async function BriefWorkspacePage({ params }: Props) {
 
   return (
     <div className="pb-10">
-      <div className="px-6 pt-6 max-w-3xl mx-auto">
+      <div className="px-6 pt-6 max-w-[920px] mx-auto">
         <Link
           href="/dashboard/brief"
           className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors mb-2"

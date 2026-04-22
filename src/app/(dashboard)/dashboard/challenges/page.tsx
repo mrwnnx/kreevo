@@ -149,7 +149,7 @@ export default async function ChallengesPage() {
   )
 
   return (
-    <div className="p-6 max-w-4xl mx-auto pb-16 space-y-6">
+    <div className="p-6 max-w-[920px] mx-auto pb-16 space-y-6">
 
       <div>
         <h2 className="text-2xl font-bold mb-1">Design Challenges</h2>

@@ -48,7 +48,7 @@ export default async function NotificationsPage() {
   return (
     <div className="pb-10">
       
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-[920px] mx-auto px-6 py-8 space-y-6">
 
         {notifications.length === 0 ? (
           <div className="text-center py-24 space-y-3">

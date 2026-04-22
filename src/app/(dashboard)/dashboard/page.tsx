@@ -135,7 +135,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto pb-10 space-y-6">
+    <div className="p-6 max-w-[920px] mx-auto pb-10 space-y-6">
 
       {/* ── Hero Profile ── */}
       <HeroProfile
