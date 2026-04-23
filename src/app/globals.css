@@ -236,6 +236,7 @@
 
   html, body {
     font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-weight: 500;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

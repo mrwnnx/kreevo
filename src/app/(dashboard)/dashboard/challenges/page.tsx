@@ -159,22 +159,11 @@ export default async function ChallengesPage() {
       </div>
 
       <Tabs defaultValue="active">
-        {/* Pill-style tabs */}
-        <TabsList className="bg-transparent p-0 gap-2 h-auto">
-          <TabsTrigger
-            value="active"
-            className="px-4 py-2 h-auto rounded-full border border-border text-sm font-medium
-              data-active:bg-foreground data-active:text-background data-active:border-foreground
-              hover:border-foreground/40 transition-all"
-          >
+        <TabsList>
+          <TabsTrigger value="active">
             Actifs ({active?.length ?? 0})
           </TabsTrigger>
-          <TabsTrigger
-            value="past"
-            className="px-4 py-2 h-auto rounded-full border border-border text-sm font-medium
-              data-active:bg-foreground data-active:text-background data-active:border-foreground
-              hover:border-foreground/40 transition-all"
-          >
+          <TabsTrigger value="past">
             Passés
           </TabsTrigger>
         </TabsList>
