@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Trophy, Zap, Star, ArrowRight, Clock, Play } from 'lucide-react'
 import { xpProgressInCurrentLevel, leagueColor, leagueLabel, levelFromXp } from '@/lib/utils/xp'
+import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { GettingStarted } from '@/components/features/dashboard/GettingStarted'
 import { StreakCard } from '@/components/features/dashboard/StreakCard'
@@ -69,6 +71,45 @@ export default async function DashboardPage() {
   if (!profile) redirect('/login')
 
   const p = profile as Profile
+
+  // ── New leagues system data ──
+  const { data: allLeagues } = await (supabaseAdmin as any)
+    .from('leagues')
+    .select('id, name, icon, order_index, min_challenges, access')
+    .eq('is_active', true)
+    .order('order_index', { ascending: true })
+
+  const userLeagueRow = (allLeagues ?? []).find(
+    (l: any) => l.name.toLowerCase() === (p.league ?? '').toLowerCase()
+  ) ?? null
+
+  const nextLeagueRow = userLeagueRow
+    ? (allLeagues ?? []).find((l: any) => l.order_index === userLeagueRow.order_index + 1) ?? null
+    : null
+
+  // XP threshold + challenges completed for LeagueCard
+  let leagueXpThreshold = 0
+  let leagueChallengesCompleted = 0
+
+  if (userLeagueRow) {
+    leagueXpThreshold = await getLeagueThreshold(userLeagueRow.id)
+
+    const { data: leagueChallengeIds } = await supabaseAdmin
+      .from('challenges')
+      .select('id')
+      .eq('league_id', userLeagueRow.id)
+      .eq('is_published', true)
+
+    const ids = (leagueChallengeIds ?? []).map((c: any) => c.id)
+    if (ids.length > 0) {
+      const { count } = await supabaseAdmin
+        .from('submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .in('challenge_id', ids)
+      leagueChallengesCompleted = count ?? 0
+    }
+  }
 
   // Rank queries (need profile.xp first)
   const [{ count: usersAhead }, { count: totalUsers }] = await Promise.all([
@@ -247,6 +288,11 @@ export default async function DashboardPage() {
             league={p.league as League}
             xp={p.xp}
             plan={p.plan}
+            xpThreshold={leagueXpThreshold > 0 ? leagueXpThreshold : undefined}
+            challengesCompleted={leagueChallengesCompleted}
+            minChallenges={userLeagueRow?.min_challenges}
+            nextLeagueName={nextLeagueRow?.name}
+            nextLeagueIcon={nextLeagueRow?.icon}
           />
         </div>
       </div>

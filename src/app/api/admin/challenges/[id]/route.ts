@@ -26,6 +26,11 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.reveal_at !== undefined && { reveal_at: body.reveal_at }),
       ...(body.closes_at !== undefined && { closes_at: body.closes_at }),
       ...(body.status !== undefined && { status: body.status }),
+      ...(body.league_id !== undefined && { league_id: body.league_id }),
+      ...(body.difficulty !== undefined && { difficulty: body.difficulty }),
+      ...(body.xp_reward !== undefined && { xp_reward: body.xp_reward }),
+      ...(body.deadline_days !== undefined && { deadline_days: body.deadline_days }),
+      ...(body.is_published !== undefined && { is_published: body.is_published }),
     })
     .eq('id', id)
 

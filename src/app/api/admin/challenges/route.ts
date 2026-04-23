@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
 
-export async function GET() {
+export async function GET(request: Request) {
   const { error, admin } = await requireAdmin()
   if (error) return error
 
-  const { data: challenges } = await (admin!.supabase as any)
+  const { searchParams } = new URL(request.url)
+  const leagueId = searchParams.get('league_id')
+
+  let query = (admin!.supabase as any)
     .from('challenges')
-    .select('*')
+    .select('*, leagues(id, name, icon)')
     .order('created_at', { ascending: false })
 
+  if (leagueId) query = query.eq('league_id', leagueId)
+
+  const { data: challenges } = await query
   return NextResponse.json({ challenges: challenges ?? [] })
 }
 
@@ -34,6 +40,11 @@ export async function POST(request: Request) {
       reveal_at: body.reveal_at || null,
       closes_at: body.closes_at || null,
       status: body.status ?? 'draft',
+      league_id: body.league_id || null,
+      difficulty: body.difficulty || null,
+      xp_reward: body.xp_reward || null,
+      deadline_days: body.deadline_days || null,
+      is_published: body.is_published ?? false,
     })
     .select()
     .single()

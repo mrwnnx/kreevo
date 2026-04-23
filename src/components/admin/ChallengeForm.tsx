@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sparkles, Save, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,6 +19,18 @@ interface FormData {
   reveal_at: string
   closes_at: string
   status: string
+  league_id: string
+  difficulty: string
+  xp_reward: string
+  deadline_days: string
+  is_published: boolean
+}
+
+const DIFFICULTY_XP: Record<string, number> = {
+  easy: 150,
+  medium: 250,
+  hard: 400,
+  expert: 600,
 }
 
 const EMPTY: FormData = {
@@ -29,36 +41,38 @@ const EMPTY: FormData = {
   year: String(new Date().getFullYear()),
   reveal_at: '', closes_at: '',
   status: 'draft',
+  league_id: '',
+  difficulty: 'medium',
+  xp_reward: '250',
+  deadline_days: '7',
+  is_published: false,
 }
+
+interface League { id: string; name: string; icon: string; order_index: number }
+
+const labelClass = 'text-xs font-mono text-muted-foreground uppercase tracking-widest'
+const inputClass = 'w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring'
 
 const field = (label: string, name: keyof FormData, value: string, onChange: (v: string) => void, type: 'input' | 'textarea' = 'input') => (
   <div key={name} className="space-y-1.5">
-    <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{label}</label>
+    <label className={labelClass}>{label}</label>
     {type === 'textarea' ? (
       <textarea
         value={value}
         onChange={e => onChange(e.target.value)}
         rows={3}
-        className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+        className={cn(inputClass, 'resize-none')}
       />
     ) : (
-      <input
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring"
-      />
+      <input value={value} onChange={e => onChange(e.target.value)} className={inputClass} />
     )}
   </div>
 )
 
 const sel = (label: string, value: string, options: [string, string][], onChange: (v: string) => void) => (
   <div className="space-y-1.5">
-    <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{label}</label>
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring"
-    >
+    <label className={labelClass}>{label}</label>
+    <select value={value} onChange={e => onChange(e.target.value)} className={inputClass}>
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
     </select>
   </div>
@@ -67,6 +81,7 @@ const sel = (label: string, value: string, options: [string, string][], onChange
 export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id?: string }) {
   const router = useRouter()
   const [form, setForm] = useState<FormData>({ ...EMPTY, ...initial })
+  const [leagues, setLeagues] = useState<League[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
@@ -74,14 +89,29 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   const [aiDomain, setAiDomain] = useState('Web')
   const [aiType, setAiType] = useState('UI')
 
-  const set = (key: keyof FormData) => (val: string) => setForm(f => ({ ...f, [key]: val }))
+  useEffect(() => {
+    fetch('/api/admin/leagues')
+      .then(r => r.json())
+      .then(d => setLeagues(d.leagues ?? []))
+  }, [])
+
+  const set = (key: keyof FormData) => (val: string | boolean) =>
+    setForm(f => ({ ...f, [key]: val }))
+
+  function handleDifficultyChange(difficulty: string) {
+    setForm(f => ({
+      ...f,
+      difficulty,
+      xp_reward: String(DIFFICULTY_XP[difficulty] ?? 250),
+    }))
+  }
 
   async function generateWithAI() {
     setAiLoading(true)
     const res = await fetch('/api/ai/brief', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: aiDomain, type: aiType, difficulty: form.level, duration: '3 jours' }),
+      body: JSON.stringify({ domain: aiDomain, type: aiType, difficulty: form.level, duration: `${form.deadline_days} jours` }),
     })
     const data = await res.json()
     if (res.ok && data.brief) {
@@ -112,6 +142,9 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         ...form,
         month: parseInt(form.month),
         year: parseInt(form.year),
+        xp_reward: parseInt(form.xp_reward),
+        deadline_days: parseInt(form.deadline_days),
+        league_id: form.league_id || null,
       }),
     })
     const data = await res.json()
@@ -134,14 +167,14 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         {showAI && (
           <div className="mt-3 flex items-end gap-3 flex-wrap">
             <div className="space-y-1">
-              <label className="text-xs font-mono text-muted-foreground">Domaine</label>
+              <label className={labelClass}>Domaine</label>
               <select value={aiDomain} onChange={e => setAiDomain(e.target.value)}
                 className="text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring">
                 {['Web', 'Mobile', 'Dashboard', 'Landing Page', 'Branding'].map(d => <option key={d}>{d}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-mono text-muted-foreground">Type</label>
+              <label className={labelClass}>Type</label>
               <select value={aiType} onChange={e => setAiType(e.target.value)}
                 className="text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring">
                 {['UX', 'UI', 'Graphic', 'Motion'].map(t => <option key={t}>{t}</option>)}
@@ -161,37 +194,98 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
       {/* Form fields */}
       <div className="grid md:grid-cols-2 gap-5">
-        {field('Titre', 'title', form.title, set('title'))}
+        {field('Titre', 'title', form.title, v => set('title')(v))}
+
+        {/* Ligue */}
+        <div className="space-y-1.5">
+          <label className={labelClass}>Ligue</label>
+          <select value={form.league_id} onChange={e => set('league_id')(e.target.value)} className={inputClass}>
+            <option value="">— Aucune ligue —</option>
+            {leagues.map(l => (
+              <option key={l.id} value={l.id}>{l.icon} {l.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Track + Niveau */}
         <div className="grid grid-cols-2 gap-3">
-          {sel('Track', form.track, [['ux_ui', 'UX/UI'], ['graphic', 'Graphic']], set('track'))}
-          {sel('Niveau', form.level, [['rookie', 'Rookie'], ['rising', 'Rising'], ['pro', 'Pro'], ['elite', 'Elite']], set('level'))}
+          {sel('Track', form.track, [['ux_ui', 'UX/UI'], ['graphic', 'Graphic']], v => set('track')(v))}
+          {sel('Niveau', form.level, [['rookie', 'Rookie'], ['rising', 'Rising'], ['pro', 'Pro'], ['elite', 'Elite']], v => set('level')(v))}
         </div>
-        <div className={cn('md:col-span-2')}>
-          {field('Brief principal', 'brief', form.brief, set('brief'), 'textarea')}
+
+        {/* Difficulté + XP */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className={labelClass}>Difficulté</label>
+            <select value={form.difficulty} onChange={e => handleDifficultyChange(e.target.value)} className={inputClass}>
+              <option value="easy">Facile — 150 XP</option>
+              <option value="medium">Moyen — 250 XP</option>
+              <option value="hard">Difficile — 400 XP</option>
+              <option value="expert">Expert — 600 XP</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>XP reward</label>
+            <input
+              type="number"
+              value={form.xp_reward}
+              onChange={e => set('xp_reward')(e.target.value)}
+              className={inputClass}
+              min={0}
+            />
+          </div>
         </div>
-        {field('Contexte', 'context', form.context, set('context'), 'textarea')}
-        {field('Livrable', 'deliverable', form.deliverable, set('deliverable'), 'textarea')}
-        {field('Contraintes', 'constraints', form.constraints, set('constraints'), 'textarea')}
-        {field('Critères d\'évaluation', 'criteria', form.criteria, set('criteria'), 'textarea')}
+
+        {/* Deadline */}
+        {sel('Deadline (jours)', form.deadline_days,
+          [['3','3 jours'],['5','5 jours'],['7','7 jours'],['10','10 jours'],['14','14 jours'],['21','21 jours']],
+          v => set('deadline_days')(v)
+        )}
+
+        {/* Brief */}
+        <div className="md:col-span-2">
+          {field('Brief principal', 'brief', form.brief, v => set('brief')(v), 'textarea')}
+        </div>
+        {field('Contexte', 'context', form.context, v => set('context')(v), 'textarea')}
+        {field('Livrable', 'deliverable', form.deliverable, v => set('deliverable')(v), 'textarea')}
+        {field('Contraintes', 'constraints', form.constraints, v => set('constraints')(v), 'textarea')}
+        {field("Critères d'évaluation", 'criteria', form.criteria, v => set('criteria')(v), 'textarea')}
+
+        {/* Période */}
         <div className="grid grid-cols-2 gap-3">
           {sel('Mois', form.month,
             Array.from({ length: 12 }, (_, i) => [String(i + 1), new Date(0, i).toLocaleString('fr', { month: 'long' })] as [string, string]),
-            set('month'))}
-          {field('Année', 'year', form.year, set('year'))}
+            v => set('month')(v))}
+          {field('Année', 'year', form.year, v => set('year')(v))}
         </div>
+
+        {/* Dates */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Reveal at</label>
-            <input type="datetime-local" value={form.reveal_at} onChange={e => set('reveal_at')(e.target.value)}
-              className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring" />
+            <label className={labelClass}>Reveal at</label>
+            <input type="datetime-local" value={form.reveal_at} onChange={e => set('reveal_at')(e.target.value)} className={inputClass} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Closes at</label>
-            <input type="datetime-local" value={form.closes_at} onChange={e => set('closes_at')(e.target.value)}
-              className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring" />
+            <label className={labelClass}>Closes at</label>
+            <input type="datetime-local" value={form.closes_at} onChange={e => set('closes_at')(e.target.value)} className={inputClass} />
           </div>
         </div>
-        {sel('Statut', form.status, [['draft', 'Draft'], ['active', 'Active'], ['closed', 'Closed']], set('status'))}
+
+        {sel('Statut', form.status, [['draft', 'Draft'], ['active', 'Active'], ['closed', 'Closed']], v => set('status')(v))}
+
+        {/* Publié toggle */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => set('is_published')(!form.is_published)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${form.is_published ? 'bg-primary' : 'bg-muted'}`}
+          >
+            <span className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow transition-transform ${form.is_published ? 'translate-x-5' : 'translate-x-0'}`} />
+          </button>
+          <span className="text-sm font-medium">
+            {form.is_published ? 'Publié' : 'Draft (non publié)'}
+          </span>
+        </div>
       </div>
 
       {error && (

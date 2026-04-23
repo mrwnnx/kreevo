@@ -63,6 +63,11 @@ export default async function EditChallenge({ params }: Props) {
           reveal_at: fmt(data.reveal_at),
           closes_at: fmt(data.closes_at),
           status: data.status ?? 'draft',
+          league_id: data.league_id ?? '',
+          difficulty: data.difficulty ?? 'medium',
+          xp_reward: String(data.xp_reward ?? 250),
+          deadline_days: String(data.deadline_days ?? 7),
+          is_published: data.is_published ?? false,
         }}
       />
 

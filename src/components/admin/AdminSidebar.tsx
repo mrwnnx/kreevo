@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
-  Mail, Settings, ArrowLeft, Palette,
+  Mail, Settings, ArrowLeft, Palette, Medal,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
   { href: '/admin/dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
+  { href: '/admin/leagues',      label: 'Ligues',         icon: Medal },
   { href: '/admin/challenges',   label: 'Challenges',     icon: Trophy },
   { href: '/admin/users',        label: 'Users',          icon: Users },
   { href: '/admin/moderation',   label: 'Modération',     icon: ShieldAlert, badge: true },

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -9,10 +10,17 @@ export async function POST(request: Request) {
   const { challenge_id } = await request.json()
   if (!challenge_id) return NextResponse.json({ error: 'Missing challenge_id' }, { status: 400 })
 
-  // Verify challenge is active
-  const { data: challenge } = await (supabase as any)
+  // Fetch user profile for plan + league check
+  const { data: profile } = await (supabase as any)
+    .from('profiles')
+    .select('plan, league')
+    .eq('id', user.id)
+    .single()
+
+  // Fetch challenge + league (bypass RLS for public read)
+  const { data: challenge } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('id, status')
+    .select('id, status, league_id, deadline_days, leagues(id, name, access, order_index)')
     .eq('id', challenge_id)
     .single()
 
@@ -20,22 +28,61 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Challenge not active' }, { status: 400 })
   }
 
-  // Check if already participated
-  const { data: existing } = await (supabase as any)
+  // Access check: free users can only join leagues with access = 'all'
+  if (
+    challenge.leagues &&
+    challenge.leagues.access === 'pro_only' &&
+    profile?.plan === 'free'
+  ) {
+    return NextResponse.json({ error: 'Ce challenge nécessite un plan Pro' }, { status: 403 })
+  }
+
+  // League match: if challenge has a league, verify user is in that league
+  if (challenge.league_id && challenge.leagues && profile?.league) {
+    const { data: userLeague } = await (supabaseAdmin as any)
+      .from('leagues')
+      .select('id, order_index')
+      .ilike('name', profile.league)
+      .maybeSingle()
+
+    if (userLeague) {
+      if (challenge.leagues.order_index > userLeague.order_index) {
+        return NextResponse.json({
+          error: `Atteins la ligue ${challenge.leagues.name} pour participer à ce défi`,
+        }, { status: 403 })
+      }
+    }
+  }
+
+  // One active participation at a time
+  const { data: activeParticipation } = await (supabaseAdmin as any)
+    .from('participations')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .maybeSingle()
+
+  if (activeParticipation) {
+    return NextResponse.json({ error: 'Tu as déjà une participation active en cours' }, { status: 409 })
+  }
+
+  // Check already participated in this specific challenge
+  const { data: existing } = await (supabaseAdmin as any)
     .from('participations')
     .select('id')
     .eq('challenge_id', challenge_id)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     return NextResponse.json({ error: 'Already participating' }, { status: 409 })
   }
 
+  const deadlineDays = challenge.deadline_days ?? 3
   const now = new Date()
-  const personal_deadline = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+  const personal_deadline = new Date(now.getTime() + deadlineDays * 24 * 60 * 60 * 1000)
 
-  const { data: participation, error } = await (supabase as any)
+  const { data: participation, error } = await (supabaseAdmin as any)
     .from('participations')
     .insert({
       challenge_id,
@@ -49,16 +96,14 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notification
   try {
-    await (supabase as any).from('notifications').insert({
+    await (supabaseAdmin as any).from('notifications').insert({
       user_id: user.id,
       type: 'joined_challenge',
       data: { challenge_id, deadline: personal_deadline.toISOString() },
     })
   } catch { /* ignore */ }
 
-  // +50 XP
   try {
     await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/xp`, {
       method: 'POST',
