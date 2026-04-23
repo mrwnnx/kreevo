@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { ArrowRight, Clock, Play, Lock, ChevronRight } from 'lucide-react'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { levelFromXp } from '@/lib/utils/xp'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
@@ -374,12 +375,12 @@ export default async function DashboardPage() {
           {/* Current → Next */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2">
-              <span className="text-xl">{userLeagueRow.icon}</span>
+              <LeagueIcon icon={userLeagueRow.icon} size="lg" />
               <span className="text-sm font-semibold" style={{ color: userLeagueRow.color }}>{userLeagueRow.name}</span>
             </div>
             <ChevronRight className="size-4 text-muted-foreground shrink-0" />
             <div className="flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-2 opacity-60">
-              <span className="text-xl">{nextLeagueRow.icon}</span>
+              <LeagueIcon icon={nextLeagueRow.icon} size="lg" />
               <span className="text-sm font-semibold" style={{ color: nextLeagueRow.color }}>{nextLeagueRow.name}</span>
             </div>
           </div>
@@ -449,7 +450,7 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {userLeagueRow && <span className="text-lg">{userLeagueRow.icon}</span>}
+            {userLeagueRow && <LeagueIcon icon={userLeagueRow.icon} size="lg" />}
             <h3 className="text-base font-semibold">
               {userLeagueRow ? `Challenges ${userLeagueRow.name}` : 'Challenges actifs'}
             </h3>
@@ -505,8 +506,8 @@ export default async function DashboardPage() {
                       {new Date(c.closes_at).toLocaleDateString('fr', { month: 'short', day: 'numeric' })}
                     </span>
                     {c.leagues && (
-                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        {c.leagues.icon} {c.leagues.name}
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        <LeagueIcon icon={c.leagues.icon} size="sm" />{c.leagues.name}
                       </span>
                     )}
                   </div>
@@ -528,7 +529,7 @@ export default async function DashboardPage() {
             <div key={leagueId} className="space-y-3">
               <div className="flex items-center gap-2">
                 <Lock className="size-3.5 text-muted-foreground" />
-                <span className="text-sm">{league.icon}</span>
+                <LeagueIcon icon={league.icon} size="md" />
                 <h4 className="text-sm font-medium text-muted-foreground">Ligue {league.name}</h4>
                 {league.access === 'pro_only' && (
                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Pro</span>
@@ -542,7 +543,7 @@ export default async function DashboardPage() {
                   >
                     <Lock className="size-4 text-muted-foreground" />
                     <p className="text-xs text-center text-muted-foreground">
-                      Atteins {league.icon} <span className="font-medium">{league.name}</span> pour débloquer
+                      Atteins <LeagueIcon icon={league.icon} size="sm" /> <span className="font-medium">{league.name}</span> pour débloquer
                     </p>
                   </div>
                 ))}

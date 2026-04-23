@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Lock, Zap, Trophy, Clock, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 // ── Track config ──────────────────────────────────────────────────────────────
 const TRACK_CONFIG: Record<string, { icon: string; label: string; gradient: string }> = {
@@ -167,7 +168,7 @@ function ChallengeCard({
           {status === 'locked' && lockedLeagueName && (
             <span className="inline-flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground">
               <Lock className="size-3" />
-              Atteins {lockedLeagueIcon} {lockedLeagueName}
+              Atteins {lockedLeagueIcon && <LeagueIcon icon={lockedLeagueIcon} size="sm" />} {lockedLeagueName}
             </span>
           )}
           {status === 'locked' && !lockedLeagueName && (
@@ -301,8 +302,8 @@ export default async function ChallengesPage() {
           {userLeagueRow ? (
             <p className="text-sm text-muted-foreground mt-1">
               Ligue actuelle :{' '}
-              <span className="font-semibold" style={{ color: userLeagueRow.color }}>
-                {userLeagueRow.icon} {userLeagueRow.name}
+              <span className="inline-flex items-center gap-1 font-semibold" style={{ color: userLeagueRow.color }}>
+                <LeagueIcon icon={userLeagueRow.icon} size="sm" />{userLeagueRow.name}
               </span>
             </p>
           ) : (
@@ -370,7 +371,7 @@ export default async function ChallengesPage() {
       {/* ── Section 1 : Mes challenges ── */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          {userLeagueRow && <span className="text-xl">{userLeagueRow.icon}</span>}
+          {userLeagueRow && <LeagueIcon icon={userLeagueRow.icon} size="lg" />}
           <h3 className="text-base font-semibold">
             {userLeagueRow ? `Ligue ${userLeagueRow.name}` : 'Mes challenges'}
           </h3>
@@ -418,7 +419,7 @@ export default async function ChallengesPage() {
           <div key={league.id} className="space-y-4">
             <div className="flex items-center gap-2">
               <Lock className="size-4 text-muted-foreground" />
-              <span className="text-xl">{league.icon}</span>
+              <LeagueIcon icon={league.icon} size="lg" />
               <h3 className="text-base font-semibold text-muted-foreground">
                 Ligue {league.name}
               </h3>

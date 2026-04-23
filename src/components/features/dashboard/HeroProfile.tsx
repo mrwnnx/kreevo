@@ -3,6 +3,7 @@ import { Pencil, ExternalLink, Zap, Trophy, BarChart2 } from 'lucide-react'
 import { leagueLabel, leagueColor } from '@/lib/utils/xp'
 import type { League } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 const LEAGUE_GRADIENT: Record<string, string> = {
   // Old system
@@ -160,7 +161,7 @@ export function HeroProfile({
 
             {/* Ligue */}
             <StatCell
-              icon={<span className="text-sm">{displayLeagueIcon || '🏅'}</span>}
+              icon={<LeagueIcon icon={displayLeagueIcon || '🏅'} size="sm" />}
               label="Ligue"
               value={displayLeagueName}
               valueColor={displayLeagueColor}
