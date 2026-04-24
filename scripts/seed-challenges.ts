@@ -540,11 +540,12 @@ async function main() {
       xp_reward: c.xp_reward,
       deadline_days: c.deadline_days,
       league_id: league_id ?? null,
+      level: 'rookie',
       is_published: true,
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
       reveal_at: new Date().toISOString(),
-      closes_at: null,
+      closes_at: new Date(Date.now() + 365 * 86400000).toISOString(),
       status: 'active',
     }
   })
