@@ -34,10 +34,8 @@ export default async function DashboardPage() {
     { data: profile },
     { data: submissions },
     { data: activeParticipations },
-    { data: startedBriefs },
     { count: participationCount },
     { count: submissionCount },
-    { count: briefCount },
     { data: recentActivity },
     { data: allLeagues },
     { data: publishedChallenges },
@@ -50,15 +48,8 @@ export default async function DashboardPage() {
       .eq('user_id', user.id)
       .eq('status', 'active')
       .order('personal_deadline', { ascending: true }),
-    (supabase as any)
-      .from('random_briefs')
-      .select('id, brief_text, prompt, deadline_at')
-      .eq('user_id', user.id)
-      .eq('status', 'started')
-      .order('deadline_at', { ascending: true }),
     (supabase as any).from('participations').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
     (supabase as any).from('submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-    (supabase as any).from('random_briefs').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
     (supabase as any)
       .from('participations')
       .select('created_at')
@@ -300,43 +291,6 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {/* Briefs en cours */}
-          {(startedBriefs as any[] ?? []).length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold">Briefs en cours</h3>
-                <span className="size-5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs flex items-center justify-center font-bold">
-                  {(startedBriefs as any[]).length}
-                </span>
-              </div>
-              {(startedBriefs as any[]).map((brief: any) => {
-                let title = 'Brief'
-                try { title = JSON.parse(brief.brief_text)?.title ?? 'Brief' } catch { /* ignore */ }
-                return (
-                  <div key={brief.id} className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-medium text-amber-700 uppercase tracking-wide">{brief.prompt?.domain} · {brief.prompt?.type}</p>
-                        <p className="text-sm font-semibold line-clamp-1">{title}</p>
-                      </div>
-                      <span className="flex items-center gap-1 text-xs text-amber-600 shrink-0">
-                        <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        En cours
-                      </span>
-                    </div>
-                    <CountdownTimer deadline={brief.deadline_at} label="Deadline" compact />
-                    <Link
-                      href={`/dashboard/brief/${brief.id}`}
-                      className="inline-flex items-center justify-center w-full gap-2 rounded-full border border-amber-300 bg-white px-3 h-8 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors"
-                    >
-                      <Play className="size-3" fill="currentColor" />
-                      Soumettre mon travail
-                    </Link>
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
 
         {/* Colonne droite */}

@@ -4,13 +4,6 @@ export const BADGE_DEFINITIONS: Record<string, { icon: string; label: string; de
   podium:           { icon: '🥈', label: 'Podium',            description: 'Top 3 d\'un challenge mensuel' },
   top_10:           { icon: '🏅', label: 'Top 10',            description: 'Top 10 d\'un challenge mensuel' },
   completed:        { icon: '✅', label: 'Challenge complété', description: 'A soumis un challenge mensuel' },
-  // Random briefs
-  first_draft:      { icon: '✏️', label: 'First Draft',       description: 'Premier brief aléatoire complété' },
-  consistent:       { icon: '🔥', label: 'Consistent',        description: '5 briefs complétés' },
-  machine:          { icon: '⚡', label: 'Machine',           description: '20 briefs complétés' },
-  obsessed:         { icon: '💀', label: 'Obsessed',          description: '50 briefs complétés' },
-  speed_runner:     { icon: '⚡', label: 'Speed Runner',      description: 'Brief complété en moins de 30 min' },
-  on_a_streak:      { icon: '🔥', label: 'On a Streak',       description: '7 jours consécutifs d\'activité' },
   // League milestones
   reached_rising:   { icon: '⬆️', label: 'Rising atteint',   description: 'Atteint la ligue Rising' },
   reached_pro:      { icon: '⭐', label: 'Pro atteint',       description: 'Atteint la ligue Pro' },

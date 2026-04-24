@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { House, Trophy, Sparkles, BarChart3, Zap } from 'lucide-react'
+import { House, Trophy, BarChart3, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -19,7 +19,6 @@ import { leagueLabel, leagueColor } from '@/lib/utils/xp'
 const NAV = [
   { href: '/dashboard',             label: 'Home',       icon: House,     match: (p: string) => p === '/dashboard' },
   { href: '/dashboard/challenges',  label: 'Challenges', icon: Trophy,    match: (p: string) => p.startsWith('/dashboard/challenges') },
-  { href: '/dashboard/brief',       label: 'Brief',      icon: Sparkles,  match: (p: string) => p.startsWith('/dashboard/brief') },
   { href: '/dashboard/leaderboard', label: 'Ranking',    icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
 ]
 

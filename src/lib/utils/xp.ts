@@ -24,11 +24,8 @@ export const XP_REWARDS = {
   top_1:                350,
   comment_received:       5,
   like_received:          2,
-  random_brief_complete:  50,
-  random_brief_shared:    20,
   comment_given:          25,
   deadline_missed:       -50,
-  brief_expired:         -50,
 } as const
 
 export type XPAction = keyof typeof XP_REWARDS

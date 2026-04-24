@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getLeagueFromXP } from '@/lib/utils/xp'
-import { XP_REWARDS } from '@/lib/utils/xp'
 
 const LEAGUE_ORDER = ['rookie', 'rising', 'pro', 'elite', 'legend']
 
@@ -25,37 +24,6 @@ export async function POST(request: Request) {
     .select('id, user_id, challenge_id')
     .eq('status', 'active')
     .lt('personal_deadline', now.toISOString())
-
-  // ── 1b. Expire random briefs past deadline ──
-  const { data: expiredBriefs } = await (supabase as any)
-    .from('random_briefs')
-    .select('id, user_id')
-    .eq('status', 'started')
-    .lt('deadline_at', now.toISOString())
-
-  let briefsExpired = 0
-
-  for (const brief of expiredBriefs ?? []) {
-    await (supabase as any)
-      .from('random_briefs')
-      .update({ status: 'expired' })
-      .eq('id', brief.id)
-
-    const { data: prof } = await (supabase as any)
-      .from('profiles').select('xp').eq('id', brief.user_id).single()
-    const newXP = Math.max(0, (prof?.xp ?? 0) + XP_REWARDS.brief_expired)
-    await (supabase as any).from('profiles').update({ xp: newXP }).eq('id', brief.user_id)
-
-    try {
-      await (supabase as any).from('notifications').insert({
-        user_id: brief.user_id,
-        type: 'deadline_missed',
-        data: { brief_id: brief.id, xp_lost: Math.abs(XP_REWARDS.brief_expired) },
-      })
-    } catch { /* ignore */ }
-
-    briefsExpired++
-  }
 
   let deadlineMissed = 0
 
@@ -87,7 +55,7 @@ export async function POST(request: Request) {
     .from('profiles')
     .select('id, xp, league')
 
-  if (!profiles?.length) return NextResponse.json({ briefsExpired, deadlineMissed, warned: 0, penalized: 0, demoted: 0 })
+  if (!profiles?.length) return NextResponse.json({ deadlineMissed, warned: 0, penalized: 0, demoted: 0 })
 
   let warned = 0, penalized = 0, demoted = 0
 
@@ -142,5 +110,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ briefsExpired, deadlineMissed, warned, penalized, demoted })
+  return NextResponse.json({ deadlineMissed, warned, penalized, demoted })
 }

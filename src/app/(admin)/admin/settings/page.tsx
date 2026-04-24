@@ -6,7 +6,6 @@ import { Save, Loader2 } from 'lucide-react'
 interface Settings {
   xp_rewards: Record<string, number>
   league_thresholds: Record<string, number>
-  free_brief_limit: number
   submission_attempts: { free: number; pro: number }
   maintenance_mode: boolean
 }
@@ -117,37 +116,23 @@ export default function AdminSettings() {
         </div>
       </section>
 
-      {/* Free brief limit */}
+      {/* Submission attempts */}
       <section className="rounded-xl border border-border bg-card p-4 space-y-4">
-        <h2 className="text-sm font-semibold">Limites Free</h2>
-        <div className="grid grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Briefs/mois (Free)</label>
-            <div className="flex gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Tentatives soumission</h2>
+          <SaveBtn saving={saving} onClick={() => save('submission_attempts', settings.submission_attempts)} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {(['free', 'pro'] as const).map(plan => (
+            <div key={plan} className="space-y-1">
+              <label className="text-[10px] font-mono text-muted-foreground capitalize">{plan}</label>
               <input
-                type="number" value={settings.free_brief_limit}
-                onChange={e => set('free_brief_limit')(parseInt(e.target.value))}
-                className="flex-1 text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
+                type="number" value={settings.submission_attempts[plan]}
+                onChange={e => set('submission_attempts')({ ...settings.submission_attempts, [plan]: parseInt(e.target.value) })}
+                className="w-full text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              <SaveBtn saving={saving} onClick={() => save('free_brief_limit', settings.free_brief_limit)} />
             </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Tentatives soumission</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(['free', 'pro'] as const).map(plan => (
-                <div key={plan} className="space-y-1">
-                  <label className="text-[10px] font-mono text-muted-foreground capitalize">{plan}</label>
-                  <input
-                    type="number" value={settings.submission_attempts[plan]}
-                    onChange={e => set('submission_attempts')({ ...settings.submission_attempts, [plan]: parseInt(e.target.value) })}
-                    className="w-full text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-              ))}
-            </div>
-            <SaveBtn saving={saving} onClick={() => save('submission_attempts', settings.submission_attempts)} />
-          </div>
+          ))}
         </div>
       </section>
     </div>
