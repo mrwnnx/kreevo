@@ -35,6 +35,9 @@ export type Database = {
           constraints: string | null
           criteria: string | null
           track: string
+          specialty: string | null
+          challenge_type: string | null
+          industry: string | null
           month: number
           year: number
           status: 'draft' | 'active' | 'closed' | 'archived'

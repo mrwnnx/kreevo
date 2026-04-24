@@ -2,10 +2,69 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Sparkles, Save, Loader2 } from 'lucide-react'
+import { Sparkles, Save, Loader2, ChevronLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const SPECIALTIES = [
+  { value: 'UX Designer',      icon: '🎨', label: 'UX Designer',      desc: 'Flows, wireframes, research, prototypes' },
+  { value: 'UI Designer',      icon: '📱', label: 'UI Designer',       desc: 'Écrans haute fidélité, kits, design systems' },
+  { value: 'Graphic Designer', icon: '✏️', label: 'Graphic Designer',  desc: 'Logos, affiches, brand identity, motion' },
+] as const
+
+const TYPES: Record<string, string[]> = {
+  'UX Designer':      ['User Flow', 'UX Research', 'Wireframes', 'UX Case Study', 'Prototype', 'IA / Navigation'],
+  'UI Designer':      ['UI Screen', 'UI Kit', 'Design System', 'Redesign', 'Dark Mode', 'Dashboard'],
+  'Graphic Designer': ['Logo', 'Brand Identity', 'Affiche', 'Social Media Kit', 'Packaging', 'Motion'],
+}
+
+const INDUSTRIES = [
+  'Fintech', 'E-commerce', 'SaaS', 'Retail', 'Immobilier',
+  'Santé', 'Fitness', 'Nutrition', 'Bien-être', 'Éducation',
+  'Musique', 'Gaming', 'Streaming', 'Sport', 'Mode',
+  'Food & Beverage', 'Voyage', 'Luxe', 'Beauté',
+  'IA', 'Cybersécurité', 'Crypto', 'Mobilité', 'ONG', 'Environnement',
+]
+
+const DELIVERABLES: Record<string, string> = {
+  'User Flow':        'Flow complet annoté (min 5 étapes). Lien Figma.',
+  'UX Research':      'Document : problématique + insights + solutions.',
+  'Wireframes':       'Écrans basse fidélité annotés. Lien Figma.',
+  'UX Case Study':    'Présentation : contexte + recherche + solution.',
+  'Prototype':        'Prototype interactif Figma avec flow complet.',
+  'UI Screen':        'Écrans haute fidélité (375x812px). Lien Figma.',
+  'UI Kit':           'Bibliothèque de composants documentée. Lien Figma.',
+  'Design System':    'Tokens + composants + documentation. Lien Figma.',
+  'Redesign':         'Avant/Après + justifications. Lien Figma.',
+  'Logo':             'Logo couleur + NB + vectoriel. Lien Figma ou SVG.',
+  'Brand Identity':   'Logo + palette + typo + exemples. Lien Figma.',
+  'Affiche':          'Affiche A3 PNG ou PDF haute résolution.',
+  'Social Media Kit': '6 templates exportés PNG + lien Figma.',
+  'Packaging':        'Mockup packaging produit. Lien Figma ou PNG.',
+  'Motion':           'GIF animé ou lien vidéo (YouTube/Vimeo).',
+}
+
+const SPECIALTY_TRACK: Record<string, string> = {
+  'UX Designer':      'ux_ui',
+  'UI Designer':      'ux_ui',
+  'Graphic Designer': 'graphic',
+}
+
+const SPECIALTY_STYLE: Record<string, { border: string; bg: string; text: string }> = {
+  'UX Designer':      { border: 'border-violet-300 dark:border-violet-700', bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-300' },
+  'UI Designer':      { border: 'border-blue-300 dark:border-blue-700',     bg: 'bg-blue-50 dark:bg-blue-900/20',     text: 'text-blue-700 dark:text-blue-300'     },
+  'Graphic Designer': { border: 'border-orange-300 dark:border-orange-700', bg: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-orange-700 dark:text-orange-300' },
+}
+
+const STEP_LABELS = ['Spécialité', 'Type', 'Industrie', 'Détails']
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 interface FormData {
+  specialty: string
+  challenge_type: string
+  industry: string
   title: string
   brief: string
   context: string
@@ -25,6 +84,9 @@ interface FormData {
 }
 
 const EMPTY: FormData = {
+  specialty: '',
+  challenge_type: '',
+  industry: '',
   title: '', brief: '', context: '', deliverable: '',
   constraints: '', criteria: '',
   track: 'ux_ui',
@@ -40,33 +102,44 @@ const EMPTY: FormData = {
 
 interface League { id: string; name: string; icon: string; order_index: number }
 
-const labelClass = 'text-xs font-mono text-muted-foreground uppercase tracking-widest'
 const inputClass = 'w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring'
+const labelClass = 'text-xs font-mono text-muted-foreground uppercase tracking-widest'
 
-const field = (label: string, name: keyof FormData, value: string, onChange: (v: string) => void, type: 'input' | 'textarea' = 'input') => (
-  <div key={name} className="space-y-1.5">
-    <label className={labelClass}>{label}</label>
-    {type === 'textarea' ? (
-      <textarea
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        rows={3}
-        className={cn(inputClass, 'resize-none')}
-      />
-    ) : (
-      <input value={value} onChange={e => onChange(e.target.value)} className={inputClass} />
-    )}
-  </div>
-)
+// ── Step indicator ─────────────────────────────────────────────────────────────
 
-const sel = (label: string, value: string, options: [string, string][], onChange: (v: string) => void) => (
-  <div className="space-y-1.5">
-    <label className={labelClass}>{label}</label>
-    <select value={value} onChange={e => onChange(e.target.value)} className={inputClass}>
-      {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-    </select>
-  </div>
-)
+function StepIndicator({ step, onBack }: { step: number; onBack?: () => void }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5">
+        {STEP_LABELS.map((label, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className={cn(
+              'size-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all',
+              i === step  ? 'bg-primary text-primary-foreground' :
+              i < step   ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground/50'
+            )}>
+              {i < step ? '✓' : i + 1}
+            </div>
+            <span className={cn(
+              'text-xs hidden sm:block',
+              i === step ? 'font-semibold text-foreground' : 'text-muted-foreground'
+            )}>
+              {label}
+            </span>
+            {i < 3 && <div className="w-5 h-px bg-border mx-0.5" />}
+          </div>
+        ))}
+      </div>
+      {onBack && (
+        <button onClick={onBack} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeft className="size-3.5" /> Précédent
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
 
 export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id?: string }) {
   const router = useRouter()
@@ -75,9 +148,11 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
-  const [showAI, setShowAI] = useState(false)
-  const [aiDomain, setAiDomain] = useState('Web')
-  const [aiType, setAiType] = useState('UI')
+  const [step, setStep] = useState(() => {
+    if (id) return 3
+    if (initial?.specialty && initial?.challenge_type && initial?.industry) return 3
+    return 0
+  })
 
   useEffect(() => {
     fetch('/api/admin/leagues')
@@ -88,26 +163,50 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   const set = (key: keyof FormData) => (val: string | boolean) =>
     setForm(f => ({ ...f, [key]: val }))
 
+  function selectSpecialty(spec: string) {
+    setForm(f => ({ ...f, specialty: spec, track: SPECIALTY_TRACK[spec] ?? 'ux_ui', challenge_type: '' }))
+    setTimeout(() => setStep(1), 150)
+  }
+
+  function selectType(type: string) {
+    setForm(f => ({ ...f, challenge_type: type, deliverable: f.deliverable || DELIVERABLES[type] || '' }))
+    setTimeout(() => setStep(2), 150)
+  }
+
+  function selectIndustry(industry: string) {
+    setForm(f => ({ ...f, industry }))
+    setTimeout(() => setStep(3), 150)
+  }
+
   async function generateWithAI() {
+    if (!form.specialty || !form.challenge_type || !form.industry) return
     setAiLoading(true)
-    const res = await fetch('/api/ai/brief', {
+    const leagueName = leagues.find(l => l.id === form.league_id)?.name ?? ''
+    const res = await fetch('/api/admin/challenges/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: aiDomain, type: aiType, duration: `${form.deadline_days} jours` }),
+      body: JSON.stringify({
+        specialty: form.specialty,
+        type: form.challenge_type,
+        industry: form.industry,
+        league: leagueName,
+        deadline: form.deadline_days,
+      }),
     })
     const data = await res.json()
     if (res.ok && data.brief) {
       const b = data.brief
       setForm(f => ({
         ...f,
-        title: b.title ?? f.title,
-        brief: b.objective ?? f.brief,
-        context: b.context ?? f.context,
+        title:       b.title       ?? f.title,
+        brief:       b.brief       ?? f.brief,
+        context:     b.context     ?? f.context,
         deliverable: b.deliverable ?? f.deliverable,
         constraints: b.constraints ?? f.constraints,
-        criteria: b.evaluation ?? f.criteria,
+        criteria:    b.criteria    ?? f.criteria,
       }))
-      setShowAI(false)
+    } else {
+      setError(data.error ?? 'Erreur de génération IA')
     }
     setAiLoading(false)
   }
@@ -139,123 +238,196 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
     router.refresh()
   }
 
+  // ── Step 0 — Specialty ─────────────────────────────────────────────────────
+  if (step === 0) {
+    return (
+      <div className="space-y-6">
+        <StepIndicator step={0} />
+        <p className="text-sm text-muted-foreground">Quelle spécialité cible ce challenge ?</p>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {SPECIALTIES.map(s => {
+            const style = SPECIALTY_STYLE[s.value]
+            const selected = form.specialty === s.value
+            return (
+              <button
+                key={s.value}
+                onClick={() => selectSpecialty(s.value)}
+                className={cn(
+                  'flex flex-col items-start gap-3 p-5 rounded-2xl border-2 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm',
+                  selected ? cn('border-2', style.border, style.bg) : 'border-border bg-card hover:border-border/80'
+                )}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-3xl">{s.icon}</span>
+                  {selected && <Check className={cn('size-4', style.text)} />}
+                </div>
+                <div>
+                  <p className={cn('font-semibold text-sm', selected ? style.text : '')}>{s.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Step 1 — Type ──────────────────────────────────────────────────────────
+  if (step === 1) {
+    const types = TYPES[form.specialty] ?? []
+    return (
+      <div className="space-y-6">
+        <StepIndicator step={1} onBack={() => setStep(0)} />
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Type de défi pour <span className="font-semibold text-foreground">{form.specialty}</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {types.map(t => (
+              <button
+                key={t}
+                onClick={() => selectType(t)}
+                className={cn(
+                  'px-4 py-2 rounded-full text-sm font-medium border transition-all',
+                  form.challenge_type === t
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
+                )}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Step 2 — Industry ──────────────────────────────────────────────────────
+  if (step === 2) {
+    return (
+      <div className="space-y-6">
+        <StepIndicator step={2} onBack={() => setStep(1)} />
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Dans quelle industrie se situe le challenge ?</p>
+          <div className="flex flex-wrap gap-2">
+            {INDUSTRIES.map(ind => (
+              <button
+                key={ind}
+                onClick={() => selectIndustry(ind)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-sm border transition-all',
+                  form.industry === ind
+                    ? 'bg-primary text-primary-foreground border-primary font-medium'
+                    : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
+                )}
+              >
+                {ind}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Step 3 — Details ───────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      {/* AI Generator */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-        <button
-          onClick={() => setShowAI(s => !s)}
-          className="flex items-center gap-2 text-sm font-semibold text-primary"
-        >
-          <Sparkles className="size-4" />
-          Générer avec IA
-        </button>
-        {showAI && (
-          <div className="mt-3 flex items-end gap-3 flex-wrap">
-            <div className="space-y-1">
-              <label className={labelClass}>Domaine</label>
-              <select value={aiDomain} onChange={e => setAiDomain(e.target.value)}
-                className="text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring">
-                {['Web', 'Mobile', 'Dashboard', 'Landing Page', 'Branding'].map(d => <option key={d}>{d}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className={labelClass}>Type</label>
-              <select value={aiType} onChange={e => setAiType(e.target.value)}
-                className="text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring">
-                {['UX', 'UI', 'Graphic', 'Motion'].map(t => <option key={t}>{t}</option>)}
-              </select>
+      {!id && <StepIndicator step={3} onBack={() => setStep(2)} />}
+
+      {/* Context chips */}
+      {(form.specialty || form.challenge_type || form.industry) && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {form.specialty && (() => {
+            const style = SPECIALTY_STYLE[form.specialty]
+            return (
+              <button
+                onClick={() => { if (!id) setStep(0) }}
+                className={cn(
+                  'inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border',
+                  style?.border ?? 'border-border',
+                  style?.bg ?? 'bg-muted',
+                  style?.text ?? 'text-foreground',
+                  !id && 'hover:opacity-80 cursor-pointer'
+                )}
+              >
+                {SPECIALTIES.find(s => s.value === form.specialty)?.icon} {form.specialty}
+              </button>
+            )
+          })()}
+          {form.challenge_type && (
+            <button
+              onClick={() => { if (!id) setStep(1) }}
+              className={cn('inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-muted/60', !id && 'hover:opacity-80 cursor-pointer')}
+            >
+              {form.challenge_type}
+            </button>
+          )}
+          {form.industry && (
+            <button
+              onClick={() => { if (!id) setStep(2) }}
+              className={cn('inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-muted/60', !id && 'hover:opacity-80 cursor-pointer')}
+            >
+              {form.industry}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* AI Generate */}
+      {form.specialty && form.challenge_type && form.industry && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                <Sparkles className="size-4" /> Générer avec IA
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {form.specialty} · {form.challenge_type} · {form.industry}
+                {form.league_id && leagues.find(l => l.id === form.league_id) && ` · ${leagues.find(l => l.id === form.league_id)!.name}`}
+                {form.deadline_days && ` · ${form.deadline_days}j`}
+              </p>
             </div>
             <button
               onClick={generateWithAI}
               disabled={aiLoading}
-              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground px-4 py-1.5 rounded-full hover:opacity-85 disabled:opacity-60"
+              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85 disabled:opacity-60 shrink-0"
             >
               {aiLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
-              Générer
+              {aiLoading ? 'Génération…' : 'Générer'}
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Form fields */}
+      {/* Fields */}
       <div className="grid md:grid-cols-2 gap-5">
-        {field('Titre', 'title', form.title, v => set('title')(v))}
+        <div className="md:col-span-2 space-y-1.5">
+          <label className={labelClass}>Titre</label>
+          <input value={form.title} onChange={e => set('title')(e.target.value)} className={inputClass} placeholder="Titre du challenge" />
+        </div>
 
-        {/* Ligue */}
         <div className="space-y-1.5">
           <label className={labelClass}>Ligue</label>
           <select value={form.league_id} onChange={e => set('league_id')(e.target.value)} className={inputClass}>
             <option value="">— Aucune ligue —</option>
-            {leagues.map(l => (
-              <option key={l.id} value={l.id}>{l.icon} {l.name}</option>
-            ))}
+            {leagues.map(l => <option key={l.id} value={l.id}>{l.icon} {l.name}</option>)}
           </select>
         </div>
 
-        {/* Track */}
-        {sel('Track', form.track, [['ux_ui', 'UX/UI'], ['graphic', 'Graphic']], v => set('track')(v))}
-
-        {/* XP */}
         <div className="space-y-1.5">
           <label className={labelClass}>XP reward</label>
-          <input
-            type="number"
-            value={form.xp_reward}
-            onChange={e => set('xp_reward')(e.target.value)}
-            className={inputClass}
-            min={0}
-          />
+          <input type="number" value={form.xp_reward} onChange={e => set('xp_reward')(e.target.value)} className={inputClass} min={0} />
         </div>
 
-        {/* Deadline */}
-        {/* Deadline */}
         <div className="space-y-1.5">
           <label className={labelClass}>Deadline (en jours)</label>
-          <input
-            type="number"
-            value={form.deadline_days}
-            onChange={e => set('deadline_days')(e.target.value)}
-            className={inputClass}
-            min={1}
-            max={365}
-            placeholder="Ex: 7"
-          />
-          <p className="text-xs text-muted-foreground">Nombre de jours à partir du moment où le participant rejoint</p>
+          <input type="number" value={form.deadline_days} onChange={e => set('deadline_days')(e.target.value)} className={inputClass} min={1} max={365} placeholder="Ex: 7" />
+          <p className="text-xs text-muted-foreground">Durée personnelle à partir de la participation</p>
         </div>
 
-        {/* Brief */}
-        <div className="md:col-span-2">
-          {field('Brief principal', 'brief', form.brief, v => set('brief')(v), 'textarea')}
-        </div>
-        {field('Contexte', 'context', form.context, v => set('context')(v), 'textarea')}
-        {field('Livrable', 'deliverable', form.deliverable, v => set('deliverable')(v), 'textarea')}
-        {field('Contraintes', 'constraints', form.constraints, v => set('constraints')(v), 'textarea')}
-        {field("Critères d'évaluation", 'criteria', form.criteria, v => set('criteria')(v), 'textarea')}
-
-        {/* Période */}
-        <div className="grid grid-cols-2 gap-3">
-          {sel('Mois', form.month,
-            Array.from({ length: 12 }, (_, i) => [String(i + 1), new Date(0, i).toLocaleString('fr', { month: 'long' })] as [string, string]),
-            v => set('month')(v))}
-          {field('Année', 'year', form.year, v => set('year')(v))}
-        </div>
-
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className={labelClass}>Reveal at</label>
-            <input type="datetime-local" value={form.reveal_at} onChange={e => set('reveal_at')(e.target.value)} className={inputClass} />
-          </div>
-          <div className="space-y-1.5">
-            <label className={labelClass}>Closes at</label>
-            <input type="datetime-local" value={form.closes_at} onChange={e => set('closes_at')(e.target.value)} className={inputClass} />
-          </div>
-        </div>
-
-        {sel('Statut', form.status, [['draft', 'Draft'], ['active', 'Active'], ['closed', 'Closed']], v => set('status')(v))}
-
-        {/* Publié toggle */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -264,9 +436,28 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
           >
             <span className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow transition-transform ${form.is_published ? 'translate-x-5' : 'translate-x-0'}`} />
           </button>
-          <span className="text-sm font-medium">
-            {form.is_published ? 'Publié' : 'Draft (non publié)'}
-          </span>
+          <span className="text-sm font-medium">{form.is_published ? 'Publié' : 'Draft (non publié)'}</span>
+        </div>
+
+        <div className="md:col-span-2 space-y-1.5">
+          <label className={labelClass}>Brief principal</label>
+          <textarea value={form.brief} onChange={e => set('brief')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+        </div>
+        <div className="space-y-1.5">
+          <label className={labelClass}>Contexte</label>
+          <textarea value={form.context} onChange={e => set('context')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+        </div>
+        <div className="space-y-1.5">
+          <label className={labelClass}>Livrable</label>
+          <textarea value={form.deliverable} onChange={e => set('deliverable')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+        </div>
+        <div className="space-y-1.5">
+          <label className={labelClass}>Contraintes</label>
+          <textarea value={form.constraints} onChange={e => set('constraints')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+        </div>
+        <div className="space-y-1.5">
+          <label className={labelClass}>Critères d'évaluation</label>
+          <textarea value={form.criteria} onChange={e => set('criteria')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
         </div>
       </div>
 

@@ -44,6 +44,9 @@ export async function POST(request: Request) {
       xp_reward: body.xp_reward || null,
       deadline_days: body.deadline_days || null,
       is_published: body.is_published ?? false,
+      specialty: body.specialty || null,
+      challenge_type: body.challenge_type || null,
+      industry: body.industry || null,
     })
     .select()
     .single()

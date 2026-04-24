@@ -73,6 +73,9 @@ export default async function EditChallenge({ params }: Props) {
           xp_reward: String(data.xp_reward ?? 250),
           deadline_days: String(data.deadline_days ?? 7),
           is_published: data.is_published ?? false,
+          specialty: data.specialty ?? '',
+          challenge_type: data.challenge_type ?? '',
+          industry: data.industry ?? '',
         }}
       />
 

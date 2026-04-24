@@ -30,6 +30,9 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.xp_reward !== undefined && { xp_reward: body.xp_reward }),
       ...(body.deadline_days !== undefined && { deadline_days: body.deadline_days }),
       ...(body.is_published !== undefined && { is_published: body.is_published }),
+      ...(body.specialty !== undefined && { specialty: body.specialty }),
+      ...(body.challenge_type !== undefined && { challenge_type: body.challenge_type }),
+      ...(body.industry !== undefined && { industry: body.industry }),
     })
     .eq('id', id)
 
