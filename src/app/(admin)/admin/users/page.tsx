@@ -7,7 +7,6 @@ import {
   Ban, Shield, Trash2, Plus, Crown,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { leagueLabel } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
 
 interface User {
@@ -33,6 +32,7 @@ const FILTER_TABS = ['Tous', 'Free', 'Pro', 'Suspendus', 'Admins']
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
+  const [leagues, setLeagues] = useState<{ id: string; name: string }[]>([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('Tous')
   const [loading, setLoading] = useState(true)
@@ -40,16 +40,23 @@ export default function AdminUsers() {
   const [xpModal, setXpModal] = useState<string | null>(null)
   const [leagueModal, setLeagueModal] = useState<string | null>(null)
   const [xpAmount, setXpAmount] = useState('')
-  const [leagueVal, setLeagueVal] = useState('rising')
+  const [leagueVal, setLeagueVal] = useState('')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     setLoading(true)
-    const res = await fetch('/api/admin/users')
-    const data = await res.json()
-    setUsers(data.users ?? [])
+    const [usersRes, leaguesRes] = await Promise.all([
+      fetch('/api/admin/users'),
+      fetch('/api/admin/leagues'),
+    ])
+    const usersData = await usersRes.json()
+    const leaguesData = await leaguesRes.json()
+    setUsers(usersData.users ?? [])
+    const sortedLeagues = (leaguesData.leagues ?? []).sort((a: any, b: any) => a.order_index - b.order_index)
+    setLeagues(sortedLeagues)
+    if (sortedLeagues.length > 0 && !leagueVal) setLeagueVal(sortedLeagues[0].name)
     setLoading(false)
   }
 
@@ -143,7 +150,7 @@ export default function AdminUsers() {
                     {u.plan}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-xs">{leagueLabel(u.league)}</td>
+                <td className="px-4 py-3 text-xs">{u.league}</td>
                 <td className="px-4 py-3 font-mono text-xs">{u.xp?.toLocaleString()}</td>
                 <td className="px-4 py-3">
                   {u.role === 'admin' && (
@@ -186,7 +193,7 @@ export default function AdminUsers() {
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
                           <TrendingDown className="size-3.5" /> Passer Free
                         </button>
-                        <button onClick={() => { setLeagueVal(u.league); setLeagueModal(u.id); setOpenMenu(null) }}
+                        <button onClick={() => { setLeagueVal(u.league || (leagues[0]?.name ?? '')); setLeagueModal(u.id); setOpenMenu(null) }}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
                           <Shield className="size-3.5" /> Changer ligue
                         </button>
@@ -241,7 +248,7 @@ export default function AdminUsers() {
         <Modal title="Changer ligue" onClose={() => setLeagueModal(null)}>
           <select value={leagueVal} onChange={e => setLeagueVal(e.target.value)}
             className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring">
-            {['rookie', 'rising', 'pro', 'elite', 'legend'].map(l => <option key={l} value={l}>{l}</option>)}
+            {leagues.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
           </select>
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setLeagueModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
