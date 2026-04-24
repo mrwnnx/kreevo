@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Eye, Pencil, Trash2, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 interface League { id: string; name: string; icon: string }
 
@@ -132,7 +133,7 @@ export default function AdminChallenges() {
                   : 'border-border text-muted-foreground hover:border-foreground/40'
               )}
             >
-              {l.icon} {l.name}
+              <LeagueIcon icon={l.icon} size="sm" /> {l.name}
             </button>
           ))}
         </div>
@@ -165,7 +166,7 @@ export default function AdminChallenges() {
                 <td className="px-4 py-3 font-medium max-w-[180px] truncate">{c.title}</td>
                 <td className="px-4 py-3 text-xs">
                   {c.leagues
-                    ? <span className="flex items-center gap-1"><span>{c.leagues.icon}</span><span className="text-muted-foreground">{c.leagues.name}</span></span>
+                    ? <span className="flex items-center gap-1"><LeagueIcon icon={c.leagues.icon} size="sm" /><span className="text-muted-foreground">{c.leagues.name}</span></span>
                     : <span className="text-muted-foreground/40">—</span>}
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
