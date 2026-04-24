@@ -20,17 +20,9 @@ interface FormData {
   closes_at: string
   status: string
   league_id: string
-  difficulty: string
   xp_reward: string
   deadline_days: string
   is_published: boolean
-}
-
-const DIFFICULTY_XP: Record<string, number> = {
-  easy: 150,
-  medium: 250,
-  hard: 400,
-  expert: 600,
 }
 
 const EMPTY: FormData = {
@@ -42,7 +34,6 @@ const EMPTY: FormData = {
   reveal_at: '', closes_at: '',
   status: 'draft',
   league_id: '',
-  difficulty: 'medium',
   xp_reward: '250',
   deadline_days: '7',
   is_published: false,
@@ -97,14 +88,6 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
   const set = (key: keyof FormData) => (val: string | boolean) =>
     setForm(f => ({ ...f, [key]: val }))
-
-  function handleDifficultyChange(difficulty: string) {
-    setForm(f => ({
-      ...f,
-      difficulty,
-      xp_reward: String(DIFFICULTY_XP[difficulty] ?? 250),
-    }))
-  }
 
   async function generateWithAI() {
     setAiLoading(true)
@@ -213,27 +196,16 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
           {sel('Niveau', form.level, [['rookie', 'Rookie'], ['rising', 'Rising'], ['pro', 'Pro'], ['elite', 'Elite']], v => set('level')(v))}
         </div>
 
-        {/* Difficulté + XP */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className={labelClass}>Difficulté</label>
-            <select value={form.difficulty} onChange={e => handleDifficultyChange(e.target.value)} className={inputClass}>
-              <option value="easy">Facile — 150 XP</option>
-              <option value="medium">Moyen — 250 XP</option>
-              <option value="hard">Difficile — 400 XP</option>
-              <option value="expert">Expert — 600 XP</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className={labelClass}>XP reward</label>
-            <input
-              type="number"
-              value={form.xp_reward}
-              onChange={e => set('xp_reward')(e.target.value)}
-              className={inputClass}
-              min={0}
-            />
-          </div>
+        {/* XP */}
+        <div className="space-y-1.5">
+          <label className={labelClass}>XP reward</label>
+          <input
+            type="number"
+            value={form.xp_reward}
+            onChange={e => set('xp_reward')(e.target.value)}
+            className={inputClass}
+            min={0}
+          />
         </div>
 
         {/* Deadline */}
