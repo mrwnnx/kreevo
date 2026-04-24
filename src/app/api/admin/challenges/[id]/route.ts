@@ -20,7 +20,6 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.constraints !== undefined && { constraints: body.constraints }),
       ...(body.criteria !== undefined && { criteria: body.criteria }),
       ...(body.track !== undefined && { track: body.track }),
-      ...(body.level !== undefined && { level: body.level }),
       ...(body.month !== undefined && { month: body.month }),
       ...(body.year !== undefined && { year: body.year }),
       ...(body.reveal_at !== undefined && { reveal_at: body.reveal_at }),

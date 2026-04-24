@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { ArrowRight, Clock, Play, Lock, ChevronRight } from 'lucide-react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
-import { levelFromXp } from '@/lib/utils/xp'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { GettingStarted } from '@/components/features/dashboard/GettingStarted'
@@ -75,7 +74,7 @@ export default async function DashboardPage() {
     // Published or active challenges with league data
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, track, level, closes_at, league_id, is_published, status, leagues(id, name, icon, color, order_index, access)')
+      .select('id, title, brief, track, closes_at, league_id, is_published, status, leagues(id, name, icon, color, order_index, access)')
       .or('status.eq.active,is_published.eq.true')
       .order('closes_at', { ascending: true }),
   ])

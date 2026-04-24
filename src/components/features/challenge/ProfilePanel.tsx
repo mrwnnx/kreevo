@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Zap, ExternalLink, Clock, BarChart2, ArrowRight } from 'lucide-react'
+import { Zap, ExternalLink, Clock, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { League } from '@/lib/utils/xp'
@@ -28,7 +28,6 @@ interface Challenge {
   id: string
   title?: string | null
   track?: string | null
-  level?: string | null
   closes_at?: string | null
   status?: string | null
 }
@@ -196,12 +195,6 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
           <Label>Challenge</Label>
           <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
           <div className="space-y-1.5">
-            {challenge.level && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <BarChart2 className="size-3" />
-                <span className="capitalize">{challenge.level}</span>
-              </div>
-            )}
             {challenge.track && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-3 text-center">🎨</span>

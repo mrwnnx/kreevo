@@ -64,7 +64,6 @@ export default async function EditChallenge({ params }: Props) {
           constraints: data.constraints ?? '',
           criteria: data.criteria ?? '',
           track: data.track ?? 'ux_ui',
-          level: data.level ?? 'rising',
           month: String(data.month ?? 1),
           year: String(data.year ?? new Date().getFullYear()),
           reveal_at: fmt(data.reveal_at),

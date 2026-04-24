@@ -13,7 +13,6 @@ interface FormData {
   constraints: string
   criteria: string
   track: string
-  level: string
   month: string
   year: string
   reveal_at: string
@@ -28,7 +27,7 @@ interface FormData {
 const EMPTY: FormData = {
   title: '', brief: '', context: '', deliverable: '',
   constraints: '', criteria: '',
-  track: 'ux_ui', level: 'rising',
+  track: 'ux_ui',
   month: String(new Date().getMonth() + 1),
   year: String(new Date().getFullYear()),
   reveal_at: '', closes_at: '',
@@ -94,7 +93,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
     const res = await fetch('/api/ai/brief', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: aiDomain, type: aiType, difficulty: form.level, duration: `${form.deadline_days} jours` }),
+      body: JSON.stringify({ domain: aiDomain, type: aiType, duration: `${form.deadline_days} jours` }),
     })
     const data = await res.json()
     if (res.ok && data.brief) {
@@ -194,11 +193,8 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
           </select>
         </div>
 
-        {/* Track + Niveau */}
-        <div className="grid grid-cols-2 gap-3">
-          {sel('Track', form.track, [['ux_ui', 'UX/UI'], ['graphic', 'Graphic']], v => set('track')(v))}
-          {sel('Niveau', form.level, [['rookie', 'Rookie'], ['rising', 'Rising'], ['pro', 'Pro'], ['elite', 'Elite']], v => set('level')(v))}
-        </div>
+        {/* Track */}
+        {sel('Track', form.track, [['ux_ui', 'UX/UI'], ['graphic', 'Graphic']], v => set('track')(v))}
 
         {/* XP */}
         <div className="space-y-1.5">

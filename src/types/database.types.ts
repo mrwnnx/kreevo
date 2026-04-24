@@ -13,7 +13,6 @@ export type Database = {
           country: string | null
           city: string | null
           specialty: string | null
-          level: string | null
           objective: string | null
           tools: string[] | null
           links: Json | null
@@ -36,7 +35,6 @@ export type Database = {
           constraints: string | null
           criteria: string | null
           track: string
-          level: string
           month: number
           year: number
           status: 'draft' | 'active' | 'closed' | 'archived'

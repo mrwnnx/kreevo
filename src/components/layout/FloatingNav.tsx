@@ -14,7 +14,7 @@ import {
 import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import type { Profile } from '@/types/database.types'
-import { leagueLabel, leagueColor, levelFromXp, xpProgressInCurrentLevel } from '@/lib/utils/xp'
+import { leagueLabel, leagueColor } from '@/lib/utils/xp'
 
 const NAV = [
   { href: '/dashboard',             label: 'Home',       icon: House,     match: (p: string) => p === '/dashboard' },
@@ -28,8 +28,6 @@ export function FloatingNav({ profile }: { profile: Profile }) {
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const level = levelFromXp(profile.xp)
-  const xp = xpProgressInCurrentLevel(profile.xp)
   const league = profile.league ?? 'rookie'
 
   useEffect(() => {
@@ -96,7 +94,7 @@ export function FloatingNav({ profile }: { profile: Profile }) {
       <div className="shrink-0 flex items-center gap-1">
         <NotificationBell userId={profile.id} />
 
-        {/* League + level chip */}
+        {/* League chip */}
         <div className="flex items-center gap-2 pl-3 border-l border-border mr-1">
           <span
             className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full leading-none"

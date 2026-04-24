@@ -34,7 +34,6 @@ export async function POST(request: Request) {
       constraints: body.constraints || null,
       criteria: body.criteria || null,
       track: body.track,
-      level: body.level,
       month: body.month,
       year: body.year,
       reveal_at: body.reveal_at || null,

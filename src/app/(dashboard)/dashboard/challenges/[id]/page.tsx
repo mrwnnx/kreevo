@@ -97,7 +97,6 @@ export default async function ChallengePage({ params }: Props) {
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${trackColor}`}>
                 {c.track}
               </span>
-              <Badge variant="secondary" className="capitalize">{c.level}</Badge>
               {isClosed ? (
                 <Badge variant="destructive">Fermé</Badge>
               ) : c.closes_at && (
@@ -393,10 +392,6 @@ export default async function ChallengePage({ params }: Props) {
           <div className="rounded-xl border border-border p-4 space-y-3">
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Détails</p>
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Niveau</span>
-                <span className="font-medium capitalize">{c.level}</span>
-              </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Track</span>
                 <span className="font-medium">{c.track}</span>

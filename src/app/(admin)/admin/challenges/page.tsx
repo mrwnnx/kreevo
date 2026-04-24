@@ -12,13 +12,11 @@ interface Challenge {
   id: string
   title: string
   track: string
-  level: string
   month: number
   year: number
   status: string
   reveal_at: string
   closes_at: string
-  difficulty: string | null
   xp_reward: number | null
   deadline_days: number | null
   is_published: boolean
@@ -31,10 +29,6 @@ const STATUS_STYLE: Record<string, string> = {
   active:   'bg-green-100 text-green-700',
   closed:   'bg-orange-100 text-orange-700',
   archived: 'bg-slate-100 text-slate-500',
-}
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: 'Facile', medium: 'Moyen', hard: 'Difficile', expert: 'Expert',
 }
 
 export default function AdminChallenges() {
@@ -153,7 +147,7 @@ export default function AdminChallenges() {
         <table className="w-full text-sm">
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
-              {['Titre', 'Ligue', 'Difficulté', 'XP', 'Deadline', 'Track', 'Status', 'Publié', 'Closes', 'Actions'].map(h => (
+              {['Titre', 'Ligue', 'XP', 'Deadline', 'Track', 'Status', 'Publié', 'Closes', 'Actions'].map(h => (
                 <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -168,9 +162,6 @@ export default function AdminChallenges() {
                   {c.leagues
                     ? <span className="flex items-center gap-1"><LeagueIcon icon={c.leagues.icon} size="sm" /><span className="text-muted-foreground">{c.leagues.name}</span></span>
                     : <span className="text-muted-foreground/40">—</span>}
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
-                  {c.difficulty ? (DIFFICULTY_LABEL[c.difficulty] ?? c.difficulty) : '—'}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {c.xp_reward ? `${c.xp_reward} XP` : '—'}

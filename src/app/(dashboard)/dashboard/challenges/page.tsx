@@ -22,14 +22,6 @@ const DIFFICULTY_CONFIG: Record<string, { label: string; style: string }> = {
   medium:       { label: 'Moyen',          style: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
   hard:         { label: 'Difficile',      style: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
   expert:       { label: 'Expert',         style: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  // legacy level fallbacks
-  rookie:       { label: 'Rookie',         style: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
-  rising:       { label: 'Rising',         style: 'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400'   },
-  pro:          { label: 'Pro',            style: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  elite:        { label: 'Elite',          style: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
-  legend:       { label: 'Legend',         style: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  intermediate: { label: 'Intermédiaire',  style: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  advanced:     { label: 'Avancé',         style: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -40,7 +32,7 @@ interface LeagueRow {
 
 interface ChallengeRow {
   id: string; title: string; brief: string; track: string
-  level: string; difficulty: string | null
+  difficulty: string | null
   xp_reward: number | null; deadline_days: number | null
   closes_at: string; league_id: string | null; is_published: boolean
   leagues: LeagueRow | null
@@ -59,7 +51,7 @@ function ChallengeCard({
   lockedLeagueIcon?: string
 }) {
   const track = TRACK_CONFIG[challenge.track] ?? { icon: '🎨', label: '', gradient: 'from-slate-400 to-slate-600' }
-  const diffKey = (challenge.difficulty ?? challenge.level) as string
+  const diffKey = (challenge.difficulty ?? '') as string
   const diff = DIFFICULTY_CONFIG[diffKey] ?? DIFFICULTY_CONFIG.medium
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
 
@@ -213,7 +205,7 @@ export default async function ChallengesPage() {
       .order('order_index', { ascending: true }),
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, track, level, difficulty, xp_reward, deadline_days, closes_at, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
+      .select('id, title, brief, track, difficulty, xp_reward, deadline_days, closes_at, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
       .eq('is_published', true)
       .order('closes_at', { ascending: true }),
     (supabase as any)
