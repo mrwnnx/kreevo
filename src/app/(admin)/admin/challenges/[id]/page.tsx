@@ -47,6 +47,13 @@ export default async function EditChallenge({ params }: Props) {
         <p className="text-sm text-muted-foreground">{data.title}</p>
       </div>
 
+      {data.deadline_days && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 border border-border rounded-lg px-4 py-2.5">
+          <span className="text-base">⏱</span>
+          <span>Deadline : <strong className="text-foreground">{data.deadline_days} jours</strong> à partir du moment où le participant rejoint le challenge</span>
+        </div>
+      )}
+
       <ChallengeForm
         id={id}
         initial={{

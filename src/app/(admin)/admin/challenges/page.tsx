@@ -176,7 +176,7 @@ export default function AdminChallenges() {
                   {c.xp_reward ? `${c.xp_reward} XP` : '—'}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                  {c.deadline_days ? `${c.deadline_days}j` : '—'}
+                  {c.deadline_days ? `${c.deadline_days} jours` : '—'}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.track}</td>
                 <td className="px-4 py-3">

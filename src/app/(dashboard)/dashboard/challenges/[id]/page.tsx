@@ -246,6 +246,12 @@ export default async function ChallengePage({ params }: Props) {
                     Rejoins ce challenge et soumets ton design pour recevoir du feedback et progresser.
                   </p>
                 </div>
+                {(c as any).deadline_days && (
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="size-3" />
+                    <span>{(c as any).deadline_days} jours pour compléter ce défi</span>
+                  </div>
+                )}
                 <ParticipateButton challengeId={c.id} />
                 {avatars.length > 0 && (
                   <div className="flex items-center justify-center gap-2">
@@ -372,7 +378,7 @@ export default async function ChallengePage({ params }: Props) {
                 <span className="text-sm font-semibold text-red-700 dark:text-red-400">Délai expiré</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Tu n&apos;as pas soumis dans les 3 jours impartis.
+                Tu n&apos;as pas soumis dans les {(c as any).deadline_days ?? 3} jours impartis.
               </p>
               <Link
                 href="/dashboard/challenges"
@@ -401,6 +407,12 @@ export default async function ChallengePage({ params }: Props) {
                   <span className="font-medium">
                     {new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
                   </span>
+                </div>
+              )}
+              {(c as any).deadline_days && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Durée</span>
+                  <span className="font-medium">{(c as any).deadline_days} jours</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-sm">

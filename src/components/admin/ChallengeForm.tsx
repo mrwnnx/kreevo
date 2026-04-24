@@ -116,6 +116,10 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   async function handleSave() {
     setSaving(true)
     setError(null)
+    const dd = parseInt(form.deadline_days)
+    if (!form.deadline_days || isNaN(dd)) { setError('Deadline requise'); setSaving(false); return }
+    if (dd < 1) { setError('Minimum 1 jour'); setSaving(false); return }
+    if (dd > 365) { setError('Maximum 365 jours'); setSaving(false); return }
     const url = id ? `/api/admin/challenges/${id}` : '/api/admin/challenges'
     const method = id ? 'PATCH' : 'POST'
     const res = await fetch(url, {
@@ -209,10 +213,20 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         </div>
 
         {/* Deadline */}
-        {sel('Deadline (jours)', form.deadline_days,
-          [['3','3 jours'],['5','5 jours'],['7','7 jours'],['10','10 jours'],['14','14 jours'],['21','21 jours']],
-          v => set('deadline_days')(v)
-        )}
+        {/* Deadline */}
+        <div className="space-y-1.5">
+          <label className={labelClass}>Deadline (en jours)</label>
+          <input
+            type="number"
+            value={form.deadline_days}
+            onChange={e => set('deadline_days')(e.target.value)}
+            className={inputClass}
+            min={1}
+            max={365}
+            placeholder="Ex: 7"
+          />
+          <p className="text-xs text-muted-foreground">Nombre de jours à partir du moment où le participant rejoint</p>
+        </div>
 
         {/* Brief */}
         <div className="md:col-span-2">
