@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Pencil, Power } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 interface League {
   id: string
@@ -87,7 +88,7 @@ export default function AdminLeagues() {
               <tr key={league.id} className="hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{league.icon}</span>
+                    <LeagueIcon icon={league.icon} size="md" />
                     <span className="font-medium">{league.name}</span>
                     <span className="inline-block size-3 rounded-full shrink-0" style={{ backgroundColor: league.color }} />
                   </div>
