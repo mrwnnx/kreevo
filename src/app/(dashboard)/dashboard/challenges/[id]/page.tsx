@@ -97,14 +97,7 @@ export default async function ChallengePage({ params }: Props) {
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${trackColor}`}>
                 {c.track}
               </span>
-              {isClosed ? (
-                <Badge variant="destructive">Fermé</Badge>
-              ) : c.closes_at && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400 px-2.5 py-1 rounded-full">
-                  <Clock className="size-3" />
-                  Ferme le {new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
-                </span>
-              )}
+              {isClosed && <Badge variant="destructive">Fermé</Badge>}
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Users className="size-3.5" />
                 {isRevealed
@@ -354,12 +347,6 @@ export default async function ChallengePage({ params }: Props) {
                   <CheckCircle2 className="size-4 text-green-500" />
                   <span className="text-sm font-semibold text-green-700 dark:text-green-400">Soumission reçue !</span>
                 </div>
-                {!isRevealed && c.closes_at && (
-                  <div className="space-y-1">
-                    <p className="text-[11px] text-muted-foreground">Reveal collectif dans</p>
-                    <CountdownTimer deadline={c.closes_at} compact />
-                  </div>
-                )}
                 {canResubmit && (
                   <p className="text-[11px] text-muted-foreground">
                     {attemptsLeft} modification{attemptsLeft > 1 ? 's' : ''} restante{attemptsLeft > 1 ? 's' : ''}
@@ -396,14 +383,6 @@ export default async function ChallengePage({ params }: Props) {
                 <span className="text-muted-foreground">Track</span>
                 <span className="font-medium">{c.track}</span>
               </div>
-              {c.closes_at && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Fermeture</span>
-                  <span className="font-medium">
-                    {new Date(c.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
-                  </span>
-                </div>
-              )}
               {(c as any).deadline_days && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Durée</span>
