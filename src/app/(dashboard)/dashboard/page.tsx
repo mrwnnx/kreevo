@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { ArrowRight, Clock, Play, Lock, ChevronRight } from 'lucide-react'
+import { ArrowRight, Clock, Play, Lock, ChevronRight, Zap } from 'lucide-react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
@@ -71,12 +71,12 @@ export default async function DashboardPage() {
       .select('*')
       .eq('is_active', true)
       .order('order_index', { ascending: true }),
-    // Published or active challenges with league data
+    // Published challenges with league data
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, track, closes_at, league_id, is_published, status, leagues(id, name, icon, color, order_index, access)')
-      .or('status.eq.active,is_published.eq.true')
-      .order('closes_at', { ascending: true }),
+      .select('id, title, brief, track, xp_reward, deadline_days, closes_at, league_id, is_published, leagues(id, name, icon, color, order_index, access)')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!profile) redirect('/login')
@@ -94,10 +94,9 @@ export default async function DashboardPage() {
     ? leagues.find(l => l.order_index === userLeagueRow.order_index + 1) ?? null
     : null
 
-  // XP threshold + challenges completed
+  // XP threshold + challenges completed in current league
   let leagueXpThreshold = 0
   let leagueChallengesCompleted = 0
-  let leagueXpEarned = 0
 
   if (userLeagueRow) {
     const { data: leagueChallengeIds } = await supabaseAdmin
@@ -108,7 +107,7 @@ export default async function DashboardPage() {
 
     const ids = (leagueChallengeIds ?? []).map((c: any) => c.id)
 
-    const [threshold, submittedCount, earnedXP] = await Promise.all([
+    const [threshold, submittedCount] = await Promise.all([
       getLeagueThreshold(userLeagueRow.id),
       ids.length > 0
         ? supabaseAdmin
@@ -118,19 +117,10 @@ export default async function DashboardPage() {
             .in('challenge_id', ids)
             .then(r => r.count ?? 0)
         : Promise.resolve(0),
-      ids.length > 0
-        ? supabaseAdmin
-            .from('submissions')
-            .select('xp_earned')
-            .eq('user_id', user.id)
-            .in('challenge_id', ids)
-            .then(r => (r.data ?? []).reduce((s: number, x: any) => s + (x.xp_earned ?? 0), 0))
-        : Promise.resolve(0),
     ])
 
     leagueXpThreshold = threshold
     leagueChallengesCompleted = submittedCount
-    leagueXpEarned = earnedXP
   }
 
   // ── Rank ──
@@ -144,7 +134,7 @@ export default async function DashboardPage() {
   const userLeagueIndex = userLeagueRow?.order_index ?? 0
 
   const myLeagueChallenges = challenges.filter(c => {
-    if (!c.league_id) return c.status === 'active'
+    if (!c.league_id) return true
     const cl = c.leagues
     if (!cl) return false
     return userLeagueRow ? cl.order_index === userLeagueIndex : cl.order_index === 1
@@ -357,6 +347,8 @@ export default async function DashboardPage() {
             league={p.league as League}
             xp={p.xp}
             plan={p.plan}
+            leagueIcon={userLeagueRow?.icon}
+            leagueDbColor={userLeagueRow?.color}
             xpThreshold={leagueXpThreshold > 0 ? leagueXpThreshold : undefined}
             challengesCompleted={leagueChallengesCompleted}
             minChallenges={userLeagueRow?.min_challenges}
@@ -500,10 +492,20 @@ export default async function DashboardPage() {
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{c.brief}</p>
                   </div>
                   <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/60">
-                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Clock className="size-3" />
-                      {new Date(c.closes_at).toLocaleDateString('fr', { month: 'short', day: 'numeric' })}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {c.xp_reward && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Zap className="size-3 text-yellow-500" />
+                          {c.xp_reward} XP
+                        </span>
+                      )}
+                      {c.deadline_days && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="size-3" />
+                          {c.deadline_days}j
+                        </span>
+                      )}
+                    </div>
                     {c.leagues && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         <LeagueIcon icon={c.leagues.icon} size="sm" />{c.leagues.name}

@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Lock, Trophy } from 'lucide-react'
-import { leagueLabel, leagueColor } from '@/lib/utils/xp'
+import { leagueColor } from '@/lib/utils/xp'
 import type { League } from '@/lib/utils/xp'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 const LEAGUE_GRADIENT: Record<string, string> = {
   // Old system
@@ -43,7 +44,8 @@ interface LeagueCardProps {
   league: string
   xp: number
   plan: string
-  // New system props (optional — if not provided, falls back to old XP-only display)
+  leagueIcon?: string
+  leagueDbColor?: string
   xpThreshold?: number
   challengesCompleted?: number
   minChallenges?: number
@@ -53,53 +55,47 @@ interface LeagueCardProps {
 
 export function LeagueCard({
   league, xp, plan,
+  leagueIcon, leagueDbColor,
   xpThreshold, challengesCompleted, minChallenges,
   nextLeagueName, nextLeagueIcon,
 }: LeagueCardProps) {
   const isPro = plan === 'pro' || plan === 'studio'
   const gradient = LEAGUE_GRADIENT[league] ?? 'from-slate-400 to-slate-600'
   const emoji = LEAGUE_EMOJI[league] ?? '🏆'
+  const color = leagueDbColor ?? leagueColor(league as League)
 
-  // New system: dual progress
   const hasNewSystem = xpThreshold !== undefined && xpThreshold > 0
   const xpPercent = hasNewSystem ? Math.min(100, Math.round((xp / xpThreshold!) * 100)) : 0
   const challengesPercent = minChallenges
     ? Math.min(100, Math.round(((challengesCompleted ?? 0) / minChallenges) * 100))
     : 0
 
-  const now = new Date()
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  const daysLeft = Math.ceil((endOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
   return (
     <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold text-sm">Ma ligue</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className={`size-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-2xl shadow-sm`}>
-          {emoji}
+        <h3 className="font-semibold text-sm">Ma ligue</h3>
+        <div className={`size-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-sm`}>
+          <LeagueIcon icon={leagueIcon ?? emoji} size="xl" />
         </div>
       </div>
 
       {/* League name */}
       <div>
-        <p className="text-2xl font-bold" style={{ color: leagueColor(league as League) }}>
+        <p className="text-2xl font-bold" style={{ color }}>
           {league}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">{xp.toLocaleString()} XP total</p>
       </div>
 
-      {/* New system: dual progress */}
+      {/* Dual progress */}
       {hasNewSystem && nextLeagueName ? (
         <div className="space-y-3 pt-2 border-t border-border">
-          <p className="text-xs text-muted-foreground font-medium">
-            Vers {nextLeagueIcon} {nextLeagueName}
-          </p>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+            Vers
+            {nextLeagueIcon && <LeagueIcon icon={nextLeagueIcon} size="sm" />}
+            <span>{nextLeagueName}</span>
+          </div>
 
           {/* XP progress */}
           <div className="space-y-1">
