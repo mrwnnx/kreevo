@@ -28,7 +28,7 @@ const TOKEN_GROUPS: { label: string; keys: (keyof ModeTokens)[] }[] = [
   },
   {
     label: 'Leagues',
-    keys: ['--league-rookie', '--league-rising', '--league-pro', '--league-elite', '--league-legend'],
+    keys: ['--league-stone', '--league-bronze', '--league-silver', '--league-gold', '--league-platinum', '--league-diamond', '--league-master', '--league-legend'],
   },
   {
     label: 'XP Gradient',
@@ -55,10 +55,13 @@ const KEY_LABEL: Record<string, string> = {
   '--border':               'Border',
   '--input':                'Input',
   '--ring':                 'Ring / Focus',
-  '--league-rookie':        'Rookie',
-  '--league-rising':        'Rising',
-  '--league-pro':           'Pro',
-  '--league-elite':         'Elite',
+  '--league-stone':         'Stone',
+  '--league-bronze':        'Bronze',
+  '--league-silver':        'Silver',
+  '--league-gold':          'Gold',
+  '--league-platinum':      'Platinum',
+  '--league-diamond':       'Diamond',
+  '--league-master':        'Master',
   '--league-legend':        'Legend',
   '--xp-from':              'XP gradient from',
   '--xp-to':                'XP gradient to',
@@ -275,11 +278,14 @@ function PreviewPanel({ tokens }: { tokens: DesignTokens }) {
         {/* League badges */}
         <div className="flex gap-1.5 mt-3 flex-wrap">
           {([
-            ['Rookie', '--league-rookie'],
-            ['Rising', '--league-rising'],
-            ['Pro',    '--league-pro'],
-            ['Elite',  '--league-elite'],
-            ['Legend', '--league-legend'],
+            ['Stone',    '--league-stone'],
+            ['Bronze',   '--league-bronze'],
+            ['Silver',   '--league-silver'],
+            ['Gold',     '--league-gold'],
+            ['Platinum', '--league-platinum'],
+            ['Diamond',  '--league-diamond'],
+            ['Master',   '--league-master'],
+            ['Legend',   '--league-legend'],
           ] as [string, keyof ModeTokens][]).map(([label, key]) => (
             <span
               key={label}

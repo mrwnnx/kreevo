@@ -536,17 +536,10 @@ async function main() {
       specialty: c.specialty,
       challenge_type: c.challenge_type,
       industry: c.industry,
-      track: c.track,
       xp_reward: c.xp_reward,
       deadline_days: c.deadline_days,
       league_id: league_id ?? null,
-      level: 'rookie',
       is_published: true,
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
-      reveal_at: new Date().toISOString(),
-      closes_at: new Date(Date.now() + 365 * 86400000).toISOString(),
-      status: 'active',
     }
   })
 

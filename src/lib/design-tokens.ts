@@ -18,10 +18,13 @@ export interface ModeTokens {
   '--border':                string
   '--input':                 string
   '--ring':                  string
-  '--league-rookie':         string
-  '--league-rising':         string
-  '--league-pro':            string
-  '--league-elite':          string
+  '--league-stone':          string
+  '--league-bronze':         string
+  '--league-silver':         string
+  '--league-gold':           string
+  '--league-platinum':       string
+  '--league-diamond':        string
+  '--league-master':         string
   '--league-legend':         string
   '--xp-from':               string
   '--xp-to':                 string
@@ -73,11 +76,14 @@ export const DEFAULT_TOKENS: DesignTokens = {
     '--border':               '#dcdce8',
     '--input':                '#dcdce8',
     '--ring':                 '#1a1924',
-    '--league-rookie':        '#6b5a3a',
-    '--league-rising':        '#5a5a6e',
-    '--league-pro':           '#7a6a1a',
-    '--league-elite':         '#1a3a7a',
-    '--league-legend':        '#8a2020',
+    '--league-stone':         '#5a5a5a',
+    '--league-bronze':        '#a06030',
+    '--league-silver':        '#909099',
+    '--league-gold':          '#c0a030',
+    '--league-platinum':      '#90a0b0',
+    '--league-diamond':       '#4d8fb8',
+    '--league-master':        '#7c3aed',
+    '--league-legend':        '#c04040',
     '--xp-from':              '#6040c0',
     '--xp-to':                '#a050b0',
   },
@@ -100,11 +106,14 @@ export const DEFAULT_TOKENS: DesignTokens = {
     '--border':               '#1f1f1f',
     '--input':                '#222222',
     '--ring':                 '#7c3aed',
-    '--league-rookie':        '#a08060',
-    '--league-rising':        '#909099',
-    '--league-pro':           '#c0a030',
-    '--league-elite':         '#4060c0',
-    '--league-legend':        '#c04040',
+    '--league-stone':         '#8a8a8a',
+    '--league-bronze':        '#cd7f32',
+    '--league-silver':        '#c0c0c0',
+    '--league-gold':          '#ffd700',
+    '--league-platinum':      '#b0c0d0',
+    '--league-diamond':       '#7ec0e0',
+    '--league-master':        '#a060ff',
+    '--league-legend':        '#e05050',
     '--xp-from':              '#7c3aed',
     '--xp-to':                '#c060d0',
   },

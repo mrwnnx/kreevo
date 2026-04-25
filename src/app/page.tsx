@@ -1,13 +1,15 @@
 import Link from 'next/link'
-import { ArrowRight, Trophy, Zap, Star, TrendingUp } from 'lucide-react'
+import { ArrowRight, Trophy, Sparkles, TrendingUp } from 'lucide-react'
 
 const LEAGUES = [
-  { name: 'Rookie',   cls: 'league-rookie',   bg: 'league-bg-rookie',   icon: '○' },
+  { name: 'Stone',    cls: 'league-stone',    bg: 'league-bg-stone',    icon: '○' },
   { name: 'Bronze',   cls: 'league-bronze',   bg: 'league-bg-bronze',   icon: '◐' },
   { name: 'Silver',   cls: 'league-silver',   bg: 'league-bg-silver',   icon: '◑' },
   { name: 'Gold',     cls: 'league-gold',     bg: 'league-bg-gold',     icon: '◕' },
   { name: 'Platinum', cls: 'league-platinum', bg: 'league-bg-platinum', icon: '●' },
   { name: 'Diamond',  cls: 'league-diamond',  bg: 'league-bg-diamond',  icon: '◆' },
+  { name: 'Master',   cls: 'league-master',   bg: 'league-bg-master',   icon: '◇' },
+  { name: 'Legend',   cls: 'league-legend',   bg: 'league-bg-legend',   icon: '★' },
 ]
 
 export default function Home() {
@@ -52,7 +54,7 @@ export default function Home() {
 
           <p className="text-base text-muted-foreground max-w-lg mb-10 leading-relaxed">
             Weekly real-world design challenges, AI feedback on every submission,
-            and a league system that ranks your progress from Rookie to Diamond.
+            and a league system that ranks your progress from Stone to Legend.
           </p>
 
           <div className="flex items-center gap-4">
@@ -73,11 +75,11 @@ export default function Home() {
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-8">
             League System
           </p>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
             {LEAGUES.map((l) => (
               <div
                 key={l.name}
-                className={`${l.bg} border border-border/50 rounded-lg px-4 py-4 text-center space-y-2 hover:border-current/30 transition-colors`}
+                className={`${l.bg} border border-border/50 rounded-lg px-3 py-4 text-center space-y-2 hover:border-current/30 transition-colors`}
               >
                 <span className={`text-2xl font-mono ${l.cls}`}>{l.icon}</span>
                 <p className={`text-xs font-mono font-bold uppercase tracking-wider ${l.cls}`}>
@@ -87,7 +89,7 @@ export default function Home() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-4 font-mono">
-            Earn XP on every submission → climb from Rookie to Diamond
+            Earn XP on every submission → climb from Stone to Legend
           </p>
         </div>
       </section>
@@ -104,10 +106,10 @@ export default function Home() {
               accent: 'text-league-gold',
             },
             {
-              icon: Zap,
-              tag: 'On-demand',
-              title: 'Random Brief Generator',
-              desc: 'AI generates custom briefs tailored to your level and track. Practice anytime, earn XP.',
+              icon: Sparkles,
+              tag: 'Leagues',
+              title: '8 Leagues, real progression',
+              desc: 'From Stone to Legend — each league unlocks tougher briefs. XP and completed challenges promote you up.',
               accent: 'text-primary',
             },
             {

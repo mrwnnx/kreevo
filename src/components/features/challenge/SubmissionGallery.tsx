@@ -25,13 +25,20 @@ interface GalleryProps {
   challengeTitle: string
 }
 
+// Keys = noms DB de la table `leagues` (7ajra = Stone)
 const LEAGUE_COLOR: Record<string, string> = {
-  rookie:  'bg-stone-100  text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
-  rising:  'bg-slate-100  text-slate-600  dark:bg-slate-900/40  dark:text-slate-400',
-  pro:     'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  elite:   'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
-  legend:  'bg-red-100    text-red-600    dark:bg-red-900/30    dark:text-red-400',
+  '7ajra':    'bg-stone-100   text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
+  Stone:      'bg-stone-100   text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
+  Bronze:     'bg-orange-100  text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  Silver:     'bg-slate-100   text-slate-600  dark:bg-slate-900/40  dark:text-slate-400',
+  Gold:       'bg-yellow-100  text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  Platinum:   'bg-sky-100     text-sky-700    dark:bg-sky-900/30    dark:text-sky-400',
+  Diamond:    'bg-cyan-100    text-cyan-700   dark:bg-cyan-900/30   dark:text-cyan-400',
+  Master:     'bg-violet-100  text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  Legend:     'bg-red-100     text-red-600    dark:bg-red-900/30    dark:text-red-400',
 }
+
+const LEAGUE_LABEL: Record<string, string> = { '7ajra': 'Stone' }
 
 export function SubmissionGallery({ submissions, currentUserId, isRevealed, challengeTitle }: GalleryProps) {
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({})
@@ -136,10 +143,10 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, chal
                       <Link href={`/u/${s.profiles.username}`} className="text-xs font-medium truncate hover:underline">@{s.profiles.username}</Link>
                       {s.profiles.league && (
                         <span className={cn(
-                          'text-[9px] font-mono px-1.5 py-0.5 rounded-full capitalize ml-auto',
-                          LEAGUE_COLOR[s.profiles.league] ?? LEAGUE_COLOR.rookie
+                          'text-[9px] font-mono px-1.5 py-0.5 rounded-full ml-auto',
+                          LEAGUE_COLOR[s.profiles.league] ?? LEAGUE_COLOR.Stone
                         )}>
-                          {s.profiles.league}
+                          {LEAGUE_LABEL[s.profiles.league] ?? s.profiles.league}
                         </span>
                       )}
                     </div>

@@ -306,11 +306,14 @@ export default function DesignSystemPage() {
 
             <Block label="League badges (usage réel)">
               {[
-                { label: 'Rookie',  cls: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400' },
-                { label: 'Rising',  cls: 'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400' },
-                { label: 'Pro',     cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-                { label: 'Elite',   cls: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400' },
-                { label: 'Legend',  cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+                { label: 'Stone',    cls: 'bg-stone-100   text-stone-600  dark:bg-stone-900/40  dark:text-stone-400' },
+                { label: 'Bronze',   cls: 'bg-orange-100  text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+                { label: 'Silver',   cls: 'bg-slate-100   text-slate-600  dark:bg-slate-900/40  dark:text-slate-400' },
+                { label: 'Gold',     cls: 'bg-yellow-100  text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { label: 'Platinum', cls: 'bg-sky-100     text-sky-700    dark:bg-sky-900/30    dark:text-sky-400' },
+                { label: 'Diamond',  cls: 'bg-cyan-100    text-cyan-700   dark:bg-cyan-900/30   dark:text-cyan-400' },
+                { label: 'Master',   cls: 'bg-violet-100  text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
+                { label: 'Legend',   cls: 'bg-red-100     text-red-600    dark:bg-red-900/30    dark:text-red-400' },
               ].map(({ label, cls }) => (
                 <span key={label} className={`text-xs font-medium px-3 py-1 rounded-full ${cls}`}>{label}</span>
               ))}
@@ -432,10 +435,12 @@ export default function DesignSystemPage() {
 
             <Block label="League ring (HeroProfile pattern)">
               {[
-                ['from-stone-400 to-stone-500',  'Rookie'],
-                ['from-yellow-400 to-yellow-500', 'Pro'],
-                ['from-blue-400 to-blue-500',     'Elite'],
-                ['from-pink-500 to-red-500',      'Legend'],
+                ['from-stone-400 to-stone-500',     'Stone'],
+                ['from-orange-400 to-orange-600',   'Bronze'],
+                ['from-yellow-400 to-yellow-500',   'Gold'],
+                ['from-cyan-400 to-cyan-500',       'Diamond'],
+                ['from-violet-500 to-purple-600',   'Master'],
+                ['from-pink-500 to-red-500',        'Legend'],
               ].map(([gradient, label]) => (
                 <div key={label} className="flex flex-col items-center gap-1.5">
                   <div className={`size-12 rounded-full p-[2px] bg-gradient-to-br ${gradient}`}>
@@ -726,17 +731,20 @@ export default function DesignSystemPage() {
           </Section>
 
           {/* ═══════════════ LEAGUES ═══════════════ */}
-          <Section id="leagues" title="League System" description="5 ligues — couleurs sémantiques, gradients, XP gates">
+          <Section id="leagues" title="League System" description="8 ligues dynamiques (table `leagues` Supabase) — Stone à Legend">
 
             <Block label="League badges">
               <div className="flex flex-wrap gap-3">
                 {[
-                  { name: 'Rookie',  bg: 'from-stone-400 to-stone-500',  xp: '0 XP',    color: 'text-stone-600' },
-                  { name: 'Rising',  bg: 'from-slate-400 to-slate-500',  xp: '500 XP',  color: 'text-slate-600' },
-                  { name: 'Pro',     bg: 'from-yellow-400 to-yellow-500', xp: '1500 XP', color: 'text-yellow-600' },
-                  { name: 'Elite',   bg: 'from-blue-400 to-blue-500',    xp: '3500 XP', color: 'text-blue-600' },
-                  { name: 'Legend',  bg: 'from-pink-500 to-red-500',     xp: '7000 XP', color: 'text-red-600' },
-                ].map(({ name, bg, xp, color }) => (
+                  { name: 'Stone',    bg: 'from-stone-400 to-stone-500',     color: 'text-stone-600',   access: 'free' },
+                  { name: 'Bronze',   bg: 'from-orange-400 to-orange-600',   color: 'text-orange-600',  access: 'free' },
+                  { name: 'Silver',   bg: 'from-slate-400 to-slate-500',     color: 'text-slate-600',   access: 'pro'  },
+                  { name: 'Gold',     bg: 'from-yellow-400 to-yellow-500',   color: 'text-yellow-600',  access: 'pro'  },
+                  { name: 'Platinum', bg: 'from-sky-400 to-sky-500',         color: 'text-sky-600',     access: 'pro'  },
+                  { name: 'Diamond',  bg: 'from-cyan-400 to-cyan-500',       color: 'text-cyan-600',    access: 'pro'  },
+                  { name: 'Master',   bg: 'from-violet-500 to-purple-600',   color: 'text-violet-600',  access: 'pro'  },
+                  { name: 'Legend',   bg: 'from-pink-500 to-red-500',        color: 'text-red-600',     access: 'pro'  },
+                ].map(({ name, bg, color, access }) => (
                   <div key={name} className="flex flex-col items-center gap-2">
                     <div className={`size-14 rounded-full p-[2px] bg-gradient-to-br ${bg}`}>
                       <div className="size-full rounded-full bg-card flex items-center justify-center text-xs font-bold text-muted-foreground">
@@ -744,20 +752,23 @@ export default function DesignSystemPage() {
                       </div>
                     </div>
                     <p className={`text-xs font-bold ${color}`}>{name}</p>
-                    <p className="text-[10px] font-mono text-muted-foreground">{xp}</p>
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase">{access}</p>
                   </div>
                 ))}
               </div>
             </Block>
 
             <Block label="League colors (semantic)">
-              <div className="grid grid-cols-5 gap-3 w-full">
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 w-full">
                 {[
-                  { name: 'rookie',  cls: 'league-bg-rookie',  text: 'league-rookie'  },
-                  { name: 'rising',  cls: 'league-bg-rising',  text: 'league-rising'  },
-                  { name: 'pro',     cls: 'league-bg-pro',     text: 'league-pro'     },
-                  { name: 'elite',   cls: 'league-bg-elite',   text: 'league-elite'   },
-                  { name: 'legend',  cls: 'league-bg-legend',  text: 'league-legend'  },
+                  { name: 'stone',    cls: 'league-bg-stone',    text: 'league-stone'    },
+                  { name: 'bronze',   cls: 'league-bg-bronze',   text: 'league-bronze'   },
+                  { name: 'silver',   cls: 'league-bg-silver',   text: 'league-silver'   },
+                  { name: 'gold',     cls: 'league-bg-gold',     text: 'league-gold'     },
+                  { name: 'platinum', cls: 'league-bg-platinum', text: 'league-platinum' },
+                  { name: 'diamond',  cls: 'league-bg-diamond',  text: 'league-diamond'  },
+                  { name: 'master',   cls: 'league-bg-master',   text: 'league-master'   },
+                  { name: 'legend',   cls: 'league-bg-legend',   text: 'league-legend'   },
                 ].map(({ name, cls, text }) => (
                   <div key={name} className="flex flex-col gap-1.5">
                     <div className={`h-12 rounded-xl border border-border ${cls} flex items-center justify-center`}>
@@ -776,12 +787,17 @@ export default function DesignSystemPage() {
               </p>
             </Block>
 
-            <CodeSnip code={`import { leagueLabel, leagueColor, levelFromXp } from '@/lib/utils/xp'
+            <CodeSnip code={`import { getLeagueLabel, getLeagueColor, getLeagueIcon } from '@/lib/utils/xp'
 
-const league  = 'pro'           // rookie|rising|pro|elite|legend
-const label   = leagueLabel(league)   // "Pro"
-const color   = leagueColor(league)   // "#b45309"
-const level   = levelFromXp(1250)     // 2`} />
+// La DB stocke '7ajra' pour Stone — on l'affiche via getLeagueLabel
+const dbName = '7ajra'                    // ou 'Bronze', 'Silver', 'Gold', etc.
+const label  = getLeagueLabel(dbName)     // "Stone"
+const color  = getLeagueColor(dbName)     // "#8B8B8B"
+const icon   = getLeagueIcon(dbName)      // "🪨"
+
+// Promotion auto via XP + min_challenges atteints
+import { checkAndUpdateLeague } from '@/lib/utils/leagues'
+await checkAndUpdateLeague(userId)`} />
 
           </Section>
 
