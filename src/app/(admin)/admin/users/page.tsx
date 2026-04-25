@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { getLeagueLabel } from '@/lib/utils/xp'
 
 interface User {
   id: string
@@ -150,7 +151,7 @@ export default function AdminUsers() {
                     {u.plan}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-xs">{u.league}</td>
+                <td className="px-4 py-3 text-xs">{getLeagueLabel(u.league)}</td>
                 <td className="px-4 py-3 font-mono text-xs">{u.xp?.toLocaleString()}</td>
                 <td className="px-4 py-3">
                   {u.role === 'admin' && (
@@ -248,7 +249,7 @@ export default function AdminUsers() {
         <Modal title="Changer ligue" onClose={() => setLeagueModal(null)}>
           <select value={leagueVal} onChange={e => setLeagueVal(e.target.value)}
             className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring">
-            {leagues.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
+            {leagues.map(l => <option key={l.id} value={l.name}>{getLeagueLabel(l.name)}</option>)}
           </select>
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setLeagueModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
