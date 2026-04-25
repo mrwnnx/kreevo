@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function requireAdmin() {
   const supabase = await createClient()
@@ -19,6 +20,5 @@ export async function requireAdmin() {
     return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), admin: null }
   }
 
-  const adminDb = await createAdminClient()
-  return { error: null, admin: { user, supabase: adminDb } }
+  return { error: null, admin: { user, supabase: supabaseAdmin } }
 }

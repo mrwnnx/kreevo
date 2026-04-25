@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Sparkles, Save, Loader2, ChevronLeft, Check } from 'lucide-react'
+import { Save, Loader2, ChevronLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -147,7 +147,6 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   const [leagues, setLeagues] = useState<League[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [aiLoading, setAiLoading] = useState(false)
   const [step, setStep] = useState(() => {
     if (id) return 3
     if (initial?.specialty && initial?.challenge_type && initial?.industry) return 3
@@ -176,39 +175,6 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   function selectIndustry(industry: string) {
     setForm(f => ({ ...f, industry }))
     setTimeout(() => setStep(3), 150)
-  }
-
-  async function generateWithAI() {
-    if (!form.specialty || !form.challenge_type || !form.industry) return
-    setAiLoading(true)
-    const leagueName = leagues.find(l => l.id === form.league_id)?.name ?? ''
-    const res = await fetch('/api/admin/challenges/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        specialty: form.specialty,
-        type: form.challenge_type,
-        industry: form.industry,
-        league: leagueName,
-        deadline: form.deadline_days,
-      }),
-    })
-    const data = await res.json()
-    if (res.ok && data.brief) {
-      const b = data.brief
-      setForm(f => ({
-        ...f,
-        title:       b.title       ?? f.title,
-        brief:       b.brief       ?? f.brief,
-        context:     b.context     ?? f.context,
-        deliverable: b.deliverable ?? f.deliverable,
-        constraints: b.constraints ?? f.constraints,
-        criteria:    b.criteria    ?? f.criteria,
-      }))
-    } else {
-      setError(data.error ?? 'Erreur de génération IA')
-    }
-    setAiLoading(false)
   }
 
   async function handleSave() {
@@ -373,32 +339,6 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
               {form.industry}
             </button>
           )}
-        </div>
-      )}
-
-      {/* AI Generate */}
-      {form.specialty && form.challenge_type && form.industry && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                <Sparkles className="size-4" /> Générer avec IA
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {form.specialty} · {form.challenge_type} · {form.industry}
-                {form.league_id && leagues.find(l => l.id === form.league_id) && ` · ${leagues.find(l => l.id === form.league_id)!.name}`}
-                {form.deadline_days && ` · ${form.deadline_days}j`}
-              </p>
-            </div>
-            <button
-              onClick={generateWithAI}
-              disabled={aiLoading}
-              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85 disabled:opacity-60 shrink-0"
-            >
-              {aiLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
-              {aiLoading ? 'Génération…' : 'Générer'}
-            </button>
-          </div>
         </div>
       )}
 

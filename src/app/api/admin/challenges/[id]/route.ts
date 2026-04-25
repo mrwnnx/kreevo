@@ -10,7 +10,7 @@ export async function PATCH(request: Request, { params }: Props) {
   const { id } = await params
   const body = await request.json()
 
-  const { error: dbErr } = await (admin!.supabase as any)
+  const { data, error: dbErr } = await (admin!.supabase as any)
     .from('challenges')
     .update({
       ...(body.title !== undefined && { title: body.title }),
@@ -35,9 +35,13 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.industry !== undefined && { industry: body.industry }),
     })
     .eq('id', id)
+    .select()
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+  if (!data || data.length === 0) {
+    return NextResponse.json({ error: 'Challenge introuvable ou modification bloquée par RLS' }, { status: 404 })
+  }
+  return NextResponse.json({ ok: true, challenge: data[0] })
 }
 
 export async function DELETE(_: Request, { params }: Props) {
