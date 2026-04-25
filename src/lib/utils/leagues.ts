@@ -7,21 +7,31 @@ export type LeagueRow = {
   color: string
   order_index: number
   min_challenges: number
+  xp_threshold_percent: number
   access: 'all' | 'pro_only'
   is_active: boolean
   specialty?: string | null
   created_at: string
 }
 
-// Seuil XP d'une ligue : 60% du total des xp_reward des challenges publiés.
+// Seuil XP d'une ligue : pourcentage configurable (par défaut 60%) du total
+// des xp_reward des challenges publiés dans la ligue.
 export async function getLeagueThreshold(leagueId: string): Promise<number> {
-  const { data } = await supabaseAdmin
-    .from('challenges')
-    .select('xp_reward')
-    .eq('league_id', leagueId)
-    .eq('is_published', true)
-  const total = (data ?? []).reduce((s: number, c: any) => s + (c.xp_reward || 0), 0)
-  return Math.floor(total * 0.6)
+  const [{ data: league }, { data: challenges }] = await Promise.all([
+    (supabaseAdmin as any)
+      .from('leagues')
+      .select('xp_threshold_percent')
+      .eq('id', leagueId)
+      .single(),
+    supabaseAdmin
+      .from('challenges')
+      .select('xp_reward')
+      .eq('league_id', leagueId)
+      .eq('is_published', true),
+  ])
+  const total = (challenges ?? []).reduce((s: number, c: any) => s + (c.xp_reward || 0), 0)
+  const percent = league?.xp_threshold_percent ?? 60
+  return Math.floor(total * percent / 100)
 }
 
 // Promotion auto si seuil XP + min_challenges atteints.

@@ -15,8 +15,9 @@ export async function PATCH(request: Request, { params }: Props) {
   if (body.icon !== undefined)           update.icon = body.icon
   if (body.color !== undefined)          update.color = body.color
   if (body.order_index !== undefined)    update.order_index = body.order_index
-  if (body.min_challenges !== undefined) update.min_challenges = body.min_challenges
-  if (body.access !== undefined)         update.access = body.access
+  if (body.min_challenges !== undefined)       update.min_challenges = body.min_challenges
+  if (body.xp_threshold_percent !== undefined) update.xp_threshold_percent = body.xp_threshold_percent
+  if (body.access !== undefined)               update.access = body.access
   if (body.is_active !== undefined)      update.is_active = body.is_active
 
   const { error: dbErr } = await (admin!.supabase as any)

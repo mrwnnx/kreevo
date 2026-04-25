@@ -29,6 +29,7 @@ export default async function EditLeague({ params }: Props) {
           color: data.color,
           order_index: String(data.order_index),
           min_challenges: String(data.min_challenges),
+          xp_threshold_percent: String(data.xp_threshold_percent ?? 60),
           access: data.access,
           is_active: data.is_active,
         }}

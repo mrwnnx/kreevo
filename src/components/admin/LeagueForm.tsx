@@ -11,6 +11,7 @@ interface LeagueFormData {
   color: string
   order_index: string
   min_challenges: string
+  xp_threshold_percent: string
   access: 'all' | 'pro_only'
   is_active: boolean
 }
@@ -21,6 +22,7 @@ const EMPTY: LeagueFormData = {
   color: '#8B8B8B',
   order_index: '1',
   min_challenges: '3',
+  xp_threshold_percent: '60',
   access: 'all',
   is_active: true,
 }
@@ -188,6 +190,7 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
         ...form,
         order_index: parseInt(form.order_index),
         min_challenges: parseInt(form.min_challenges),
+        xp_threshold_percent: Math.max(0, Math.min(100, parseInt(form.xp_threshold_percent) || 60)),
       }),
     })
     const data = await res.json()
@@ -248,6 +251,25 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
             min={1}
             className={inputClass}
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Seuil XP (%)</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              value={form.xp_threshold_percent}
+              onChange={e => set('xp_threshold_percent')(e.target.value)}
+              min={0}
+              max={100}
+              step={5}
+              className={inputClass}
+            />
+            <span className="text-xs font-mono text-muted-foreground shrink-0">% du XP publié</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Pourcentage du total des <code className="font-mono">xp_reward</code> de cette ligue requis pour la promotion. Défaut 60.
+          </p>
         </div>
 
         <div className="space-y-1.5">

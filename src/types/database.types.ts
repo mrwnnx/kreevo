@@ -36,6 +36,7 @@ export type Database = {
           color: string
           order_index: number
           min_challenges: number
+          xp_threshold_percent: number
           access: 'all' | 'pro_only'
           is_active: boolean
           specialty: string | null
