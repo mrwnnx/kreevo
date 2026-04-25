@@ -9,20 +9,23 @@ import {
   Heart, MessageCircle, Lock, ExternalLink, Mail,
   Trophy, Zap, Star, Link as LinkIcon,
 } from 'lucide-react'
-import type { Profile, Submission } from '@/types/database.types'
+import type { Profile } from '@/types/database.types'
 
-// ── League display config ──────────────────────────────────────
+// ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  rookie:   { label: 'Rookie',   color: '#8B6914', bg: '#FEF3C7', border: '#F59E0B' },
-  bronze:   { label: 'Rising',   color: '#92400E', bg: '#FEF3C7', border: '#B45309' },
-  silver:   { label: 'Pro',      color: '#374151', bg: '#F3F4F6', border: '#9CA3AF' },
-  gold:     { label: 'Pro',      color: '#92400E', bg: '#FFFBEB', border: '#F59E0B' },
-  platinum: { label: 'Elite',    color: '#1E40AF', bg: '#EFF6FF', border: '#3B82F6' },
-  diamond:  { label: 'Legend',   color: '#991B1B', bg: '#FEF2F2', border: '#EF4444' },
+  '7ajra':  { label: 'Stone',    color: '#475569', bg: '#F1F5F9', border: '#94A3B8' },
+  Stone:    { label: 'Stone',    color: '#475569', bg: '#F1F5F9', border: '#94A3B8' },
+  Bronze:   { label: 'Bronze',   color: '#92400E', bg: '#FEF3C7', border: '#B45309' },
+  Silver:   { label: 'Silver',   color: '#374151', bg: '#F3F4F6', border: '#9CA3AF' },
+  Gold:     { label: 'Gold',     color: '#92400E', bg: '#FFFBEB', border: '#F59E0B' },
+  Platinum: { label: 'Platinum', color: '#0E7490', bg: '#ECFEFF', border: '#22D3EE' },
+  Diamond:  { label: 'Diamond',  color: '#1E40AF', bg: '#EFF6FF', border: '#3B82F6' },
+  Master:   { label: 'Master',   color: '#5B21B6', bg: '#F5F3FF', border: '#8B5CF6' },
+  Legend:   { label: 'Legend',   color: '#991B1B', bg: '#FEF2F2', border: '#EF4444' },
 }
 
 function getLeague(league: string) {
-  return LEAGUE_CONFIG[league] ?? LEAGUE_CONFIG.rookie
+  return LEAGUE_CONFIG[league] ?? LEAGUE_CONFIG['7ajra']
 }
 
 // ── Links parser ───────────────────────────────────────────────
@@ -62,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
   const name = profile.full_name ?? username
   const specialty = profile.specialty ? ` · ${profile.specialty}` : ''
-  const league = getLeague(profile.league ?? 'rookie')
+  const league = getLeague(profile.league ?? '7ajra')
 
   return {
     title: `${name}${specialty} | Kreevo`,
@@ -94,7 +97,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   const p = profile as Profile
   const social = parseLinks(p.links)
-  const league = getLeague(p.league ?? 'rookie')
+  const league = getLeague(p.league ?? '7ajra')
   const isPro = p.plan === 'pro' || p.plan === 'studio'
 
   const [
@@ -104,7 +107,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   ] = await Promise.all([
     supabase
       .from('submissions')
-      .select('*, challenges(title, track, month, year)', { count: 'exact' })
+      .select('*, challenges(title, specialty, challenge_type, industry)', { count: 'exact' })
       .eq('user_id', p.id)
       .eq('is_visible', true)
       .order('created_at', { ascending: false }),
@@ -337,11 +340,8 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
           {s.challenges?.title ?? 'Challenge'}
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-muted-foreground capitalize">
-            {s.challenges?.track}
-            {s.challenges?.month && s.challenges?.year
-              ? ` · ${new Date(s.challenges.year, s.challenges.month - 1).toLocaleDateString('en', { month: 'short', year: 'numeric' })}`
-              : ''}
+          <span className="text-[10px] font-mono text-muted-foreground">
+            {[s.challenges?.specialty, s.challenges?.challenge_type, s.challenges?.industry].filter(Boolean).join(' · ')}
           </span>
           <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-0.5">
@@ -358,20 +358,19 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
 }
 
 function TrackFilter({ submissions }: { submissions: any[] }) {
-  const tracks = ['All', ...Array.from(new Set(submissions.map((s: any) => s.challenges?.track).filter(Boolean)))]
+  const specialties = ['All', ...Array.from(new Set(submissions.map((s: any) => s.challenges?.specialty).filter(Boolean)))]
 
   if (submissions.length === 0) return <EmptyState text="No public work yet." />
 
   return (
     <div className="space-y-4">
-      {/* Static filter tabs — will be replaced by client component if needed */}
       <div className="flex gap-2 flex-wrap">
-        {tracks.map(track => (
+        {specialties.map(spec => (
           <span
-            key={track}
+            key={spec}
             className="text-xs font-mono px-3 py-1.5 rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
           >
-            {track}
+            {spec}
           </span>
         ))}
       </div>

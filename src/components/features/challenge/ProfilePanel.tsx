@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { Zap, ExternalLink, Clock, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import type { League } from '@/lib/utils/xp'
-import { leagueLabel, leagueColor } from '@/lib/utils/xp'
+import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 
 interface Author {
   id: string
@@ -27,15 +26,15 @@ interface Author {
 interface Challenge {
   id: string
   title?: string | null
-  track?: string | null
-  closes_at?: string | null
-  status?: string | null
+  specialty?: string | null
+  challenge_type?: string | null
+  industry?: string | null
 }
 
 interface Props {
   author: Author | null
   gradient: string
-  league: League
+  league: string | null | undefined
   isOwn: boolean
   challenge?: Challenge | null
 }
@@ -77,7 +76,7 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
 
   const links = author.links as Record<string, string> | null
   const activeLinks = links ? Object.entries(links).filter(([, v]) => v) : []
-  const lColor = leagueColor(league)
+  const lColor = getLeagueColor(league)
 
   return (
     <aside
@@ -145,7 +144,7 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
               label="Ligue"
               value={
                 <span className="font-semibold" style={{ color: lColor }}>
-                  {leagueLabel(league)}
+                  {getLeagueLabel(league)}
                 </span>
               }
             />
@@ -195,20 +194,16 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
           <Label>Challenge</Label>
           <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
           <div className="space-y-1.5">
-            {challenge.track && (
+            {(challenge.specialty || challenge.challenge_type) && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-3 text-center">🎨</span>
-                <span className="capitalize">{challenge.track.replace('_', '/')}</span>
+                <span>{[challenge.specialty, challenge.challenge_type].filter(Boolean).join(' · ')}</span>
               </div>
             )}
-            {challenge.closes_at && (
+            {challenge.industry && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Clock className="size-3" />
-                <span>
-                  {new Date(challenge.closes_at) > new Date()
-                    ? `Ferme le ${new Date(challenge.closes_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}`
-                    : 'Terminé'}
-                </span>
+                <span>{challenge.industry}</span>
               </div>
             )}
           </div>

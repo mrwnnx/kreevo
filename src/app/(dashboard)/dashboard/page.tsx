@@ -13,16 +13,13 @@ import { HeroProfile } from '@/components/features/dashboard/HeroProfile'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
-import type { League } from '@/lib/utils/xp'
 
-const TRACK_CONFIG: Record<string, { icon: string; bg: string }> = {
-  ux_ui:    { icon: '📱', bg: 'bg-violet-100 dark:bg-violet-900/30' },
-  graphic:  { icon: '🎨', bg: 'bg-orange-100 dark:bg-orange-900/30' },
-  motion:   { icon: '✨', bg: 'bg-pink-100 dark:bg-pink-900/30' },
-  '3d':     { icon: '🧊', bg: 'bg-green-100 dark:bg-green-900/30' },
-  branding: { icon: '💎', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  web:      { icon: '🌐', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+const SPECIALTY_CONFIG: Record<string, { icon: string; bg: string }> = {
+  'UX Designer':      { icon: '📱', bg: 'bg-violet-100 dark:bg-violet-900/30' },
+  'UI Designer':      { icon: '🎨', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+  'Graphic Designer': { icon: '✏️', bg: 'bg-orange-100 dark:bg-orange-900/30' },
 }
+const DEFAULT_SPECIALTY = { icon: '🎨', bg: 'bg-muted' }
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -41,10 +38,10 @@ export default async function DashboardPage() {
     { data: publishedChallenges },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('submissions').select('*, challenges(title, track)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+    supabase.from('submissions').select('*, challenges(title, specialty, challenge_type, industry)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
     (supabase as any)
       .from('participations')
-      .select('*, challenges(id, title, track, closes_at)')
+      .select('*, challenges(id, title, specialty, challenge_type, industry)')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .order('personal_deadline', { ascending: true }),
@@ -65,7 +62,7 @@ export default async function DashboardPage() {
     // Published challenges with league data
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, track, xp_reward, deadline_days, closes_at, league_id, is_published, leagues(id, name, icon, color, order_index, access)')
+      .select('id, title, brief, specialty, challenge_type, industry, xp_reward, deadline_days, league_id, is_published, leagues(id, name, icon, color, order_index, access)')
       .eq('is_published', true)
       .order('created_at', { ascending: false }),
   ])
@@ -124,10 +121,24 @@ export default async function DashboardPage() {
   // ── Challenges classification ──
   const userLeagueIndex = userLeagueRow?.order_index ?? 0
 
+  // Specialty filter
+  const profileSpecialty = (p.specialty ?? '') as string
+  const userTrack: 'graphic' | 'ux_ui' | null = profileSpecialty
+    ? (/graphic|illustration|brand|3d/i.test(profileSpecialty) ? 'graphic' : 'ux_ui')
+    : null
+
+  function matchesUserTrack(c: any): boolean {
+    if (!userTrack) return true
+    const cs = (c.specialty ?? '') as string
+    if (userTrack === 'graphic') return /graphic/i.test(cs)
+    return /ux|ui/i.test(cs)
+  }
+
   const myLeagueChallenges = challenges.filter(c => {
     if (!c.league_id) return true
     const cl = c.leagues
     if (!cl) return false
+    if (!matchesUserTrack(c)) return false
     return userLeagueRow ? cl.order_index === userLeagueIndex : cl.order_index === 1
   }).slice(0, 6)
 
@@ -236,7 +247,7 @@ export default async function DashboardPage() {
         specialty={p.specialty ?? null}
         bio={p.bio ?? null}
         country={p.country ?? null}
-        league={p.league as League}
+        league={p.league}
         xp={p.xp}
         submissionCount={submissionCount ?? 0}
         rank={rank}
@@ -268,7 +279,9 @@ export default async function DashboardPage() {
                 <div key={part.id} className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10 p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wide">{part.challenges?.track}</p>
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wide">
+                        {[part.challenges?.specialty, part.challenges?.challenge_type].filter(Boolean).join(' · ')}
+                      </p>
                       <p className="text-sm font-semibold">{part.challenges?.title}</p>
                     </div>
                     <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 shrink-0">
@@ -298,7 +311,7 @@ export default async function DashboardPage() {
           <GettingStarted steps={gettingStartedSteps} />
           <StreakCard streak={streak} activeDays={activeDays} todayIndex={todayIndex} />
           <LeagueCard
-            league={p.league as League}
+            league={p.league}
             xp={p.xp}
             plan={p.plan}
             leagueIcon={userLeagueRow?.icon}
@@ -417,7 +430,7 @@ export default async function DashboardPage() {
           <div className="grid md:grid-cols-3 gap-4">
             {myLeagueChallenges.map(c => {
               const isActive = activePartsByChallengeId.has(c.id)
-              const track = TRACK_CONFIG[c.track] ?? { icon: '🎨', bg: 'bg-muted' }
+              const spec = SPECIALTY_CONFIG[c.specialty ?? ''] ?? DEFAULT_SPECIALTY
               const blocked = userHasActiveParticipation && !isActive
               return (
                 <Link
@@ -431,8 +444,8 @@ export default async function DashboardPage() {
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className={cn('size-10 rounded-xl flex items-center justify-center text-xl shrink-0', track.bg)}>
-                      {track.icon}
+                    <div className={cn('size-10 rounded-xl flex items-center justify-center text-xl shrink-0', spec.bg)}>
+                      {spec.icon}
                     </div>
                     {isActive && (
                       <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 shrink-0">
@@ -517,7 +530,9 @@ export default async function DashboardPage() {
               <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/40 transition-colors">
                 <div>
                   <p className="text-sm font-medium">{s.challenges?.title ?? 'Challenge'}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{s.challenges?.track}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[s.challenges?.specialty, s.challenges?.challenge_type, s.challenges?.industry].filter(Boolean).join(' · ')}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {s.xp_earned > 0 && <span className="text-xs font-semibold text-violet-600">+{s.xp_earned} XP</span>}

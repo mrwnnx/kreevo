@@ -42,7 +42,7 @@ export default async function AdminDashboard() {
     (supabase as any).from('profiles').select('id', { count: 'exact', head: true }),
     (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'pro'),
     (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'free'),
-    (supabase as any).from('challenges').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    (supabase as any).from('challenges').select('id', { count: 'exact', head: true }).eq('is_published', true),
     (supabase as any).from('submissions').select('id', { count: 'exact', head: true }).gte('created_at', startOfMonth),
     (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfWeek),
     (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfLastWeek).lt('created_at', startOfWeek),

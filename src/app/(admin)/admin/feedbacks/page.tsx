@@ -69,7 +69,7 @@ function FeedbackCard({ fb, onSave, onPublish }: {
               <AvatarFallback className="rounded-md text-[10px]">{fb.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{fb.profiles?.full_name ?? fb.profiles?.username}</span>
-            <span className="text-xs text-muted-foreground">{leagueLabel(fb.profiles?.league ?? 'rookie')}</span>
+            <span className="text-xs text-muted-foreground">{leagueLabel(fb.profiles?.league ?? 'Stone')}</span>
           </div>
         </div>
         <span className="text-[11px] font-mono text-muted-foreground">

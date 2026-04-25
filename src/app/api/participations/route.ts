@@ -20,11 +20,11 @@ export async function POST(request: Request) {
   // Fetch challenge + league (bypass RLS for public read)
   const { data: challenge } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('id, status, league_id, deadline_days, leagues(id, name, access, order_index)')
+    .select('id, is_published, league_id, deadline_days, leagues(id, name, access, order_index)')
     .eq('id', challenge_id)
     .single()
 
-  if (!challenge || challenge.status !== 'active') {
+  if (!challenge || !challenge.is_published) {
     return NextResponse.json({ error: 'Challenge not active' }, { status: 400 })
   }
 
@@ -125,7 +125,7 @@ export async function GET(request: Request) {
 
   let query = (supabase as any)
     .from('participations')
-    .select('*, challenges(id, title, closes_at, track)')
+    .select('*, challenges(id, title, specialty, challenge_type, industry)')
     .eq('user_id', user.id)
 
   if (challenge_id) query = query.eq('challenge_id', challenge_id)

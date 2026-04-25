@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
-import { getLeagueFromXP } from '@/lib/utils/xp'
+import { checkAndUpdateLeague } from '@/lib/utils/leagues'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -17,14 +17,13 @@ export async function PATCH(request: Request, { params }: Props) {
   if ('role' in body)         update.role = body.role
   if ('is_suspended' in body) update.is_suspended = body.is_suspended
 
+  let triggerLeagueCheck = false
   if ('xp_add' in body) {
     const { data: profile } = await (admin!.supabase as any)
       .from('profiles').select('xp').eq('id', id).single()
     const newXP = Math.max(0, (profile?.xp ?? 0) + (body.xp_add as number))
     update.xp = newXP
-    if (!('league' in body)) {
-      update.league = getLeagueFromXP(newXP)
-    }
+    triggerLeagueCheck = !('league' in body)
   }
 
   const { error: dbErr } = await (admin!.supabase as any)
@@ -33,6 +32,11 @@ export async function PATCH(request: Request, { params }: Props) {
     .eq('id', id)
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
+
+  if (triggerLeagueCheck) {
+    try { await checkAndUpdateLeague(id) } catch { /* ignore */ }
+  }
+
   return NextResponse.json({ ok: true })
 }
 

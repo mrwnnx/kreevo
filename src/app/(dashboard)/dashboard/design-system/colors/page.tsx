@@ -109,42 +109,36 @@ export default function ColorsPage() {
 
       {/* ── Leagues ── */}
       <Section title="Leagues">
-        <div className="grid grid-cols-5 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <div className="h-14 rounded-xl league-bg-rookie border border-border" />
-            <p className="text-xs font-semibold">rookie</p>
-            <p className="text-[10px] font-mono text-muted-foreground">oklch(0.45 0.02 60)</p>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="h-14 rounded-xl league-bg-rising border border-border" />
-            <p className="text-xs font-semibold">rising</p>
-            <p className="text-[10px] font-mono text-muted-foreground">oklch(0.45 0.01 265)</p>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="h-14 rounded-xl league-bg-pro border border-border" />
-            <p className="text-xs font-semibold">pro</p>
-            <p className="text-[10px] font-mono text-muted-foreground">oklch(0.55 0.16 85)</p>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="h-14 rounded-xl league-bg-elite border border-border" />
-            <p className="text-xs font-semibold">elite</p>
-            <p className="text-[10px] font-mono text-muted-foreground">oklch(0.45 0.18 240)</p>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="h-14 rounded-xl league-bg-legend border border-border" />
-            <p className="text-xs font-semibold">legend</p>
-            <p className="text-[10px] font-mono text-muted-foreground">oklch(0.50 0.22 15)</p>
-          </div>
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+          {[
+            { name: 'Stone',    color: '#8B8B8B' },
+            { name: 'Bronze',   color: '#CD7F32' },
+            { name: 'Silver',   color: '#C0C0C0' },
+            { name: 'Gold',     color: '#FFD700' },
+            { name: 'Platinum', color: '#E5E4E2' },
+            { name: 'Diamond',  color: '#B9F2FF' },
+            { name: 'Master',   color: '#7C3AED' },
+            { name: 'Legend',   color: '#DC2626' },
+          ].map(l => (
+            <div key={l.name} className="flex flex-col gap-1.5">
+              <div className="h-14 rounded-xl border border-border" style={{ backgroundColor: l.color }} />
+              <p className="text-xs font-semibold">{l.name}</p>
+              <p className="text-[10px] font-mono text-muted-foreground">{l.color}</p>
+            </div>
+          ))}
         </div>
 
-        {/* League solid colors */}
-        <div className="grid grid-cols-5 gap-3 mt-2">
+        {/* League gradients */}
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 mt-4">
           {[
-            { name: 'rookie', cls: 'from-stone-400 to-stone-500' },
-            { name: 'rising', cls: 'from-slate-400 to-slate-500' },
-            { name: 'pro',    cls: 'from-yellow-400 to-yellow-500' },
-            { name: 'elite',  cls: 'from-blue-400 to-blue-500' },
-            { name: 'legend', cls: 'from-pink-500 to-red-500' },
+            { name: 'Stone',    cls: 'from-stone-400 to-stone-600' },
+            { name: 'Bronze',   cls: 'from-orange-400 to-orange-700' },
+            { name: 'Silver',   cls: 'from-slate-300 to-slate-500' },
+            { name: 'Gold',     cls: 'from-yellow-400 to-yellow-600' },
+            { name: 'Platinum', cls: 'from-cyan-300 to-cyan-600' },
+            { name: 'Diamond',  cls: 'from-blue-300 to-blue-600' },
+            { name: 'Master',   cls: 'from-violet-500 to-violet-700' },
+            { name: 'Legend',   cls: 'from-pink-500 to-red-600' },
           ].map(l => (
             <div key={l.name} className="flex flex-col gap-1.5">
               <div className={`h-14 rounded-xl bg-gradient-to-br ${l.cls}`} />

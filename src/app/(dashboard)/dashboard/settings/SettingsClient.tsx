@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
-import { leagueLabel, LEAGUE_COLORS, getLeagueProgress, getXPForNextLeague, getNextLeague } from '@/lib/utils/xp'
-import type { League } from '@/lib/utils/xp'
+import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
-import { CheckCircle, Loader2, Shield, CreditCard, Zap } from 'lucide-react'
+import { CheckCircle, Loader2, Shield, Zap } from 'lucide-react'
 
 export function SettingsClient({ profile, email }: { profile: Profile; email: string }) {
   const [isPending, startTransition] = useTransition()
@@ -18,11 +17,8 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  const league = (profile.league ?? 'rookie') as League
-  const progress = getLeagueProgress(profile.xp ?? 0)
-  const xpLeft = getXPForNextLeague(profile.xp ?? 0)
-  const nextLeague = getNextLeague(league)
-  const gradient = LEAGUE_COLORS[league]
+  const league = profile.league ?? '7ajra'
+  const leagueColor = getLeagueColor(league)
 
   async function handlePasswordChange() {
     setError(null)
@@ -55,7 +51,7 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
             <div>
               <p className="text-sm font-medium">Current Plan</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {profile.plan === 'free' ? 'Free — limited to 3 AI briefs/month' : 'Pro — unlimited AI briefs & features'}
+                {profile.plan === 'free' ? 'Free — accès aux ligues Stone et Bronze' : 'Pro — accès à toutes les ligues'}
               </p>
             </div>
             <span className={cn(
@@ -72,28 +68,19 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
             </Button>
           )}
 
-          <div className="pt-2 border-t border-border space-y-3">
+          <div className="pt-2 border-t border-border space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">League</span>
-              <span className={cn('text-xs font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-white bg-gradient-to-r', gradient)}>
-                {leagueLabel(league)}
+              <span className="text-sm font-medium">Ligue actuelle</span>
+              <span
+                className="text-xs font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-white"
+                style={{ backgroundColor: leagueColor }}
+              >
+                {getLeagueLabel(league)}
               </span>
             </div>
-            <div className="space-y-1.5">
-              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className={cn('h-full rounded-full bg-gradient-to-r transition-all duration-700', gradient)}
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              {nextLeague ? (
-                <p className="text-xs text-muted-foreground">
-                  {xpLeft} XP to reach {leagueLabel(nextLeague)} · Total: {profile.xp ?? 0} XP
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">Legend — maximum league · {profile.xp ?? 0} XP</p>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Total : {(profile.xp ?? 0).toLocaleString()} XP — la progression vers la prochaine ligue est visible sur le dashboard.
+            </p>
           </div>
         </div>
       </section>

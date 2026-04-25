@@ -1,9 +1,8 @@
 import { cn } from '@/lib/utils'
-import { LEAGUE_CONFIG } from '@/lib/utils/leagues'
-import type { League } from '@/lib/utils/xp'
+import { getLeagueColor, getLeagueIcon, getLeagueLabel } from '@/lib/utils/xp'
 
 interface Props {
-  league: League
+  league: string | null | undefined
   size?: 'sm' | 'md' | 'lg'
 }
 
@@ -14,17 +13,17 @@ const SIZE = {
 }
 
 export function LeagueBadge({ league, size = 'md' }: Props) {
-  const config = LEAGUE_CONFIG[league] ?? LEAGUE_CONFIG.rookie
+  const label = getLeagueLabel(league)
+  const icon = getLeagueIcon(league)
+  const color = getLeagueColor(league)
 
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full font-mono font-semibold text-white',
-      'bg-gradient-to-r',
-      config.gradient,
-      SIZE[size]
-    )}>
-      <span>{config.icon}</span>
-      <span>{config.name}</span>
+    <span
+      className={cn('inline-flex items-center rounded-full font-mono font-semibold text-white', SIZE[size])}
+      style={{ backgroundColor: color }}
+    >
+      <span>{icon}</span>
+      <span>{label}</span>
     </span>
   )
 }

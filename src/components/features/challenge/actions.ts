@@ -82,7 +82,7 @@ export async function submitChallenge(formData: FormData) {
     const newXP = (prof?.xp ?? 0) + 150
     await (supabase as any).from('profiles').update({ xp: newXP }).eq('id', user.id)
     const { checkAndUpdateLeague } = await import('@/lib/utils/leagues')
-    await checkAndUpdateLeague(user.id, supabase)
+    await checkAndUpdateLeague(user.id)
   }
 
   revalidatePath(`/dashboard/challenges/${challengeId}`)

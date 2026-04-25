@@ -7,8 +7,6 @@ import Link from 'next/link'
 
 interface Props { params: Promise<{ id: string }> }
 
-function fmt(d: string) { return d ? new Date(d).toISOString().slice(0, 16) : '' }
-
 function timeAgo(date: string): string {
   const diff = Date.now() - new Date(date).getTime()
   const h = Math.floor(diff / 3600000)
@@ -63,12 +61,6 @@ export default async function EditChallenge({ params }: Props) {
           deliverable: data.deliverable ?? '',
           constraints: data.constraints ?? '',
           criteria: data.criteria ?? '',
-          track: data.track ?? 'ux_ui',
-          month: String(data.month ?? 1),
-          year: String(data.year ?? new Date().getFullYear()),
-          reveal_at: fmt(data.reveal_at),
-          closes_at: fmt(data.closes_at),
-          status: data.status ?? 'draft',
           league_id: data.league_id ?? '',
           xp_reward: String(data.xp_reward ?? 250),
           deadline_days: String(data.deadline_days ?? 7),

@@ -1,21 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ExternalLink, Clock, BarChart2 } from 'lucide-react'
+import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { SubmissionComments } from '@/components/features/challenge/SubmissionComments'
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
-import { LEAGUE_COLORS } from '@/lib/utils/xp'
-import type { League } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
 
 interface Props { params: Promise<{ id: string }> }
 
-const TRACK_STYLE: Record<string, string> = {
-  ux_ui:   'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
-  graphic: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  motion:  'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
-  '3d':    'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400',
+const SPECIALTY_STYLE: Record<string, string> = {
+  'UX Designer':      'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  'UI Designer':      'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
+  'Graphic Designer': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 }
 
 export default async function SubmissionDetailPage({ params }: Props) {
@@ -27,7 +24,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const [{ data: submission }, { data: comments }, { data: liked }] = await Promise.all([
     (supabase as any)
       .from('submissions')
-      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, track, level, closes_at, reveal_at, status)')
+      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
       .eq('id', id)
       .single(),
     (supabase as any)
@@ -49,15 +46,24 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const author = submission.profiles
   const isOwn = submission.user_id === user.id
 
-  const isClosed = challenge?.closes_at ? new Date(challenge.closes_at) < new Date() : false
-  const isRevealed = challenge?.reveal_at ? new Date(challenge.reveal_at) <= new Date() : isClosed
-  const isBlurred = !isRevealed && !isOwn
+  const isBlurred = false
 
-  const league = (author?.league ?? 'rookie') as League
-  const gradient = LEAGUE_COLORS[league] ?? LEAGUE_COLORS.rookie
+  const league = author?.league ?? '7ajra'
+  const LEAGUE_GRADIENT: Record<string, string> = {
+    '7ajra':  'from-stone-400 to-stone-600',
+    Stone:    'from-stone-400 to-stone-600',
+    Bronze:   'from-orange-400 to-orange-700',
+    Silver:   'from-slate-300 to-slate-500',
+    Gold:     'from-yellow-400 to-yellow-600',
+    Platinum: 'from-cyan-300 to-cyan-600',
+    Diamond:  'from-blue-300 to-blue-600',
+    Master:   'from-violet-500 to-violet-700',
+    Legend:   'from-pink-500 to-red-600',
+  }
+  const gradient = LEAGUE_GRADIENT[league] ?? 'from-slate-400 to-slate-600'
   const figmaUrl = (submission.files as any)?.figma
-  const trackStyle = TRACK_STYLE[challenge?.track] ?? 'bg-muted text-muted-foreground'
-  const trackLabel = challenge?.track?.replace('_', '/').toUpperCase() ?? ''
+  const specialty = challenge?.specialty as string | null
+  const specialtyStyle = SPECIALTY_STYLE[specialty ?? ''] ?? 'bg-muted text-muted-foreground'
 
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
@@ -79,13 +85,16 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
           {/* Card image */}
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
-            {/* Header track */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              {trackLabel ? (
-                <span className={cn('text-[11px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest', trackStyle)}>
-                  {trackLabel}
+            {/* Header specialty */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border gap-2">
+              {specialty ? (
+                <span className={cn('text-[11px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest', specialtyStyle)}>
+                  {specialty}
                 </span>
               ) : <span />}
+              {challenge?.challenge_type && (
+                <span className="text-[11px] font-mono text-muted-foreground">{challenge.challenge_type}</span>
+              )}
             </div>
 
             {/* Image */}

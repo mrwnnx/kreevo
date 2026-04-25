@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label'
 import { AvatarUpload } from '@/components/features/dashboard/AvatarUpload'
 import { CheckCircle, Loader2 } from 'lucide-react'
 import type { Profile } from '@/types/database.types'
-import type { League } from '@/lib/utils/xp'
 
 const SPECIALTY_OPTIONS = ['Graphic Design', 'UX/UI', 'Motion', 'Branding', 'Illustration', '3D', 'Web Design', 'Product Design']
 
@@ -103,7 +102,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           userId={profile.id}
           value={avatar}
           name={fullName || username}
-          league={(profile.league as League) ?? 'rookie'}
+          league={profile.league ?? '7ajra'}
           onChange={url => setAvatar(url)}
         />
       </div>

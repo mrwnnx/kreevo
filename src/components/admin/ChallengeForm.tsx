@@ -45,12 +45,6 @@ const DELIVERABLES: Record<string, string> = {
   'Motion':           'GIF animé ou lien vidéo (YouTube/Vimeo).',
 }
 
-const SPECIALTY_TRACK: Record<string, string> = {
-  'UX Designer':      'ux_ui',
-  'UI Designer':      'ux_ui',
-  'Graphic Designer': 'graphic',
-}
-
 const SPECIALTY_STYLE: Record<string, { border: string; bg: string; text: string }> = {
   'UX Designer':      { border: 'border-violet-300 dark:border-violet-700', bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-300' },
   'UI Designer':      { border: 'border-blue-300 dark:border-blue-700',     bg: 'bg-blue-50 dark:bg-blue-900/20',     text: 'text-blue-700 dark:text-blue-300'     },
@@ -71,12 +65,6 @@ interface FormData {
   deliverable: string
   constraints: string
   criteria: string
-  track: string
-  month: string
-  year: string
-  reveal_at: string
-  closes_at: string
-  status: string
   league_id: string
   xp_reward: string
   deadline_days: string
@@ -89,11 +77,6 @@ const EMPTY: FormData = {
   industry: '',
   title: '', brief: '', context: '', deliverable: '',
   constraints: '', criteria: '',
-  track: 'ux_ui',
-  month: String(new Date().getMonth() + 1),
-  year: String(new Date().getFullYear()),
-  reveal_at: '', closes_at: '',
-  status: 'draft',
   league_id: '',
   xp_reward: '250',
   deadline_days: '7',
@@ -163,7 +146,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
     setForm(f => ({ ...f, [key]: val }))
 
   function selectSpecialty(spec: string) {
-    setForm(f => ({ ...f, specialty: spec, track: SPECIALTY_TRACK[spec] ?? 'ux_ui', challenge_type: '' }))
+    setForm(f => ({ ...f, specialty: spec, challenge_type: '' }))
     setTimeout(() => setStep(1), 150)
   }
 
@@ -191,8 +174,6 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
-        month: parseInt(form.month),
-        year: parseInt(form.year),
         xp_reward: parseInt(form.xp_reward),
         deadline_days: parseInt(form.deadline_days),
         league_id: form.league_id || null,

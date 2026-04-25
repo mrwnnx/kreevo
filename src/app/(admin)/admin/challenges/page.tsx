@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Eye, Pencil, Trash2, CheckCircle } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
@@ -11,24 +11,14 @@ interface League { id: string; name: string; icon: string }
 interface Challenge {
   id: string
   title: string
-  track: string
-  month: number
-  year: number
-  status: string
-  reveal_at: string
-  closes_at: string
+  specialty: string | null
+  challenge_type: string | null
+  industry: string | null
   xp_reward: number | null
   deadline_days: number | null
   is_published: boolean
   league_id: string | null
   leagues: League | null
-}
-
-const STATUS_STYLE: Record<string, string> = {
-  draft:    'bg-muted text-muted-foreground',
-  active:   'bg-green-100 text-green-700',
-  closed:   'bg-orange-100 text-orange-700',
-  archived: 'bg-slate-100 text-slate-500',
 }
 
 export default function AdminChallenges() {
@@ -59,17 +49,12 @@ export default function AdminChallenges() {
     setLoading(false)
   }
 
-  async function publish(id: string) {
+  async function publish(id: string, value: boolean) {
     await fetch(`/api/admin/challenges/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'active' }),
+      body: JSON.stringify({ is_published: value }),
     })
-    load()
-  }
-
-  async function reveal(id: string) {
-    await fetch(`/api/admin/challenges/${id}/reveal`, { method: 'POST' })
     load()
   }
 
@@ -81,9 +66,11 @@ export default function AdminChallenges() {
     load()
   }
 
+  const q = search.toLowerCase()
   const filtered = challenges.filter(c =>
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.track.toLowerCase().includes(search.toLowerCase())
+    c.title.toLowerCase().includes(q) ||
+    (c.specialty ?? '').toLowerCase().includes(q) ||
+    (c.industry ?? '').toLowerCase().includes(q)
   )
 
   return (
@@ -147,14 +134,14 @@ export default function AdminChallenges() {
         <table className="w-full text-sm">
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
-              {['Titre', 'Ligue', 'XP', 'Deadline', 'Track', 'Status', 'Publié', 'Closes', 'Actions'].map(h => (
+              {['Titre', 'Ligue', 'Spécialité', 'Type', 'Industrie', 'XP', 'Deadline', 'Publié', 'Actions'].map(h => (
                 <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground text-sm">Chargement…</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground text-sm">Chargement…</td></tr>
             ) : filtered.map(c => (
               <tr key={c.id} className="hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3 font-medium max-w-[180px] truncate">{c.title}</td>
@@ -163,41 +150,30 @@ export default function AdminChallenges() {
                     ? <span className="flex items-center gap-1"><LeagueIcon icon={c.leagues.icon} size="sm" /><span className="text-muted-foreground">{c.leagues.name}</span></span>
                     : <span className="text-muted-foreground/40">—</span>}
                 </td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.specialty ?? '—'}</td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.challenge_type ?? '—'}</td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.industry ?? '—'}</td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {c.xp_reward ? `${c.xp_reward} XP` : '—'}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                  {c.deadline_days ? `${c.deadline_days} jours` : '—'}
-                </td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.track}</td>
-                <td className="px-4 py-3">
-                  <span className={cn('text-[10px] font-mono px-2 py-0.5 rounded-full capitalize', STATUS_STYLE[c.status] ?? STATUS_STYLE.draft)}>
-                    {c.status}
-                  </span>
+                  {c.deadline_days ? `${c.deadline_days}j` : '—'}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn(
-                    'text-[10px] font-mono px-2 py-0.5 rounded-full',
-                    c.is_published ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'
-                  )}>
+                  <button
+                    onClick={() => publish(c.id, !c.is_published)}
+                    className={cn(
+                      'text-[10px] font-mono px-2 py-0.5 rounded-full transition-colors',
+                      c.is_published
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/70'
+                    )}
+                  >
                     {c.is_published ? 'Publié' : 'Draft'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                  {c.closes_at ? new Date(c.closes_at).toLocaleDateString('fr') : '—'}
+                  </button>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
-                    {c.status === 'draft' && (
-                      <button onClick={() => publish(c.id)} title="Publier" className="p-1.5 rounded-md hover:bg-green-100 text-green-600 transition-colors">
-                        <CheckCircle className="size-3.5" />
-                      </button>
-                    )}
-                    {c.status === 'active' && (
-                      <button onClick={() => reveal(c.id)} title="Reveal" className="p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition-colors">
-                        <Eye className="size-3.5" />
-                      </button>
-                    )}
                     <Link href={`/admin/challenges/${c.id}`} title="Éditer" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
                       <Pencil className="size-3.5" />
                     </Link>

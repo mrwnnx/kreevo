@@ -19,11 +19,30 @@ export type Database = {
           plan: 'free' | 'pro' | 'studio'
           xp: number
           league: string
+          role: 'user' | 'admin'
+          is_suspended: boolean
+          notification_prefs: Json | null
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'xp' | 'plan' | 'league' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['profiles']['Insert']>
+        Insert: Partial<Database['public']['Tables']['profiles']['Row']>
+        Update: Partial<Database['public']['Tables']['profiles']['Row']>
+      }
+      leagues: {
+        Row: {
+          id: string
+          name: string
+          icon: string
+          color: string
+          order_index: number
+          min_challenges: number
+          access: 'all' | 'pro_only'
+          is_active: boolean
+          specialty: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['leagues']['Row']>
+        Update: Partial<Database['public']['Tables']['leagues']['Row']>
       }
       challenges: {
         Row: {
@@ -34,74 +53,80 @@ export type Database = {
           deliverable: string | null
           constraints: string | null
           criteria: string | null
-          track: string
+          league_id: string | null
           specialty: string | null
           challenge_type: string | null
           industry: string | null
-          month: number
-          year: number
-          status: 'draft' | 'active' | 'closed' | 'archived'
-          reveal_at: string
-          closes_at: string
+          xp_reward: number
+          deadline_days: number
+          is_published: boolean
           created_by: string | null
           created_at: string
+          updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['challenges']['Row'], 'status' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['challenges']['Insert']>
+        Insert: Partial<Database['public']['Tables']['challenges']['Row']>
+        Update: Partial<Database['public']['Tables']['challenges']['Row']>
+      }
+      participations: {
+        Row: {
+          id: string
+          challenge_id: string
+          user_id: string
+          joined_at: string
+          personal_deadline: string
+          status: 'active' | 'submitted' | 'expired'
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['participations']['Row']>
+        Update: Partial<Database['public']['Tables']['participations']['Row']>
       }
       submissions: {
         Row: {
           id: string
-          challenge_id: string | null
-          user_id: string | null
+          challenge_id: string
+          user_id: string
+          participation_id: string | null
           cover_url: string
           files: Json | null
           description: string | null
           attempt_number: number
           is_visible: boolean
+          is_reported: boolean
           xp_earned: number
           likes_count: number
           comments_count: number
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['submissions']['Row'], 'attempt_number' | 'is_visible' | 'xp_earned' | 'likes_count' | 'comments_count' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['submissions']['Insert']>
-      }
-      random_briefs: {
-        Row: {
-          id: string
-          user_id: string | null
-          prompt: Json
-          brief_text: string
-          status: 'active' | 'archived'
-          is_public: boolean
-          created_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['random_briefs']['Row'], 'status' | 'is_public' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['random_briefs']['Insert']>
+        Insert: Partial<Database['public']['Tables']['submissions']['Row']>
+        Update: Partial<Database['public']['Tables']['submissions']['Row']>
       }
       likes: {
-        Row: { id: string; submission_id: string | null; user_id: string | null; created_at: string }
-        Insert: Pick<Database['public']['Tables']['likes']['Row'], 'submission_id' | 'user_id'>
-        Update: never
+        Row: {
+          id: string
+          submission_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['likes']['Row']>
+        Update: Partial<Database['public']['Tables']['likes']['Row']>
       }
       comments: {
         Row: {
           id: string
-          submission_id: string | null
-          user_id: string | null
+          submission_id: string
+          user_id: string
           content: string
           is_reported: boolean
           created_at: string
         }
-        Insert: Pick<Database['public']['Tables']['comments']['Row'], 'submission_id' | 'user_id' | 'content'>
-        Update: Partial<Pick<Database['public']['Tables']['comments']['Row'], 'content'>>
+        Insert: Partial<Database['public']['Tables']['comments']['Row']>
+        Update: Partial<Database['public']['Tables']['comments']['Row']>
       }
       feedbacks: {
         Row: {
           id: string
-          submission_id: string | null
+          submission_id: string
           mentor_id: string | null
           ai_draft: string | null
           final_text: string | null
@@ -110,35 +135,19 @@ export type Database = {
           priority_action: string | null
           league_impact: string | null
           score: number | null
-          status: 'pending' | 'published'
+          status: 'pending' | 'in_review' | 'published'
           created_at: string
           published_at: string | null
         }
-        Insert: Omit<Database['public']['Tables']['feedbacks']['Row'], 'status' | 'created_at' | 'published_at'>
-        Update: Partial<Database['public']['Tables']['feedbacks']['Insert']>
-      }
-      badges: {
-        Row: {
-          id: string
-          user_id: string | null
-          badge_type: string
-          metadata: Json | null
-          created_at: string
-        }
-        Insert: Pick<Database['public']['Tables']['badges']['Row'], 'user_id' | 'badge_type' | 'metadata'>
-        Update: never
-      }
-      user_badges: {
-        Row: { id: string; user_id: string; badge_id: string; earned_at: string }
-        Insert: Pick<Database['public']['Tables']['user_badges']['Row'], 'user_id' | 'badge_id'>
-        Update: never
+        Insert: Partial<Database['public']['Tables']['feedbacks']['Row']>
+        Update: Partial<Database['public']['Tables']['feedbacks']['Row']>
       }
       subscriptions: {
         Row: {
           id: string
-          user_id: string | null
-          plan: 'free' | 'pro' | 'studio'
-          status: 'active' | 'past_due' | 'canceled' | 'trialing'
+          user_id: string
+          plan: 'pro_monthly' | 'pro_yearly'
+          status: 'active' | 'cancelled' | 'expired' | 'paused'
           paddle_subscription_id: string | null
           paddle_customer_id: string | null
           current_period_start: string | null
@@ -146,35 +155,54 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['subscriptions']['Row'], 'status' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['subscriptions']['Insert']>
+        Insert: Partial<Database['public']['Tables']['subscriptions']['Row']>
+        Update: Partial<Database['public']['Tables']['subscriptions']['Row']>
+      }
+      badges: {
+        Row: {
+          id: string
+          user_id: string
+          badge_type: string
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['badges']['Row']>
+        Update: Partial<Database['public']['Tables']['badges']['Row']>
       }
       notifications: {
         Row: {
           id: string
-          user_id: string | null
+          user_id: string
           type: string
           data: Json | null
           is_read: boolean
           created_at: string
         }
-        Insert: Pick<Database['public']['Tables']['notifications']['Row'], 'user_id' | 'type' | 'data'>
-        Update: Partial<Pick<Database['public']['Tables']['notifications']['Row'], 'is_read'>>
+        Insert: Partial<Database['public']['Tables']['notifications']['Row']>
+        Update: Partial<Database['public']['Tables']['notifications']['Row']>
+      }
+      settings: {
+        Row: {
+          key: string
+          value: Json
+          updated_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['settings']['Row']>
+        Update: Partial<Database['public']['Tables']['settings']['Row']>
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
   }
 }
 
 export type Profile = Database['public']['Tables']['profiles']['Row']
+export type League = Database['public']['Tables']['leagues']['Row']
 export type Challenge = Database['public']['Tables']['challenges']['Row']
+export type Participation = Database['public']['Tables']['participations']['Row']
 export type Submission = Database['public']['Tables']['submissions']['Row']
-export type RandomBrief = Database['public']['Tables']['random_briefs']['Row']
 export type Like = Database['public']['Tables']['likes']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
 export type Feedback = Database['public']['Tables']['feedbacks']['Row']
-export type Badge = Database['public']['Tables']['badges']['Row']
 export type Subscription = Database['public']['Tables']['subscriptions']['Row']
+export type Badge = Database['public']['Tables']['badges']['Row']
 export type Notification = Database['public']['Tables']['notifications']['Row']
+export type Setting = Database['public']['Tables']['settings']['Row']

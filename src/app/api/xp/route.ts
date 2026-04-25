@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { XP_REWARDS, getLeagueFromXP } from '@/lib/utils/xp'
+import { XP_REWARDS } from '@/lib/utils/xp'
 import { checkAndUpdateLeague } from '@/lib/utils/leagues'
 import type { XPAction } from '@/lib/utils/xp'
 
@@ -32,9 +32,11 @@ export async function POST(request: Request) {
     .update({ xp: newXP })
     .eq('id', userId)
 
-  await checkAndUpdateLeague(userId, supabase)
+  await checkAndUpdateLeague(userId)
 
-  const newLeague = getLeagueFromXP(newXP)
+  const { data: updated } = await (supabase as any)
+    .from('profiles').select('league').eq('id', userId).single()
+  const newLeague = updated?.league ?? profile.league
   const leagueChanged = newLeague !== profile.league
 
   return NextResponse.json({ xpEarned, newXP, newLeague, leagueChanged })

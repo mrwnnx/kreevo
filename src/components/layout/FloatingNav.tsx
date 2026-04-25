@@ -27,7 +27,7 @@ export function FloatingNav({ profile }: { profile: Profile }) {
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const league = profile.league ?? 'rookie'
+  const league = profile.league ?? '7ajra'
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60)

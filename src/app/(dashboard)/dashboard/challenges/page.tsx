@@ -7,22 +7,13 @@ import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
-// ── Track config ──────────────────────────────────────────────────────────────
-const TRACK_CONFIG: Record<string, { icon: string; label: string; gradient: string }> = {
-  ux_ui:    { icon: '📱', label: 'UX/UI',    gradient: 'from-violet-500 to-violet-700' },
-  graphic:  { icon: '🎨', label: 'Graphic',  gradient: 'from-orange-400 to-orange-600' },
-  motion:   { icon: '✨', label: 'Motion',   gradient: 'from-pink-400 to-pink-600'     },
-  '3d':     { icon: '🧊', label: '3D',       gradient: 'from-green-400 to-green-600'   },
-  branding: { icon: '💎', label: 'Branding', gradient: 'from-yellow-400 to-yellow-600' },
-  web:      { icon: '🌐', label: 'Web',      gradient: 'from-blue-400 to-blue-600'     },
+// ── Specialty config ──────────────────────────────────────────────────────────
+const SPECIALTY_CONFIG: Record<string, { icon: string; gradient: string }> = {
+  'UX Designer':      { icon: '📱', gradient: 'from-violet-500 to-violet-700'   },
+  'UI Designer':      { icon: '🎨', gradient: 'from-blue-500 to-indigo-700'     },
+  'Graphic Designer': { icon: '✏️', gradient: 'from-orange-400 to-orange-600'   },
 }
-
-const DIFFICULTY_CONFIG: Record<string, { label: string; style: string }> = {
-  easy:         { label: 'Facile',         style: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
-  medium:       { label: 'Moyen',          style: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  hard:         { label: 'Difficile',      style: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
-  expert:       { label: 'Expert',         style: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-}
+const DEFAULT_SPECIALTY = { icon: '🎨', gradient: 'from-slate-400 to-slate-600' }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
@@ -31,10 +22,10 @@ interface LeagueRow {
 }
 
 interface ChallengeRow {
-  id: string; title: string; brief: string; track: string
-  difficulty: string | null
+  id: string; title: string; brief: string
+  specialty: string | null; challenge_type: string | null; industry: string | null
   xp_reward: number | null; deadline_days: number | null
-  closes_at: string; league_id: string | null; is_published: boolean
+  league_id: string | null; is_published: boolean
   leagues: LeagueRow | null
 }
 
@@ -50,9 +41,7 @@ function ChallengeCard({
   lockedLeagueName?: string
   lockedLeagueIcon?: string
 }) {
-  const track = TRACK_CONFIG[challenge.track] ?? { icon: '🎨', label: '', gradient: 'from-slate-400 to-slate-600' }
-  const diffKey = (challenge.difficulty ?? '') as string
-  const diff = DIFFICULTY_CONFIG[diffKey] ?? DIFFICULTY_CONFIG.medium
+  const spec = SPECIALTY_CONFIG[challenge.specialty ?? ''] ?? DEFAULT_SPECIALTY
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
 
   const card = (
@@ -65,17 +54,22 @@ function ChallengeCard({
       status === 'blocked'    && 'opacity-60 cursor-default',
     )}>
 
-      {/* Track gradient header */}
-      <div className={cn('relative h-[72px] bg-gradient-to-r flex items-center px-4 gap-3', track.gradient)}>
+      {/* Specialty gradient header */}
+      <div className={cn('relative h-[72px] bg-gradient-to-r flex items-center px-4 gap-3', spec.gradient)}>
         <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl shrink-0">
-          {track.icon}
+          {spec.icon}
         </div>
-        <span className="text-xs font-semibold text-white/80 uppercase tracking-wide">{track.label}</span>
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-white/90 uppercase tracking-wide">{challenge.specialty ?? '—'}</span>
+          {challenge.challenge_type && (
+            <span className="text-[10px] font-mono text-white/70 uppercase tracking-widest">{challenge.challenge_type}</span>
+          )}
+        </div>
 
-        {/* Difficulty badge */}
-        {diffKey && DIFFICULTY_CONFIG[diffKey] && (
-          <span className={cn('absolute top-2.5 right-2.5 text-[11px] font-semibold px-2 py-0.5 rounded-full', diff.style)}>
-            {diff.label}
+        {/* Industry badge */}
+        {challenge.industry && (
+          <span className="absolute top-2.5 right-2.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white">
+            {challenge.industry}
           </span>
         )}
 
@@ -197,7 +191,7 @@ export default async function ChallengesPage() {
     { data: userSubmissions },
     { data: allPartRows },
   ] = await Promise.all([
-    supabase.from('profiles').select('league, plan, xp').eq('id', user.id).single(),
+    supabase.from('profiles').select('league, plan, xp, specialty').eq('id', user.id).single(),
     (supabaseAdmin as any)
       .from('leagues')
       .select('*')
@@ -205,9 +199,9 @@ export default async function ChallengesPage() {
       .order('order_index', { ascending: true }),
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, track, difficulty, xp_reward, deadline_days, closes_at, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
+      .select('id, title, brief, specialty, challenge_type, industry, xp_reward, deadline_days, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
       .eq('is_published', true)
-      .order('closes_at', { ascending: true }),
+      .order('created_at', { ascending: false }),
     (supabase as any)
       .from('participations')
       .select('id, challenge_id, personal_deadline')
@@ -251,11 +245,25 @@ export default async function ChallengesPage() {
     leagueChallengesCompleted = leagueChallengeIds.filter(id => submittedIds.has(id)).length
   }
 
+  // Specialty filter : on filtre selon la spécialité du profil
+  const profileSpecialty = (profile?.specialty ?? '') as string
+  const userTrack: 'graphic' | 'ux_ui' | null = profileSpecialty
+    ? (/graphic|illustration|brand|3d/i.test(profileSpecialty) ? 'graphic' : 'ux_ui')
+    : null
+
+  function matchesUserTrack(c: ChallengeRow): boolean {
+    if (!userTrack) return true
+    const cs = c.specialty ?? ''
+    if (userTrack === 'graphic') return /graphic/i.test(cs)
+    return /ux|ui/i.test(cs)
+  }
+
   // My league challenges (sorted: active first)
   const myLeagueChallenges = challenges.filter(c => {
     if (!c.league_id) return false
     const cl = c.leagues
     if (!cl) return false
+    if (!matchesUserTrack(c)) return false
     if (!userLeagueRow) return cl.order_index === 1
     return cl.order_index === userLeagueIndex
   })
@@ -271,7 +279,7 @@ export default async function ChallengesPage() {
   const higherLeagues = leagues.filter(l => l.order_index > userLeagueIndex)
   const challengesByLeague: Record<string, ChallengeRow[]> = {}
   for (const l of higherLeagues) {
-    challengesByLeague[l.id] = challenges.filter(c => c.league_id === l.id)
+    challengesByLeague[l.id] = challenges.filter(c => c.league_id === l.id && matchesUserTrack(c))
   }
 
   // Pro gate: user is free but current league is pro_only

@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 import { Clock, ChevronLeft, Users, CheckCircle2, Target, Package, AlertCircle, Star, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
@@ -44,10 +43,10 @@ export default async function ChallengePage({ params }: Props) {
   if (!profile) redirect('/login')
   if (!challenge) notFound()
 
-  const c = challenge as Challenge
+  const c = challenge as any
   const p = profile as Profile
-  const isClosed = c.closes_at ? new Date(c.closes_at) < new Date() : false
-  const isRevealed = c.reveal_at ? new Date(c.reveal_at) <= new Date() : isClosed
+  const isClosed = false
+  const isRevealed = true
   const totalParticipants = participantCount ?? 0
 
   const hasParticipation = !!participation
@@ -65,13 +64,12 @@ export default async function ChallengePage({ params }: Props) {
 
   const avatars = ((participantAvatars ?? []) as any[]).map(r => r.profiles).filter(Boolean)
 
-  const TRACK_COLOR: Record<string, string> = {
-    UX:      'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
-    UI:      'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
-    Graphic: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20 dark:text-pink-400',
-    Motion:  'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400',
+  const SPECIALTY_COLOR: Record<string, string> = {
+    'UX Designer':      'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
+    'UI Designer':      'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
+    'Graphic Designer': 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400',
   }
-  const trackColor = TRACK_COLOR[c.track ?? ''] ?? 'text-muted-foreground bg-muted'
+  const specialtyColor = SPECIALTY_COLOR[c.specialty ?? ''] ?? 'text-muted-foreground bg-muted'
 
   return (
     <div className="p-6 max-w-[960px] mx-auto pb-16">
@@ -94,15 +92,24 @@ export default async function ChallengePage({ params }: Props) {
           {/* Header */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${trackColor}`}>
-                {c.track}
-              </span>
-              {isClosed && <Badge variant="destructive">Fermé</Badge>}
+              {c.specialty && (
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${specialtyColor}`}>
+                  {c.specialty}
+                </span>
+              )}
+              {c.challenge_type && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider bg-muted text-muted-foreground">
+                  {c.challenge_type}
+                </span>
+              )}
+              {c.industry && (
+                <span className="text-xs font-mono text-muted-foreground">
+                  {c.industry}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Users className="size-3.5" />
-                {isRevealed
-                  ? `${allSubmissions?.length ?? 0} soumissions`
-                  : `${totalParticipants} participant${totalParticipants !== 1 ? 's' : ''}`}
+                {`${allSubmissions?.length ?? 0} soumissions`}
               </span>
             </div>
 
@@ -151,7 +158,7 @@ export default async function ChallengePage({ params }: Props) {
                 <p className="text-sm text-muted-foreground mt-1">Ton travail sera évalué sur les critères suivants.</p>
               </div>
               <div className="space-y-3">
-                {c.criteria.split(/[.•\n]/).filter(s => s.trim().length > 10).map((criterion, i) => (
+                {c.criteria.split(/[.•\n]/).filter((s: string) => s.trim().length > 10).map((criterion: string, i: number) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
                     <p className="text-sm text-foreground leading-relaxed">{criterion.trim()}</p>
@@ -379,10 +386,24 @@ export default async function ChallengePage({ params }: Props) {
           <div className="rounded-xl border border-border p-4 space-y-3">
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Détails</p>
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Track</span>
-                <span className="font-medium">{c.track}</span>
-              </div>
+              {c.specialty && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Spécialité</span>
+                  <span className="font-medium">{c.specialty}</span>
+                </div>
+              )}
+              {c.challenge_type && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Type</span>
+                  <span className="font-medium">{c.challenge_type}</span>
+                </div>
+              )}
+              {c.industry && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Industrie</span>
+                  <span className="font-medium">{c.industry}</span>
+                </div>
+              )}
               {(c as any).deadline_days && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Durée</span>

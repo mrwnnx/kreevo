@@ -1,17 +1,10 @@
 import Link from 'next/link'
 import { Lock, Trophy } from 'lucide-react'
-import { leagueColor } from '@/lib/utils/xp'
-import type { League } from '@/lib/utils/xp'
+import { getLeagueColor, getLeagueIcon, getLeagueLabel } from '@/lib/utils/xp'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 const LEAGUE_GRADIENT: Record<string, string> = {
-  // Old system
-  rookie:  'from-stone-400 to-stone-600',
-  rising:  'from-slate-400 to-slate-600',
-  pro:     'from-yellow-400 to-yellow-600',
-  elite:   'from-blue-400 to-blue-600',
-  legend:  'from-pink-500 to-red-600',
-  // New system
+  '7ajra':  'from-stone-400 to-stone-600',
   Stone:    'from-stone-400 to-stone-600',
   Bronze:   'from-orange-400 to-orange-700',
   Silver:   'from-slate-300 to-slate-500',
@@ -20,24 +13,6 @@ const LEAGUE_GRADIENT: Record<string, string> = {
   Diamond:  'from-blue-300 to-blue-600',
   Master:   'from-violet-500 to-violet-700',
   Legend:   'from-pink-500 to-red-600',
-}
-
-const LEAGUE_EMOJI: Record<string, string> = {
-  // Old system
-  rookie:  '🎯',
-  rising:  '⬆️',
-  pro:     '⭐',
-  elite:   '💎',
-  legend:  '👑',
-  // New system
-  Stone:    '🪨',
-  Bronze:   '🟤',
-  Silver:   '⚪',
-  Gold:     '🟡',
-  Platinum: '🔵',
-  Diamond:  '💎',
-  Master:   '👑',
-  Legend:   '🔴',
 }
 
 interface LeagueCardProps {
@@ -61,8 +36,9 @@ export function LeagueCard({
 }: LeagueCardProps) {
   const isPro = plan === 'pro' || plan === 'studio'
   const gradient = LEAGUE_GRADIENT[league] ?? 'from-slate-400 to-slate-600'
-  const emoji = LEAGUE_EMOJI[league] ?? '🏆'
-  const color = leagueDbColor ?? leagueColor(league as League)
+  const emoji = getLeagueIcon(league)
+  const color = leagueDbColor ?? getLeagueColor(league)
+  const displayLabel = getLeagueLabel(league)
 
   const hasNewSystem = xpThreshold !== undefined && xpThreshold > 0
   const xpPercent = hasNewSystem ? Math.min(100, Math.round((xp / xpThreshold!) * 100)) : 0
@@ -83,7 +59,7 @@ export function LeagueCard({
       {/* League name */}
       <div>
         <p className="text-2xl font-bold" style={{ color }}>
-          {league}
+          {displayLabel}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">{xp.toLocaleString()} XP total</p>
       </div>

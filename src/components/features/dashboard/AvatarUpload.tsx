@@ -4,21 +4,13 @@ import { useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { League } from '@/lib/utils/xp'
-
-const LEAGUE_GRADIENT: Record<League, string> = {
-  rookie: 'from-stone-400 to-stone-500',
-  rising: 'from-slate-400 to-slate-500',
-  pro:    'from-yellow-400 to-yellow-500',
-  elite:  'from-blue-400 to-blue-500',
-  legend: 'from-pink-500 to-red-500',
-}
+import { getLeagueColor } from '@/lib/utils/xp'
 
 interface Props {
   userId: string
   value: string | null
   name: string
-  league: League
+  league: string | null | undefined
   onChange: (url: string) => void
 }
 
@@ -104,10 +96,8 @@ export function AvatarUpload({ userId, value, name, league, onChange }: Props) {
     <div className="flex flex-col items-center gap-3">
       {/* Avatar with gradient border ring */}
       <div
-        className={cn(
-          'group relative cursor-pointer rounded-full p-[2px] bg-gradient-to-br shrink-0',
-          LEAGUE_GRADIENT[league]
-        )}
+        className="group relative cursor-pointer rounded-full p-[2px] shrink-0"
+        style={{ backgroundColor: getLeagueColor(league) }}
         onClick={() => !uploading && inputRef.current?.click()}
       >
         {/* Inner circle */}

@@ -1,18 +1,10 @@
 import Link from 'next/link'
 import { Pencil, ExternalLink, Zap, Trophy, BarChart2 } from 'lucide-react'
-import { leagueLabel, leagueColor } from '@/lib/utils/xp'
-import type { League } from '@/lib/utils/xp'
-import { cn } from '@/lib/utils'
+import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 const LEAGUE_GRADIENT: Record<string, string> = {
-  // Old system
-  rookie: 'from-stone-400 to-stone-500',
-  rising: 'from-slate-400 to-slate-500',
-  pro:    'from-yellow-400 to-yellow-500',
-  elite:  'from-blue-400 to-blue-500',
-  legend: 'from-pink-500 to-red-500',
-  // New system
+  '7ajra':  'from-stone-400 to-stone-600',
   Stone:    'from-stone-400 to-stone-600',
   Bronze:   'from-orange-400 to-orange-700',
   Silver:   'from-slate-300 to-slate-500',
@@ -61,7 +53,7 @@ function Avatar({ url, name, league }: { url: string | null; name: string; leagu
 
   return (
     <div className="relative shrink-0">
-      <div className={cn('size-[88px] rounded-full p-[2px] bg-gradient-to-br', gradient)}>
+      <div className={`size-[88px] rounded-full p-[2px] bg-gradient-to-br ${gradient}`}>
         <div className="size-full rounded-full overflow-hidden bg-muted">
           {url ? (
             <img src={url} alt={name} className="size-full object-cover" />
@@ -88,9 +80,9 @@ export function HeroProfile({
   const subtitle = specialty || bio || null
   const rankPercent = rank && totalUsers > 0 ? Math.round((rank / totalUsers) * 100) : null
 
-  // Use new system if available, fallback to old
-  const displayLeagueName = leagueDisplayName ?? leagueLabel(league as League)
-  const displayLeagueColor = leagueDisplayColor ?? leagueColor(league as League)
+  // Use new system if available, fallback to lookup by name
+  const displayLeagueName = leagueDisplayName ?? getLeagueLabel(league)
+  const displayLeagueColor = leagueDisplayColor ?? getLeagueColor(league)
   const displayLeagueIcon = leagueIcon ?? ''
 
   // XP remaining to next league
