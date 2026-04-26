@@ -110,7 +110,7 @@ function ChallengeCard({
 
         <div>
           <h3 className={cn(
-            'text-sm font-semibold leading-snug line-clamp-2',
+            'text-base font-semibold leading-snug line-clamp-2',
             isClickable && 'group-hover:text-primary transition-colors',
           )}>
             {challenge.title}
