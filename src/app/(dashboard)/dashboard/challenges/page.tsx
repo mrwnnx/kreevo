@@ -9,12 +9,12 @@ import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 
 // ── Specialty visual config ───────────────────────────────────────────────────
-const SPECIALTY_VISUAL: Record<string, { icon: string; gradient: string }> = {
-  'UX Designer':      { icon: '📱', gradient: 'from-violet-400 via-violet-500 to-violet-700'  },
-  'UI Designer':      { icon: '🎨', gradient: 'from-blue-400 via-blue-500 to-indigo-700'      },
-  'Graphic Designer': { icon: '✏️', gradient: 'from-orange-300 via-orange-400 to-orange-600'  },
+const SPECIALTY_VISUAL: Record<string, { icon: string }> = {
+  'UX Designer':      { icon: '📱' },
+  'UI Designer':      { icon: '🎨' },
+  'Graphic Designer': { icon: '✏️' },
 }
-const DEFAULT_VISUAL = { icon: '🎨', gradient: 'from-slate-400 via-slate-500 to-slate-600' }
+const DEFAULT_VISUAL = { icon: '🎨' }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
@@ -57,11 +57,11 @@ function ChallengeCard({
     )}>
 
       {/* Cover image — 4:3 ratio */}
-      <div className={cn('relative w-full aspect-[4/3] bg-gradient-to-br flex items-center justify-center overflow-hidden', visual.gradient)}>
-        <span className="text-6xl drop-shadow-sm">{visual.icon}</span>
+      <div className="relative w-full aspect-[4/3] bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+        <span className="text-6xl opacity-70">{visual.icon}</span>
 
         {challenge.industry && (
-          <span className="absolute top-3 right-3 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/25 text-white backdrop-blur-sm">
+          <span className="absolute top-3 right-3 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 backdrop-blur-sm">
             {challenge.industry}
           </span>
         )}
