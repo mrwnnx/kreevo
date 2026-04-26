@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, ArrowRight } from 'lucide-react'
+import { Lock, Zap, Trophy, Clock, ArrowRight, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -123,6 +123,10 @@ function ChallengeCard({
               {challenge.deadline_days}j deadline
             </span>
           )}
+          <span className="flex items-center gap-1">
+            <Users className="size-3" />
+            {participantCount ?? 0}
+          </span>
         </div>
 
         {participantCount != null && participantCount > 0 && (
