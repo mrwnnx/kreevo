@@ -6,6 +6,7 @@ import { Lock, Zap, Trophy, Clock, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
@@ -25,11 +26,12 @@ type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocke
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, participantCount, lockedLeagueName, lockedLeagueIcon,
+  challenge, status, participantCount, participants, lockedLeagueName, lockedLeagueIcon,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
   participantCount?: number
+  participants?: Array<{ username: string; avatar_url: string | null }>
   lockedLeagueName?: string
   lockedLeagueIcon?: string
 }) {
@@ -85,7 +87,22 @@ function ChallengeCard({
         </div>
 
         {participantCount != null && participantCount > 0 && (
-          <p className="text-xs text-muted-foreground">👥 {participantCount} designers</p>
+          <div className="flex items-center gap-2">
+            <AvatarGroup data-size="sm">
+              {(participants ?? []).slice(0, 3).map((p) => (
+                <Avatar key={p.username} size="sm">
+                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
+                  <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+                </Avatar>
+              ))}
+              {participantCount > 3 && (
+                <AvatarGroupCount className="size-6 text-xs">+{participantCount - 3}</AvatarGroupCount>
+              )}
+            </AvatarGroup>
+            <span className="text-xs text-muted-foreground">
+              {participantCount} {participantCount > 1 ? 'designers' : 'designer'}
+            </span>
+          </div>
         )}
 
         {/* Footer */}
@@ -155,7 +172,7 @@ export default async function ChallengesPage() {
     supabase.from('submissions').select('challenge_id').eq('user_id', user.id),
     (supabaseAdmin as any)
       .from('participations')
-      .select('challenge_id'),
+      .select('challenge_id, user_id'),
   ])
 
   const profile = profileData as any
@@ -168,6 +185,25 @@ export default async function ChallengesPage() {
   const partCounts: Record<string, number> = {}
   for (const p of (allPartRows ?? []) as any[]) {
     partCounts[p.challenge_id] = (partCounts[p.challenge_id] ?? 0) + 1
+  }
+
+  // Participants (with avatars) per challenge — fetch profiles for unique user_ids
+  const uniqueUserIds = [...new Set(((allPartRows ?? []) as any[]).map((p) => p.user_id))]
+  const { data: participantProfiles } = uniqueUserIds.length > 0
+    ? await (supabaseAdmin as any)
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', uniqueUserIds)
+    : { data: [] }
+  const profileById = new Map<string, { username: string; avatar_url: string | null }>(
+    ((participantProfiles ?? []) as any[]).map((p) => [p.id, { username: p.username, avatar_url: p.avatar_url }])
+  )
+  const participantsByChallenge: Record<string, Array<{ username: string; avatar_url: string | null }>> = {}
+  for (const p of (allPartRows ?? []) as any[]) {
+    const prof = profileById.get(p.user_id)
+    if (!prof) continue
+    if (!participantsByChallenge[p.challenge_id]) participantsByChallenge[p.challenge_id] = []
+    participantsByChallenge[p.challenge_id].push(prof)
   }
 
   // Find user's current league in new table
@@ -343,6 +379,7 @@ export default async function ChallengesPage() {
                   challenge={c}
                   status={status}
                   participantCount={partCounts[c.id]}
+                  participants={participantsByChallenge[c.id]}
                 />
               )
             })}
@@ -381,6 +418,7 @@ export default async function ChallengesPage() {
                   challenge={c}
                   status="locked"
                   participantCount={partCounts[c.id]}
+                  participants={participantsByChallenge[c.id]}
                   lockedLeagueName={league.name}
                   lockedLeagueIcon={league.icon}
                 />
