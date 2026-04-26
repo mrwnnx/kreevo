@@ -7,14 +7,6 @@ import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
-// ── Specialty config ──────────────────────────────────────────────────────────
-const SPECIALTY_CONFIG: Record<string, { icon: string; gradient: string }> = {
-  'UX Designer':      { icon: '📱', gradient: 'from-violet-500 to-violet-700'   },
-  'UI Designer':      { icon: '🎨', gradient: 'from-blue-500 to-indigo-700'     },
-  'Graphic Designer': { icon: '✏️', gradient: 'from-orange-400 to-orange-600'   },
-}
-const DEFAULT_SPECIALTY = { icon: '🎨', gradient: 'from-slate-400 to-slate-600' }
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
   id: string; name: string; icon: string; color: string
@@ -41,12 +33,11 @@ function ChallengeCard({
   lockedLeagueName?: string
   lockedLeagueIcon?: string
 }) {
-  const spec = SPECIALTY_CONFIG[challenge.specialty ?? ''] ?? DEFAULT_SPECIALTY
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
 
   const card = (
     <div className={cn(
-      'group flex flex-col bg-card border rounded-2xl overflow-hidden transition-all duration-200',
+      'group relative flex flex-col bg-card border rounded-2xl overflow-hidden transition-all duration-200',
       status === 'available'  && 'border-border hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
       status === 'active'     && 'border-green-400 dark:border-green-600 shadow-sm shadow-green-500/10',
       status === 'completed'  && 'border-border/40',
@@ -54,50 +45,8 @@ function ChallengeCard({
       status === 'blocked'    && 'opacity-60 cursor-default',
     )}>
 
-      {/* Specialty gradient header */}
-      <div className={cn('relative h-[72px] bg-gradient-to-r flex items-center px-4 gap-3', spec.gradient)}>
-        <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl shrink-0">
-          {spec.icon}
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-semibold text-white/90 uppercase tracking-wide">{challenge.specialty ?? '—'}</span>
-          {challenge.challenge_type && (
-            <span className="text-[10px] font-mono text-white/70 uppercase tracking-widest">{challenge.challenge_type}</span>
-          )}
-        </div>
-
-        {/* Industry badge */}
-        {challenge.industry && (
-          <span className="absolute top-2.5 right-2.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white">
-            {challenge.industry}
-          </span>
-        )}
-
-        {/* Active badge */}
-        {status === 'active' && (
-          <div className="absolute bottom-2 right-3 flex items-center gap-1 bg-green-600/80 rounded-full px-2 py-0.5">
-            <span className="size-1.5 rounded-full bg-green-300 animate-pulse" />
-            <span className="text-[11px] font-medium text-white">En cours</span>
-          </div>
-        )}
-
-        {/* Completed overlay */}
-        {status === 'completed' && (
-          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-            <span className="text-2xl">✅</span>
-          </div>
-        )}
-
-        {/* Lock overlay */}
-        {status === 'locked' && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <Lock className="size-6 text-white/80" />
-          </div>
-        )}
-      </div>
-
       {/* Body */}
-      <div>
+      <div className="p-4 space-y-3">
 
         {/* Blocked overlay */}
         {status === 'blocked' && (
