@@ -385,7 +385,7 @@ export default async function ChallengesPage() {
         )}
 
         {sortedMyLeague.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sortedMyLeague.map(c => {
               let status: ChallengeStatus = 'available'
               if (submittedIds.has(c.id))            status = 'completed'
@@ -430,7 +430,7 @@ export default async function ChallengesPage() {
               )}
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {leagueChallenges.map(c => (
                 <ChallengeCard
                   key={c.id}
