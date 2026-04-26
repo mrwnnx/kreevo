@@ -293,7 +293,7 @@ export default async function ChallengesPage() {
   const challengesPercent = Math.min(100, Math.round((leagueChallengesCompleted / minCh) * 100))
 
   return (
-    <div className="p-6 max-w-[960px] mx-auto pb-16 space-y-8">
+    <div className="p-6 max-w-[1280px] mx-auto pb-16 space-y-8">
 
       {/* ── Header ── */}
       <div className="space-y-4">
