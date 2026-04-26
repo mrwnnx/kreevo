@@ -8,6 +8,14 @@ import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 
+// ── Specialty visual config ───────────────────────────────────────────────────
+const SPECIALTY_VISUAL: Record<string, { icon: string; gradient: string }> = {
+  'UX Designer':      { icon: '📱', gradient: 'from-violet-400 via-violet-500 to-violet-700'  },
+  'UI Designer':      { icon: '🎨', gradient: 'from-blue-400 via-blue-500 to-indigo-700'      },
+  'Graphic Designer': { icon: '✏️', gradient: 'from-orange-300 via-orange-400 to-orange-600'  },
+}
+const DEFAULT_VISUAL = { icon: '🎨', gradient: 'from-slate-400 via-slate-500 to-slate-600' }
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
   id: string; name: string; icon: string; color: string
@@ -36,6 +44,7 @@ function ChallengeCard({
   lockedLeagueIcon?: string
 }) {
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
+  const visual = SPECIALTY_VISUAL[challenge.specialty ?? ''] ?? DEFAULT_VISUAL
 
   const card = (
     <div className={cn(
@@ -46,6 +55,36 @@ function ChallengeCard({
       status === 'locked'     && 'opacity-50 cursor-default',
       status === 'blocked'    && 'opacity-60 cursor-default',
     )}>
+
+      {/* Cover image — 4:3 ratio */}
+      <div className={cn('relative w-full aspect-[4/3] bg-gradient-to-br flex items-center justify-center overflow-hidden', visual.gradient)}>
+        <span className="text-6xl drop-shadow-sm">{visual.icon}</span>
+
+        {challenge.industry && (
+          <span className="absolute top-3 right-3 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/25 text-white backdrop-blur-sm">
+            {challenge.industry}
+          </span>
+        )}
+
+        {status === 'active' && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-green-600/85 rounded-full px-2 py-0.5 backdrop-blur-sm">
+            <span className="size-1.5 rounded-full bg-green-200 animate-pulse" />
+            <span className="text-[11px] font-medium text-white">En cours</span>
+          </div>
+        )}
+
+        {status === 'completed' && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <span className="text-3xl">✅</span>
+          </div>
+        )}
+
+        {status === 'locked' && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <Lock className="size-7 text-white/85" />
+          </div>
+        )}
+      </div>
 
       {/* Body */}
       <div className="p-4 space-y-3">
