@@ -141,11 +141,6 @@ function ChallengeCard({
 
         {/* Footer */}
         <div className="mt-auto pt-3 border-t border-border/60">
-          {status === 'available' && (
-            <span className="inline-flex items-center justify-center w-full rounded-full bg-primary text-primary-foreground text-xs font-semibold py-2 group-hover:opacity-90">
-              Participer
-            </span>
-          )}
           {status === 'active' && (
             <span className="inline-flex items-center justify-center gap-1.5 w-full rounded-full border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 text-xs font-semibold py-2 group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
               Continuer <ArrowRight className="size-3" />
