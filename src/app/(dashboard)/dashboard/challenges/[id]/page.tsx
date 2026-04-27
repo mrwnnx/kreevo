@@ -4,13 +4,13 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
 import { Avatar, AvatarFallback, AvatarImage, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
+import { cn } from '@/lib/utils'
 import { Clock, ChevronLeft, Users, CheckCircle2, Package, AlertCircle, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
-import { SubmitForm } from '@/components/features/challenge/SubmitForm'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { ParticipateButton } from '@/components/features/challenge/ParticipateButton'
-import type { Profile, Submission } from '@/types/database.types'
+import type { Profile } from '@/types/database.types'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -34,7 +34,7 @@ export default async function ChallengePage({ params }: Props) {
     supabase.from('challenges').select('*').eq('id', id).single(),
     (supabase as any).from('participations').select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
-    (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).order('likes_count', { ascending: false }),
+    (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).eq('is_draft', false).neq('user_id', user.id).order('likes_count', { ascending: false }),
     supabaseAdmin.from('participations' as any).select('*', { count: 'exact', head: true }).eq('challenge_id', id),
     supabaseAdmin.from('participations' as any).select('profiles(username, avatar_url)').eq('challenge_id', id).limit(6),
     (supabase as any).from('participations').select('challenge_id').eq('user_id', user.id).eq('status', 'active').neq('challenge_id', id),
@@ -60,7 +60,7 @@ export default async function ChallengePage({ params }: Props) {
   const maxAttempts = p.plan === 'pro' ? 3 : 2
   const currentAttempts = (existingSubmission as any)?.attempt_number ?? (existingSubmission ? 1 : 0)
   const attemptsLeft = maxAttempts - currentAttempts
-  const canResubmit = participationStatus === 'active' && attemptsLeft > 0
+  const canResubmit = !!participation && !deadlinePassed && attemptsLeft > 0 && participationStatus !== 'expired'
 
   const avatars = ((participantAvatars ?? []) as any[]).map(r => r.profiles).filter(Boolean)
 
@@ -184,13 +184,10 @@ export default async function ChallengePage({ params }: Props) {
   return (
     <div className="p-6 max-w-[960px] mx-auto pb-16 bg-white dark:bg-background">
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
-        <Link href="/dashboard/challenges" className="hover:text-foreground transition-colors flex items-center gap-1">
+      <div className="mb-6">
+        <Link href="/dashboard/challenges" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft className="size-3.5" /> Challenges
         </Link>
-        <span>/</span>
-        <span className="text-foreground font-medium truncate max-w-[280px]">{c.title}</span>
       </div>
 
       {/* 2-col layout */}
@@ -276,51 +273,11 @@ export default async function ChallengePage({ params }: Props) {
             </section>
           )}
 
-          {/* Submit form (active) */}
-          {participationStatus === 'active' && (
-            <section id="submit" className="space-y-5 pt-2">
-              <div className="h-px bg-border" />
-              <div className="rounded-xl border border-border bg-zinc-50 dark:bg-zinc-900/20 p-4 flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-sm font-semibold">Ta participation — En cours</span>
-                  <span className="text-xs text-muted-foreground font-mono ml-2">{currentAttempts}/{maxAttempts} soumissions</span>
-                </div>
-                <CountdownTimer deadline={participation.personal_deadline} label="Il te reste" compact />
-              </div>
-
-              <h2 className="text-base font-semibold">
-                {existingSubmission ? 'Modifier ta soumission' : 'Soumettre ton travail'}
-              </h2>
-              <SubmitForm
-                challengeId={c.id}
-                existing={existingSubmission as Submission | null}
-                isClosed={false}
-                participationId={participation.id}
-                attemptsLeft={attemptsLeft}
-              />
-            </section>
-          )}
-
-          {participationStatus === 'submitted' && canResubmit && (
-            <section className="space-y-3 pt-2">
-              <div className="h-px bg-border" />
-              <h2 className="text-sm font-semibold">Modifier ta soumission</h2>
-              <SubmitForm
-                challengeId={c.id}
-                existing={existingSubmission as Submission | null}
-                isClosed={false}
-                participationId={participation.id}
-                attemptsLeft={attemptsLeft}
-              />
-            </section>
-          )}
-
           {/* Gallery */}
           {allSubmissions && allSubmissions.length > 0 && (
             <section className="space-y-4 pt-2">
               <div className="h-px bg-border" />
-              <h2 className="text-base font-semibold">{allSubmissions.length} travaux soumis</h2>
+              <h2 className="text-base font-semibold">Autres soumissions ({allSubmissions.length})</h2>
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
@@ -341,13 +298,13 @@ export default async function ChallengePage({ params }: Props) {
                 <span className="text-sm font-semibold text-green-700 dark:text-green-400">Participation active</span>
               </div>
               <CountdownTimer deadline={participation.personal_deadline} label="Deadline dans" />
-              <a
-                href="#submit"
+              <Link
+                href={`/dashboard/challenges/${c.id}/submit`}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green-600 text-white text-sm font-semibold h-11 px-4 hover:bg-green-700 transition-colors"
               >
                 <Play className="size-4" fill="currentColor" />
-                Soumettre mon travail
-              </a>
+                {existingSubmission ? 'Continuer ma soumission' : 'Soumettre mon travail'}
+              </Link>
               {avatars.length > 0 && (
                 <div className="flex items-center gap-2 pt-0.5">
                   <AvatarGroup>
@@ -369,31 +326,6 @@ export default async function ChallengePage({ params }: Props) {
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {currentAttempts}/{maxAttempts} soumissions utilisées
               </p>
-            </div>
-          )}
-
-          {participationStatus === 'submitted' && existingSubmission && (
-            <div className="rounded-xl border border-border overflow-hidden">
-              {(existingSubmission as any).cover_url && (
-                <div className="relative aspect-video overflow-hidden">
-                  <img
-                    src={(existingSubmission as any).cover_url}
-                    alt="Ta soumission"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-green-500" />
-                  <span className="text-sm font-semibold text-green-700 dark:text-green-400">Soumission reçue !</span>
-                </div>
-                {canResubmit && (
-                  <p className="text-[11px] text-muted-foreground">
-                    {attemptsLeft} modification{attemptsLeft > 1 ? 's' : ''} restante{attemptsLeft > 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
             </div>
           )}
 
@@ -449,6 +381,47 @@ export default async function ChallengePage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Ma soumission */}
+          {existingSubmission && (() => {
+            const sub = existingSubmission as any
+            const isDraft = !!sub.is_draft
+            return (
+              <div className="rounded-xl border border-border overflow-hidden">
+                {sub.cover_url && (
+                  <div className="relative aspect-video overflow-hidden bg-muted">
+                    <img src={sub.cover_url} alt={sub.title ?? 'Ma soumission'} className="w-full h-full object-cover" />
+                    <span className={cn(
+                      'absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm',
+                      isDraft
+                        ? 'bg-amber-500/90 text-white'
+                        : 'bg-green-600/90 text-white',
+                    )}>
+                      {isDraft ? 'Brouillon' : 'Publié'}
+                    </span>
+                  </div>
+                )}
+                <div className="p-3 space-y-2">
+                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Ma soumission</p>
+                  {sub.title && <p className="text-sm font-semibold leading-snug line-clamp-2">{sub.title}</p>}
+                  {!isDraft && (
+                    <div className="flex items-center gap-1.5 text-xs text-green-700 dark:text-green-400">
+                      <CheckCircle2 className="size-3.5" />
+                      <span>Soumission publiée</span>
+                    </div>
+                  )}
+                  {(canResubmit || isDraft) && participationStatus !== 'expired' && (
+                    <Link
+                      href={`/dashboard/challenges/${c.id}/submit`}
+                      className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-border text-xs font-medium h-8 px-3 hover:bg-muted transition-colors"
+                    >
+                      {isDraft ? 'Continuer' : 'Modifier'}
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
         </div>
       </div>
