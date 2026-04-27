@@ -116,10 +116,19 @@ export default async function ChallengePage({ params }: Props) {
                   <strong className="text-foreground">{c.deadline_days}</strong> jours
                 </span>
               )}
-              <span className="flex items-center gap-1.5">
-                <Users className="size-4" />
-                <strong className="text-foreground">{totalParticipants}</strong> participant{totalParticipants !== 1 ? 's' : ''}
-              </span>
+              {avatars.length > 0 && (
+                <AvatarGroup>
+                  {avatars.slice(0, 4).map((av: any, i: number) => (
+                    <Avatar key={i} size="sm">
+                      <AvatarImage src={av.avatar_url ?? undefined} />
+                      <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {totalParticipants > 4 && (
+                    <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
+                  )}
+                </AvatarGroup>
+              )}
             </div>
           </div>
 
@@ -129,26 +138,6 @@ export default async function ChallengePage({ params }: Props) {
               <h2 className="text-base font-semibold">Brief</h2>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
             </section>
-          )}
-
-          {/* Avatars preview */}
-          {avatars.length > 0 && (
-            <div className="flex items-center gap-2">
-              <AvatarGroup>
-                {avatars.slice(0, 4).map((av: any, i: number) => (
-                  <Avatar key={i} size="sm">
-                    <AvatarImage src={av.avatar_url ?? undefined} />
-                    <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                ))}
-                {totalParticipants > 4 && (
-                  <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
-                )}
-              </AvatarGroup>
-              <span className="text-sm text-muted-foreground">
-                {totalParticipants} designer{totalParticipants !== 1 ? 's' : ''} participent
-              </span>
-            </div>
           )}
 
           {/* Warning */}
@@ -306,7 +295,7 @@ export default async function ChallengePage({ params }: Props) {
                 {existingSubmission ? 'Continuer ma soumission' : 'Soumettre mon travail'}
               </Link>
               {avatars.length > 0 && (
-                <div className="flex items-center gap-2 pt-0.5">
+                <div className="pt-0.5">
                   <AvatarGroup>
                     {avatars.slice(0, 4).map((av: any, i: number) => (
                       <Avatar key={i} size="sm">
@@ -318,9 +307,6 @@ export default async function ChallengePage({ params }: Props) {
                       <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
                     )}
                   </AvatarGroup>
-                  <span className="text-[11px] text-muted-foreground">
-                    {totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}
-                  </span>
                 </div>
               )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
