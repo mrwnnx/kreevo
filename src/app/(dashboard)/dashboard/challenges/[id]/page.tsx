@@ -3,13 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
-import { Avatar, AvatarFallback, AvatarImage, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { Clock, ChevronLeft, Users, CheckCircle2, Package, AlertCircle, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { ParticipateButton } from '@/components/features/challenge/ParticipateButton'
+import { ParticipantsDialog } from '@/components/features/challenge/ParticipantsDialog'
 import type { Profile } from '@/types/database.types'
 
 interface Props { params: Promise<{ id: string }> }
@@ -36,7 +36,7 @@ export default async function ChallengePage({ params }: Props) {
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).eq('is_draft', false).neq('user_id', user.id).order('likes_count', { ascending: false }),
     supabaseAdmin.from('participations' as any).select('*', { count: 'exact', head: true }).eq('challenge_id', id),
-    supabaseAdmin.from('participations' as any).select('profiles(username, avatar_url)').eq('challenge_id', id).limit(6),
+    supabaseAdmin.from('participations' as any).select('profiles(id, username, full_name, avatar_url)').eq('challenge_id', id).limit(100),
     (supabase as any).from('participations').select('challenge_id').eq('user_id', user.id).eq('status', 'active').neq('challenge_id', id),
   ])
 
@@ -116,18 +116,8 @@ export default async function ChallengePage({ params }: Props) {
                   <strong className="text-foreground">{c.deadline_days}</strong> jours
                 </span>
               )}
-              {avatars.length > 0 && (
-                <AvatarGroup>
-                  {avatars.slice(0, 4).map((av: any, i: number) => (
-                    <Avatar key={i} size="sm">
-                      <AvatarImage src={av.avatar_url ?? undefined} />
-                      <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                  {totalParticipants > 4 && (
-                    <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
-                  )}
-                </AvatarGroup>
+              {totalParticipants > 0 && (
+                <ParticipantsDialog participants={avatars} total={totalParticipants} />
               )}
             </div>
           </div>
@@ -294,19 +284,9 @@ export default async function ChallengePage({ params }: Props) {
                 <Play className="size-4" fill="currentColor" />
                 {existingSubmission ? 'Continuer ma soumission' : 'Soumettre mon travail'}
               </Link>
-              {avatars.length > 0 && (
+              {totalParticipants > 0 && (
                 <div className="pt-0.5">
-                  <AvatarGroup>
-                    {avatars.slice(0, 4).map((av: any, i: number) => (
-                      <Avatar key={i} size="sm">
-                        <AvatarImage src={av.avatar_url ?? undefined} />
-                        <AvatarFallback>{av.username?.[0]?.toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    ))}
-                    {totalParticipants > 4 && (
-                      <AvatarGroupCount>+{totalParticipants - 4}</AvatarGroupCount>
-                    )}
-                  </AvatarGroup>
+                  <ParticipantsDialog participants={avatars} total={totalParticipants} />
                 </div>
               )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
