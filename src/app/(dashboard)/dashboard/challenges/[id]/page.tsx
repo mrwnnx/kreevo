@@ -11,6 +11,7 @@ import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { ParticipateButton } from '@/components/features/challenge/ParticipateButton'
 import { ParticipantsDialog } from '@/components/features/challenge/ParticipantsDialog'
 import { RulesDialog } from '@/components/features/challenge/RulesDialog'
+import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import type { Profile } from '@/types/database.types'
 
 interface Props { params: Promise<{ id: string }> }
@@ -35,7 +36,7 @@ export default async function ChallengePage({ params }: Props) {
     supabase.from('challenges').select('*').eq('id', id).single(),
     (supabase as any).from('participations').select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
-    (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).eq('is_draft', false).neq('user_id', user.id).order('likes_count', { ascending: false }),
+    (supabase.from('submissions') as any).select('*, profiles(username, avatar_url, league)').eq('challenge_id', id).eq('is_draft', false).eq('validation_status', 'approved').neq('user_id', user.id).order('likes_count', { ascending: false }),
     supabaseAdmin.from('participations' as any).select('*', { count: 'exact', head: true }).eq('challenge_id', id),
     supabaseAdmin.from('participations' as any).select('profiles(id, username, full_name, avatar_url)').eq('challenge_id', id).limit(100),
     (supabase as any).from('participations').select('challenge_id').eq('user_id', user.id).eq('status', 'active').neq('challenge_id', id),
@@ -355,45 +356,14 @@ export default async function ChallengePage({ params }: Props) {
           </div>
 
           {/* Ma soumission */}
-          {existingSubmission && (() => {
-            const sub = existingSubmission as any
-            const isDraft = !!sub.is_draft
-            return (
-              <div className="rounded-xl border border-border overflow-hidden">
-                {sub.cover_url && (
-                  <div className="relative aspect-video overflow-hidden bg-muted">
-                    <img src={sub.cover_url} alt={sub.title ?? 'Ma soumission'} className="w-full h-full object-cover" />
-                    <span className={cn(
-                      'absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm',
-                      isDraft
-                        ? 'bg-amber-500/90 text-white'
-                        : 'bg-green-600/90 text-white',
-                    )}>
-                      {isDraft ? 'Brouillon' : 'Publié'}
-                    </span>
-                  </div>
-                )}
-                <div className="p-3 space-y-2">
-                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Ma soumission</p>
-                  {sub.title && <p className="text-sm font-semibold leading-snug line-clamp-2">{sub.title}</p>}
-                  {!isDraft && (
-                    <div className="flex items-center gap-1.5 text-xs text-green-700 dark:text-green-400">
-                      <CheckCircle2 className="size-3.5" />
-                      <span>Soumission publiée</span>
-                    </div>
-                  )}
-                  {(canResubmit || isDraft) && participationStatus !== 'expired' && (
-                    <Link
-                      href={`/dashboard/challenges/${c.id}/submit`}
-                      className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-border text-xs font-medium h-8 px-3 hover:bg-muted transition-colors"
-                    >
-                      {isDraft ? 'Continuer' : 'Modifier'}
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )
-          })()}
+          {existingSubmission && (
+            <MySubmissionCard
+              submission={existingSubmission as any}
+              challengeId={c.id}
+              canResubmit={canResubmit}
+              participationStatus={participationStatus}
+            />
+          )}
 
         </div>
       </div>

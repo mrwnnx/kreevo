@@ -82,12 +82,19 @@ export async function submitChallenge(formData: FormData) {
     is_visible: isVisible,
   }
 
+  // Reset validation_status to pending on every publish (not on drafts)
+  const finalPayload = isDraft
+    ? payload
+    : { ...payload, validation_status: 'pending', xp_attributed: false, rejection_reason: null, validated_at: null, validated_by: null }
+
   const table = supabase.from('submissions') as any
-  const { error } = existing
-    ? await table.update(payload).eq('id', existing.id)
-    : await table.insert(payload)
+  const { data: upsertResult, error } = existing
+    ? await table.update(finalPayload).eq('id', existing.id).select('id').single()
+    : await table.insert(finalPayload).select('id').single()
 
   if (error) return { error: error.message }
+
+  const submissionId = upsertResult?.id ?? existing?.id
 
   // For drafts: skip status updates and XP awards
   if (isDraft) {
@@ -103,15 +110,10 @@ export async function submitChallenge(formData: FormData) {
       .eq('id', participationId)
   }
 
-  // Award XP only on the first published submission (not on drafts, not on resubmits)
-  const isFirstPublish = !existing || wasDraft
-  if (isFirstPublish) {
-    const { data: prof } = await (supabase as any)
-      .from('profiles').select('xp').eq('id', user.id).single()
-    const newXP = (prof?.xp ?? 0) + 150
-    await (supabase as any).from('profiles').update({ xp: newXP }).eq('id', user.id)
-    const { checkAndUpdateLeague } = await import('@/lib/utils/leagues')
-    await checkAndUpdateLeague(user.id)
+  // Trigger validation flow (AI auto-validation for low leagues, pending review for high leagues)
+  if (submissionId) {
+    const { triggerValidationFlow } = await import('@/lib/utils/submissions')
+    await triggerValidationFlow(submissionId)
   }
 
   revalidatePath(`/dashboard/challenges/${challengeId}`)

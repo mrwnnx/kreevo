@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Heart, MessageCircle, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { ReportButton } from './ReportButton'
 
 interface Submission {
   id: string
@@ -14,6 +15,7 @@ interface Submission {
   likes_count: number
   comments_count: number
   user_id: string
+  created_at?: string
   profiles?: { username: string; avatar_url: string | null; league: string }
   challenges?: { title: string }
 }
@@ -173,6 +175,11 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, chal
                       <MessageCircle className="size-3.5" />
                       {s.comments_count}
                     </Link>
+                    {!isOwn && currentUserId && s.created_at && (
+                      <div className="ml-auto">
+                        <ReportButton submissionId={s.id} submissionCreatedAt={s.created_at} />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
