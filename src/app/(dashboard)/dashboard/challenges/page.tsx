@@ -2,11 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, ArrowRight, Users } from 'lucide-react'
+import { Lock, Zap, Trophy, Clock, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
-import { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 
 // ── Specialty visual config ───────────────────────────────────────────────────
 const SPECIALTY_VISUAL: Record<string, { icon: string }> = {
@@ -105,24 +104,9 @@ function ChallengeCard({
           {challenge.title}
         </h3>
 
-        {/* Specialty + Type + Industry badges */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {challenge.specialty && (
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-              {challenge.specialty}
-            </span>
-          )}
-          {challenge.challenge_type && (
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-              {challenge.challenge_type}
-            </span>
-          )}
-          {challenge.industry && (
-            <span className="text-[11px] font-mono text-muted-foreground">
-              {challenge.industry}
-            </span>
-          )}
-        </div>
+        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+          {challenge.brief}
+        </p>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
@@ -141,49 +125,6 @@ function ChallengeCard({
             <Users className="size-3" />
             {participantCount ?? 0}
           </span>
-        </div>
-
-        {participantCount != null && participantCount > 0 && (
-          <AvatarGroup data-size="sm">
-            {(participants ?? []).slice(0, 3).map((p) => (
-              <Avatar key={p.username} size="sm">
-                {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
-                <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-              </Avatar>
-            ))}
-            {participantCount > 3 && (
-              <AvatarGroupCount className="size-6 text-xs">+{participantCount - 3}</AvatarGroupCount>
-            )}
-          </AvatarGroup>
-        )}
-
-        {/* Footer */}
-        <div className="pt-1">
-          {(status === 'available' || status === 'active' || status === 'completed') && (
-            <span className={cn(
-              'inline-flex items-center justify-center gap-1.5 w-full rounded-full text-xs font-semibold py-2 transition-colors',
-              status === 'active'
-                ? 'border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 group-hover:bg-green-50 dark:group-hover:bg-green-900/20'
-                : status === 'completed'
-                ? 'border border-border text-muted-foreground'
-                : 'bg-primary text-primary-foreground group-hover:opacity-85',
-            )}>
-              {status === 'active' && <>Continuer <ArrowRight className="size-3" /></>}
-              {status === 'completed' && <>✅ Complété</>}
-              {status === 'available' && <>Voir le défi <ArrowRight className="size-3" /></>}
-            </span>
-          )}
-          {status === 'locked' && lockedLeagueName && (
-            <span className="inline-flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground">
-              <Lock className="size-3" />
-              Atteins {lockedLeagueIcon && <LeagueIcon icon={lockedLeagueIcon} size="sm" />} {lockedLeagueName}
-            </span>
-          )}
-          {status === 'locked' && !lockedLeagueName && (
-            <span className="inline-flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground">
-              <Lock className="size-3" /> Verrouillé
-            </span>
-          )}
         </div>
       </div>
     </div>
