@@ -10,6 +10,7 @@ import { SubmissionGallery } from '@/components/features/challenge/SubmissionGal
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { ParticipateButton } from '@/components/features/challenge/ParticipateButton'
 import { ParticipantsDialog } from '@/components/features/challenge/ParticipantsDialog'
+import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import type { Profile } from '@/types/database.types'
 
 interface Props { params: Promise<{ id: string }> }
@@ -152,7 +153,12 @@ export default async function ChallengePage({ params }: Props) {
               Tu as déjà un défi en cours. Termine-le avant d&apos;en rejoindre un autre.
             </div>
           ) : (
-            <ParticipateButton challengeId={c.id} deadlineDays={c.deadline_days ?? 3} />
+            <div className="space-y-3">
+              <ParticipateButton challengeId={c.id} deadlineDays={c.deadline_days ?? 3} />
+              <div className="text-center">
+                <RulesDialog xpReward={c.xp_reward ?? 150} deadlineDays={c.deadline_days ?? 3} />
+              </div>
+            </div>
           )}
         </div>
       </div>
