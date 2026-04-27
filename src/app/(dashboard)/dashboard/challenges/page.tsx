@@ -112,18 +112,18 @@ function ChallengeCard({
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
             <span className="flex items-center gap-1.5">
               <Zap className="size-4 text-amber-500" />
-              {challenge.xp_reward} XP
+              <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> XP
             </span>
           )}
           {challenge.deadline_days != null && (
             <span className="flex items-center gap-1.5">
               <Clock className="size-4" />
-              {challenge.deadline_days}j
+              <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>j
             </span>
           )}
           <span className="flex items-center gap-1.5">
             <Users className="size-4" />
-            {participantCount ?? 0}
+            <strong className="font-semibold text-foreground">{participantCount ?? 0}</strong>
           </span>
         </div>
       </div>
