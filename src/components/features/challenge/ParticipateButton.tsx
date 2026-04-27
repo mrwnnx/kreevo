@@ -3,9 +3,24 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { Loader2, ArrowRight } from 'lucide-react'
 
-export function ParticipateButton({ challengeId }: { challengeId: string }) {
+export function ParticipateButton({
+  challengeId,
+  deadlineDays,
+}: {
+  challengeId: string
+  deadlineDays: number
+}) {
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -20,29 +35,59 @@ export function ParticipateButton({ challengeId }: { challengeId: string }) {
         body: JSON.stringify({ challenge_id: challengeId }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error); setLoading(false); return }
+      if (!res.ok) {
+        setError(data.error ?? 'Erreur')
+        setLoading(false)
+        return
+      }
+      setOpen(false)
       router.refresh()
     } catch {
-      setError('Something went wrong')
+      setError('Une erreur est survenue')
       setLoading(false)
     }
   }
 
   return (
-    <div className="space-y-3">
+    <>
       <Button
         size="lg"
-        onClick={handleParticipate}
-        disabled={loading}
+        onClick={() => setOpen(true)}
         className="w-full text-base h-12 gap-2"
       >
-        {loading ? <Loader2 className="size-5 animate-spin" /> : '🚀'}
-        {loading ? 'Inscription en cours…' : 'Je participe'}
+        Je participe <ArrowRight className="size-4" />
       </Button>
-      {error && <p className="text-sm text-destructive text-center">{error}</p>}
-      <p className="text-xs text-muted-foreground text-center">
-        Tu auras 3 jours pour soumettre ton travail après avoir rejoint.
-      </p>
-    </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tu es prêt ?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-sm">
+              En confirmant, ton chrono de{' '}
+              <strong>{deadlineDays} jours</strong> démarre immédiatement.
+              Tu découvriras le brief complet et tu devras soumettre ton
+              travail avant la deadline.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Tu ne pourras pas choisir un autre défi tant que tu n&apos;as pas
+              soumis.
+            </p>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" disabled={loading} />}>
+              Annuler
+            </DialogClose>
+            <Button onClick={handleParticipate} disabled={loading} className="gap-2">
+              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+              Oui, je participe
+              <ArrowRight className="size-4" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

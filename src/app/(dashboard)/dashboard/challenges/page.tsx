@@ -98,16 +98,30 @@ function ChallengeCard({
           </div>
         )}
 
-        <div>
-          <h3 className={cn(
-            'text-base font-semibold leading-snug line-clamp-2',
-            isClickable && 'group-hover:text-primary transition-colors',
-          )}>
-            {challenge.title}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-            {challenge.brief}
-          </p>
+        <h3 className={cn(
+          'text-base font-semibold leading-snug line-clamp-2',
+          isClickable && 'group-hover:text-primary transition-colors',
+        )}>
+          {challenge.title}
+        </h3>
+
+        {/* Specialty + Type + Industry badges */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {challenge.specialty && (
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+              {challenge.specialty}
+            </span>
+          )}
+          {challenge.challenge_type && (
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+              {challenge.challenge_type}
+            </span>
+          )}
+          {challenge.industry && (
+            <span className="text-[11px] font-mono text-muted-foreground">
+              {challenge.industry}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -120,7 +134,7 @@ function ChallengeCard({
           {challenge.deadline_days != null && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
-              {challenge.deadline_days}j deadline
+              {challenge.deadline_days}j
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -130,29 +144,33 @@ function ChallengeCard({
         </div>
 
         {participantCount != null && participantCount > 0 && (
-          <div className="flex items-center gap-2">
-            <AvatarGroup data-size="sm">
-              {(participants ?? []).slice(0, 3).map((p) => (
-                <Avatar key={p.username} size="sm">
-                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
-                  <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-                </Avatar>
-              ))}
-              {participantCount > 3 && (
-                <AvatarGroupCount className="size-6 text-xs">+{participantCount - 3}</AvatarGroupCount>
-              )}
-            </AvatarGroup>
-            <span className="text-xs text-muted-foreground">
-              {participantCount} {participantCount > 1 ? 'designers' : 'designer'}
-            </span>
-          </div>
+          <AvatarGroup data-size="sm">
+            {(participants ?? []).slice(0, 3).map((p) => (
+              <Avatar key={p.username} size="sm">
+                {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
+                <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+              </Avatar>
+            ))}
+            {participantCount > 3 && (
+              <AvatarGroupCount className="size-6 text-xs">+{participantCount - 3}</AvatarGroupCount>
+            )}
+          </AvatarGroup>
         )}
 
         {/* Footer */}
-        <div>
-          {status === 'active' && (
-            <span className="inline-flex items-center justify-center gap-1.5 w-full rounded-full border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 text-xs font-semibold py-2 group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
-              Continuer <ArrowRight className="size-3" />
+        <div className="pt-1">
+          {(status === 'available' || status === 'active' || status === 'completed') && (
+            <span className={cn(
+              'inline-flex items-center justify-center gap-1.5 w-full rounded-full text-xs font-semibold py-2 transition-colors',
+              status === 'active'
+                ? 'border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 group-hover:bg-green-50 dark:group-hover:bg-green-900/20'
+                : status === 'completed'
+                ? 'border border-border text-muted-foreground'
+                : 'bg-primary text-primary-foreground group-hover:opacity-85',
+            )}>
+              {status === 'active' && <>Continuer <ArrowRight className="size-3" /></>}
+              {status === 'completed' && <>✅ Complété</>}
+              {status === 'available' && <>Voir le défi <ArrowRight className="size-3" /></>}
             </span>
           )}
           {status === 'locked' && lockedLeagueName && (
@@ -164,11 +182,6 @@ function ChallengeCard({
           {status === 'locked' && !lockedLeagueName && (
             <span className="inline-flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground">
               <Lock className="size-3" /> Verrouillé
-            </span>
-          )}
-          {status === 'completed' && (
-            <span className="inline-flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground">
-              ✅ Complété
             </span>
           )}
         </div>
