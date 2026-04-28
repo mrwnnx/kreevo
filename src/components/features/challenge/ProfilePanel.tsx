@@ -74,7 +74,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
       )}
     >
       {/* ── Card profil ── */}
-      <div className="rounded-2xl border border-border overflow-hidden bg-card">
+      <div className="rounded-2xl border border-border overflow-hidden bg-card p-4">
         <div>
           <div className="mb-3">
             <Avatar className="size-11 rounded-full border border-border shadow-sm">
@@ -125,21 +125,10 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
         </div>
       </div>
 
-      {/* ── Card tools ── */}
-      {author.tools && author.tools.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <Label>Outils</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {author.tools.map(t => (
-              <span key={t} className="text-[11px] bg-muted px-2 py-0.5 rounded-full">{t}</span>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* ── Card links ── */}
+      {/* Links */}
       {activeLinks.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div>
           <Label>Liens</Label>
           <div className="space-y-2">
             {activeLinks.map(([key, url]) => (
@@ -158,9 +147,9 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
         </div>
       )}
 
-      {/* ── Card challenge ── */}
+      {/* Challenge */}
       {challenge && (
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <div className="space-y-3">
           <Label>Challenge</Label>
           <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
           <div className="space-y-1.5">
