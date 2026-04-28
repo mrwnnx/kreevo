@@ -180,9 +180,13 @@ export default async function ChallengePage({ params, searchParams }: Props) {
         </Link>
       </div>
 
-      {/* Banner après soumission (?just_submitted=approved|rejected|pending) */}
+      {/* Banner après soumission — synchronisé avec le vrai statut courant de la soumission
+          (le query param peut devenir obsolète si l'admin valide/rejette après coup) */}
       {justSubmitted && existingSubmission && (() => {
         const sub = existingSubmission as any
+        const currentStatus = sub.validation_status as string | null
+        // Only show banner if URL param matches current status (otherwise it's stale)
+        if (justSubmitted !== currentStatus) return null
         if (justSubmitted === 'approved') {
           return (
             <div className="bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-900/40 rounded-2xl p-4 flex items-center gap-3 mb-6">
