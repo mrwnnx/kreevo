@@ -20,7 +20,7 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
 
   const { data: submission } = await (supabaseAdmin as any)
     .from('submissions')
-    .select('*, profiles(id, username, avatar_url, full_name, league, plan), challenges(id, title, brief, specialty, challenge_type, industry, xp_reward, leagues(name))')
+    .select('*, profiles:user_id(id, username, avatar_url, full_name, league, plan), challenges(id, title, brief, specialty, challenge_type, industry, xp_reward, leagues(name))')
     .eq('id', id)
     .single()
 

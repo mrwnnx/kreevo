@@ -22,7 +22,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
 
   let query = (supabaseAdmin as any)
     .from('submissions')
-    .select('id, title, cover_url, validation_status, reports_count, created_at, validated_at, rejection_reason, profiles(username, avatar_url), challenges(title, leagues(name))')
+    .select('id, title, cover_url, validation_status, reports_count, created_at, validated_at, rejection_reason, profiles:user_id(username, avatar_url), challenges(title, leagues(name))')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
     .limit(100)
@@ -60,7 +60,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
   const contests = tab === 'contested'
     ? (await (supabaseAdmin as any)
         .from('submission_contests')
-        .select('id, message, status, created_at, submissions(id, title, cover_url, validation_status, profiles(username, avatar_url), challenges(title))')
+        .select('id, message, status, created_at, submissions(id, title, cover_url, validation_status, profiles:user_id(username, avatar_url), challenges(title))')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })).data ?? []
     : []
