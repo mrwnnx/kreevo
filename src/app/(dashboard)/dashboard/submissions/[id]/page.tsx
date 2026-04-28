@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ExternalLink } from 'lucide-react'
-import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ShareButton } from '@/components/features/challenge/ShareButton'
@@ -17,29 +16,23 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: submission }, { data: liked }, { data: currentProfile }, { data: ratings }] = await Promise.all([
+  const [{ data: submission }, { data: clapData }, { data: currentProfile }] = await Promise.all([
     (supabase as any)
       .from('submissions')
       .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
       .eq('id', id)
       .single(),
     (supabase as any)
-      .from('likes')
-      .select('id')
+      .from('submission_claps')
+      .select('claps_count')
       .eq('submission_id', id)
       .eq('user_id', user.id)
-      .single(),
+      .maybeSingle(),
     (supabase as any)
       .from('profiles')
       .select('username, avatar_url, plan')
       .eq('id', user.id)
       .single(),
-    (supabase as any)
-      .from('comments')
-      .select('rating')
-      .eq('submission_id', id)
-      .eq('is_reported', false)
-      .not('rating', 'is', null),
   ])
 
   if (!submission) notFound()
@@ -50,8 +43,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
 
   const figmaUrl = (submission.files as any)?.figma
-  const fireSum = ((ratings ?? []) as { rating: number | null }[])
-    .reduce((s, r) => s + (r.rating ?? 0), 0)
+  const userClaps = (clapData as any)?.claps_count ?? 0
 
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
@@ -84,25 +76,15 @@ export default async function SubmissionDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Card actions : likes + commentaires + signaler */}
-          <div className="rounded-2xl border border-border bg-card flex items-center gap-4 px-4 py-3">
-            <LikeButton
-              submissionId={id}
-              initialLikes={submission.likes_count ?? 0}
-              initialLiked={!!liked}
-              currentUserId={user.id}
-              displayCount={fireSum}
-            />
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full text-muted-foreground">
-              💬 {submission.comments_count ?? 0}
-            </span>
-            <div className="ml-auto flex items-center gap-3">
+          {/* Share + report */}
+          {(!isOwn || true) && (
+            <div className="flex items-center gap-3 justify-end">
               <ShareButton />
               {!isOwn && submission.created_at && (
                 <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
               )}
             </div>
-          </div>
+          )}
 
           {/* Card description */}
           {(submission.description || figmaUrl) && (
@@ -134,10 +116,10 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 submissionId={id}
                 currentUserId={user.id}
                 userPlan={currentProfile?.plan ?? null}
-                userAvatar={currentProfile?.avatar_url ?? null}
-                username={currentProfile?.username}
+                initialUserClaps={userClaps}
+                initialTotalClaps={submission.total_claps ?? 0}
+                initialCommentsCount={submission.comments_count ?? 0}
                 submissionOwnerId={submission.user_id}
-                isVisible={true}
               />
             </>
           )}

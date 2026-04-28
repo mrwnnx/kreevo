@@ -1,17 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { FireRating } from './FireRating'
-import { Heart, Flag } from 'lucide-react'
+import { Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ProBadge } from '@/components/ui/ProBadge'
 
 export interface ReviewComment {
   id: string
   content: string
-  rating: number | null
-  likes_count: number
-  liked_by_me: boolean
+  title?: string | null
   created_at: string
   is_reported: boolean
   user: {
@@ -26,7 +23,6 @@ export interface ReviewComment {
 interface CommentCardProps {
   comment: ReviewComment
   currentUserId: string
-  onLike: (id: string) => Promise<void>
   onReport: (id: string) => Promise<void>
 }
 
@@ -42,26 +38,14 @@ function timeAgo(date: string): string {
   return new Date(date).toLocaleDateString('fr', { month: 'short', day: 'numeric' })
 }
 
-export function CommentCard({ comment, currentUserId, onLike, onReport }: CommentCardProps) {
+export function CommentCard({ comment, currentUserId, onReport }: CommentCardProps) {
+  const [reported, setReported] = useState(comment.is_reported)
   const isOwn = comment.user.id === currentUserId
-  const [liked, setLiked] = useState(comment.liked_by_me)
-  const [likesCount, setLikesCount] = useState(comment.likes_count ?? 0)
-  const [pending, setPending] = useState(false)
 
-  async function handleLike() {
-    if (isOwn || pending) return
-    setPending(true)
-    const wasLiked = liked
-    setLiked(!wasLiked)
-    setLikesCount((prev) => (wasLiked ? Math.max(0, prev - 1) : prev + 1))
-    try {
-      await onLike(comment.id)
-    } catch {
-      setLiked(wasLiked)
-      setLikesCount((prev) => (wasLiked ? prev + 1 : Math.max(0, prev - 1)))
-    } finally {
-      setPending(false)
-    }
+  async function handleReport() {
+    if (!confirm('Signaler ce commentaire ?')) return
+    await onReport(comment.id)
+    setReported(true)
   }
 
   return (
@@ -86,36 +70,26 @@ export function CommentCard({ comment, currentUserId, onLike, onReport }: Commen
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo(comment.created_at)}</span>
         </div>
 
-        {comment.rating && comment.rating > 0 && <FireRating value={comment.rating} readonly size="sm" />}
-
+        {comment.title && (
+          <p className="text-sm font-semibold text-foreground">{comment.title}</p>
+        )}
         <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{comment.content}</p>
 
-        <div className="flex items-center gap-4 pt-0.5">
-          {!isOwn && (
-            <button
-              onClick={handleLike}
-              className={cn(
-                'flex items-center gap-1.5 text-xs',
-                'transition-colors duration-150',
-                liked ? 'text-violet-600 dark:text-violet-400' : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <Heart className={cn('w-3.5 h-3.5 transition-all', liked && 'fill-violet-600 dark:fill-violet-400 scale-110')} />
-              {likesCount > 0 && <span>{likesCount}</span>}
-              <span>Utile</span>
-            </button>
-          )}
+        {!isOwn && !reported && (
+          <button
+            onClick={handleReport}
+            className={cn(
+              'flex items-center gap-1 text-xs',
+              'text-muted-foreground hover:text-red-500 transition-colors',
+              'opacity-0 group-hover:opacity-100 duration-150',
+            )}
+          >
+            <Flag className="w-3 h-3" />
+            <span>Signaler</span>
+          </button>
+        )}
 
-          {!isOwn && !comment.is_reported && (
-            <button
-              onClick={() => onReport(comment.id)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 duration-150"
-            >
-              <Flag className="w-3 h-3" />
-              <span>Signaler</span>
-            </button>
-          )}
-        </div>
+        {reported && <span className="text-xs text-muted-foreground">✓ Signalé</span>}
       </div>
     </div>
   )

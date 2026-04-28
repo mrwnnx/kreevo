@@ -17,20 +17,13 @@ export async function GET(_req: Request, { params }: Params) {
   const { data: comments } = await (supabaseAdmin as any)
     .from('comments')
     .select(`
-      id, content, rating, likes_count, is_reported, created_at,
-      user:profiles(id, username, avatar_url, plan, league),
-      liked_by_me:comment_likes(user_id)
+      id, content, title, is_reported, created_at,
+      user:profiles(id, username, avatar_url, plan, league)
     `)
     .eq('submission_id', submissionId)
     .eq('is_reported', false)
     .order('created_at', { ascending: false })
 
-  const mapped = ((comments ?? []) as any[]).map((c) => ({
-    ...c,
-    liked_by_me: (c.liked_by_me ?? []).some((l: any) => l.user_id === user.id),
-  }))
-
-  // Count user's comments today
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const { count: dailyCount } = await (supabaseAdmin as any)
@@ -39,7 +32,7 @@ export async function GET(_req: Request, { params }: Params) {
     .eq('user_id', user.id)
     .gte('created_at', today.toISOString())
 
-  return NextResponse.json({ comments: mapped, dailyCount: dailyCount ?? 0 })
+  return NextResponse.json({ comments: comments ?? [], dailyCount: dailyCount ?? 0 })
 }
 
 export async function POST(req: Request, { params }: Params) {
@@ -50,19 +43,16 @@ export async function POST(req: Request, { params }: Params) {
   const { id: submissionId } = await params
   const body = await req.json().catch(() => ({}))
   const content = (body.content as string | undefined)?.trim() ?? ''
-  const rating = body.rating as number | undefined
+  const title = (body.title as string | undefined)?.trim() ?? ''
+  const requestedClaps = Math.max(0, Math.min(10, Number(body.claps ?? 0)))
 
   if (content.length < MIN_CONTENT) {
     return NextResponse.json({ error: `Min ${MIN_CONTENT} caractères` }, { status: 400 })
   }
-  if (typeof rating !== 'number' || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: 'Note invalide (1 à 5)' }, { status: 400 })
-  }
 
-  // Verify submission is approved + not own
   const { data: submission } = await (supabaseAdmin as any)
     .from('submissions')
-    .select('id, user_id, validation_status')
+    .select('id, user_id, validation_status, total_claps')
     .eq('id', submissionId)
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
@@ -73,7 +63,6 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Tu ne peux pas commenter ta propre soumission' }, { status: 403 })
   }
 
-  // Free limit check
   const { data: profile } = await (supabaseAdmin as any)
     .from('profiles').select('plan').eq('id', user.id).single()
   const isPro = profile?.plan === 'pro' || profile?.plan === 'studio'
@@ -90,19 +79,18 @@ export async function POST(req: Request, { params }: Params) {
     }
   }
 
-  // Insert comment
   const { data: comment, error } = await (supabaseAdmin as any)
     .from('comments')
-    .insert({ submission_id: submissionId, user_id: user.id, content, rating })
+    .insert({ submission_id: submissionId, user_id: user.id, content, title: title || null })
     .select(`
-      id, content, rating, likes_count, is_reported, created_at,
+      id, content, title, is_reported, created_at,
       user:profiles(id, username, avatar_url, plan, league)
     `)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Increment submission comments_count + award XP to owner (+5)
+  // Increment submission comments_count + +5 XP to owner
   const { data: sub } = await (supabaseAdmin as any)
     .from('submissions').select('comments_count').eq('id', submissionId).single()
   await (supabaseAdmin as any)
@@ -117,5 +105,51 @@ export async function POST(req: Request, { params }: Params) {
     await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
   }
 
-  return NextResponse.json({ comment: { ...comment, liked_by_me: false } })
+  // Apply claps from the review (1-10 in one shot)
+  let appliedClaps = 0
+  let newTotalClaps = submission.total_claps ?? 0
+  if (requestedClaps > 0) {
+    const { data: existingClap } = await (supabaseAdmin as any)
+      .from('submission_claps')
+      .select('id, claps_count')
+      .eq('submission_id', submissionId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const currentUserClaps = existingClap?.claps_count ?? 0
+    const allowedClaps = Math.min(requestedClaps, 10 - currentUserClaps)
+
+    if (allowedClaps > 0) {
+      const newUserClaps = currentUserClaps + allowedClaps
+      newTotalClaps = (submission.total_claps ?? 0) + allowedClaps
+
+      if (existingClap) {
+        await (supabaseAdmin as any)
+          .from('submission_claps')
+          .update({ claps_count: newUserClaps, updated_at: new Date().toISOString() })
+          .eq('id', existingClap.id)
+      } else {
+        await (supabaseAdmin as any)
+          .from('submission_claps')
+          .insert({ submission_id: submissionId, user_id: user.id, claps_count: newUserClaps })
+      }
+
+      await (supabaseAdmin as any)
+        .from('submissions')
+        .update({ total_claps: newTotalClaps })
+        .eq('id', submissionId)
+
+      // +2 XP per clap to owner
+      const { data: ownerProf2 } = await (supabaseAdmin as any)
+        .from('profiles').select('xp').eq('id', submission.user_id).single()
+      await (supabaseAdmin as any)
+        .from('profiles')
+        .update({ xp: (ownerProf2?.xp ?? 0) + allowedClaps * 2 })
+        .eq('id', submission.user_id)
+
+      appliedClaps = allowedClaps
+    }
+  }
+
+  return NextResponse.json({ comment, appliedClaps, totalClaps: newTotalClaps })
 }

@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 
-import { Heart, MessageCircle, Lock } from 'lucide-react'
+import { MessageCircle, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
@@ -13,7 +12,7 @@ interface Submission {
   id: string
   cover_url: string
   is_visible: boolean
-  likes_count: number
+  total_claps?: number | null
   comments_count: number
   user_id: string
   created_at?: string
@@ -43,26 +42,7 @@ const LEAGUE_COLOR: Record<string, string> = {
 
 const LEAGUE_LABEL: Record<string, string> = { '7ajra': 'Stone' }
 
-export function SubmissionGallery({ submissions, currentUserId, isRevealed, challengeTitle }: GalleryProps) {
-  const [likedMap, setLikedMap] = useState<Record<string, boolean>>({})
-  const [likesMap, setLikesMap] = useState<Record<string, number>>(
-    Object.fromEntries(submissions.map(s => [s.id, s.likes_count]))
-  )
-
-  async function handleLike(submissionId: string) {
-    if (!currentUserId) return
-    const res = await fetch('/api/likes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ submissionId }),
-    })
-    if (res.ok) {
-      const { liked, likes_count } = await res.json()
-      setLikedMap(prev => ({ ...prev, [submissionId]: liked }))
-      setLikesMap(prev => ({ ...prev, [submissionId]: likes_count }))
-    }
-  }
-
+export function SubmissionGallery({ submissions, currentUserId, isRevealed }: GalleryProps) {
   if (submissions.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
@@ -91,8 +71,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, chal
         {submissions.map(s => {
           const isOwn = s.user_id === currentUserId
           const blurred = !isRevealed && !isOwn
-          const liked = likedMap[s.id] ?? false
-          const likes = likesMap[s.id] ?? 0
+          const claps = s.total_claps ?? 0
 
           return (
             <div key={s.id} className="group border border-border rounded-xl overflow-hidden hover:border-primary/20 transition-colors">
@@ -160,18 +139,12 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, chal
 
                   {/* Actions */}
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleLike(s.id)}
-                      disabled={!currentUserId}
-                      className={cn(
-                        'flex items-center gap-1 text-xs font-mono transition-colors',
-                        liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
-                        !currentUserId && 'opacity-40 cursor-not-allowed'
-                      )}
-                    >
-                      <Heart className={cn('size-3.5', liked && 'fill-current')} />
-                      {likes}
-                    </button>
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <svg viewBox="0 0 100 100" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">
+                        <path d="M35 55 C35 55 30 45 32 35 C33 28 38 25 42 28 C42 28 44 18 50 18 C56 18 57 25 57 28 C57 28 60 18 66 20 C72 22 71 32 70 36 C70 36 74 28 79 31 C84 34 82 44 78 52 L70 70 C68 76 62 82 54 82 C46 82 38 76 35 68 Z" />
+                      </svg>
+                      {claps}
+                    </span>
                     <Link
                       href={`/dashboard/submissions/${s.id}`}
                       className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"

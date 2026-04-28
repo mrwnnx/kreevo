@@ -1,35 +1,31 @@
 'use client'
 
 import { useState } from 'react'
-import { FireRating } from './FireRating'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface CommentFormProps {
-  submissionId: string
-  onSubmit: (data: { content: string; rating: number }) => Promise<void>
+  onSubmit: (content: string) => Promise<void>
   userAvatar?: string | null
   username?: string
 }
 
 export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps) {
-  const [rating, setRating] = useState(0)
   const [content, setContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const canSubmit = rating > 0 && content.trim().length >= 10
+  const canSubmit = content.trim().length >= 10 && !isLoading
 
   async function handleSubmit() {
     if (!canSubmit) return
     setIsLoading(true)
     setError('')
     try {
-      await onSubmit({ content: content.trim(), rating })
+      await onSubmit(content.trim())
       setContent('')
-      setRating(0)
     } catch {
-      setError('Une erreur est survenue. Réessaie.')
+      setError('Une erreur est survenue.')
     } finally {
       setIsLoading(false)
     }
@@ -37,7 +33,7 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
 
   return (
     <div className="border border-border rounded-2xl p-5 space-y-4 bg-white dark:bg-zinc-950">
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex-shrink-0">
           {userAvatar ? (
             <img src={userAvatar} alt={username} className="w-full h-full object-cover" />
@@ -47,20 +43,17 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
             </div>
           )}
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium">Laisse une review</p>
+        <div>
+          <p className="text-sm font-medium">Laisse un commentaire</p>
           <p className="text-xs text-muted-foreground">Aide le designer à progresser</p>
-        </div>
-        <div className="ml-auto">
-          <FireRating value={rating} onChange={setRating} size="md" />
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Donne un feedback constructif sur ce travail... (min 10 caractères)"
+          placeholder="Donne un feedback constructif... (minimum 10 caractères)"
           rows={3}
           maxLength={500}
           className={cn(
@@ -73,21 +66,21 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
           )}
         />
         <div className="flex items-center justify-between">
-          <span className={cn('text-xs', content.length < 10 ? 'text-muted-foreground' : 'text-green-500')}>
-            {content.length < 10 ? `${10 - content.length} caractères minimum` : `${content.length}/500`}
+          <span className={cn('text-xs transition-colors', content.length < 10 ? 'text-muted-foreground' : 'text-emerald-500')}>
+            {content.length < 10 ? `${10 - content.length} caractères minimum` : `${content.length} / 500`}
           </span>
           {error && <span className="text-xs text-red-500">{error}</span>}
         </div>
       </div>
 
-      <Button onClick={handleSubmit} disabled={!canSubmit || isLoading} className="w-full" size="sm">
+      <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full" size="sm">
         {isLoading ? (
           <span className="flex items-center gap-2">
             <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Publication...
           </span>
         ) : (
-          'Publier mon avis →'
+          'Publier →'
         )}
       </Button>
     </div>
