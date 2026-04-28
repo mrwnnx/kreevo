@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: Params) {
   const { data: comments } = await (supabaseAdmin as any)
     .from('comments')
     .select(`
-      id, content, title, is_reported, created_at,
+      id, content, title, parent_id, claps_given, is_reported, created_at,
       user:profiles(id, username, avatar_url, plan, league)
     `)
     .eq('submission_id', submissionId)
@@ -81,9 +81,15 @@ export async function POST(req: Request, { params }: Params) {
 
   const { data: comment, error } = await (supabaseAdmin as any)
     .from('comments')
-    .insert({ submission_id: submissionId, user_id: user.id, content, title: title || null })
+    .insert({
+      submission_id: submissionId,
+      user_id: user.id,
+      content,
+      title: title || null,
+      claps_given: 0, // updated below if claps applied
+    })
     .select(`
-      id, content, title, is_reported, created_at,
+      id, content, title, claps_given, is_reported, created_at,
       user:profiles(id, username, avatar_url, plan, league)
     `)
     .single()
@@ -148,6 +154,13 @@ export async function POST(req: Request, { params }: Params) {
         .eq('id', submission.user_id)
 
       appliedClaps = allowedClaps
+
+      // Track on comment for refund on delete
+      await (supabaseAdmin as any)
+        .from('comments')
+        .update({ claps_given: allowedClaps })
+        .eq('id', comment.id)
+      ;(comment as any).claps_given = allowedClaps
     }
   }
 

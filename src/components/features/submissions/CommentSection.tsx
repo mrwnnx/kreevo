@@ -75,6 +75,37 @@ export function CommentSection({
     setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, is_reported: true } : c)))
   }
 
+  async function handleDelete(commentId: string) {
+    const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error ?? 'Erreur')
+    }
+    // Find the comment to know if it had claps + was top-level
+    const removed = comments.find((c) => c.id === commentId)
+    if (removed && !removed.parent_id) {
+      const refunded = removed.claps_given ?? 0
+      setUserClaps((c) => Math.max(0, c - refunded))
+      setTotalClaps((t) => Math.max(0, t - refunded))
+      setCommentsCount((n) => Math.max(0, n - 1))
+    }
+    setComments((prev) => prev.filter((c) => c.id !== commentId && c.parent_id !== commentId))
+  }
+
+  async function handleReply(parentId: string, content: string) {
+    const res = await fetch(`/api/comments/${parentId}/replies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error ?? 'Erreur')
+    }
+    const json = await res.json()
+    setComments((prev) => [...prev, json.comment])
+  }
+
   return (
     <div className="space-y-6">
       {/* Combined actions bar */}
@@ -138,16 +169,39 @@ export function CommentSection({
               </div>
             </div>
           ))
-        ) : comments.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-2xl mb-2">💬</p>
-            <p className="text-sm text-muted-foreground">Sois le premier à laisser un commentaire !</p>
-          </div>
-        ) : (
-          comments.map((comment) => (
-            <CommentCard key={comment.id} comment={comment} currentUserId={currentUserId} onReport={handleReport} />
+        ) : (() => {
+          const topLevel = comments.filter((c) => !c.parent_id)
+          const repliesByParent = comments.reduce<Record<string, ReviewComment[]>>((acc, c) => {
+            if (c.parent_id) {
+              acc[c.parent_id] = acc[c.parent_id] ?? []
+              acc[c.parent_id].push(c)
+            }
+            return acc
+          }, {})
+          // Sort replies oldest first within each parent
+          Object.values(repliesByParent).forEach((arr) =>
+            arr.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at)),
+          )
+          if (topLevel.length === 0) {
+            return (
+              <div className="text-center py-10">
+                <p className="text-2xl mb-2">💬</p>
+                <p className="text-sm text-muted-foreground">Sois le premier à laisser un commentaire !</p>
+              </div>
+            )
+          }
+          return topLevel.map((comment) => (
+            <CommentCard
+              key={comment.id}
+              comment={comment}
+              currentUserId={currentUserId}
+              replies={repliesByParent[comment.id] ?? []}
+              onReport={handleReport}
+              onDelete={handleDelete}
+              onReply={handleReply}
+            />
           ))
-        )}
+        })()}
       </div>
     </div>
   )
