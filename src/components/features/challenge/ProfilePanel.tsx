@@ -149,7 +149,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
 
       {/* Challenge */}
       {challenge && (
-        <div className="space-y-3">
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
           <Label>Challenge</Label>
           <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
           <div className="space-y-1.5">
