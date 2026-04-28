@@ -137,7 +137,7 @@ export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
           </div>
 
           {/* Info rows */}
-          <div className="rounded-xl bg-muted/40 px-3 py-1">
+          <div>
             <InfoRow
               label="Ligue"
               value={
