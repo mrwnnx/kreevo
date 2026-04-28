@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { CommentCard, type ReviewComment } from './CommentCard'
 import { ReviewModal } from './ReviewModal'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, Star } from 'lucide-react'
+import { MessageSquare, MessageCircle, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CommentSectionProps {
@@ -118,8 +118,12 @@ export function CommentSection({
         >
           <MessageSquare className="size-4" />
           Laisser une review
-          <span className="text-xs font-mono opacity-80">· {commentsCount}</span>
         </Button>
+
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+          <MessageCircle className="size-5" strokeWidth={1.5} />
+          {commentsCount}
+        </span>
 
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
           <Star className="size-5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
