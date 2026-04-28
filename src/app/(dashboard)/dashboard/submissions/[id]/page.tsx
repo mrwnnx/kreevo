@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ExternalLink } from 'lucide-react'
+import { ChevronLeft, ExternalLink, Calendar } from 'lucide-react'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ShareButton } from '@/components/features/challenge/ShareButton'
@@ -70,7 +70,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 <h1 className="text-2xl font-bold leading-tight">{submission.title}</h1>
               )}
               {submission.created_at && (
-                <p className="text-xs text-muted-foreground">
+                <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Calendar className="size-3.5" />
                   {new Date(submission.created_at).toLocaleDateString('fr-FR', {
                     day: 'numeric',
                     month: 'long',
