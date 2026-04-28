@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { FireIcon } from '@/components/features/submissions/FireIcon'
 
 interface Props {
   submissionId: string
@@ -50,7 +50,9 @@ export function LikeButton({ submissionId, initialLikes, initialLiked, currentUs
         (!currentUserId || pending) && 'opacity-50 cursor-not-allowed'
       )}
     >
-      <Heart className={cn('size-3.5 transition-all', liked && 'fill-current scale-110')} />
+      <span className={cn('size-3.5 inline-flex transition-all', liked && 'scale-110')}>
+        <FireIcon filled={liked} className="w-full h-full" />
+      </span>
       {likes}
     </button>
   )
