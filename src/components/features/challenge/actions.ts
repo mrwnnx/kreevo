@@ -19,6 +19,8 @@ export async function submitChallenge(formData: FormData) {
   const isVisible = formData.get('isVisible') !== 'false'
   const additionalImagesRaw = formData.get('additionalImages') as string | null
   const collaboratorsRaw = formData.get('collaborators') as string | null
+  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | null
+  const aiReason = formData.get('aiReason') as string | null
 
   if (!coverUrl) return { error: 'Image de couverture requise' }
 
@@ -110,13 +112,32 @@ export async function submitChallenge(formData: FormData) {
       .eq('id', participationId)
   }
 
-  // Trigger validation flow (AI auto-validation for low leagues, pending review for high leagues)
+  // Apply AI verdict from client (decided during upload), or fall back to server-side flow
   if (submissionId) {
-    const { triggerValidationFlow } = await import('@/lib/utils/submissions')
-    await triggerValidationFlow(submissionId)
+    if (aiVerdict === 'approved') {
+      const { approveSubmission } = await import('@/lib/utils/submissions')
+      await approveSubmission(submissionId, null)
+    } else if (aiVerdict === 'rejected') {
+      const { rejectSubmission } = await import('@/lib/utils/submissions')
+      await rejectSubmission(
+        submissionId,
+        aiReason ?? 'Soumission rejetée par la validation automatique',
+        null
+      )
+    } else {
+      // skipped (Gold+) or no verdict → run server-side flow (pending admin review)
+      const { triggerValidationFlow } = await import('@/lib/utils/submissions')
+      await triggerValidationFlow(submissionId)
+    }
   }
 
   revalidatePath(`/dashboard/challenges/${challengeId}`)
   revalidatePath('/dashboard')
-  return { success: true, draft: false }
+
+  // Tell client which final status was applied so it can show the right UI
+  let finalStatus: 'approved' | 'rejected' | 'pending' = 'pending'
+  if (aiVerdict === 'approved') finalStatus = 'approved'
+  else if (aiVerdict === 'rejected') finalStatus = 'rejected'
+
+  return { success: true, draft: false, status: finalStatus }
 }

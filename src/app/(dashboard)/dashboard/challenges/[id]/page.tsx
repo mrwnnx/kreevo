@@ -14,10 +14,14 @@ import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import type { Profile } from '@/types/database.types'
 
-interface Props { params: Promise<{ id: string }> }
+interface Props {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ just_submitted?: string }>
+}
 
-export default async function ChallengePage({ params }: Props) {
+export default async function ChallengePage({ params, searchParams }: Props) {
   const { id } = await params
+  const { just_submitted: justSubmitted } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -175,6 +179,49 @@ export default async function ChallengePage({ params }: Props) {
           <ChevronLeft className="size-3.5" /> Challenges
         </Link>
       </div>
+
+      {/* Banner après soumission (?just_submitted=approved|rejected|pending) */}
+      {justSubmitted && existingSubmission && (() => {
+        const sub = existingSubmission as any
+        if (justSubmitted === 'approved') {
+          return (
+            <div className="bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-900/40 rounded-2xl p-4 flex items-center gap-3 mb-6">
+              <span className="text-2xl">🎉</span>
+              <div>
+                <p className="font-semibold text-green-800 dark:text-green-300">Travail soumis et validé !</p>
+                <p className="text-sm text-green-700 dark:text-green-400/90">
+                  +{c.xp_reward ?? 150} XP ajoutés à ton profil.
+                </p>
+              </div>
+            </div>
+          )
+        }
+        if (justSubmitted === 'rejected') {
+          return (
+            <div className="bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-900/40 rounded-2xl p-4 flex items-start gap-3 mb-6">
+              <span className="text-2xl">❌</span>
+              <div>
+                <p className="font-semibold text-red-800 dark:text-red-300">Travail soumis mais non validé</p>
+                {sub.rejection_reason && (
+                  <p className="text-sm text-red-700 dark:text-red-400/90">{sub.rejection_reason}</p>
+                )}
+              </div>
+            </div>
+          )
+        }
+        if (justSubmitted === 'pending') {
+          return (
+            <div className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4 flex items-center gap-3 mb-6">
+              <span className="text-2xl">⏳</span>
+              <div>
+                <p className="font-semibold text-amber-800 dark:text-amber-300">Travail soumis — en attente de validation</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400/90">Un admin va examiner ton travail sous 48h.</p>
+              </div>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       {/* 2-col layout */}
       <div className="grid lg:grid-cols-[1fr_280px] gap-8 items-start">

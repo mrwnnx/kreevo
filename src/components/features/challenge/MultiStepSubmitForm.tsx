@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/avatar'
 import { submitChallenge } from './actions'
 import type { Submission } from '@/types/database.types'
-import { CheckCircle, X, Plus, Loader2, ArrowLeft, ArrowRight, Sparkles, Search } from 'lucide-react'
+import { CheckCircle, X, Plus, Loader2, ArrowLeft, ArrowRight, Sparkles, Search, ShieldCheck, ShieldAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Collaborator {
@@ -60,7 +60,51 @@ export function MultiStepSubmitForm({
 
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<{ draft: boolean } | null>(null)
+  const [success, setSuccess] = useState<{ draft: boolean; status?: 'approved' | 'rejected' | 'pending' } | null>(null)
+
+  // AI validation state — analyzed in real time after cover upload
+  type AIState =
+    | { phase: 'idle' }
+    | { phase: 'analyzing' }
+    | { phase: 'approved' }
+    | { phase: 'rejected'; reason: string }
+    | { phase: 'skipped' } // higher leagues — no AI
+    | { phase: 'error' }
+  const [aiState, setAiState] = useState<AIState>({ phase: 'idle' })
+  const lastValidatedUrlRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    // Trigger AI validation whenever a NEW cover is uploaded
+    if (!coverUrl) {
+      setAiState({ phase: 'idle' })
+      lastValidatedUrlRef.current = null
+      return
+    }
+    if (lastValidatedUrlRef.current === coverUrl) return
+    lastValidatedUrlRef.current = coverUrl
+
+    setAiState({ phase: 'analyzing' })
+    const ctrl = new AbortController()
+    fetch('/api/ai/validate-submission', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cover_url: coverUrl, challenge_id: challengeId }),
+      signal: ctrl.signal,
+    })
+      .then(async (res) => {
+        const data = await res.json()
+        if (data.skipped) { setAiState({ phase: 'skipped' }); return }
+        if (data.valid === true) { setAiState({ phase: 'approved' }); return }
+        if (data.valid === false) { setAiState({ phase: 'rejected', reason: data.reason ?? 'Travail non accepté' }); return }
+        setAiState({ phase: 'error' })
+      })
+      .catch((e) => {
+        if (e?.name === 'AbortError') return
+        setAiState({ phase: 'error' })
+      })
+
+    return () => ctrl.abort()
+  }, [coverUrl, challengeId])
 
   // Collaborator search
   const [collabQuery, setCollabQuery] = useState('')
@@ -138,39 +182,75 @@ export function MultiStepSubmitForm({
     fd.set('additionalImages', JSON.stringify(additionalImages))
     fd.set('collaborators', JSON.stringify(collaborators.map(c => c.id)))
 
+    // Pass AI verdict so action can apply final status without re-running the AI
+    if (!asDraft) {
+      if (aiState.phase === 'approved') fd.set('aiVerdict', 'approved')
+      else if (aiState.phase === 'rejected') {
+        fd.set('aiVerdict', 'rejected')
+        fd.set('aiReason', aiState.reason)
+      }
+      else if (aiState.phase === 'skipped') fd.set('aiVerdict', 'skipped')
+    }
+
     startTransition(async () => {
       const result = await submitChallenge(fd)
       if (result?.error) {
         setError(result.error)
         return
       }
-      setSuccess({ draft: !!result?.draft })
+
+      const finalStatus = (result as any)?.status as 'approved' | 'rejected' | 'pending' | undefined
+      setSuccess({ draft: !!result?.draft, status: finalStatus })
+
+      // Redirect to challenge page — celebrate 2s if approved, immediate otherwise
+      if (asDraft) return
+      const delay = finalStatus === 'approved' ? 2000 : 600
+      setTimeout(() => {
+        router.push(`/dashboard/challenges/${challengeId}?just_submitted=${finalStatus ?? 'pending'}`)
+      }, delay)
     })
   }
 
   if (success) {
+    const isApproved = success.status === 'approved'
+    const isRejected = success.status === 'rejected'
+    const headline = success.draft
+      ? 'Brouillon enregistré'
+      : isApproved ? '🎉 Soumission validée !'
+      : isRejected ? 'Soumission enregistrée'
+      : 'Soumission reçue'
+
+    const sub = success.draft
+      ? 'Tu peux revenir plus tard pour finaliser et publier ton travail.'
+      : isApproved ? 'Bravo ! Tes XP arrivent…'
+      : isRejected ? 'Ton travail a été enregistré sans XP.'
+      : 'Un admin va examiner ton travail.'
+
     return (
       <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center space-y-4">
-          <div className="size-16 rounded-full bg-green-100 dark:bg-green-900/40 mx-auto flex items-center justify-center">
-            <CheckCircle className="size-8 text-green-600 dark:text-green-400" />
+          <div className={cn(
+            'size-16 rounded-full mx-auto flex items-center justify-center',
+            isRejected ? 'bg-red-100 dark:bg-red-900/40'
+            : isApproved ? 'bg-green-100 dark:bg-green-900/40 animate-bounce'
+            : 'bg-zinc-100 dark:bg-zinc-900/40',
+          )}>
+            {isRejected ? <X className="size-8 text-red-600 dark:text-red-400" />
+            : <CheckCircle className="size-8 text-green-600 dark:text-green-400" />}
           </div>
-          <h1 className="text-2xl font-bold">
-            {success.draft ? 'Brouillon enregistré' : 'Soumission publiée !'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {success.draft
-              ? 'Tu peux revenir plus tard pour finaliser et publier ton travail.'
-              : '+150 XP attribués. Bravo !'}
-          </p>
-          <div className="flex gap-2 justify-center pt-2">
-            <Button variant="outline" onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}>
-              Retour au challenge
-            </Button>
-            <Button onClick={() => router.push('/dashboard')}>
-              Mon dashboard
-            </Button>
-          </div>
+          <h1 className="text-2xl font-bold">{headline}</h1>
+          <p className="text-sm text-muted-foreground">{sub}</p>
+          {success.draft && (
+            <div className="flex gap-2 justify-center pt-2">
+              <Button variant="outline" onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}>
+                Retour au challenge
+              </Button>
+              <Button onClick={() => router.push('/dashboard')}>Mon dashboard</Button>
+            </div>
+          )}
+          {!success.draft && (
+            <p className="text-xs text-muted-foreground pt-2">Redirection en cours…</p>
+          )}
         </div>
       </div>
     )
@@ -213,6 +293,7 @@ export function MultiStepSubmitForm({
             removeAdditionalImage={removeAdditionalImage}
             showMotivation={showMotivation}
             dismissMotivation={() => setShowMotivation(false)}
+            aiState={aiState}
           />
         ) : (
           <Step2
@@ -254,9 +335,10 @@ export function MultiStepSubmitForm({
               </Button>
               <Button
                 onClick={() => setStep(2)}
-                disabled={!canGoToStep2() || isPending}
+                disabled={!canGoToStep2() || isPending || aiState.phase === 'analyzing'}
                 className="gap-2"
               >
+                {aiState.phase === 'analyzing' ? <Loader2 className="size-4 animate-spin" /> : null}
                 Continuer <ArrowRight className="size-4" />
               </Button>
             </>
@@ -281,11 +363,14 @@ export function MultiStepSubmitForm({
                 </Button>
                 <Button
                   onClick={() => handleSubmit(false)}
-                  disabled={isPending}
+                  disabled={isPending || aiState.phase === 'analyzing'}
+                  variant={aiState.phase === 'rejected' ? 'ghost' : 'default'}
                   className="gap-2"
                 >
                   {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Publier maintenant
+                  {aiState.phase === 'rejected'
+                    ? <>Soumettre quand même <span className="text-xs ml-1 opacity-70">(sans XP)</span></>
+                    : 'Publier maintenant'}
                 </Button>
               </div>
             </>
@@ -302,6 +387,14 @@ export function MultiStepSubmitForm({
 }
 
 // ── Step 1 ───────────────────────────────────────────────────────────────────
+type AIStateProp =
+  | { phase: 'idle' }
+  | { phase: 'analyzing' }
+  | { phase: 'approved' }
+  | { phase: 'rejected'; reason: string }
+  | { phase: 'skipped' }
+  | { phase: 'error' }
+
 function Step1({
   coverUrl,
   setCoverUrl,
@@ -310,6 +403,7 @@ function Step1({
   removeAdditionalImage,
   showMotivation,
   dismissMotivation,
+  aiState,
 }: {
   coverUrl: string | null
   setCoverUrl: (url: string | null) => void
@@ -318,6 +412,7 @@ function Step1({
   removeAdditionalImage: (idx: number) => void
   showMotivation: boolean
   dismissMotivation: () => void
+  aiState: AIStateProp
 }) {
   const [tempUploadKey, setTempUploadKey] = useState(0)
 
@@ -342,6 +437,9 @@ function Step1({
         <p className="text-xs text-muted-foreground">
           PNG / JPG / WebP — max 5MB. L&apos;image sera compressée automatiquement.
         </p>
+
+        {/* AI verdict UI — appears after cover upload */}
+        {coverUrl && <AIVerdictPanel aiState={aiState} onChange={() => setCoverUrl(null)} />}
       </div>
 
       {/* Additional images */}
@@ -402,6 +500,83 @@ function Step1({
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange: () => void }) {
+  if (aiState.phase === 'idle') return null
+
+  if (aiState.phase === 'analyzing') {
+    return (
+      <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl p-4">
+        <div className="animate-spin size-5 border-2 border-violet-500 border-t-transparent rounded-full shrink-0" />
+        <div>
+          <p className="font-medium text-sm">Analyse en cours…</p>
+          <p className="text-xs text-muted-foreground">
+            Notre IA vérifie que ton travail correspond au brief.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (aiState.phase === 'approved') {
+    return (
+      <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-900/40 rounded-2xl p-4">
+        <ShieldCheck className="size-6 text-green-600 dark:text-green-400 shrink-0" />
+        <div>
+          <p className="font-medium text-sm text-green-800 dark:text-green-300">Travail validé !</p>
+          <p className="text-xs text-green-700 dark:text-green-400/90">
+            Ton travail correspond bien au brief. Tu peux soumettre.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (aiState.phase === 'rejected') {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-900/40 rounded-2xl p-4">
+          <ShieldAlert className="size-6 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-sm text-red-800 dark:text-red-300">Travail non accepté</p>
+            <p className="text-xs text-red-700 dark:text-red-400/90 leading-relaxed">{aiState.reason}</p>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">
+          Ton travail n&apos;a pas été accepté par notre IA. Tu ne recevras pas de XP pour cette soumission.
+          Tu peux changer de fichier ou soumettre quand même.
+        </p>
+        <Button variant="outline" onClick={onChange} className="w-full">
+          Changer de fichier
+        </Button>
+      </div>
+    )
+  }
+
+  if (aiState.phase === 'skipped') {
+    return (
+      <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4">
+        <Sparkles className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
+        <div>
+          <p className="font-medium text-sm text-amber-800 dark:text-amber-300">Validation manuelle</p>
+          <p className="text-xs text-amber-700 dark:text-amber-400/90">
+            Ton travail sera examiné par un admin sous 48h.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // error
+  return (
+    <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl p-4">
+      <Sparkles className="size-5 text-muted-foreground shrink-0" />
+      <p className="text-xs text-muted-foreground">
+        Validation IA indisponible — tu peux quand même soumettre, un admin examinera ton travail.
+      </p>
     </div>
   )
 }
