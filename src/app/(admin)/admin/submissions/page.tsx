@@ -18,7 +18,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
     .from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
 
-  const { tab = 'pending' } = await searchParams
+  const { tab = 'all' } = await searchParams
 
   let query = (supabaseAdmin as any)
     .from('submissions')
@@ -34,29 +34,26 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
   const { data: submissions } = await query
 
   // Counts for tabs
-  const { count: pendingCount } = await (supabaseAdmin as any)
-    .from('submissions')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_draft', false)
-    .eq('validation_status', 'pending')
-
-  const { count: reportedCount } = await (supabaseAdmin as any)
-    .from('submissions')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_draft', false)
-    .eq('validation_status', 'on_hold')
-
-  const { count: contestsCount } = await (supabaseAdmin as any)
-    .from('submission_contests')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
+  const [
+    { count: allCount },
+    { count: pendingCount },
+    { count: reportedCount },
+    { count: rejectedCount },
+    { count: contestsCount },
+  ] = await Promise.all([
+    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false),
+    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'pending'),
+    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'on_hold'),
+    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'rejected'),
+    (supabaseAdmin as any).from('submission_contests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+  ])
 
   const TABS: Array<{ id: string; label: string; count?: number | null }> = [
-    { id: 'all',       label: 'Toutes' },
-    { id: 'pending',   label: 'En attente',  count: pendingCount },
-    { id: 'reported',  label: 'Signalées',   count: reportedCount },
-    { id: 'rejected',  label: 'Rejetées' },
-    { id: 'contested', label: 'Contestées',  count: contestsCount },
+    { id: 'all',       label: 'Toutes',     count: allCount },
+    { id: 'pending',   label: 'En attente', count: pendingCount },
+    { id: 'reported',  label: 'Signalées',  count: reportedCount },
+    { id: 'rejected',  label: 'Rejetées',   count: rejectedCount },
+    { id: 'contested', label: 'Contestées', count: contestsCount },
   ]
 
   // Fetch contests if tab=contested
@@ -90,7 +87,12 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
           >
             {t.label}
             {t.count !== undefined && t.count !== null && t.count > 0 && (
-              <span className="ml-2 text-[10px] font-mono bg-destructive text-destructive-foreground rounded-full px-1.5 py-0.5">
+              <span className={cn(
+                'ml-2 text-[10px] font-mono rounded-full px-1.5 py-0.5',
+                t.id === 'pending' || t.id === 'reported' || t.id === 'contested'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-muted text-muted-foreground'
+              )}>
                 {t.count}
               </span>
             )}

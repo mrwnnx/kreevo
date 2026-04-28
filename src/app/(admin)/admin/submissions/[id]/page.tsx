@@ -36,7 +36,9 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
     .from('submission_contests')
     .select('id, message, status, admin_response, created_at, resolved_at')
     .eq('submission_id', id)
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   const s = submission as any
   const challenge = s.challenges
