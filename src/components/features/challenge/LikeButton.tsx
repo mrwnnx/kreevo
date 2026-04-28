@@ -9,9 +9,11 @@ interface Props {
   initialLikes: number
   initialLiked: boolean
   currentUserId: string | null
+  /** Override count displayed (e.g. sum of fire ratings) */
+  displayCount?: number
 }
 
-export function LikeButton({ submissionId, initialLikes, initialLiked, currentUserId }: Props) {
+export function LikeButton({ submissionId, initialLikes, initialLiked, currentUserId, displayCount }: Props) {
   const [liked, setLiked] = useState(initialLiked)
   const [likes, setLikes] = useState(initialLikes)
   const [pending, setPending] = useState(false)
@@ -38,6 +40,8 @@ export function LikeButton({ submissionId, initialLikes, initialLiked, currentUs
     setPending(false)
   }
 
+  const shown = displayCount ?? likes
+
   return (
     <button
       onClick={toggle}
@@ -53,7 +57,7 @@ export function LikeButton({ submissionId, initialLikes, initialLiked, currentUs
       <span className={cn('size-3.5 inline-flex transition-all', liked && 'scale-110')}>
         <FireIcon filled={liked} className="w-full h-full" />
       </span>
-      {likes}
+      {shown}
     </button>
   )
 }

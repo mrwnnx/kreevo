@@ -16,7 +16,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: submission }, { data: liked }, { data: currentProfile }] = await Promise.all([
+  const [{ data: submission }, { data: liked }, { data: currentProfile }, { data: ratings }] = await Promise.all([
     (supabase as any)
       .from('submissions')
       .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
@@ -33,6 +33,12 @@ export default async function SubmissionDetailPage({ params }: Props) {
       .select('username, avatar_url, plan')
       .eq('id', user.id)
       .single(),
+    (supabase as any)
+      .from('comments')
+      .select('rating')
+      .eq('submission_id', id)
+      .eq('is_reported', false)
+      .not('rating', 'is', null),
   ])
 
   if (!submission) notFound()
@@ -43,6 +49,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
 
   const figmaUrl = (submission.files as any)?.figma
+  const fireSum = ((ratings ?? []) as { rating: number | null }[])
+    .reduce((s, r) => s + (r.rating ?? 0), 0)
 
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
@@ -82,6 +90,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
               initialLikes={submission.likes_count ?? 0}
               initialLiked={!!liked}
               currentUserId={user.id}
+              displayCount={fireSum}
             />
             <span className="text-xs text-muted-foreground font-mono">
               💬 {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}

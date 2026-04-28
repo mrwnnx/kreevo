@@ -43,8 +43,8 @@ export function CommentSection({
 
   const ratingsWithValue = comments.filter((c) => c.rating && c.rating > 0)
   const totalRatings = ratingsWithValue.length
-  const averageRating =
-    totalRatings > 0 ? ratingsWithValue.reduce((s, c) => s + (c.rating ?? 0), 0) / totalRatings : 0
+  const totalFires = ratingsWithValue.reduce((s, c) => s + (c.rating ?? 0), 0)
+  const averageRating = totalRatings > 0 ? totalFires / totalRatings : 0
   const getRatingCount = (n: number) => ratingsWithValue.filter((c) => c.rating === n).length
   const getRatingPercent = (n: number) => (totalRatings > 0 ? (getRatingCount(n) / totalRatings) * 100 : 0)
 
@@ -95,7 +95,7 @@ export function CommentSection({
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              {averageRating.toFixed(1)}
+              {totalFires}
             </p>
             <div className="flex justify-center mt-1">
               {[1, 2, 3, 4, 5].map((f) => (
