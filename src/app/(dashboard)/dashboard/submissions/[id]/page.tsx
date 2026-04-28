@@ -5,6 +5,7 @@ import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
+import { ShareButton } from '@/components/features/challenge/ShareButton'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentSection } from '@/components/features/submissions/CommentSection'
 
@@ -95,11 +96,12 @@ export default async function SubmissionDetailPage({ params }: Props) {
             <span className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full text-muted-foreground">
               💬 {submission.comments_count ?? 0}
             </span>
-            {!isOwn && submission.created_at && (
-              <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-3">
+              <ShareButton />
+              {!isOwn && submission.created_at && (
                 <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Card description */}
