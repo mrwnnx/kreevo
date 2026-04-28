@@ -63,6 +63,24 @@ export default async function SubmissionDetailPage({ params }: Props) {
         {/* ── Colonne gauche ── */}
         <div className="flex-1 min-w-0 space-y-4">
 
+          {/* Title + date */}
+          {(submission.title || submission.created_at) && (
+            <div className="space-y-1">
+              {submission.title && (
+                <h1 className="text-2xl font-bold leading-tight">{submission.title}</h1>
+              )}
+              {submission.created_at && (
+                <p className="text-xs text-muted-foreground">
+                  {new Date(submission.created_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Card image — seule */}
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
             <div className="relative aspect-video bg-muted">
