@@ -62,9 +62,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
         {/* ── Colonne gauche ── */}
         <div className="flex-1 min-w-0 space-y-4">
 
-          {/* Card image */}
+          {/* Card image — seule */}
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
-            {/* Image */}
             <div className="relative aspect-video bg-muted">
               {submission.cover_url ? (
                 <ImageLightbox src={submission.cover_url} alt="Submission cover" />
@@ -74,24 +73,24 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Footer : likes + commentaires + signaler */}
-            <div className="flex items-center gap-4 px-4 py-3 border-t border-border">
-              <LikeButton
-                submissionId={id}
-                initialLikes={submission.likes_count ?? 0}
-                initialLiked={!!liked}
-                currentUserId={user.id}
-              />
-              <span className="text-xs text-muted-foreground font-mono">
-                💬 {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}
-              </span>
-              {!isOwn && submission.created_at && (
-                <div className="ml-auto">
-                  <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
-                </div>
-              )}
-            </div>
+          {/* Card actions : likes + commentaires + signaler */}
+          <div className="rounded-2xl border border-border bg-card flex items-center gap-4 px-4 py-3">
+            <LikeButton
+              submissionId={id}
+              initialLikes={submission.likes_count ?? 0}
+              initialLiked={!!liked}
+              currentUserId={user.id}
+            />
+            <span className="text-xs text-muted-foreground font-mono">
+              💬 {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}
+            </span>
+            {!isOwn && submission.created_at && (
+              <div className="ml-auto">
+                <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
+              </div>
+            )}
           </div>
 
           {/* Card description */}
