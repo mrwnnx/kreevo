@@ -6,7 +6,6 @@ import { Zap, ExternalLink, Clock, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
-import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 
 interface Author {
   id: string
@@ -34,7 +33,6 @@ interface Challenge {
 
 interface Props {
   author: Author | null
-  league: string | null | undefined
   isOwn: boolean
   challenge?: Challenge | null
 }
@@ -56,16 +54,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xs font-medium text-foreground">{value}</span>
-    </div>
-  )
-}
-
-export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
+export function ProfilePanel({ author, isOwn, challenge }: Props) {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60)
@@ -76,7 +65,6 @@ export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
 
   const links = author.links as Record<string, string> | null
   const activeLinks = links ? Object.entries(links).filter(([, v]) => v) : []
-  const lColor = getLeagueColor(league)
 
   return (
     <aside
@@ -87,8 +75,7 @@ export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
     >
       {/* ── Card profil ── */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
-        {/* Avatar */}
-        <div className="px-4 pt-4 pb-4">
+        <div>
           <div className="mb-3">
             <Avatar className="size-11 rounded-full border border-border shadow-sm">
               <AvatarImage src={author.avatar_url ?? undefined} />
@@ -117,7 +104,7 @@ export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
           </div>
 
           {/* Badges plan + XP */}
-          <div className="flex items-center gap-2 flex-wrap mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
             {author.plan && (
               <span className={cn(
                 'text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase',
@@ -133,21 +120,6 @@ export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
                 <Zap className="size-3 text-amber-500" />
                 {author.xp.toLocaleString()} XP
               </span>
-            )}
-          </div>
-
-          {/* Info rows */}
-          <div>
-            <InfoRow
-              label="Ligue"
-              value={
-                <span className="font-semibold" style={{ color: lColor }}>
-                  {getLeagueLabel(league)}
-                </span>
-              }
-            />
-            {author.specialty && (
-              <InfoRow label="Spécialité" value={author.specialty} />
             )}
           </div>
         </div>

@@ -43,7 +43,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
   const isBlurred = false
 
-  const league = author?.league ?? '7ajra'
   const figmaUrl = (submission.files as any)?.figma
 
   return (
@@ -146,7 +145,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
         {/* ── Colonne droite ── */}
         <ProfilePanel
           author={author}
-          league={league}
           isOwn={isOwn}
           challenge={challenge}
         />
