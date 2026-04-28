@@ -130,7 +130,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
           {/* Reviews & commentaires */}
           {submission.validation_status === 'approved' && (
             <>
-              <hr className="border-border" />
               <CommentSection
                 submissionId={id}
                 currentUserId={user.id}
