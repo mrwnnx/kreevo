@@ -92,7 +92,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
               currentUserId={user.id}
               displayCount={fireSum}
             />
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-border text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full text-muted-foreground">
               💬 {submission.comments_count ?? 0}
             </span>
             {!isOwn && submission.created_at && (
