@@ -175,13 +175,6 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
         </div>
       )}
 
-      {/* ── CTA profil ── */}
-      <Link
-        href={`/u/${author.username}`}
-        className="flex items-center justify-center w-full h-9 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors"
-      >
-        Voir le profil →
-      </Link>
     </aside>
   )
 }
