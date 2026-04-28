@@ -5,6 +5,7 @@ import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { SubmissionComments } from '@/components/features/challenge/SubmissionComments'
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
+import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { cn } from '@/lib/utils'
 
 interface Props { params: Promise<{ id: string }> }
@@ -119,7 +120,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
               )}
             </div>
 
-            {/* Footer : likes + commentaires */}
+            {/* Footer : likes + commentaires + signaler */}
             <div className="flex items-center gap-4 px-4 py-3 border-t border-border">
               <LikeButton
                 submissionId={id}
@@ -130,6 +131,11 @@ export default async function SubmissionDetailPage({ params }: Props) {
               <span className="text-xs text-muted-foreground font-mono">
                 💬 {submission.comments_count ?? 0} commentaire{(submission.comments_count ?? 0) !== 1 ? 's' : ''}
               </span>
+              {!isOwn && submission.created_at && (
+                <div className="ml-auto">
+                  <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
+                </div>
+              )}
             </div>
           </div>
 
