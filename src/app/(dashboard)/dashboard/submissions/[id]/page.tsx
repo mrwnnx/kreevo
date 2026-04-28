@@ -10,12 +10,6 @@ import { cn } from '@/lib/utils'
 
 interface Props { params: Promise<{ id: string }> }
 
-const SPECIALTY_STYLE: Record<string, string> = {
-  'UX Designer':      'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
-  'UI Designer':      'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
-  'Graphic Designer': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-}
-
 export default async function SubmissionDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
@@ -63,8 +57,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
   }
   const gradient = LEAGUE_GRADIENT[league] ?? 'from-slate-400 to-slate-600'
   const figmaUrl = (submission.files as any)?.figma
-  const specialty = challenge?.specialty as string | null
-  const specialtyStyle = SPECIALTY_STYLE[specialty ?? ''] ?? 'bg-muted text-muted-foreground'
 
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
@@ -86,18 +78,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
           {/* Card image */}
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
-            {/* Header specialty */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border gap-2">
-              {specialty ? (
-                <span className={cn('text-[11px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest', specialtyStyle)}>
-                  {specialty}
-                </span>
-              ) : <span />}
-              {challenge?.challenge_type && (
-                <span className="text-[11px] font-mono text-muted-foreground">{challenge.challenge_type}</span>
-              )}
-            </div>
-
             {/* Image */}
             <div className="relative aspect-video bg-muted">
               {submission.cover_url ? (
