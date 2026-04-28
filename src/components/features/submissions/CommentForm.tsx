@@ -37,7 +37,7 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
 
   return (
     <div className="border border-border rounded-2xl p-5 space-y-4 bg-white dark:bg-zinc-950">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex-shrink-0">
           {userAvatar ? (
             <img src={userAvatar} alt={username} className="w-full h-full object-cover" />
@@ -47,14 +47,13 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
             </div>
           )}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium">Laisse une review</p>
           <p className="text-xs text-muted-foreground">Aide le designer à progresser</p>
         </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <FireRating value={rating} onChange={setRating} size="md" />
+        <div className="ml-auto">
+          <FireRating value={rating} onChange={setRating} size="md" />
+        </div>
       </div>
 
       <div className="space-y-1">
