@@ -28,7 +28,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
     .limit(100)
 
   if (tab === 'pending') query = query.eq('validation_status', 'pending')
-  else if (tab === 'reported') query = query.eq('validation_status', 'on_hold')
+  else if (tab === 'reported') query = query.gt('reports_count', 0).order('reports_count', { ascending: false })
   else if (tab === 'rejected') query = query.eq('validation_status', 'rejected')
 
   const { data: submissions } = await query
@@ -43,7 +43,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
   ] = await Promise.all([
     (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false),
     (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'pending'),
-    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'on_hold'),
+    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).gt('reports_count', 0),
     (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'rejected'),
     (supabaseAdmin as any).from('submission_contests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
   ])
@@ -149,7 +149,14 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
                     @{s.profiles?.username} · {s.challenges?.leagues?.name ?? '—'} · {new Date(s.created_at).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
-                <StatusBadge status={s.validation_status} reportsCount={s.reports_count} />
+                <div className="flex items-center gap-2">
+                  {s.reports_count > 0 && s.validation_status !== 'on_hold' && (
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 whitespace-nowrap">
+                      🚩 {s.reports_count}
+                    </span>
+                  )}
+                  <StatusBadge status={s.validation_status} reportsCount={s.reports_count} />
+                </div>
               </Link>
             ))
           )}
