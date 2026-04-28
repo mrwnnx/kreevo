@@ -165,6 +165,20 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               </div>
             </div>
           )}
+
+          {/* Gallery — autres soumissions visibles avant de participer */}
+          {allSubmissions && allSubmissions.length > 0 && (
+            <section className="space-y-4 pt-6">
+              <div className="h-px bg-border" />
+              <h2 className="text-base font-semibold">Autres soumissions ({allSubmissions.length})</h2>
+              <SubmissionGallery
+                submissions={allSubmissions}
+                currentUserId={user.id}
+                isRevealed={true}
+                challengeTitle={c.title}
+              />
+            </section>
+          )}
         </div>
       </div>
     )
