@@ -84,11 +84,10 @@ export function CommentSection({
           disabled={!canReview}
           className={cn('gap-2', fullWidthTrigger && 'flex-1')}
           size="sm"
-          variant="outline"
         >
           <MessageSquare className="size-4" />
           Laisser une review
-          <span className="text-xs text-muted-foreground font-mono">· {commentsCount}</span>
+          <span className="text-xs font-mono opacity-80">· {commentsCount}</span>
         </Button>
 
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">

@@ -125,7 +125,7 @@ export function ReviewModal({ open, onOpenChange, onSubmit, remainingClaps }: Re
                     onClick={() => setClaps(claps === n ? n - 1 : n)}
                     onMouseEnter={() => !disabled && setHovered(n)}
                     className={cn(
-                      'size-7 transition-transform duration-100',
+                      'w-8 h-8 transition-transform duration-100',
                       !disabled && 'cursor-pointer hover:scale-110',
                       disabled && 'opacity-30 cursor-not-allowed',
                       n <= activeValue && !disabled && 'scale-105',
