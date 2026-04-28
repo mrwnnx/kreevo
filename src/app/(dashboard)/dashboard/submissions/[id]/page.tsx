@@ -6,7 +6,7 @@ import { SubmissionComments } from '@/components/features/challenge/SubmissionCo
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
-import { cn } from '@/lib/utils'
+import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -41,7 +41,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const author = submission.profiles
   const isOwn = submission.user_id === user.id
 
-  const isBlurred = false
 
   const figmaUrl = (submission.files as any)?.figma
 
@@ -68,21 +67,10 @@ export default async function SubmissionDetailPage({ params }: Props) {
             {/* Image */}
             <div className="relative aspect-video bg-muted">
               {submission.cover_url ? (
-                <img
-                  src={submission.cover_url}
-                  alt="Submission cover"
-                  className={cn('w-full h-full object-cover', isBlurred && 'blur-2xl scale-110')}
-                />
+                <ImageLightbox src={submission.cover_url} alt="Submission cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
                   Pas de preview
-                </div>
-              )}
-              {isBlurred && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-sm font-semibold bg-background/70 backdrop-blur-sm px-4 py-2 rounded-full">
-                    🔒 Caché jusqu'à la révélation
-                  </p>
                 </div>
               )}
             </div>
