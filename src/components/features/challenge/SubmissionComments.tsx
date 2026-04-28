@@ -4,12 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Send } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 
 interface Comment {
   id: string
   content: string
   created_at: string
-  profiles?: { username: string; avatar_url: string | null }
+  profiles?: { username: string; avatar_url: string | null; plan?: string | null }
 }
 
 interface Props {
@@ -70,8 +71,9 @@ export function SubmissionComments({ submissionId, initialComments, currentUserI
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <Link href={`/u/${c.profiles?.username}`} className="text-xs font-bold hover:underline">
+                  <Link href={`/u/${c.profiles?.username}`} className="text-xs font-bold hover:underline inline-flex items-center gap-1">
                     @{c.profiles?.username}
+                    <ProBadge plan={c.profiles?.plan} size={11} />
                   </Link>
                   <span className="text-[11px] text-muted-foreground font-mono">{timeAgo(c.created_at)}</span>
                 </div>

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, ArrowRight, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { cn } from '@/lib/utils'
 
@@ -243,11 +244,7 @@ export default async function LeaderboardPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-semibold truncate">@{profile?.username}</span>
-                {isPro && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 shrink-0">
-                    Pro
-                  </span>
-                )}
+                <ProBadge plan={profile?.plan} />
               </div>
               {profile?.specialty && (
                 <p className="text-xs text-muted-foreground truncate">{profile.specialty}</p>
@@ -335,11 +332,7 @@ export default async function LeaderboardPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-sm font-medium truncate">@{u.username}</span>
-                      {(u.plan === 'pro' || u.plan === 'studio') && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 shrink-0">
-                          Pro
-                        </span>
-                      )}
+                      <ProBadge plan={u.plan} />
                       {isMe && (
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-violet-200 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300 shrink-0">
                           Toi

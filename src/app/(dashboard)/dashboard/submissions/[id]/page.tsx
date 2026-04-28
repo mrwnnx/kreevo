@@ -30,7 +30,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
       .single(),
     (supabase as any)
       .from('comments')
-      .select('*, profiles:user_id(username, avatar_url)')
+      .select('*, profiles:user_id(username, avatar_url, plan)')
       .eq('submission_id', id)
       .order('created_at', { ascending: true }),
     (supabase as any)

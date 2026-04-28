@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
   const { data: comment, error } = await (supabase.from('comments') as any)
     .insert({ submission_id: submissionId, user_id: user.id, content: content.trim() })
-    .select('*, profiles(username, avatar_url)')
+    .select('*, profiles(username, avatar_url, plan)')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
   const { data, error } = await (supabase.from('comments') as any)
-    .select('*, profiles(username, avatar_url)')
+    .select('*, profiles(username, avatar_url, plan)')
     .eq('submission_id', submissionId)
     .order('created_at', { ascending: true })
 

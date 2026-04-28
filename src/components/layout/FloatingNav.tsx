@@ -7,6 +7,7 @@ import { House, Trophy, BarChart3, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -118,7 +119,10 @@ export function FloatingNav({ profile }: { profile: Profile }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 rounded-xl mt-1">
             <div className="px-3 py-2 border-b border-border mb-1">
-              <p className="text-sm font-semibold">@{profile.username}</p>
+              <p className="text-sm font-semibold inline-flex items-center gap-1.5">
+                @{profile.username}
+                <ProBadge plan={profile.plan} />
+              </p>
               <p className="text-xs text-muted-foreground font-mono capitalize">{profile.plan} plan</p>
             </div>
             <DropdownMenuItem>

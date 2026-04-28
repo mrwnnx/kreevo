@@ -9,6 +9,7 @@ import {
   AvatarGroup,
   AvatarGroupCount,
 } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ interface Participant {
   username: string
   full_name: string | null
   avatar_url: string | null
+  plan?: string | null
 }
 
 export function ParticipantsDialog({
@@ -82,8 +84,9 @@ export function ParticipantsDialog({
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm font-medium truncate inline-flex items-center gap-1.5">
                         {p.full_name ?? p.username}
+                        <ProBadge plan={p.plan} />
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
                         @{p.username}

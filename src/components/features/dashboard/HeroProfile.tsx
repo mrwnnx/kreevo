@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Pencil, ExternalLink, Zap, Trophy, BarChart2 } from 'lucide-react'
 import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { ProBadge } from '@/components/ui/ProBadge'
 
 const LEAGUE_GRADIENT: Record<string, string> = {
   '7ajra':  'from-stone-400 to-stone-600',
@@ -27,6 +28,7 @@ interface HeroProfileProps {
   submissionCount: number
   rank: number | null
   totalUsers: number
+  plan?: string | null
   // New leagues system props
   leagueIcon?: string
   leagueDisplayName?: string
@@ -71,7 +73,7 @@ function Avatar({ url, name, league }: { url: string | null; name: string; leagu
 
 export function HeroProfile({
   username, fullName, avatarUrl, specialty, bio, country,
-  league, xp, submissionCount, rank, totalUsers,
+  league, xp, submissionCount, rank, totalUsers, plan,
   leagueIcon, leagueDisplayName, leagueDisplayColor,
   leagueXpThreshold, leagueChallengesCompleted, minChallenges,
 }: HeroProfileProps) {
@@ -102,9 +104,10 @@ export function HeroProfile({
         {/* Nom + spécialité + boutons */}
         <div className="flex-1 flex flex-col items-center md:items-start gap-3 min-w-0">
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold leading-tight tracking-tight">
+            <h1 className="text-3xl font-bold leading-tight tracking-tight inline-flex items-center gap-2">
               {displayName}
-              {flag && <span className="ml-2 text-2xl align-middle">{flag}</span>}
+              <ProBadge plan={plan} size={20} />
+              {flag && <span className="ml-1 text-2xl align-middle">{flag}</span>}
             </h1>
             {subtitle && (
               <p className="text-base text-muted-foreground mt-1">{subtitle}</p>

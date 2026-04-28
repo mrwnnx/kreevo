@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { ProBadge } from '@/components/ui/ProBadge'
 import { Separator } from '@/components/ui/separator'
 import {
   MapPin, Globe,
@@ -170,7 +171,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   </span>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground font-mono mt-0.5">@{p.username}</p>
+              <p className="text-sm text-muted-foreground font-mono mt-0.5 inline-flex items-center gap-1.5">
+                @{p.username}
+                <ProBadge plan={p.plan} />
+              </p>
             </div>
 
             {/* Specialty + location */}

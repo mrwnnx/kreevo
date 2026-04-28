@@ -249,6 +249,7 @@ export default async function DashboardPage() {
         country={p.country ?? null}
         league={p.league}
         xp={p.xp}
+        plan={p.plan}
         submissionCount={submissionCount ?? 0}
         rank={rank}
         totalUsers={totalUsers ?? 0}

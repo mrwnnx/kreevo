@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Zap, ExternalLink, Clock, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
 import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 
@@ -104,8 +105,9 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
           {/* Name */}
           <div className="mb-3">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <Link href={`/u/${author.username}`} className="text-sm font-bold hover:underline">
+              <Link href={`/u/${author.username}`} className="text-sm font-bold hover:underline inline-flex items-center gap-1.5">
                 @{author.username}
+                <ProBadge plan={author.plan} />
               </Link>
               {isOwn && (
                 <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-full">

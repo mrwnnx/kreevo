@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 import { Heart, MessageCircle, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
 import { ReportButton } from './ReportButton'
 
@@ -16,7 +17,7 @@ interface Submission {
   comments_count: number
   user_id: string
   created_at?: string
-  profiles?: { username: string; avatar_url: string | null; league: string }
+  profiles?: { username: string; avatar_url: string | null; league: string; plan?: string | null }
   challenges?: { title: string }
 }
 
@@ -142,7 +143,10 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, chal
                           {s.profiles.username[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <Link href={`/u/${s.profiles.username}`} className="text-xs font-medium truncate hover:underline">@{s.profiles.username}</Link>
+                      <Link href={`/u/${s.profiles.username}`} className="text-xs font-medium truncate hover:underline inline-flex items-center gap-1">
+                        @{s.profiles.username}
+                        <ProBadge plan={s.profiles.plan} size={11} />
+                      </Link>
                       {s.profiles.league && (
                         <span className={cn(
                           'text-[9px] font-mono px-1.5 py-0.5 rounded-full ml-auto',

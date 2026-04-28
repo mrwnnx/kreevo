@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ProBadge } from '@/components/ui/ProBadge'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -48,7 +49,10 @@ export function Header({ profile, title }: { profile: Profile; title?: string })
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 rounded-xl">
             <div className="px-3 py-2 border-b border-border mb-1">
-              <p className="text-xs font-semibold">@{profile.username}</p>
+              <p className="text-xs font-semibold inline-flex items-center gap-1">
+                @{profile.username}
+                <ProBadge plan={profile.plan} size={11} />
+              </p>
               <p className="text-[10px] text-muted-foreground capitalize font-mono">{profile.plan} plan</p>
             </div>
             <DropdownMenuItem>
