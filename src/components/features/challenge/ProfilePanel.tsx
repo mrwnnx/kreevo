@@ -34,7 +34,6 @@ interface Challenge {
 
 interface Props {
   author: Author | null
-  gradient: string
   league: string | null | undefined
   isOwn: boolean
   challenge?: Challenge | null
@@ -66,7 +65,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Props) {
+export function ProfilePanel({ author, league, isOwn, challenge }: Props) {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60)
@@ -88,13 +87,10 @@ export function ProfilePanel({ author, gradient, league, isOwn, challenge }: Pro
     >
       {/* ── Card profil ── */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
-        {/* Header gradient */}
-        <div className={cn('h-[60px] bg-gradient-to-br', gradient)} />
-
-        {/* Avatar chevauchant */}
-        <div className="px-4 pb-4">
-          <div className="-mt-[22px] mb-3">
-            <Avatar className="size-11 rounded-full border-2 border-background shadow-sm">
+        {/* Avatar */}
+        <div className="px-4 pt-4 pb-4">
+          <div className="mb-3">
+            <Avatar className="size-11 rounded-full border border-border shadow-sm">
               <AvatarImage src={author.avatar_url ?? undefined} />
               <AvatarFallback className="text-sm font-bold">
                 {(author.username ?? '?')[0].toUpperCase()}

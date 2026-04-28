@@ -44,18 +44,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const isBlurred = false
 
   const league = author?.league ?? '7ajra'
-  const LEAGUE_GRADIENT: Record<string, string> = {
-    '7ajra':  'from-stone-400 to-stone-600',
-    Stone:    'from-stone-400 to-stone-600',
-    Bronze:   'from-orange-400 to-orange-700',
-    Silver:   'from-slate-300 to-slate-500',
-    Gold:     'from-yellow-400 to-yellow-600',
-    Platinum: 'from-cyan-300 to-cyan-600',
-    Diamond:  'from-blue-300 to-blue-600',
-    Master:   'from-violet-500 to-violet-700',
-    Legend:   'from-pink-500 to-red-600',
-  }
-  const gradient = LEAGUE_GRADIENT[league] ?? 'from-slate-400 to-slate-600'
   const figmaUrl = (submission.files as any)?.figma
 
   return (
@@ -158,7 +146,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
         {/* ── Colonne droite ── */}
         <ProfilePanel
           author={author}
-          gradient={gradient}
           league={league}
           isOwn={isOwn}
           challenge={challenge}
