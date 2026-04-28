@@ -110,6 +110,11 @@ export function CommentSection({
     <div className="space-y-6">
       {/* Combined actions bar */}
       <div className="rounded-2xl border border-border bg-card flex items-center gap-4 px-4 py-3">
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+          <Star className="size-5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
+          {totalClaps}
+        </span>
+
         <Button
           onClick={() => setModalOpen(true)}
           disabled={!canReview}
@@ -120,14 +125,9 @@ export function CommentSection({
           Laisser une review
         </Button>
 
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+        <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
           <MessageCircle className="size-5" strokeWidth={1.5} />
           {commentsCount}
-        </span>
-
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-          <Star className="size-5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
-          {totalClaps}
         </span>
       </div>
 
