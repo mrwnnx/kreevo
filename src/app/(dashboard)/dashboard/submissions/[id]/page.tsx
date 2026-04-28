@@ -95,6 +95,17 @@ export default async function SubmissionDetailPage({ params }: Props) {
             </div>
           </div>
 
+          {/* Additional images */}
+          {(((submission.files as any)?.images ?? []) as string[]).length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {(((submission.files as any).images ?? []) as string[]).map((url, i) => (
+                <div key={i} className="rounded-xl border border-border overflow-hidden bg-muted aspect-square">
+                  <ImageLightbox src={url} alt={`Visuel ${i + 1}`} />
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Share + report */}
           {(!isOwn || true) && (
             <div className="flex items-center gap-3 justify-end">
