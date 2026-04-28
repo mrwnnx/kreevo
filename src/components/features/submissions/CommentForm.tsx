@@ -54,9 +54,7 @@ export function CommentForm({ onSubmit, userAvatar, username }: CommentFormProps
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground flex-shrink-0">Ta note :</span>
         <FireRating value={rating} onChange={setRating} size="md" />
-        {rating === 0 && <span className="text-xs text-muted-foreground">Clique pour noter</span>}
       </div>
 
       <div className="space-y-1">
