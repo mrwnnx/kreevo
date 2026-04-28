@@ -2,11 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ExternalLink } from 'lucide-react'
-import { SubmissionComments } from '@/components/features/challenge/SubmissionComments'
 import { LikeButton } from '@/components/features/challenge/LikeButton'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
+import { CommentSection } from '@/components/features/submissions/CommentSection'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -16,22 +16,22 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: submission }, { data: comments }, { data: liked }] = await Promise.all([
+  const [{ data: submission }, { data: liked }, { data: currentProfile }] = await Promise.all([
     (supabase as any)
       .from('submissions')
       .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
       .eq('id', id)
       .single(),
     (supabase as any)
-      .from('comments')
-      .select('*, profiles:user_id(username, avatar_url, plan)')
-      .eq('submission_id', id)
-      .order('created_at', { ascending: true }),
-    (supabase as any)
       .from('likes')
       .select('id')
       .eq('submission_id', id)
       .eq('user_id', user.id)
+      .single(),
+    (supabase as any)
+      .from('profiles')
+      .select('username, avatar_url, plan')
+      .eq('id', user.id)
       .single(),
   ])
 
@@ -116,17 +116,21 @@ export default async function SubmissionDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* Card commentaires */}
-          <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
-            <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
-              Commentaires ({comments?.length ?? 0})
-            </p>
-            <SubmissionComments
-              submissionId={id}
-              initialComments={comments ?? []}
-              currentUserId={user.id}
-            />
-          </div>
+          {/* Reviews & commentaires */}
+          {submission.validation_status === 'approved' && (
+            <>
+              <hr className="border-border" />
+              <CommentSection
+                submissionId={id}
+                currentUserId={user.id}
+                userPlan={currentProfile?.plan ?? null}
+                userAvatar={currentProfile?.avatar_url ?? null}
+                username={currentProfile?.username}
+                submissionOwnerId={submission.user_id}
+                isVisible={true}
+              />
+            </>
+          )}
         </div>
 
         {/* ── Colonne droite ── */}
