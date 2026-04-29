@@ -67,7 +67,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
           {(submission.title || submission.created_at) && (
             <div className="space-y-1">
               {submission.title && (
-                <h1 className="text-[30px] font-bold leading-tight">{submission.title}</h1>
+                <h1 className="text-[36px] font-bold leading-tight">{submission.title}</h1>
               )}
               {submission.created_at && (
                 <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
