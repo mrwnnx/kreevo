@@ -134,7 +134,7 @@ export default function DesignSystemPage() {
           </div>
 
           {/* ═══════════════ TYPOGRAPHY ═══════════════ */}
-          <Section id="typography" title="Typography" description="Plus Jakarta Sans (display) + Space Mono (code)">
+          <Section id="typography" title="Typography" description="Plus Jakarta Sans">
 
             <Block label="Headings">
               <div className="w-full space-y-2">
@@ -180,7 +180,7 @@ export default function DesignSystemPage() {
               <div className="w-full space-y-1.5">
                 <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">const kreevo = &quot;design&quot;</code>
                 <pre className="text-xs font-mono bg-muted rounded-lg p-3 text-foreground">
-                  {`// Space Mono\nimport { cn } from '@/lib/utils'`}
+                  {`// Plus Jakarta Sans\nimport { cn } from '@/lib/utils'`}
                 </pre>
               </div>
             </Block>

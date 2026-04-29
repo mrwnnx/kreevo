@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import type { Metadata } from "next"
-import { Plus_Jakarta_Sans, Space_Mono } from "next/font/google"
+import { Plus_Jakarta_Sans } from "next/font/google"
 import Script from "next/script"
 import { buildDesignCSS, FONT_OPTIONS } from "@/lib/design-tokens"
 import { getDesignTokens } from "@/lib/design-tokens.server"
@@ -11,12 +11,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
-})
-
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
 })
 
 export const metadata: Metadata = {
@@ -31,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isCustomFont = tokens.font !== 'Plus Jakarta Sans' && fontOption
 
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${spaceMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${plusJakartaSans.variable} h-full antialiased`}>
       <head>
         {isCustomFont && (
           <link rel="stylesheet" href={fontOption.url} />
