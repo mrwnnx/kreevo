@@ -52,50 +52,79 @@ export function LeagueSection({
   return (
     <div className="grid md:grid-cols-2 gap-4">
 
-      <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5">
-        <p className="text-xs font-semibold text-amber-600 uppercase tracking-widest mb-3">
-          YOUR LEAGUE
-        </p>
+      <div
+        className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5"
+        style={{ backgroundColor: '#FCEAC8' }}
+      >
+        {/* Decorative organic shapes */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 w-full h-full"
+          viewBox="0 0 400 240"
+          preserveAspectRatio="xMidYMid slice"
+          fill="#F5D9A8"
+        >
+          {/* top-left blob */}
+          <path d="M-20 30 Q 30 -10 70 20 Q 95 50 60 80 Q 25 100 -5 80 Q -35 55 -20 30 Z" opacity="0.55" />
+          {/* small top-right curl */}
+          <path d="M380 10 Q 410 25 395 50 Q 375 65 360 50 Q 350 30 380 10 Z" opacity="0.5" />
+          {/* mid dot */}
+          <circle cx="270" cy="55" r="4" opacity="0.55" />
+          {/* mid-left dot */}
+          <circle cx="35" cy="155" r="3" opacity="0.55" />
+          {/* bottom-left petal */}
+          <path d="M0 200 Q 35 170 70 195 Q 90 225 60 245 Q 20 250 0 230 Z" opacity="0.55" />
+          {/* bottom-right petal */}
+          <path d="M340 220 Q 380 200 410 230 Q 415 260 380 265 Q 345 260 340 220 Z" opacity="0.5" />
+          {/* center-right curve */}
+          <path d="M310 130 Q 340 115 360 140 Q 350 170 320 165 Q 300 150 310 130 Z" opacity="0.4" />
+        </svg>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center text-xl">
-              🏆
+        <div className="relative">
+          <p className="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-3">
+            YOUR LEAGUE
+          </p>
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-xl">
+                🏆
+              </div>
+              <h3 className="text-xl font-bold text-amber-900">
+                {leagueName} League
+              </h3>
             </div>
-            <h3 className="text-xl font-bold text-amber-800 dark:text-amber-300">
-              {leagueName} League
-            </h3>
           </div>
-        </div>
 
-        <div className="mb-3">
-          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-            <span>Tier progress</span>
-            <span>
-              {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
-            </span>
+          <div className="mb-3">
+            <div className="flex justify-between text-xs text-amber-900/70 mb-1.5">
+              <span>Tier progress</span>
+              <span>
+                {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
+              </span>
+            </div>
+            <div className="h-2.5 bg-white/50 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                style={{ width: `${xpPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-amber-400 rounded-full transition-all duration-700"
-              style={{ width: `${xpPercent}%` }}
-            />
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-sm">
-            <TrendingUp className="w-4 h-4 text-amber-500" />
-            <span className="font-semibold text-amber-800 dark:text-amber-300">
-              Rank #{userRank || '—'} of {totalInLeague || 50}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-sm">
+              <TrendingUp className="w-4 h-4 text-amber-700" />
+              <span className="font-semibold text-amber-900">
+                Rank #{userRank || '—'} of {totalInLeague || 50}
+              </span>
+            </div>
+            <Link
+              href="/dashboard/leaderboard"
+              className="text-xs text-amber-700 hover:text-amber-800 font-medium"
+            >
+              Push to top 10 🔥
+            </Link>
           </div>
-          <Link
-            href="/dashboard/leaderboard"
-            className="text-xs text-amber-600 hover:text-amber-700 font-medium"
-          >
-            Push to top 10 🔥
-          </Link>
         </div>
       </div>
 
