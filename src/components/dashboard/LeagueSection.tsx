@@ -62,22 +62,22 @@ export function LeagueSection({
           className="pointer-events-none absolute inset-0 w-full h-full"
           viewBox="0 0 400 240"
           preserveAspectRatio="xMidYMid slice"
-          fill="#F5D9A8"
+          fill="#E8B872"
         >
           {/* top-left blob */}
-          <path d="M-20 30 Q 30 -10 70 20 Q 95 50 60 80 Q 25 100 -5 80 Q -35 55 -20 30 Z" opacity="0.55" />
+          <path d="M-30 20 Q 30 -20 80 15 Q 110 55 65 90 Q 20 115 -15 90 Q -45 55 -30 20 Z" opacity="0.85" />
           {/* small top-right curl */}
-          <path d="M380 10 Q 410 25 395 50 Q 375 65 360 50 Q 350 30 380 10 Z" opacity="0.5" />
+          <path d="M375 5 Q 415 20 400 55 Q 375 75 355 55 Q 345 25 375 5 Z" opacity="0.8" />
           {/* mid dot */}
-          <circle cx="270" cy="55" r="4" opacity="0.55" />
+          <circle cx="270" cy="55" r="6" opacity="0.85" />
           {/* mid-left dot */}
-          <circle cx="35" cy="155" r="3" opacity="0.55" />
+          <circle cx="35" cy="155" r="5" opacity="0.85" />
           {/* bottom-left petal */}
-          <path d="M0 200 Q 35 170 70 195 Q 90 225 60 245 Q 20 250 0 230 Z" opacity="0.55" />
+          <path d="M-10 195 Q 35 165 75 195 Q 100 230 65 250 Q 20 255 -10 235 Z" opacity="0.85" />
           {/* bottom-right petal */}
-          <path d="M340 220 Q 380 200 410 230 Q 415 260 380 265 Q 345 260 340 220 Z" opacity="0.5" />
+          <path d="M335 215 Q 385 195 420 230 Q 425 270 380 275 Q 340 265 335 215 Z" opacity="0.8" />
           {/* center-right curve */}
-          <path d="M310 130 Q 340 115 360 140 Q 350 170 320 165 Q 300 150 310 130 Z" opacity="0.4" />
+          <path d="M305 125 Q 345 110 370 140 Q 360 175 320 170 Q 295 155 305 125 Z" opacity="0.7" />
         </svg>
 
         <div className="relative">
