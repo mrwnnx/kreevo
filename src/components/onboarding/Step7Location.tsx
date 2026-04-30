@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { ALL_COUNTRIES, MENA_SUGGESTED } from './countries'
 
-interface Step6Props {
+interface Step7Props {
   country: string
   onNext: (data: { country: string }) => void
   onBack: () => void
   saving?: boolean
 }
 
-export function Step6Location({ country, onNext, onBack, saving }: Step6Props) {
+export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
   const [value, setValue] = useState(country)
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)

@@ -15,7 +15,7 @@ export interface OnboardingData {
   country: string
 }
 
-export const TOTAL_STEPS = 6
+export const TOTAL_STEPS = 7
 
 export const TOOLS_BY_SPECIALTY: Record<'ux_ui' | 'graphic', string[]> = {
   ux_ui: ['Figma', 'Adobe XD', 'Maze', 'Notion', 'Claude'],

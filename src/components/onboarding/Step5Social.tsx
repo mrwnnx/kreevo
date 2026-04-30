@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 
-interface Step4Props {
+interface Step5Props {
   behanceUrl: string
   linkedinUrl: string
   onNext: (data: { behanceUrl: string; linkedinUrl: string }) => void
@@ -15,7 +15,7 @@ interface Step4Props {
 
 const isValidUrl = (v: string) => v.length === 0 || v.trim().toLowerCase().startsWith('https://')
 
-export function Step4Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, saving }: Step4Props) {
+export function Step5Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, saving }: Step5Props) {
   const [behance, setBehance] = useState(behanceUrl)
   const [linkedin, setLinkedin] = useState(linkedinUrl)
   const [behanceError, setBehanceError] = useState<string | null>(null)

@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation'
 import { ProgressBar } from '@/components/onboarding/ProgressBar'
 import { Step1BasicInfo } from '@/components/onboarding/Step1BasicInfo'
 import { Step2Specialty } from '@/components/onboarding/Step2Specialty'
-import { Step3Objectives } from '@/components/onboarding/Step3Objectives'
-import { Step4Social } from '@/components/onboarding/Step4Social'
-import { Step5Photo } from '@/components/onboarding/Step5Photo'
-import { Step6Location } from '@/components/onboarding/Step6Location'
+import { Step3ToolsLevel } from '@/components/onboarding/Step3ToolsLevel'
+import { Step4Objectives } from '@/components/onboarding/Step4Objectives'
+import { Step5Social } from '@/components/onboarding/Step5Social'
+import { Step6Photo } from '@/components/onboarding/Step6Photo'
+import { Step7Location } from '@/components/onboarding/Step7Location'
 import { CompletionModal } from '@/components/onboarding/CompletionModal'
 import { TOTAL_STEPS } from '@/components/onboarding/types'
 import type {
@@ -92,7 +93,7 @@ export default function OnboardingPage() {
 
   const goNext = () => {
     setDirection('forward')
-    setStep((s) => Math.min(6, s + 1))
+    setStep((s) => Math.min(TOTAL_STEPS, s + 1))
   }
 
   const goBack = () => {
@@ -108,15 +109,18 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep2 = async (v: {
-    specialty: Specialty
-    tools: string[]
-    experienceLevel: ExperienceLevel
-  }) => {
+  const handleStep2 = async (v: { specialty: Specialty }) => {
+    setData((d) => ({ ...d, ...v }))
+    try {
+      await persist({ specialty: v.specialty })
+      goNext()
+    } catch {}
+  }
+
+  const handleStep3 = async (v: { tools: string[]; experienceLevel: ExperienceLevel }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({
-        specialty: v.specialty,
         tools: v.tools,
         experience_level: v.experienceLevel || null,
       })
@@ -124,7 +128,7 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep3 = async (v: { objectives: Objective[] }) => {
+  const handleStep4 = async (v: { objectives: Objective[] }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({ objectives: v.objectives })
@@ -132,7 +136,7 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep4 = async (v: { behanceUrl: string; linkedinUrl: string }) => {
+  const handleStep5 = async (v: { behanceUrl: string; linkedinUrl: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({ behance_url: v.behanceUrl || null, linkedin_url: v.linkedinUrl || null })
@@ -140,7 +144,7 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep5 = async (v: { avatarUrl: string }) => {
+  const handleStep6 = async (v: { avatarUrl: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       if (v.avatarUrl) await persist({ avatar_url: v.avatarUrl })
@@ -148,7 +152,7 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep6 = async (v: { country: string }) => {
+  const handleStep7 = async (v: { country: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({
@@ -159,12 +163,7 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const skipStep4 = () => {
-    setDirection('forward')
-    goNext()
-  }
-
-  const skipStep5 = () => {
+  const skipForward = () => {
     setDirection('forward')
     goNext()
   }
@@ -216,44 +215,52 @@ export default function OnboardingPage() {
           {step === 2 && (
             <Step2Specialty
               specialty={data.specialty}
-              tools={data.tools}
-              experienceLevel={data.experienceLevel}
               onNext={handleStep2}
               onBack={goBack}
               saving={saving}
             />
           )}
           {step === 3 && (
-            <Step3Objectives
-              objectives={data.objectives}
+            <Step3ToolsLevel
+              specialty={data.specialty}
+              tools={data.tools}
+              experienceLevel={data.experienceLevel}
               onNext={handleStep3}
               onBack={goBack}
               saving={saving}
             />
           )}
           {step === 4 && (
-            <Step4Social
-              behanceUrl={data.behanceUrl}
-              linkedinUrl={data.linkedinUrl}
+            <Step4Objectives
+              objectives={data.objectives}
               onNext={handleStep4}
               onBack={goBack}
-              onSkip={skipStep4}
               saving={saving}
             />
           )}
           {step === 5 && (
-            <Step5Photo
-              avatarUrl={data.avatarUrl}
+            <Step5Social
+              behanceUrl={data.behanceUrl}
+              linkedinUrl={data.linkedinUrl}
               onNext={handleStep5}
               onBack={goBack}
-              onSkip={skipStep5}
+              onSkip={skipForward}
               saving={saving}
             />
           )}
           {step === 6 && (
-            <Step6Location
-              country={data.country}
+            <Step6Photo
+              avatarUrl={data.avatarUrl}
               onNext={handleStep6}
+              onBack={goBack}
+              onSkip={skipForward}
+              saving={saving}
+            />
+          )}
+          {step === 7 && (
+            <Step7Location
+              country={data.country}
+              onNext={handleStep7}
               onBack={goBack}
               saving={saving}
             />

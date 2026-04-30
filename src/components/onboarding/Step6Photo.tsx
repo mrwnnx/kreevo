@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 
-interface Step5Props {
+interface Step6Props {
   avatarUrl: string
   onNext: (data: { avatarUrl: string }) => void
   onBack: () => void
@@ -57,7 +57,7 @@ function compressImage(file: File): Promise<Blob> {
   })
 }
 
-export function Step5Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step5Props) {
+export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6Props) {
   const [photo, setPhoto] = useState(avatarUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)

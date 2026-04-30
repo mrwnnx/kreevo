@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { type Objective } from './types'
 
-interface Step3Props {
+interface Step4Props {
   objectives: Objective[]
   onNext: (data: { objectives: Objective[] }) => void
   onBack: () => void
@@ -28,7 +28,7 @@ const OPTIONS: Array<{ value: Objective; icon: string; title: string; subtitle: 
   },
 ]
 
-export function Step3Objectives({ objectives, onNext, onBack, saving }: Step3Props) {
+export function Step4Objectives({ objectives, onNext, onBack, saving }: Step4Props) {
   const [selected, setSelected] = useState<Objective[]>(objectives)
 
   const toggle = (value: Objective) => {
