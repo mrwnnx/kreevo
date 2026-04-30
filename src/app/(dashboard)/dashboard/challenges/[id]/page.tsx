@@ -12,6 +12,7 @@ import { ParticipateButton } from '@/components/features/challenge/ParticipateBu
 import { ParticipantsDialog } from '@/components/features/challenge/ParticipantsDialog'
 import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
+import { CancelParticipationButton } from '@/components/features/challenge/CancelParticipationButton'
 import type { Profile } from '@/types/database.types'
 
 interface Props {
@@ -364,6 +365,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {currentAttempts}/{maxAttempts} soumissions utilisées
               </p>
+              {!(existingSubmission && !(existingSubmission as any).is_draft) && (
+                <CancelParticipationButton challengeId={c.id} />
+              )}
             </div>
           )}
 

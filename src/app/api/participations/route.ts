@@ -115,6 +115,67 @@ export async function POST(request: Request) {
   return NextResponse.json({ participation })
 }
 
+export async function DELETE(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { searchParams } = new URL(request.url)
+  const challenge_id = searchParams.get('challenge_id')
+  if (!challenge_id) return NextResponse.json({ error: 'Missing challenge_id' }, { status: 400 })
+
+  const { data: participation } = await (supabaseAdmin as any)
+    .from('participations')
+    .select('id, status')
+    .eq('challenge_id', challenge_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!participation) {
+    return NextResponse.json({ error: 'Aucune participation trouvée' }, { status: 404 })
+  }
+  if (participation.status === 'submitted') {
+    return NextResponse.json({ error: 'Impossible : tu as déjà soumis ce travail' }, { status: 409 })
+  }
+
+  const { data: submission } = await (supabaseAdmin as any)
+    .from('submissions')
+    .select('id, is_draft, validation_status, cover_url, files')
+    .eq('challenge_id', challenge_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (submission && !submission.is_draft) {
+    return NextResponse.json({ error: 'Impossible : ta soumission est déjà publiée' }, { status: 409 })
+  }
+
+  if (submission) {
+    await (supabaseAdmin as any).from('submissions').delete().eq('id', submission.id)
+  }
+
+  const { error: delErr } = await (supabaseAdmin as any)
+    .from('participations')
+    .delete()
+    .eq('id', participation.id)
+  if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 })
+
+  // Refund the +50 XP joined_challenge bonus
+  const { data: profile } = await (supabaseAdmin as any)
+    .from('profiles').select('xp').eq('id', user.id).single()
+  const refunded = Math.max(0, (profile?.xp ?? 0) - 50)
+  await (supabaseAdmin as any).from('profiles').update({ xp: refunded }).eq('id', user.id)
+
+  try {
+    await (supabaseAdmin as any).from('notifications').insert({
+      user_id: user.id,
+      type: 'participation_cancelled',
+      data: { challenge_id },
+    })
+  } catch { /* ignore */ }
+
+  return NextResponse.json({ ok: true })
+}
+
 export async function GET(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
