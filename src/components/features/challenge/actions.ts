@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { updateStreak } from '@/lib/utils/streaks'
 import { revalidatePath } from 'next/cache'
 
 export async function submitChallenge(formData: FormData) {
@@ -111,6 +113,8 @@ export async function submitChallenge(formData: FormData) {
       .update({ status: 'submitted' })
       .eq('id', participationId)
   }
+
+  try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
   // Apply AI verdict from client (decided during upload), or fall back to server-side flow
   if (submissionId) {

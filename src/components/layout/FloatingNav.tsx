@@ -18,9 +18,9 @@ import type { Profile } from '@/types/database.types'
 import { leagueLabel, leagueColor } from '@/lib/utils/xp'
 
 const NAV = [
-  { href: '/dashboard',             label: 'Home',       icon: House,     match: (p: string) => p === '/dashboard' },
+  { href: '/dashboard',             label: 'Dashboard',  icon: House,     match: (p: string) => p === '/dashboard' },
   { href: '/dashboard/challenges',  label: 'Challenges', icon: Trophy,    match: (p: string) => p.startsWith('/dashboard/challenges') },
-  { href: '/dashboard/leaderboard', label: 'Ranking',    icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
+  { href: '/dashboard/leaderboard', label: 'Leagues',    icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
 ]
 
 export function FloatingNav({ profile }: { profile: Profile }) {

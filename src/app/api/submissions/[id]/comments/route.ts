@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { updateStreak } from '@/lib/utils/streaks'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -103,6 +104,8 @@ export async function POST(req: Request, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
   const { data: sub } = await (supabaseAdmin as any)
     .from('submissions').select('comments_count').eq('id', submissionId).single()

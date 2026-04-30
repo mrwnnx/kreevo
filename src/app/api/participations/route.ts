@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { updateStreak } from '@/lib/utils/streaks'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -95,6 +96,8 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
   try {
     await (supabaseAdmin as any).from('notifications').insert({
