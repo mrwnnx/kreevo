@@ -14,6 +14,7 @@ export type Database = {
           city: string | null
           specialty: string | null
           objective: string | null
+          objectives: string[] | null
           tools: string[] | null
           links: Json | null
           plan: 'free' | 'pro' | 'studio'
@@ -22,6 +23,12 @@ export type Database = {
           role: 'user' | 'admin'
           is_suspended: boolean
           notification_prefs: Json | null
+          first_name: string | null
+          last_name: string | null
+          experience_level: string | null
+          behance_url: string | null
+          linkedin_url: string | null
+          onboarding_completed: boolean
           created_at: string
           updated_at: string
         }

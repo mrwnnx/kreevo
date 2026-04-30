@@ -49,6 +49,58 @@ export async function GET(request: NextRequest) {
         `${origin}/login?error=${encodeURIComponent(exchangeError.message)}`
       )
     }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const meta = (user.user_metadata ?? {}) as Record<string, unknown>
+        const provider = (user.app_metadata?.provider as string | undefined) ?? ''
+
+        const given = (meta.given_name as string | undefined)?.trim()
+        const family = (meta.family_name as string | undefined)?.trim()
+        const fullName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined)
+        const picture =
+          (meta.avatar_url as string | undefined) ??
+          (meta.picture as string | undefined)
+
+        let first = given ?? ''
+        let last = family ?? ''
+        if ((!first || !last) && fullName && fullName.trim().includes(' ')) {
+          const parts = fullName.trim().split(/\s+/)
+          if (!first) first = parts[0]
+          if (!last) last = parts.slice(1).join(' ')
+        }
+
+        const { data: existing } = await (supabase as any)
+          .from('profiles')
+          .select('first_name, last_name, avatar_url, full_name, linkedin_url')
+          .eq('id', user.id)
+          .single()
+
+        if (existing) {
+          const update: Record<string, unknown> = {}
+          if (!existing.first_name && first) update.first_name = first
+          if (!existing.last_name && last) update.last_name = last
+          if (!existing.full_name && fullName) update.full_name = fullName
+          if (!existing.avatar_url && picture) update.avatar_url = picture
+
+          if (provider === 'linkedin_oidc' && !existing.linkedin_url) {
+            const linkedinId = meta.sub as string | undefined
+            if (linkedinId) update.linkedin_url = `https://www.linkedin.com/in/${linkedinId}`
+          }
+
+          if (Object.keys(update).length > 0) {
+            update.updated_at = new Date().toISOString()
+            await (supabase as any)
+              .from('profiles')
+              .update(update)
+              .eq('id', user.id)
+          }
+        }
+      }
+    } catch (err) {
+      console.error('OAuth metadata pre-fill failed:', err)
+    }
   }
 
   return NextResponse.redirect(`${origin}/dashboard`)
