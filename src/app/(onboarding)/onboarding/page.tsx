@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ProgressBar } from '@/components/onboarding/ProgressBar'
 import { Step1BasicInfo } from '@/components/onboarding/Step1BasicInfo'
 import { Step2Specialty } from '@/components/onboarding/Step2Specialty'
-import { Step3ToolsLevel } from '@/components/onboarding/Step3ToolsLevel'
+import { Step3Tools } from '@/components/onboarding/Step3Tools'
 import { Step4Objectives } from '@/components/onboarding/Step4Objectives'
 import { Step5Social } from '@/components/onboarding/Step5Social'
 import { Step6Photo } from '@/components/onboarding/Step6Photo'
@@ -109,21 +109,21 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep2 = async (v: { specialty: Specialty }) => {
+  const handleStep2 = async (v: { specialty: Specialty; experienceLevel: ExperienceLevel }) => {
     setData((d) => ({ ...d, ...v }))
     try {
-      await persist({ specialty: v.specialty })
+      await persist({
+        specialty: v.specialty,
+        experience_level: v.experienceLevel || null,
+      })
       goNext()
     } catch {}
   }
 
-  const handleStep3 = async (v: { tools: string[]; experienceLevel: ExperienceLevel }) => {
+  const handleStep3 = async (v: { tools: string[] }) => {
     setData((d) => ({ ...d, ...v }))
     try {
-      await persist({
-        tools: v.tools,
-        experience_level: v.experienceLevel || null,
-      })
+      await persist({ tools: v.tools })
       goNext()
     } catch {}
   }
@@ -215,16 +215,16 @@ export default function OnboardingPage() {
           {step === 2 && (
             <Step2Specialty
               specialty={data.specialty}
+              experienceLevel={data.experienceLevel}
               onNext={handleStep2}
               onBack={goBack}
               saving={saving}
             />
           )}
           {step === 3 && (
-            <Step3ToolsLevel
+            <Step3Tools
               specialty={data.specialty}
               tools={data.tools}
-              experienceLevel={data.experienceLevel}
               onNext={handleStep3}
               onBack={goBack}
               saving={saving}
