@@ -360,11 +360,6 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               {!(existingSubmission && !(existingSubmission as any).is_draft) && (
                 <CancelParticipationButton challengeId={c.id} />
               )}
-              {totalParticipants > 0 && (
-                <div className="pt-0.5">
-                  <ParticipantsDialog participants={avatars} total={totalParticipants} />
-                </div>
-              )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {currentAttempts}/{maxAttempts} soumissions utilisées
               </p>
@@ -417,10 +412,12 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                   <span className="font-medium">{c.deadline_days} jours</span>
                 </div>
               )}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Participants</span>
-                <span className="font-medium">{totalParticipants}</span>
-              </div>
+              {totalParticipants > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Participants</span>
+                  <ParticipantsDialog participants={avatars} total={totalParticipants} />
+                </div>
+              )}
             </div>
           </div>
 
