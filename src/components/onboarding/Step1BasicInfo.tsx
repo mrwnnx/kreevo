@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 
 interface Step1Props {
@@ -42,6 +43,13 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
     onNext({ firstName: first.trim(), lastName: last.trim() })
   }
 
+  const inputCls = (err: string | null) =>
+    `w-full h-12 px-4 text-sm rounded-[var(--radius-input)] border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 transition-colors ${
+      err
+        ? 'border-destructive focus:ring-destructive/20'
+        : 'border-input focus:ring-ring/30 focus:border-ring'
+    }`
+
   return (
     <div>
       <StepHeader
@@ -51,7 +59,7 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-2">First Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">First Name</label>
           <input
             ref={firstRef}
             type="text"
@@ -70,17 +78,13 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
               }
             }}
             placeholder="e.g. Sara"
-            className={`w-full h-12 px-4 text-sm rounded-xl border bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition ${
-              firstError
-                ? 'border-red-400 focus:ring-red-200'
-                : 'border-zinc-200 focus:ring-violet-200 focus:border-violet-500'
-            }`}
+            className={inputCls(firstError)}
           />
-          {firstError && <p className="text-xs text-red-500 mt-1.5">{firstError}</p>}
+          {firstError && <p className="text-xs text-destructive mt-1.5">{firstError}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-2">Last Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Last Name</label>
           <input
             ref={lastRef}
             type="text"
@@ -99,23 +103,20 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
               }
             }}
             placeholder="e.g. Essalah"
-            className={`w-full h-12 px-4 text-sm rounded-xl border bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition ${
-              lastError
-                ? 'border-red-400 focus:ring-red-200'
-                : 'border-zinc-200 focus:ring-violet-200 focus:border-violet-500'
-            }`}
+            className={inputCls(lastError)}
           />
-          {lastError && <p className="text-xs text-red-500 mt-1.5">{lastError}</p>}
+          {lastError && <p className="text-xs text-destructive mt-1.5">{lastError}</p>}
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={submit}
           disabled={!canSubmit}
-          className="w-full h-12 mt-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          size="lg"
+          className="w-full h-12 mt-2"
         >
           {saving ? 'Saving…' : 'Continue →'}
-        </button>
+        </Button>
       </div>
     </div>
   )

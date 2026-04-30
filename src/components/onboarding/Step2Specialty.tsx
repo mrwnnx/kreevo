@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { TOOLS_BY_SPECIALTY, type ExperienceLevel, type Specialty } from './types'
 
@@ -79,12 +80,12 @@ export function Step2Specialty({
               <div
                 key={`disabled-${idx}`}
                 title="Coming soon — stay tuned! 🔔"
-                className="relative rounded-2xl border border-zinc-200 p-5 text-left opacity-40 cursor-not-allowed"
+                className="relative rounded-[var(--radius-card)] border border-border bg-card p-5 text-left opacity-50 cursor-not-allowed"
               >
                 <div className="text-2xl mb-2">{s.icon}</div>
-                <p className="text-sm font-semibold text-zinc-900">{s.label}</p>
-                <span className="absolute top-2 right-2 text-[10px] uppercase tracking-wider font-semibold bg-zinc-900 text-white px-2 py-0.5 rounded-full">
-                  Coming Soon
+                <p className="text-sm font-semibold text-foreground">{s.label}</p>
+                <span className="absolute top-2 right-2 text-[10px] uppercase tracking-wider font-semibold bg-foreground text-background px-2 py-0.5 rounded-full">
+                  Soon
                 </span>
               </div>
             )
@@ -94,17 +95,17 @@ export function Step2Specialty({
               key={s.value}
               type="button"
               onClick={() => setSelSpec(s.value)}
-              className={`relative rounded-2xl border p-5 text-left transition-all ${
+              className={`relative rounded-[var(--radius-card)] border p-5 text-left transition-all ${
                 selected
-                  ? 'border-2 border-violet-600 bg-violet-50'
-                  : 'border-zinc-200 hover:border-violet-400 hover:bg-violet-50/40'
+                  ? 'border-2 border-primary bg-primary/5'
+                  : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30'
               }`}
             >
               <div className="text-2xl mb-2">{s.icon}</div>
-              <p className="text-sm font-semibold text-zinc-900">{s.label}</p>
+              <p className="text-sm font-semibold text-foreground">{s.label}</p>
               {selected && (
-                <div className="absolute top-2 right-2 size-5 rounded-full bg-violet-600 flex items-center justify-center">
-                  <Check className="size-3 text-white" strokeWidth={3} />
+                <div className="absolute top-2 right-2 size-5 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="size-3 text-primary-foreground" strokeWidth={3} />
                 </div>
               )}
             </button>
@@ -113,15 +114,10 @@ export function Step2Specialty({
       </div>
 
       {selSpec && (
-        <div
-          className="mt-8 space-y-6"
-          style={{
-            animation: 'onbFadeUp 0.3s ease-out',
-          }}
-        >
+        <div className="mt-8 space-y-6 onb-fade-up">
           <div>
-            <p className="text-sm font-semibold text-zinc-900 mb-1">Tools you use</p>
-            <p className="text-xs text-zinc-500 mb-3">Select all that apply</p>
+            <p className="text-sm font-semibold text-foreground mb-1">Tools you use</p>
+            <p className="text-xs text-muted-foreground mb-3">Select all that apply</p>
             <div className="flex flex-wrap gap-2">
               {availableTools.map((tool) => {
                 const active = selTools.includes(tool)
@@ -132,8 +128,8 @@ export function Step2Specialty({
                     onClick={() => toggleTool(tool)}
                     className={`rounded-full px-3 py-1.5 text-sm border transition-colors ${
                       active
-                        ? 'bg-violet-100 border-violet-500 text-violet-700'
-                        : 'border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'border-border text-foreground hover:border-primary/40 hover:bg-accent/30'
                     }`}
                   >
                     {tool}
@@ -144,7 +140,7 @@ export function Step2Specialty({
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-zinc-900 mb-3">Your experience level</p>
+            <p className="text-sm font-semibold text-foreground mb-3">Your experience level</p>
             <div className="flex gap-2">
               {LEVELS.map((lvl) => {
                 const active = selLevel === lvl.value
@@ -153,10 +149,10 @@ export function Step2Specialty({
                     key={lvl.value}
                     type="button"
                     onClick={() => setSelLevel(lvl.value)}
-                    className={`flex-1 rounded-xl px-4 py-2.5 text-sm border transition-colors ${
+                    className={`flex-1 rounded-[var(--radius-input)] px-4 py-2.5 text-sm border transition-colors ${
                       active
-                        ? 'bg-violet-600 text-white border-violet-600'
-                        : 'border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'border-border text-foreground hover:bg-accent/30'
                     }`}
                   >
                     {lvl.label}
@@ -169,24 +165,24 @@ export function Step2Specialty({
       )}
 
       <div className="flex gap-3 mt-8">
-        <button
-          type="button"
-          onClick={onBack}
-          className="h-12 px-5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+        <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
           ← Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={submit}
           disabled={!canSubmit}
-          className="flex-1 h-12 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          size="lg"
+          className="flex-1 h-12"
         >
           {saving ? 'Saving…' : 'Continue →'}
-        </button>
+        </Button>
       </div>
 
       <style jsx>{`
+        :global(.onb-fade-up) {
+          animation: onbFadeUp 0.3s ease-out;
+        }
         @keyframes onbFadeUp {
           from {
             opacity: 0;

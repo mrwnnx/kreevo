@@ -174,7 +174,7 @@ export default function OnboardingPage() {
       <header className="grid grid-cols-[1fr_auto_1fr] items-center px-6 py-5 max-w-screen-xl mx-auto w-full">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight text-zinc-900 justify-self-start"
+          className="text-2xl font-bold tracking-tight text-foreground justify-self-start"
         >
           kreevo
         </Link>
@@ -182,10 +182,10 @@ export default function OnboardingPage() {
           <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
         </div>
         <div className="justify-self-end flex items-center gap-2 text-sm">
-          <span className="text-zinc-500 hidden sm:inline">Already have an account?</span>
+          <span className="text-muted-foreground hidden sm:inline">Already have an account?</span>
           <Link
             href="/login"
-            className="font-medium text-violet-600 hover:text-violet-700 underline underline-offset-4"
+            className="font-medium text-foreground hover:opacity-80 underline underline-offset-4"
           >
             Sign in
           </Link>
@@ -195,12 +195,12 @@ export default function OnboardingPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-[480px] relative">
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mb-4 rounded-[var(--radius-card)] border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}
           </div>
         )}
         {!loaded ? (
-          <div className="flex items-center justify-center py-20 text-sm text-zinc-400">
+          <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
             Loading…
           </div>
         ) : (

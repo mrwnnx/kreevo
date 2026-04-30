@@ -14,13 +14,13 @@ export function ProgressBar({ currentStep, totalSteps, className }: ProgressBarP
             <div
               key={i}
               className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                filled ? 'bg-violet-600' : 'bg-zinc-200'
+                filled ? 'bg-primary' : 'bg-secondary'
               }`}
             />
           )
         })}
       </div>
-      <p className="text-center text-[11px] text-zinc-500 font-medium">
+      <p className="text-center text-[11px] text-muted-foreground font-medium">
         Step {currentStep} of {totalSteps}
       </p>
     </div>

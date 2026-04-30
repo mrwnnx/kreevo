@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+
 interface CompletionModalProps {
   firstName: string
   onStart: () => void
@@ -7,27 +9,23 @@ interface CompletionModalProps {
 
 export function CompletionModal({ firstName, onStart }: CompletionModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 onb-overlay">
-      <div className="onb-pop relative w-full max-w-md rounded-2xl bg-white p-8 sm:p-10 shadow-2xl text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 supports-[backdrop-filter]:backdrop-blur-sm px-4 onb-overlay">
+      <div className="onb-pop relative w-full max-w-md rounded-[var(--radius-card)] bg-popover text-popover-foreground border border-border p-8 sm:p-10 shadow-lg text-center">
         <Confetti />
         <div className="text-7xl onb-bounce" aria-hidden>
           🎉
         </div>
-        <h2 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900">
+        <h2 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           You&apos;re all set, {firstName}!
         </h2>
-        <p className="mt-3 text-sm text-zinc-500 leading-relaxed">
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
           Your Kreevo profile is ready.
           <br />
           Time to show the MENA design world what you&apos;re made of.
         </p>
-        <button
-          type="button"
-          onClick={onStart}
-          className="mt-7 w-full h-12 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors"
-        >
+        <Button onClick={onStart} size="lg" className="mt-7 w-full h-12">
           Start exploring →
-        </button>
+        </Button>
       </div>
 
       <style jsx>{`

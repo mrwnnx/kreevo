@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 
 interface Step4Props {
@@ -35,10 +36,10 @@ export function Step4Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, s
   }
 
   const inputCls = (err: string | null) =>
-    `w-full h-12 pl-11 pr-4 text-sm rounded-xl border bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 transition ${
+    `w-full h-12 pl-11 pr-4 text-sm rounded-[var(--radius-input)] border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 transition-colors ${
       err
-        ? 'border-red-400 focus:ring-red-200'
-        : 'border-zinc-200 focus:ring-violet-200 focus:border-violet-500'
+        ? 'border-destructive focus:ring-destructive/20'
+        : 'border-input focus:ring-ring/30 focus:border-ring'
     }`
 
   return (
@@ -50,7 +51,7 @@ export function Step4Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, s
 
       <div className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-2">Behance</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Behance</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 size-6 rounded bg-[#1769FF] text-white text-[10px] font-bold flex items-center justify-center">
               Bē
@@ -70,14 +71,14 @@ export function Step4Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, s
             />
           </div>
           {behanceError ? (
-            <p className="text-xs text-red-500 mt-1.5">{behanceError}</p>
+            <p className="text-xs text-destructive mt-1.5">{behanceError}</p>
           ) : (
-            <p className="text-xs text-zinc-400 mt-1.5">Your Behance profile URL</p>
+            <p className="text-xs text-muted-foreground mt-1.5">Your Behance profile URL</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-2">LinkedIn</label>
+          <label className="block text-sm font-medium text-foreground mb-2">LinkedIn</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 size-6 rounded bg-[#0A66C2] text-white flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
@@ -100,35 +101,32 @@ export function Step4Social({ behanceUrl, linkedinUrl, onNext, onBack, onSkip, s
             />
           </div>
           {linkedinError ? (
-            <p className="text-xs text-red-500 mt-1.5">{linkedinError}</p>
+            <p className="text-xs text-destructive mt-1.5">{linkedinError}</p>
           ) : (
-            <p className="text-xs text-zinc-400 mt-1.5">Your LinkedIn profile URL</p>
+            <p className="text-xs text-muted-foreground mt-1.5">Your LinkedIn profile URL</p>
           )}
         </div>
       </div>
 
       <div className="flex gap-3 mt-8">
-        <button
-          type="button"
-          onClick={onBack}
-          className="h-12 px-5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+        <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
           ← Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={submit}
           disabled={saving}
-          className="flex-1 h-12 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-40"
+          size="lg"
+          className="flex-1 h-12"
         >
           {saving ? 'Saving…' : 'Continue →'}
-        </button>
+        </Button>
       </div>
 
       <button
         type="button"
         onClick={onSkip}
-        className="mx-auto block mt-4 text-sm text-zinc-500 hover:text-zinc-700 underline underline-offset-4"
+        className="mx-auto block mt-4 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
       >
         Skip for now →
       </button>

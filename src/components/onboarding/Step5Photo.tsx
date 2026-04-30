@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { Camera, Check, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 
 interface Step5Props {
@@ -113,17 +114,17 @@ export function Step5Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step5P
             <img
               src={photo}
               alt="Profile"
-              className="size-24 rounded-full object-cover border-2 border-emerald-500"
+              className="size-24 rounded-full object-cover border-2 border-primary"
             />
-            <div className="absolute -bottom-1 -right-1 size-7 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-white">
-              <Check className="size-4 text-white" strokeWidth={3} />
+            <div className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+              <Check className="size-4 text-primary-foreground" strokeWidth={3} />
             </div>
           </div>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="mt-4 text-sm font-medium text-violet-600 hover:text-violet-700 underline underline-offset-4 disabled:opacity-50"
+            className="mt-4 text-sm font-medium text-primary hover:opacity-80 underline underline-offset-4 disabled:opacity-50"
           >
             {uploading ? 'Uploading…' : 'Change photo'}
           </button>
@@ -137,23 +138,23 @@ export function Step5Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step5P
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
-          className={`rounded-2xl border-2 border-dashed text-center p-12 cursor-pointer transition-colors ${
+          className={`rounded-[var(--radius-card)] border-2 border-dashed text-center p-12 cursor-pointer transition-colors ${
             dragging
-              ? 'border-violet-400 bg-violet-50'
-              : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/60'
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-primary/40 hover:bg-accent/30'
           }`}
         >
           {uploading ? (
             <>
-              <Loader2 className="size-10 mx-auto text-violet-600 animate-spin" />
-              <p className="mt-3 text-sm text-zinc-600">Uploading…</p>
+              <Loader2 className="size-10 mx-auto text-primary animate-spin" />
+              <p className="mt-3 text-sm text-muted-foreground">Uploading…</p>
             </>
           ) : (
             <>
-              <Camera className="size-10 mx-auto text-zinc-400" strokeWidth={1.5} />
-              <p className="mt-3 text-sm font-semibold text-zinc-900">Drop your photo here</p>
-              <p className="text-xs text-zinc-500 mt-1">or click to browse</p>
-              <p className="text-[11px] text-zinc-400 mt-3">PNG, JPG — Max 5MB</p>
+              <Camera className="size-10 mx-auto text-muted-foreground" strokeWidth={1.5} />
+              <p className="mt-3 text-sm font-semibold text-foreground">Drop your photo here</p>
+              <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+              <p className="text-[11px] text-muted-foreground/70 mt-3">PNG, JPG — Max 5MB</p>
             </>
           )}
         </div>
@@ -171,30 +172,27 @@ export function Step5Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step5P
         }}
       />
 
-      {error && <p className="text-xs text-red-500 text-center mt-3">{error}</p>}
+      {error && <p className="text-xs text-destructive text-center mt-3">{error}</p>}
 
       <div className="flex gap-3 mt-8">
-        <button
-          type="button"
-          onClick={onBack}
-          className="h-12 px-5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+        <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
           ← Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => onNext({ avatarUrl: photo })}
           disabled={saving || uploading}
-          className="flex-1 h-12 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-40"
+          size="lg"
+          className="flex-1 h-12"
         >
           {saving ? 'Saving…' : 'Continue →'}
-        </button>
+        </Button>
       </div>
 
       <button
         type="button"
         onClick={onSkip}
-        className="mx-auto block mt-4 text-sm text-zinc-500 hover:text-zinc-700 underline underline-offset-4"
+        className="mx-auto block mt-4 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
       >
         Skip for now →
       </button>
