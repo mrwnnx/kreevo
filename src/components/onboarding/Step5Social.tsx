@@ -4,12 +4,12 @@ import { useMemo, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
+import { SocialLogo } from './SocialLogo'
 import {
   SOCIAL_DEFS,
   SUGGESTED_BY_SPECIALTY,
   defForKey,
   slugifyPlatform,
-  type SocialDef,
 } from './socials'
 import type { Specialty } from './types'
 
@@ -136,7 +136,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
             return (
               <div key={key}>
                 <div className="flex items-center gap-2">
-                  <SocialIcon def={def} />
+                  <SocialLogo def={def} />
                   <input
                     type="url"
                     value={values[key] ?? ''}
@@ -183,7 +183,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
                   onClick={() => addNetwork(key)}
                   className="inline-flex items-center gap-2 rounded-full border border-border bg-card text-sm text-foreground px-3 py-1.5 hover:border-primary/40 hover:bg-accent/30 transition-colors"
                 >
-                  <SocialIcon def={def} small />
+                  <SocialLogo def={def} size="sm" />
                   {def.name}
                   <Plus className="size-3 text-muted-foreground" strokeWidth={2.5} />
                 </button>
@@ -266,18 +266,5 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
         Skip for now →
       </button>
     </div>
-  )
-}
-
-function SocialIcon({ def, small }: { def: SocialDef; small?: boolean }) {
-  const size = small ? 'size-5 text-[10px]' : 'size-9 text-xs'
-  return (
-    <span
-      className={`${size} shrink-0 inline-flex items-center justify-center rounded-full font-bold tracking-tight`}
-      style={{ backgroundColor: def.iconBg, color: def.iconColor ?? '#FFFFFF' }}
-      aria-hidden
-    >
-      {def.iconText}
-    </span>
   )
 }
