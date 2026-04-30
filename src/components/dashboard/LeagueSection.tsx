@@ -67,7 +67,7 @@ export function LeagueSection({
               <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-xl">
                 🏆
               </div>
-              <h3 className="text-xl font-bold text-amber-900">
+              <h3 className="text-xl font-bold text-foreground">
                 {leagueName} League
               </h3>
             </div>
