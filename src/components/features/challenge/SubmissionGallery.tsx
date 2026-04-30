@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-import { MessageCircle, Lock, Star } from 'lucide-react'
+import { MessageCircle, Lock, Heart } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
@@ -140,7 +140,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed }: Ga
                   {/* Actions */}
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
+                      <Heart className="size-3.5 fill-red-500 text-red-500" strokeWidth={1.5} />
                       {claps}
                     </span>
                     <Link

@@ -54,12 +54,12 @@ export async function POST(req: Request, { params }: Params) {
       parent_id: parent.parent_id ?? parentId, // flatten one level (replies stay one level deep)
     })
     .select(`
-      id, content, title, parent_id, claps_given, is_reported, created_at,
+      id, content, parent_id, likes_count, is_reported, created_at,
       user:profiles(id, username, avatar_url, plan, league)
     `)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ comment: reply })
+  return NextResponse.json({ comment: { ...reply, liked_by_me: false } })
 }

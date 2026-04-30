@@ -16,7 +16,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: submission }, { data: clapData }, { data: currentProfile }] = await Promise.all([
+  const [{ data: submission }, { data: likeData }, { data: currentProfile }] = await Promise.all([
     (supabase as any)
       .from('submissions')
       .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
@@ -24,7 +24,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
       .single(),
     (supabase as any)
       .from('submission_claps')
-      .select('claps_count')
+      .select('id')
       .eq('submission_id', id)
       .eq('user_id', user.id)
       .maybeSingle(),
@@ -43,7 +43,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
 
   const figmaUrl = (submission.files as any)?.figma
-  const userClaps = (clapData as any)?.claps_count ?? 0
+  const userLiked = !!likeData
 
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
@@ -146,8 +146,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 submissionId={id}
                 currentUserId={user.id}
                 userPlan={currentProfile?.plan ?? null}
-                initialUserClaps={userClaps}
-                initialTotalClaps={submission.total_claps ?? 0}
+                initialUserLiked={userLiked}
+                initialTotalLikes={submission.total_claps ?? 0}
                 initialCommentsCount={submission.comments_count ?? 0}
                 submissionOwnerId={submission.user_id}
               />

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { CommentCard, type ReviewComment } from './CommentCard'
 import { ReviewModal } from './ReviewModal'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, MessageCircle, Star } from 'lucide-react'
+import { MessageSquare, MessageCircle, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CommentSectionProps {
@@ -12,31 +12,31 @@ interface CommentSectionProps {
   currentUserId: string
   userPlan: string | null | undefined
   submissionOwnerId: string
-  initialUserClaps?: number
-  initialTotalClaps?: number
+  initialUserLiked?: boolean
+  initialTotalLikes?: number
   initialCommentsCount?: number
   /** Stretch trigger button to fill its container width */
   fullWidthTrigger?: boolean
 }
 
 const FREE_LIMIT = 5
-const MAX_USER_CLAPS = 10
 
 export function CommentSection({
   submissionId,
   currentUserId,
   userPlan,
   submissionOwnerId,
-  initialUserClaps = 0,
-  initialTotalClaps = 0,
+  initialUserLiked = false,
+  initialTotalLikes = 0,
   initialCommentsCount = 0,
   fullWidthTrigger = false,
 }: CommentSectionProps) {
   const [comments, setComments] = useState<ReviewComment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [dailyCount, setDailyCount] = useState(0)
-  const [userClaps, setUserClaps] = useState(initialUserClaps)
-  const [totalClaps, setTotalClaps] = useState(initialTotalClaps)
+  const [liked, setLiked] = useState(initialUserLiked)
+  const [totalLikes, setTotalLikes] = useState(initialTotalLikes)
+  const [likePending, setLikePending] = useState(false)
   const [commentsCount, setCommentsCount] = useState(initialCommentsCount)
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -53,9 +53,9 @@ export function CommentSection({
   const isOwner = currentUserId === submissionOwnerId
   const isProUser = userPlan === 'pro' || userPlan === 'studio'
   const isFreeLimited = !isProUser && dailyCount >= FREE_LIMIT
-  const canReview = !isOwner && !isFreeLimited
+  const canComment = !isOwner && !isFreeLimited
 
-  async function handleSubmit(data: { title: string; content: string; claps: number }) {
+  async function handleSubmit(data: { content: string }) {
     const res = await fetch(`/api/submissions/${submissionId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,8 +66,57 @@ export function CommentSection({
     setComments((prev) => [json.comment, ...prev])
     setDailyCount((prev) => prev + 1)
     setCommentsCount((prev) => prev + 1)
-    if (typeof json.appliedClaps === 'number') setUserClaps((c) => Math.min(MAX_USER_CLAPS, c + json.appliedClaps))
-    if (typeof json.totalClaps === 'number') setTotalClaps(json.totalClaps)
+  }
+
+  async function handleLike() {
+    if (isOwner || likePending) return
+    setLikePending(true)
+    const prevLiked = liked
+    const prevTotal = totalLikes
+    setLiked(!prevLiked)
+    setTotalLikes(prevLiked ? Math.max(0, prevTotal - 1) : prevTotal + 1)
+    try {
+      const res = await fetch(`/api/submissions/${submissionId}/clap`, { method: 'POST' })
+      if (!res.ok) throw new Error()
+      const json = await res.json()
+      setLiked(!!json.liked)
+      setTotalLikes(json.totalLikes ?? 0)
+    } catch {
+      setLiked(prevLiked)
+      setTotalLikes(prevTotal)
+    } finally {
+      setLikePending(false)
+    }
+  }
+
+  async function handleCommentLike(commentId: string) {
+    const target = comments.find((c) => c.id === commentId)
+    if (!target) return
+    const prevLiked = !!target.liked_by_me
+    const prevCount = target.likes_count ?? 0
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId
+          ? { ...c, liked_by_me: !prevLiked, likes_count: prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1 }
+          : c,
+      ),
+    )
+    try {
+      const res = await fetch(`/api/comments/${commentId}/like`, { method: 'POST' })
+      if (!res.ok) throw new Error()
+      const json = await res.json()
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, liked_by_me: !!json.liked, likes_count: json.likesCount ?? 0 } : c,
+        ),
+      )
+    } catch {
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, liked_by_me: prevLiked, likes_count: prevCount } : c,
+        ),
+      )
+    }
   }
 
   async function handleReport(commentId: string) {
@@ -81,12 +130,8 @@ export function CommentSection({
       const data = await res.json().catch(() => ({}))
       throw new Error(data.error ?? 'Erreur')
     }
-    // Find the comment to know if it had claps + was top-level
     const removed = comments.find((c) => c.id === commentId)
     if (removed && !removed.parent_id) {
-      const refunded = removed.claps_given ?? 0
-      setUserClaps((c) => Math.max(0, c - refunded))
-      setTotalClaps((t) => Math.max(0, t - refunded))
       setCommentsCount((n) => Math.max(0, n - 1))
     }
     setComments((prev) => prev.filter((c) => c.id !== commentId && c.parent_id !== commentId))
@@ -110,19 +155,28 @@ export function CommentSection({
     <div className="space-y-6">
       {/* Combined actions bar */}
       <div className="rounded-2xl border border-border bg-card flex items-center gap-4 px-4 py-3">
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-          <Star className="size-5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
-          {totalClaps}
-        </span>
+        <button
+          onClick={handleLike}
+          disabled={isOwner || likePending}
+          aria-label={liked ? 'Retirer le like' : 'Liker'}
+          className={cn(
+            'inline-flex items-center gap-1.5 text-sm font-semibold transition-colors',
+            isOwner ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
+            liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
+          )}
+        >
+          <Heart className={cn('size-5 transition-all', liked && 'fill-red-500')} strokeWidth={1.5} />
+          {totalLikes}
+        </button>
 
         <Button
           onClick={() => setModalOpen(true)}
-          disabled={!canReview}
+          disabled={!canComment}
           className={cn('gap-2', fullWidthTrigger && 'flex-1')}
           size="sm"
         >
           <MessageSquare className="size-4" />
-          Laisser une review
+          Laisser un commentaire
         </Button>
 
         <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
@@ -143,18 +197,13 @@ export function CommentSection({
         </div>
       )}
 
-      <ReviewModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        onSubmit={handleSubmit}
-        remainingClaps={Math.max(0, MAX_USER_CLAPS - userClaps)}
-      />
+      <ReviewModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleSubmit} />
 
       {/* Comments list */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-base">Commentaires</h3>
-          <span className="text-sm text-muted-foreground">{comments.length} avis</span>
+          <span className="text-sm text-muted-foreground">{comments.length} commentaire{comments.length !== 1 ? 's' : ''}</span>
         </div>
 
         {isLoading ? (
@@ -177,7 +226,6 @@ export function CommentSection({
             }
             return acc
           }, {})
-          // Sort replies oldest first within each parent
           Object.values(repliesByParent).forEach((arr) =>
             arr.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at)),
           )
@@ -198,6 +246,7 @@ export function CommentSection({
               onReport={handleReport}
               onDelete={handleDelete}
               onReply={handleReply}
+              onLike={handleCommentLike}
             />
           ))
         })()}

@@ -1,16 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Flag, MessageCircle, Trash2 } from 'lucide-react'
+import { Flag, MessageCircle, Trash2, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ProBadge } from '@/components/ui/ProBadge'
 
 export interface ReviewComment {
   id: string
   content: string
-  title?: string | null
   parent_id?: string | null
-  claps_given?: number | null
+  likes_count?: number | null
+  liked_by_me?: boolean
   created_at: string
   is_reported: boolean
   user: {
@@ -29,6 +29,7 @@ interface CommentCardProps {
   onReport: (id: string) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onReply: (parentId: string, content: string) => Promise<void>
+  onLike: (id: string) => Promise<void> | void
   onReportReply?: (id: string) => Promise<void>
   onDeleteReply?: (id: string) => Promise<void>
   isReply?: boolean
@@ -53,6 +54,7 @@ export function CommentCard({
   onReport,
   onDelete,
   onReply,
+  onLike,
   onReportReply,
   onDeleteReply,
   isReply = false,
@@ -63,6 +65,8 @@ export function CommentCard({
   const [replyPending, setReplyPending] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
   const isOwn = comment.user.id === currentUserId
+  const liked = !!comment.liked_by_me
+  const likesCount = comment.likes_count ?? 0
 
   async function handleReport() {
     if (!confirm('Signaler ce commentaire ?')) return
@@ -71,7 +75,7 @@ export function CommentCard({
   }
 
   async function handleDelete() {
-    if (!confirm('Supprimer ce commentaire ? Tes claps seront retirés.')) return
+    if (!confirm('Supprimer ce commentaire ?')) return
     setDeletePending(true)
     try {
       await onDelete(comment.id)
@@ -114,12 +118,28 @@ export function CommentCard({
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo(comment.created_at)}</span>
         </div>
 
-        {comment.title && !isReply && (
-          <p className="text-sm font-semibold text-foreground">{comment.title}</p>
-        )}
         <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{comment.content}</p>
 
         <div className="flex items-center gap-3 pt-0.5">
+          {!isOwn && (
+            <button
+              onClick={() => onLike(comment.id)}
+              aria-label={liked ? 'Retirer le like' : 'Liker'}
+              className={cn(
+                'flex items-center gap-1 text-xs transition-colors',
+                liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
+              )}
+            >
+              <Heart className={cn('w-3.5 h-3.5 transition-all', liked && 'fill-red-500')} strokeWidth={1.5} />
+              <span>{likesCount}</span>
+            </button>
+          )}
+          {isOwn && likesCount > 0 && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Heart className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span>{likesCount}</span>
+            </span>
+          )}
           {!isReply && (
             <button
               onClick={() => setReplyOpen((v) => !v)}
@@ -192,6 +212,7 @@ export function CommentCard({
                 onReport={onReportReply ?? onReport}
                 onDelete={onDeleteReply ?? onDelete}
                 onReply={onReply}
+                onLike={onLike}
                 isReply
               />
             ))}
