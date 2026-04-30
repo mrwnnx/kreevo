@@ -52,19 +52,16 @@ export function LeagueSection({
   return (
     <div className="grid md:grid-cols-2 gap-4">
 
-      <div
-        className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5"
-        style={{ backgroundColor: '#FEF3C6' }}
-      >
+      <div className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5 bg-[#FEF3C6] dark:bg-[#322801]">
 
         <div className="relative">
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-3">
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-widest mb-3">
             YOUR LEAGUE
           </p>
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-xl">
+              <div className="w-10 h-10 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center text-xl">
                 🏆
               </div>
               <h3 className="text-xl font-bold text-foreground">
@@ -74,13 +71,13 @@ export function LeagueSection({
           </div>
 
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-amber-900/70 mb-1.5">
+            <div className="flex justify-between text-xs text-amber-900/70 dark:text-amber-200/70 mb-1.5">
               <span>Tier progress</span>
               <span>
                 {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
               </span>
             </div>
-            <div className="h-2.5 bg-white/50 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
               <div
                 className="h-full bg-amber-500 rounded-full transition-all duration-700"
                 style={{ width: `${xpPercent}%` }}
@@ -90,14 +87,14 @@ export function LeagueSection({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-sm">
-              <TrendingUp className="w-4 h-4 text-amber-700" />
-              <span className="font-semibold text-amber-900">
+              <TrendingUp className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+              <span className="font-semibold text-amber-900 dark:text-amber-200">
                 Rank #{userRank || '—'} of {totalInLeague || 50}
               </span>
             </div>
             <Link
               href="/dashboard/leaderboard"
-              className="text-xs text-amber-700 hover:text-amber-800 font-medium"
+              className="text-xs text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 font-medium"
             >
               Push to top 10 🔥
             </Link>
