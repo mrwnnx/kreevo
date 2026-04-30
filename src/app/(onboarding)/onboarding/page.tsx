@@ -29,8 +29,7 @@ const initialData: OnboardingData = {
   tools: [],
   experienceLevel: '',
   objectives: [],
-  behanceUrl: '',
-  linkedinUrl: '',
+  links: {},
   avatarUrl: '',
   country: '',
 }
@@ -51,6 +50,15 @@ export default function OnboardingPage() {
       .then((res) => {
         const p = res?.profile
         if (p) {
+          const mergedLinks: Record<string, string> = {}
+          if (p.links && typeof p.links === 'object') {
+            for (const [k, v] of Object.entries(p.links)) {
+              if (typeof v === 'string' && v) mergedLinks[k] = v
+            }
+          }
+          if (p.behance_url && !mergedLinks.behance) mergedLinks.behance = p.behance_url
+          if (p.linkedin_url && !mergedLinks.linkedin) mergedLinks.linkedin = p.linkedin_url
+
           setData((prev) => ({
             ...prev,
             firstName: p.first_name ?? '',
@@ -59,8 +67,7 @@ export default function OnboardingPage() {
             tools: p.tools ?? [],
             experienceLevel: (p.experience_level as ExperienceLevel) ?? '',
             objectives: (p.objectives ?? []) as Objective[],
-            behanceUrl: p.behance_url ?? '',
-            linkedinUrl: p.linkedin_url ?? '',
+            links: mergedLinks,
             avatarUrl: p.avatar_url ?? '',
             country: p.country ?? '',
           }))
@@ -136,10 +143,14 @@ export default function OnboardingPage() {
     } catch {}
   }
 
-  const handleStep5 = async (v: { behanceUrl: string; linkedinUrl: string }) => {
+  const handleStep5 = async (v: { links: Record<string, string> }) => {
     setData((d) => ({ ...d, ...v }))
     try {
-      await persist({ behance_url: v.behanceUrl || null, linkedin_url: v.linkedinUrl || null })
+      await persist({
+        links: v.links,
+        behance_url: v.links.behance ?? null,
+        linkedin_url: v.links.linkedin ?? null,
+      })
       goNext()
     } catch {}
   }
@@ -240,8 +251,8 @@ export default function OnboardingPage() {
           )}
           {step === 5 && (
             <Step5Social
-              behanceUrl={data.behanceUrl}
-              linkedinUrl={data.linkedinUrl}
+              specialty={data.specialty}
+              links={data.links}
               onNext={handleStep5}
               onBack={goBack}
               onSkip={skipForward}

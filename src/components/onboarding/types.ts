@@ -9,8 +9,7 @@ export interface OnboardingData {
   tools: string[]
   experienceLevel: ExperienceLevel
   objectives: Objective[]
-  behanceUrl: string
-  linkedinUrl: string
+  links: Record<string, string>
   avatarUrl: string
   country: string
 }
