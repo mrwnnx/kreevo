@@ -54,31 +54,14 @@ export function LeagueSection({
 
       <div
         className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5"
-        style={{ backgroundColor: '#FCEAC8' }}
+        style={{
+          backgroundColor: '#FCEAC8',
+          backgroundImage: "url('/patterns/league-pattern.svg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'multiply',
+        }}
       >
-        {/* Decorative organic shapes */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 w-full h-full"
-          viewBox="0 0 400 240"
-          preserveAspectRatio="xMidYMid slice"
-          fill="#E8B872"
-        >
-          {/* top-left blob */}
-          <path d="M-30 20 Q 30 -20 80 15 Q 110 55 65 90 Q 20 115 -15 90 Q -45 55 -30 20 Z" opacity="0.85" />
-          {/* small top-right curl */}
-          <path d="M375 5 Q 415 20 400 55 Q 375 75 355 55 Q 345 25 375 5 Z" opacity="0.8" />
-          {/* mid dot */}
-          <circle cx="270" cy="55" r="6" opacity="0.85" />
-          {/* mid-left dot */}
-          <circle cx="35" cy="155" r="5" opacity="0.85" />
-          {/* bottom-left petal */}
-          <path d="M-10 195 Q 35 165 75 195 Q 100 230 65 250 Q 20 255 -10 235 Z" opacity="0.85" />
-          {/* bottom-right petal */}
-          <path d="M335 215 Q 385 195 420 230 Q 425 270 380 275 Q 340 265 335 215 Z" opacity="0.8" />
-          {/* center-right curve */}
-          <path d="M305 125 Q 345 110 370 140 Q 360 175 320 170 Q 295 155 305 125 Z" opacity="0.7" />
-        </svg>
 
         <div className="relative">
           <p className="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-3">
