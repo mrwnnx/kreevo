@@ -357,6 +357,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 <Play className="size-4" fill="currentColor" />
                 {existingSubmission ? 'Continuer ma soumission' : 'Soumettre mon travail'}
               </Link>
+              {!(existingSubmission && !(existingSubmission as any).is_draft) && (
+                <CancelParticipationButton challengeId={c.id} />
+              )}
               {totalParticipants > 0 && (
                 <div className="pt-0.5">
                   <ParticipantsDialog participants={avatars} total={totalParticipants} />
@@ -365,9 +368,6 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {currentAttempts}/{maxAttempts} soumissions utilisées
               </p>
-              {!(existingSubmission && !(existingSubmission as any).is_draft) && (
-                <CancelParticipationButton challengeId={c.id} />
-              )}
             </div>
           )}
 
