@@ -14,8 +14,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="pb-10">
-      
-      <div className="max-w-[960px] mx-auto px-6 py-8">
+      <div className="max-w-[520px] mx-auto px-6 py-8">
         <ProfileForm profile={profile as Profile} />
       </div>
     </div>

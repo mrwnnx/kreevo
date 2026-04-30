@@ -1,12 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Check, ChevronDown, Plus, Search, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Check, ChevronDown, Plus, Search, X, CheckCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AvatarUpload } from '@/components/features/dashboard/AvatarUpload'
-import { CheckCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
 
@@ -51,19 +50,23 @@ function detectExperience(raw: string | null | undefined): ExperienceLevel {
   return ''
 }
 
+const inputClass =
+  'h-8 w-full min-w-0 rounded-[var(--radius-input)] border border-input bg-transparent px-2.5 py-1 text-base md:text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+
 interface ProfileFormProps {
   profile: Profile
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
-  const [isPending, startTransition] = useTransition()
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
   // Onboarding-aligned fields
   const [avatar, setAvatar] = useState<string | null>(profile.avatar_url ?? null)
   const [firstName, setFirstName] = useState(profile.first_name ?? profile.full_name?.split(' ')[0] ?? '')
   const [lastName, setLastName] = useState(profile.last_name ?? profile.full_name?.split(' ').slice(1).join(' ') ?? '')
+  const [username, setUsername] = useState(profile.username ?? '')
+  const [country, setCountry] = useState(profile.country ?? '')
+  const [bio, setBio] = useState(profile.bio ?? '')
   const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
   const [tools, setTools] = useState<string[]>((profile.tools as string[]) ?? [])
@@ -82,14 +85,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [customUrl, setCustomUrl] = useState('')
   const [customError, setCustomError] = useState<string | null>(null)
 
-  const [country, setCountry] = useState(profile.country ?? '')
+  // Save status
+  const [status, setStatus] = useState<SaveStatus>('idle')
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // Bonus profile-only fields (not in onboarding) — kept for public profile
-  const [username, setUsername] = useState(profile.username ?? '')
-  const [bio, setBio] = useState(profile.bio ?? '')
-  const [city, setCity] = useState(profile.city ?? '')
-
-  // Tools dropdown state
+  // Tools dropdown
   const [toolsOpen, setToolsOpen] = useState(false)
   const [toolsQuery, setToolsQuery] = useState('')
   const toolsWrapRef = useRef<HTMLDivElement>(null)
@@ -115,7 +115,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     return availableTools.filter((t) => t.toLowerCase().includes(q))
   }, [toolsQuery, availableTools])
 
-  // Reset selected tools that don't belong to the current specialty
+  // Drop tools that don't belong to the new specialty
   useEffect(() => {
     setTools((prev) => prev.filter((t) => availableTools.includes(t)))
   }, [availableTools])
@@ -131,7 +131,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     setObjectives((prev) => (prev.includes(o) ? prev.filter((x) => x !== o) : [...prev, o]))
   }
 
-  // Country dropdown state
+  // Country dropdown
   const [countryOpen, setCountryOpen] = useState(false)
   const [countryQuery, setCountryQuery] = useState('')
   const countryWrapRef = useRef<HTMLDivElement>(null)
@@ -156,7 +156,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     }
   }, [countryQuery])
 
-  // Links helpers (mirrors Step5Social)
+  // Social links helpers
   const suggestedSocialKeys = useMemo(() => {
     const list = specialty
       ? SUGGESTED_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']
@@ -214,11 +214,28 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     setShowCustom(false)
   }
 
-  function handleSave() {
-    setError(null)
-    setSuccess(false)
+  // ── Auto-save (debounced) ──
+  const isFirstRender = useRef(true)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    // Validate links
+  const cleanedLinks = useMemo(() => {
+    const out: Record<string, string> = {}
+    for (const key of activeKeys) {
+      const v = (linkValues[key] ?? '').trim()
+      if (v && isValidUrl(v)) out[key] = v
+    }
+    return out
+  }, [activeKeys, linkValues])
+
+  useEffect(() => {
+    // Skip the initial run (don't auto-save mounted defaults)
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    // Local URL validation — block save until all link URLs are valid
     const newLinkErrors: Record<string, string> = {}
     for (const key of activeKeys) {
       const v = (linkValues[key] ?? '').trim()
@@ -229,45 +246,82 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       return
     }
 
-    const cleanedLinks: Record<string, string> = {}
-    for (const key of activeKeys) {
-      const v = (linkValues[key] ?? '').trim()
-      if (v) cleanedLinks[key] = v
-    }
-
-    const payload = {
-      avatar_url: avatar,
-      first_name: firstName.trim() || null,
-      last_name: lastName.trim() || null,
-      specialty: specialty || null,
-      experience_level: experienceLevel || null,
-      tools,
-      objectives,
-      links: cleanedLinks,
-      country: country || null,
-      username: username.trim(),
-      bio: bio.trim() || null,
-      city: city.trim() || null,
-    }
-
-    startTransition(async () => {
-      const res = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Something went wrong')
-        return
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(async () => {
+      setStatus('saving')
+      setErrorMsg(null)
+      try {
+        const res = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            avatar_url: avatar,
+            first_name: firstName.trim() || null,
+            last_name: lastName.trim() || null,
+            specialty: specialty || null,
+            experience_level: experienceLevel || null,
+            tools,
+            objectives,
+            links: cleanedLinks,
+            country: country || null,
+            username: username.trim(),
+            bio: bio.trim() || null,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setStatus('error')
+          setErrorMsg(data?.error ?? 'Could not save')
+          return
+        }
+        setStatus('saved')
+        if (savedTimer.current) clearTimeout(savedTimer.current)
+        savedTimer.current = setTimeout(() => setStatus('idle'), 2000)
+      } catch {
+        setStatus('error')
+        setErrorMsg('Network error')
       }
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
-    })
-  }
+    }, 700)
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    avatar,
+    firstName,
+    lastName,
+    username,
+    country,
+    bio,
+    specialty,
+    experienceLevel,
+    tools,
+    objectives,
+    cleanedLinks,
+  ])
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 relative">
+      {/* Save status — sticky top */}
+      <div className="sticky top-16 z-10 -mt-4 mb-2 flex justify-end pointer-events-none h-6">
+        {status === 'saving' && (
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 rounded-full">
+            <Loader2 className="size-3 animate-spin" /> Saving…
+          </span>
+        )}
+        {status === 'saved' && (
+          <span className="inline-flex items-center gap-1.5 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full transition-opacity">
+            <CheckCircle className="size-3" /> Saved
+          </span>
+        )}
+        {status === 'error' && errorMsg && (
+          <span className="inline-flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-2 py-1 rounded-full">
+            ✕ {errorMsg}
+          </span>
+        )}
+      </div>
+
       {/* Avatar */}
       <section>
         <Label className="text-sm font-semibold mb-3 block">Profile photo</Label>
@@ -282,44 +336,118 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         </div>
       </section>
 
-      {/* Basic info */}
+      {/* Basic info — one input per row */}
       <section className="space-y-4">
         <Label className="text-sm font-semibold block">Basic info</Label>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Jane"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-            />
+
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First name</Label>
+          <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last name</Label>
+          <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="your_username" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="country">Country</Label>
+          <div ref={countryWrapRef} className="relative">
+            <button
+              id="country"
+              type="button"
+              onClick={() => setCountryOpen((v) => !v)}
+              className={cn(inputClass, 'flex items-center justify-between text-left')}
+              aria-expanded={countryOpen}
+            >
+              <span className={country ? 'text-foreground' : 'text-muted-foreground'}>
+                {country || 'Select your country…'}
+              </span>
+              <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', countryOpen && 'rotate-180')} />
+            </button>
+
+            {countryOpen && (
+              <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+                <div className="relative p-2 border-b border-border">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={countryQuery}
+                    onChange={(e) => setCountryQuery(e.target.value)}
+                    placeholder="Search country…"
+                    className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
+                  />
+                </div>
+                <div className="max-h-64 overflow-auto p-1">
+                  {filteredCountries.suggested.length === 0 && filteredCountries.others.length === 0 && (
+                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">No country matches</p>
+                  )}
+                  {filteredCountries.suggested.length > 0 && (
+                    <>
+                      <p className="px-3 pt-2 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                        Suggested
+                      </p>
+                      {filteredCountries.suggested.map((c) => {
+                        const active = country === c
+                        return (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => {
+                              setCountry(c)
+                              setCountryOpen(false)
+                              setCountryQuery('')
+                            }}
+                            className={cn(
+                              'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                              active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
+                            )}
+                          >
+                            <span>{c}</span>
+                            {active && <Check className="size-4 text-primary" />}
+                          </button>
+                        )
+                      })}
+                      {filteredCountries.others.length > 0 && (
+                        <p className="px-3 pt-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                          All countries
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {filteredCountries.others.map((c) => {
+                    const active = country === c
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          setCountry(c)
+                          setCountryOpen(false)
+                          setCountryQuery('')
+                        }}
+                        className={cn(
+                          'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                          active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
+                        )}
+                      >
+                        <span>{c}</span>
+                        {active && <Check className="size-4 text-primary" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username *</Label>
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="your_username"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Paris" />
-          </div>
-        </div>
+
         <div className="space-y-2">
           <Label htmlFor="bio">
             Bio <span className="text-muted-foreground font-normal">({bio.length}/160)</span>
@@ -330,13 +458,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             onChange={(e) => setBio(e.target.value.slice(0, 160))}
             rows={3}
             placeholder="Tell the community about yourself..."
-            className="w-full rounded-[var(--radius-input)] border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring resize-none"
+            className="w-full rounded-[var(--radius-input)] border border-input bg-transparent px-2.5 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring resize-none dark:bg-input/30"
           />
         </div>
       </section>
 
-      {/* Specialty + Experience Level */}
-      <section className="space-y-4">
+      {/* Specialty */}
+      <section className="space-y-3">
         <Label className="text-sm font-semibold block">Specialty</Label>
         <div className="space-y-3">
           {SPECIALTY_OPTIONS.map((s) => {
@@ -381,7 +509,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   type="button"
                   onClick={() => setExperienceLevel(l.value)}
                   className={cn(
-                    'h-12 rounded-[var(--radius-input)] border text-sm font-medium transition-colors',
+                    'h-10 rounded-[var(--radius-input)] border text-sm font-medium transition-colors',
                     active
                       ? 'border-2 border-primary bg-primary/5 text-foreground'
                       : 'border-input bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -404,10 +532,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               type="button"
               onClick={() => setToolsOpen((v) => !v)}
               disabled={!specialty}
-              className={cn(
-                'w-full flex items-center justify-between h-12 px-4 rounded-[var(--radius-input)] border bg-background text-sm transition-colors disabled:opacity-50',
-                toolsOpen ? 'border-ring ring-3 ring-ring/30' : 'border-input',
-              )}
+              className={cn(inputClass, 'flex items-center justify-between text-left disabled:opacity-50')}
             >
               <span className={tools.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
                 {!specialty
@@ -416,7 +541,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     ? 'Select your tools…'
                     : `${tools.length} tool${tools.length > 1 ? 's' : ''} selected`}
               </span>
-              <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', toolsOpen && 'rotate-180')} />
+              <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', toolsOpen && 'rotate-180')} />
             </button>
 
             {toolsOpen && (
@@ -429,7 +554,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     value={toolsQuery}
                     onChange={(e) => setToolsQuery(e.target.value)}
                     placeholder="Search tools…"
-                    className="w-full h-9 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
+                    className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                   />
                 </div>
                 <div className="max-h-64 overflow-auto p-1">
@@ -537,25 +662,24 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                       onChange={(e) => updateLinkUrl(key, e.target.value)}
                       placeholder={def.placeholder}
                       className={cn(
-                        'flex-1 h-12 px-3 text-sm rounded-[var(--radius-input)] border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 transition-colors',
-                        err
-                          ? 'border-destructive focus:ring-destructive/20'
-                          : 'border-input focus:ring-ring/30 focus:border-ring',
+                        inputClass,
+                        'flex-1',
+                        err && 'border-destructive focus-visible:ring-destructive/20',
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => removeNetwork(key)}
                       aria-label={`Remove ${def.name}`}
-                      className="size-9 inline-flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
+                      className="size-8 inline-flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
                     >
-                      <X className="size-4" />
+                      <X className="size-3.5" />
                     </button>
                   </div>
                   {err ? (
-                    <p className="text-xs text-destructive mt-1.5 ml-12">{err}</p>
+                    <p className="text-xs text-destructive mt-1.5 ml-11">{err}</p>
                   ) : (
-                    <p className="text-xs text-muted-foreground mt-1.5 ml-12">{def.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1.5 ml-11">{def.name}</p>
                   )}
                 </div>
               )
@@ -605,20 +729,20 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   <X className="size-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2">
+              <div className="space-y-2">
                 <input
                   type="text"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder="Platform name"
-                  className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
+                  className={inputClass}
                 />
                 <input
                   type="url"
                   value={customUrl}
                   onChange={(e) => setCustomUrl(e.target.value)}
                   placeholder="https://..."
-                  className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
+                  className={inputClass}
                 />
               </div>
               {customError && <p className="text-xs text-destructive">{customError}</p>}
@@ -638,114 +762,6 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           )}
         </div>
       </section>
-
-      {/* Country */}
-      <section className="space-y-3">
-        <Label className="text-sm font-semibold block">Country</Label>
-        <div ref={countryWrapRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setCountryOpen((v) => !v)}
-            className={cn(
-              'w-full flex items-center justify-between h-12 px-4 rounded-[var(--radius-input)] border bg-background text-sm transition-colors',
-              countryOpen ? 'border-ring ring-3 ring-ring/30' : 'border-input',
-            )}
-          >
-            <span className={country ? 'text-foreground' : 'text-muted-foreground'}>
-              {country || 'Select your country…'}
-            </span>
-            <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', countryOpen && 'rotate-180')} />
-          </button>
-
-          {countryOpen && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
-              <div className="relative p-2 border-b border-border">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                <input
-                  autoFocus
-                  type="text"
-                  value={countryQuery}
-                  onChange={(e) => setCountryQuery(e.target.value)}
-                  placeholder="Search country…"
-                  className="w-full h-9 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
-                />
-              </div>
-              <div className="max-h-64 overflow-auto p-1">
-                {filteredCountries.suggested.length === 0 && filteredCountries.others.length === 0 && (
-                  <p className="px-3 py-6 text-center text-sm text-muted-foreground">No country matches</p>
-                )}
-                {filteredCountries.suggested.length > 0 && (
-                  <>
-                    <p className="px-3 pt-2 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Suggested
-                    </p>
-                    {filteredCountries.suggested.map((c) => {
-                      const active = country === c
-                      return (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => {
-                            setCountry(c)
-                            setCountryOpen(false)
-                            setCountryQuery('')
-                          }}
-                          className={cn(
-                            'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
-                            active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
-                          )}
-                        >
-                          <span>{c}</span>
-                          {active && <Check className="size-4 text-primary" />}
-                        </button>
-                      )
-                    })}
-                    {filteredCountries.others.length > 0 && (
-                      <p className="px-3 pt-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        All countries
-                      </p>
-                    )}
-                  </>
-                )}
-                {filteredCountries.others.map((c) => {
-                  const active = country === c
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => {
-                        setCountry(c)
-                        setCountryOpen(false)
-                        setCountryQuery('')
-                      }}
-                      className={cn(
-                        'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
-                        active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
-                      )}
-                    >
-                      <span>{c}</span>
-                      {active && <Check className="size-4 text-primary" />}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <div className="flex items-center gap-3 pt-2">
-        <Button onClick={handleSave} disabled={isPending} className="min-w-32">
-          {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Save Changes'}
-        </Button>
-        {success && (
-          <span className="flex items-center gap-1.5 text-sm text-green-600">
-            <CheckCircle className="size-4" /> Saved!
-          </span>
-        )}
-      </div>
     </div>
   )
 }
