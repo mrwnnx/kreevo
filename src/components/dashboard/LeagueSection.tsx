@@ -55,9 +55,9 @@ export function LeagueSection({
       <div
         className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-2xl p-5"
         style={{
-          backgroundColor: '#FCEAC8',
+          backgroundColor: '#FDF3DC',
           backgroundImage:
-            "linear-gradient(rgba(252,234,200,0.9), rgba(252,234,200,0.9)), url('/patterns/league-pattern.svg')",
+            "linear-gradient(rgba(253,243,220,0.9), rgba(253,243,220,0.9)), url('/patterns/league-pattern.svg')",
           backgroundSize: 'auto, cover',
           backgroundPosition: 'center, center',
           backgroundRepeat: 'no-repeat, no-repeat',
