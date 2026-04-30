@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { DashboardNav } from '@/components/layout/DashboardNav'
+import { FloatingNav } from '@/components/layout/FloatingNav'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
+import type { Profile } from '@/types/database.types'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,8 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <DashboardNav profile={profile} />
-        <div className="h-16" />
+        <FloatingNav profile={profile as Profile} />
         {children}
         <Toaster position="bottom-right" />
       </div>
