@@ -72,7 +72,6 @@ export function StatCards({
             {stat.icon}
           </div>
           <p className={stat.valueClass}>{stat.value}</p>
-          <p className="text-xs text-muted-foreground mt-1">{stat.subtext}</p>
         </div>
       ))}
     </div>
