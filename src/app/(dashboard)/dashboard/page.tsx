@@ -180,7 +180,7 @@ export default async function DashboardPage() {
   const isCloseToPromotion = threshold > 0 && currentXP / threshold >= 0.8
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-[960px] mx-auto px-6 py-8 space-y-6">
 
       <HeroBanner
         profile={profile}
