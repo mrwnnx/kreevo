@@ -82,7 +82,7 @@ function LeagueCardPreview({ league }: { league: LeaguePreview }) {
   const threshold = 7000
 
   return (
-    <div className={`relative overflow-hidden border border-border rounded-2xl p-5 ${league.bgClass}`}>
+    <div className={`relative overflow-hidden border border-border rounded-lg p-4 ${league.bgClass}`}>
       <div className="relative">
         <p className={`text-xs font-bold ${league.textPrimary} uppercase tracking-widest mb-3`}>
           YOUR LEAGUE
