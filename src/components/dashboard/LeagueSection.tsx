@@ -5,6 +5,7 @@ import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { getLeagueStyle } from '@/lib/utils/league-style'
 
 type Props = {
   profile: any
@@ -47,31 +48,30 @@ export function LeagueSection({
     return () => clearInterval(interval)
   }, [])
 
-  const leagueName = profile?.league === '7ajra' ? 'Stone' : profile?.league || 'Stone'
+  const leagueStyle = getLeagueStyle(profile?.league)
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
 
-      <div className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-[16px] p-4 bg-[#FEF3C6] dark:bg-[#322801]">
-
+      <div className={cn('relative overflow-hidden border border-border rounded-[24px] p-4', leagueStyle.bgClass)}>
         <div className="relative">
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-widest mb-3">
+          <p className={cn('text-xs font-bold uppercase tracking-widest mb-3', leagueStyle.textPrimary)}>
             YOUR LEAGUE
           </p>
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center text-xl">
-                🏆
+                {leagueStyle.emoji}
               </div>
               <h3 className="text-xl font-bold text-foreground">
-                {leagueName} League
+                {leagueStyle.name} League
               </h3>
             </div>
           </div>
 
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-amber-900/70 dark:text-amber-200/70 mb-1.5">
+            <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
               <span>Tier progress</span>
               <span>
                 {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
@@ -79,7 +79,7 @@ export function LeagueSection({
             </div>
             <div className="h-2.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                className={cn('h-full rounded-full transition-all duration-700', leagueStyle.accent)}
                 style={{ width: `${xpPercent}%` }}
               />
             </div>
@@ -87,14 +87,14 @@ export function LeagueSection({
 
           <div className="flex items-center justify-between p-2 bg-white dark:bg-white/10 rounded-lg">
             <div className="flex items-center gap-1.5 text-sm">
-              <TrendingUp className="w-4 h-4 text-amber-700 dark:text-amber-300" />
-              <span className="font-semibold text-amber-900 dark:text-amber-200">
+              <TrendingUp className={cn('w-4 h-4', leagueStyle.textPrimary)} />
+              <span className={cn('font-semibold', leagueStyle.textSecondary)}>
                 Rank #{userRank || '—'} of {totalInLeague || 50}
               </span>
             </div>
             <Link
               href="/dashboard/leaderboard"
-              className="text-xs text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 font-medium"
+              className={cn('text-xs font-medium', leagueStyle.textPrimary)}
             >
               Push to top 10 🔥
             </Link>
@@ -104,7 +104,7 @@ export function LeagueSection({
 
       <div
         className={cn(
-          'rounded-[16px] p-4 relative overflow-hidden',
+          'rounded-[24px] p-4 relative overflow-hidden',
           isCloseToPromotion
             ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white'
             : 'bg-gradient-to-br from-violet-600 to-indigo-700 text-white',
@@ -123,7 +123,7 @@ export function LeagueSection({
 
             <h3 className="font-bold text-lg mb-1">Don&apos;t lose your spot.</h3>
             <p className="text-white/80 text-sm mb-4">
-              Stay active to remain in {leagueName}. Top 20 stay. Others drop to{' '}
+              Stay active to remain in {leagueStyle.name}. Top 20 stay. Others drop to{' '}
               {nextLeague?.name || 'Silver'}.
             </p>
 

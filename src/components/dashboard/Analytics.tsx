@@ -63,7 +63,7 @@ export function Analytics({
   ]
 
   return (
-    <div className="bg-card border border-border rounded-[16px] p-4">
+    <div className="bg-card border border-border rounded-[24px] p-4">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h3 className="font-semibold">Analytics</h3>
