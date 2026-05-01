@@ -125,7 +125,7 @@ export function HeroBanner({
   return (
     <div
       className={cn(
-        'rounded-lg overflow-hidden p-4 pb-10 relative bg-gradient-to-r text-white min-h-[200px]',
+        'rounded-[16px] overflow-hidden p-4 pb-10 relative bg-gradient-to-r text-white min-h-[200px]',
         config.gradient,
       )}
     >

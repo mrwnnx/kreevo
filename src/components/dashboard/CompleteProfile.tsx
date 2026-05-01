@@ -33,7 +33,7 @@ export function CompleteProfile({ profile }: { profile: any }) {
   if (completion === 100) return null
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
+    <div className="bg-card border border-border rounded-[16px] p-4">
       <div className="flex items-center justify-between mb-1">
         <h3 className="font-semibold text-sm">Complete your profile</h3>
         <span className="text-sm font-bold text-orange-500">{completion}%</span>

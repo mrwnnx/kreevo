@@ -52,7 +52,7 @@ export function LeagueSection({
   return (
     <div className="grid md:grid-cols-2 gap-4">
 
-      <div className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-lg p-4 bg-[#FEF3C6] dark:bg-[#322801]">
+      <div className="relative overflow-hidden border border-amber-100 dark:border-amber-900/30 rounded-[16px] p-4 bg-[#FEF3C6] dark:bg-[#322801]">
 
         <div className="relative">
           <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-widest mb-3">
@@ -104,7 +104,7 @@ export function LeagueSection({
 
       <div
         className={cn(
-          'rounded-lg p-4 relative overflow-hidden',
+          'rounded-[16px] p-4 relative overflow-hidden',
           isCloseToPromotion
             ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white'
             : 'bg-gradient-to-br from-violet-600 to-indigo-700 text-white',
