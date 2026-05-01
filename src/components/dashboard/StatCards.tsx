@@ -66,7 +66,7 @@ export function StatCards({
           className="flex flex-col gap-4 bg-card border border-border rounded-2xl p-5 hover:shadow-sm transition-shadow duration-200"
         >
           <div className="flex items-center justify-between h-5">
-            <span className="text-xs font-medium text-foreground tracking-widest leading-none">
+            <span className="text-xs font-bold text-foreground tracking-widest leading-none">
               {stat.label}
             </span>
             <span className="inline-flex items-center justify-center w-5 h-5 shrink-0">
