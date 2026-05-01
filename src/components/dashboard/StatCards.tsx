@@ -30,7 +30,7 @@ export function StatCards({
       icon: <Trophy className="w-4 h-4 text-amber-500" />,
       value: `${LEAGUE_ICONS[leagueName] || '🪨'} ${leagueName === '7ajra' ? 'Stone' : leagueName}`,
       subtext: `Tier ${leagueIndex} of 8`,
-      valueClass: 'text-2xl font-bold',
+      valueClass: 'text-3xl font-bold',
     },
     {
       label: 'TOTAL XP',
