@@ -125,7 +125,7 @@ export function HeroBanner({
   return (
     <div
       className={cn(
-        'rounded-2xl overflow-hidden p-8 pb-12 relative bg-gradient-to-r text-white min-h-[200px]',
+        'rounded-lg overflow-hidden p-4 pb-10 relative bg-gradient-to-r text-white min-h-[200px]',
         config.gradient,
       )}
     >
@@ -160,7 +160,7 @@ export function HeroBanner({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 px-8 pb-4">
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
         <div className="flex justify-between text-xs text-white/60 mb-1.5">
           <span>Today&apos;s progress</span>
           <span>{completedToday} / 5 tasks</span>

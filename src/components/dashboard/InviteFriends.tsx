@@ -31,7 +31,7 @@ export function InviteFriends({ profile, referrals }: Props) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-100 dark:border-teal-900/30 rounded-2xl p-6 relative overflow-hidden">
+    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-100 dark:border-teal-900/30 rounded-lg p-4 relative overflow-hidden">
       <div className="absolute right-4 top-4 text-5xl opacity-10 select-none">🚀</div>
 
       <h3 className="font-bold text-lg mb-1">Invite friends. Earn XP 🚀</h3>
