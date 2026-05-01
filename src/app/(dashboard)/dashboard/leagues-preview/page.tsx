@@ -91,7 +91,7 @@ function LeagueCardPreview({ league }: { league: LeaguePreview }) {
           YOUR LEAGUE
         </p>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between p-2 bg-white rounded-lg mb-4">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-xl">
               {league.emoji}
@@ -115,7 +115,7 @@ function LeagueCardPreview({ league }: { league: LeaguePreview }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-2 bg-white rounded-lg">
           <div className="flex items-center gap-1.5 text-sm">
             <TrendingUp className={`w-4 h-4 ${league.textPrimary}`} />
             <span className={`font-semibold ${league.textSecondary}`}>Rank #12 of 50</span>

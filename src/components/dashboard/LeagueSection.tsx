@@ -59,7 +59,7 @@ export function LeagueSection({
             YOUR LEAGUE
           </p>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between p-2 bg-white dark:bg-white/10 rounded-lg mb-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center text-xl">
                 🏆
@@ -85,7 +85,7 @@ export function LeagueSection({
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-2 bg-white dark:bg-white/10 rounded-lg">
             <div className="flex items-center gap-1.5 text-sm">
               <TrendingUp className="w-4 h-4 text-amber-700 dark:text-amber-300" />
               <span className="font-semibold text-amber-900 dark:text-amber-200">
