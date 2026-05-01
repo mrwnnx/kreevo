@@ -27,21 +27,21 @@ export function StatCards({
   const stats = [
     {
       label: 'LEAGUE',
-      icon: <Trophy className="w-5 h-5 text-amber-500" />,
+      icon: <Trophy className="w-4 h-4 text-amber-500" />,
       value: `${LEAGUE_ICONS[leagueName] || '🪨'} ${leagueName === '7ajra' ? 'Stone' : leagueName}`,
       subtext: `Tier ${leagueIndex} of 8`,
       valueClass: 'text-2xl font-bold',
     },
     {
       label: 'TOTAL XP',
-      icon: <Zap className="w-5 h-5 text-violet-500" />,
+      icon: <Zap className="w-4 h-4 text-violet-500" />,
       value: (profile?.xp || 0).toLocaleString(),
       subtext: xpToday > 0 ? `+${xpToday} XP today` : 'Keep going!',
       valueClass: 'text-3xl font-bold text-violet-600',
     },
     {
       label: 'STREAK',
-      icon: <span className="text-xl">🔥</span>,
+      icon: <span className="text-base leading-none">🔥</span>,
       value: `${streak?.current_streak || 0}d`,
       subtext:
         streak?.current_streak === streak?.longest_streak && streak?.current_streak > 0
@@ -51,7 +51,7 @@ export function StatCards({
     },
     {
       label: 'CHALLENGES',
-      icon: <Target className="w-5 h-5 text-green-500" />,
+      icon: <Target className="w-4 h-4 text-green-500" />,
       value: (completedTotal || 0).toString(),
       subtext: completedThisWeek > 0 ? `+${completedThisWeek} this week` : 'Complete your first!',
       valueClass: 'text-3xl font-bold text-green-500',
@@ -65,11 +65,13 @@ export function StatCards({
           key={stat.label}
           className="flex flex-col gap-4 bg-card border border-border rounded-2xl p-5 hover:shadow-sm transition-shadow duration-200"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground tracking-widest">
+          <div className="flex items-center justify-between h-5">
+            <span className="text-xs font-medium text-muted-foreground tracking-widest leading-none">
               {stat.label}
             </span>
-            {stat.icon}
+            <span className="inline-flex items-center justify-center w-5 h-5 shrink-0">
+              {stat.icon}
+            </span>
           </div>
           <p className={stat.valueClass}>{stat.value}</p>
         </div>
