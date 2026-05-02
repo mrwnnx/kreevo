@@ -77,7 +77,8 @@ export function HeroBanner({
       cta2: { label: 'View Challenges', href: '/dashboard/challenges' },
     },
     active: {
-      gradient: 'from-violet-600 via-violet-600 to-indigo-700',
+      gradient: 'from-[#E5DBFB] via-[#E5DBFB] to-[#D4D2F1]',
+      tone: 'light' as const,
       badge: '⏱ Défi en cours',
       title: participation?.challenges?.title || 'Défi en cours',
       subtitle: 'Continue ton travail !',
@@ -122,15 +123,23 @@ export function HeroBanner({
 
   const config = bannerConfig[state]
 
+  const isLight = (config as { tone?: 'light' }).tone === 'light'
+
   return (
     <div
       className={cn(
-        'rounded-[24px] overflow-hidden p-4 pb-10 relative bg-gradient-to-r text-white min-h-[200px]',
+        'rounded-[24px] overflow-hidden p-4 pb-10 relative bg-gradient-to-r min-h-[200px]',
+        isLight ? 'text-violet-900' : 'text-white',
         config.gradient,
       )}
     >
       {config.badge && (
-        <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium mb-4">
+        <div
+          className={cn(
+            'inline-flex items-center gap-1.5 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium mb-4',
+            isLight ? 'bg-violet-200/70 text-violet-900' : 'bg-white/20',
+          )}
+        >
           {config.badge}
         </div>
       )}
@@ -138,21 +147,43 @@ export function HeroBanner({
       <div className="max-w-[60%]">
         <h1 className="text-2xl font-bold mb-1 leading-tight">{config.title}</h1>
         {config.subtitle && (
-          <p className="text-lg font-semibold text-white/90 mb-2">{config.subtitle}</p>
+          <p
+            className={cn(
+              'text-lg font-semibold mb-2',
+              isLight ? 'text-violet-800' : 'text-white/90',
+            )}
+          >
+            {config.subtitle}
+          </p>
         )}
-        <p className="text-white/75 text-sm mb-6">{config.body}</p>
+        <p className={cn('text-sm mb-6', isLight ? 'text-violet-700/80' : 'text-white/75')}>
+          {config.body}
+        </p>
 
         <div className="flex items-center gap-3 flex-wrap">
           {config.cta1 && (
             <Link href={config.cta1.href}>
-              <Button className="bg-white text-violet-700 hover:bg-white/90 font-semibold">
+              <Button
+                className={
+                  isLight
+                    ? 'bg-violet-700 text-white hover:bg-violet-800 font-semibold'
+                    : 'bg-white text-violet-700 hover:bg-white/90 font-semibold'
+                }
+              >
                 {config.cta1.label}
               </Button>
             </Link>
           )}
           {config.cta2 && (
             <Link href={config.cta2.href}>
-              <Button variant="outline" className="border-white/40 text-white hover:bg-white/10 bg-transparent">
+              <Button
+                variant="outline"
+                className={
+                  isLight
+                    ? 'border-violet-400 text-violet-800 hover:bg-violet-200/40 bg-transparent'
+                    : 'border-white/40 text-white hover:bg-white/10 bg-transparent'
+                }
+              >
                 {config.cta2.label}
               </Button>
             </Link>
@@ -161,13 +192,23 @@ export function HeroBanner({
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-        <div className="flex justify-between text-xs text-white/60 mb-1.5">
+        <div
+          className={cn(
+            'flex justify-between text-xs mb-1.5',
+            isLight ? 'text-violet-700/70' : 'text-white/60',
+          )}
+        >
           <span>Today&apos;s progress</span>
           <span>{completedToday} / 5 tasks</span>
         </div>
-        <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+        <div
+          className={cn(
+            'h-1.5 rounded-full overflow-hidden',
+            isLight ? 'bg-violet-300/60' : 'bg-white/20',
+          )}
+        >
           <div
-            className="h-full bg-white rounded-full transition-all duration-700"
+            className={cn('h-full rounded-full transition-all duration-700', isLight ? 'bg-violet-700' : 'bg-white')}
             style={{ width: `${Math.min((completedToday / 5) * 100, 100)}%` }}
           />
         </div>
