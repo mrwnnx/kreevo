@@ -5,6 +5,7 @@ export type LeagueStyle = {
   textPrimary: string
   textSecondary: string
   accent: string
+  borderClass: string
 }
 
 export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
@@ -15,6 +16,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-amber-700 dark:text-amber-300',
     textSecondary: 'text-amber-900 dark:text-amber-200',
     accent: 'bg-amber-500',
+    borderClass: 'border-amber-500',
   },
   Bronze: {
     name: 'Bronze',
@@ -23,6 +25,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-orange-700 dark:text-orange-300',
     textSecondary: 'text-orange-900 dark:text-orange-200',
     accent: 'bg-orange-500',
+    borderClass: 'border-orange-500',
   },
   Silver: {
     name: 'Silver',
@@ -31,6 +34,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-slate-700 dark:text-slate-300',
     textSecondary: 'text-slate-900 dark:text-slate-200',
     accent: 'bg-slate-500',
+    borderClass: 'border-slate-500',
   },
   Gold: {
     name: 'Gold',
@@ -39,6 +43,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-yellow-700 dark:text-yellow-300',
     textSecondary: 'text-yellow-900 dark:text-yellow-200',
     accent: 'bg-yellow-500',
+    borderClass: 'border-yellow-500',
   },
   Platinum: {
     name: 'Platinum',
@@ -47,6 +52,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-sky-700 dark:text-sky-300',
     textSecondary: 'text-sky-900 dark:text-sky-200',
     accent: 'bg-sky-500',
+    borderClass: 'border-sky-500',
   },
   Diamond: {
     name: 'Diamond',
@@ -55,6 +61,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-cyan-700 dark:text-cyan-300',
     textSecondary: 'text-cyan-900 dark:text-cyan-200',
     accent: 'bg-cyan-500',
+    borderClass: 'border-cyan-500',
   },
   Master: {
     name: 'Master',
@@ -63,6 +70,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-violet-700 dark:text-violet-300',
     textSecondary: 'text-violet-900 dark:text-violet-200',
     accent: 'bg-violet-500',
+    borderClass: 'border-violet-500',
   },
   Legend: {
     name: 'Legend',
@@ -71,6 +79,7 @@ export const LEAGUE_STYLES: Record<string, LeagueStyle> = {
     textPrimary: 'text-rose-700 dark:text-rose-300',
     textSecondary: 'text-rose-900 dark:text-rose-200',
     accent: 'bg-rose-500',
+    borderClass: 'border-rose-500',
   },
 }
 
