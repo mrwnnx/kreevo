@@ -413,8 +413,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 </div>
               )}
               {totalParticipants > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Participants</span>
+                <div className="flex items-center justify-start text-sm">
                   <ParticipantsDialog participants={avatars} total={totalParticipants} />
                 </div>
               )}
