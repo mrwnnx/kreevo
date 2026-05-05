@@ -181,17 +181,14 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="grid grid-cols-[1fr_auto_1fr] items-center px-6 py-5 max-w-screen-xl mx-auto w-full">
+      <header className="flex items-center justify-between px-6 py-5 max-w-screen-xl mx-auto w-full">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight text-foreground justify-self-start"
+          className="text-2xl font-bold tracking-tight text-foreground"
         >
           kreevo
         </Link>
-        <div className="justify-self-center">
-          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
-        </div>
-        <div className="justify-self-end flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm">
           <span className="text-muted-foreground hidden sm:inline">Already have an account?</span>
           <Link
             href="/login"
@@ -202,8 +199,11 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex items-start justify-center px-4 pt-6 pb-12">
+      <main className="flex-1 flex items-start justify-center px-4 pb-12">
         <div className="w-full max-w-[480px] relative">
+        <div className="mb-6 flex justify-center">
+          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
+        </div>
         {error && (
           <div className="mb-4 rounded-[var(--radius-card)] border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}
