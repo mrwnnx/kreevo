@@ -5,24 +5,16 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ currentStep, totalSteps, className }: ProgressBarProps) {
+  const pct = Math.max(0, Math.min(100, (currentStep / totalSteps) * 100))
+
   return (
     <div className={`w-full max-w-[280px] ${className ?? ''}`}>
-      <div className="flex items-center justify-between gap-1.5 mb-1.5">
-        {Array.from({ length: totalSteps }).map((_, i) => {
-          const filled = i < currentStep
-          return (
-            <div
-              key={i}
-              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                filled ? 'bg-primary' : 'bg-secondary'
-              }`}
-            />
-          )
-        })}
+      <div className="h-1.5 w-full rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+        <div
+          className="h-full bg-violet-500 rounded-full transition-[width] duration-300 ease-out"
+          style={{ width: `${pct}%` }}
+        />
       </div>
-      <p className="text-center text-[11px] text-muted-foreground font-medium">
-        Step {currentStep} of {totalSteps}
-      </p>
     </div>
   )
 }

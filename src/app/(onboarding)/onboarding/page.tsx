@@ -202,7 +202,7 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
+      <main className="flex-1 flex items-start justify-center px-4 pt-6 pb-12">
         <div className="w-full max-w-[480px] relative">
         {error && (
           <div className="mb-4 rounded-[var(--radius-card)] border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
