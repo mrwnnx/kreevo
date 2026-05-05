@@ -198,6 +198,7 @@ export default async function DashboardPage() {
         completedThisWeek={completedThisWeek}
         xpToday={xpToday}
         leagueIndex={leagueIndex}
+        userLeague={userLeague}
       />
 
       <LeagueSection

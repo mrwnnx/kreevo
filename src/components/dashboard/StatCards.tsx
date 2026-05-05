@@ -1,10 +1,6 @@
 import { Trophy, Zap, Target } from 'lucide-react'
-
-const LEAGUE_ICONS: Record<string, string> = {
-  Stone: '🪨', '7ajra': '🪨', Bronze: '🟤', Silver: '⚪',
-  Gold: '🟡', Platinum: '🔵', Diamond: '💎',
-  Master: '👑', Legend: '🔴',
-}
+import type { ReactNode } from 'react'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 type Props = {
   profile: any
@@ -13,6 +9,7 @@ type Props = {
   completedThisWeek: number
   xpToday: number
   leagueIndex: number
+  userLeague?: { name?: string; icon?: string } | null
 }
 
 export function StatCards({
@@ -22,13 +19,26 @@ export function StatCards({
   completedThisWeek,
   xpToday,
   leagueIndex,
+  userLeague,
 }: Props) {
-  const leagueName = profile?.league || 'Stone'
-  const stats = [
+  const leagueName = userLeague?.name || (profile?.league === '7ajra' ? 'Stone' : profile?.league) || 'Stone'
+  const leagueIcon = userLeague?.icon || '🪨'
+  const stats: Array<{
+    label: string
+    icon: ReactNode
+    value: ReactNode
+    subtext: string
+    valueClass: string
+  }> = [
     {
       label: 'LEAGUE',
       icon: <Trophy className="w-4 h-4 text-amber-500" />,
-      value: `${LEAGUE_ICONS[leagueName] || '🪨'} ${leagueName === '7ajra' ? 'Stone' : leagueName}`,
+      value: (
+        <span className="inline-flex items-center gap-2">
+          <LeagueIcon icon={leagueIcon} size="lg" />
+          {leagueName}
+        </span>
+      ),
       subtext: `Tier ${leagueIndex} of 8`,
       valueClass: 'text-3xl font-bold',
     },

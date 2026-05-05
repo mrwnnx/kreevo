@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getLeagueStyle } from '@/lib/utils/league-style'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 type Props = {
   profile: any
@@ -61,11 +62,11 @@ export function LeagueSection({
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center text-xl">
-                {leagueStyle.emoji}
+              <div className="w-10 h-10 bg-white/60 dark:bg-white/10 rounded-xl flex items-center justify-center">
+                <LeagueIcon icon={league?.icon ?? leagueStyle.emoji} size="lg" />
               </div>
               <h3 className="text-xl font-bold text-foreground">
-                {leagueStyle.name} League
+                {league?.name ?? leagueStyle.name} League
               </h3>
             </div>
           </div>
