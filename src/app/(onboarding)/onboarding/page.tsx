@@ -199,7 +199,7 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex items-start justify-center px-4 pb-12">
+      <main className="flex-1 flex items-start justify-center px-4 pt-[84px] pb-12">
         <div className="w-full max-w-[480px] relative">
         <div className="mb-6 flex justify-center">
           <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
