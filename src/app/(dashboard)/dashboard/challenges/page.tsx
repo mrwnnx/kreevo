@@ -33,14 +33,12 @@ type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocke
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, participantCount, participants, lockedLeagueName, lockedLeagueIcon,
+  challenge, status, participantCount, participants,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
   participantCount?: number
   participants?: Array<{ username: string; avatar_url: string | null }>
-  lockedLeagueName?: string
-  lockedLeagueIcon?: string
 }) {
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
   const visual = SPECIALTY_VISUAL[challenge.specialty ?? ''] ?? DEFAULT_VISUAL
@@ -252,13 +250,6 @@ export default async function ChallengesPage() {
     return 0
   })
 
-  // Higher leagues grouped
-  const higherLeagues = leagues.filter(l => l.order_index > userLeagueIndex)
-  const challengesByLeague: Record<string, ChallengeRow[]> = {}
-  for (const l of higherLeagues) {
-    challengesByLeague[l.id] = challenges.filter(c => c.league_id === l.id && matchesUserTrack(c))
-  }
-
   // Pro gate: user is free but current league is pro_only
   const isPro = profile?.plan === 'pro' || profile?.plan === 'studio'
   const isProGated = (userLeagueRow?.access === 'pro_only') && !isPro
@@ -387,43 +378,6 @@ export default async function ChallengesPage() {
           </div>
         )}
       </div>
-
-      {/* ── Section 2 : Ligues supérieures verrouillées ── */}
-      {higherLeagues.map(league => {
-        const leagueChallenges = challengesByLeague[league.id] ?? []
-        if (leagueChallenges.length === 0) return null
-
-        return (
-          <div key={league.id} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Lock className="size-4 text-muted-foreground" />
-              <LeagueIcon icon={league.icon} size="lg" />
-              <h3 className="text-base font-semibold text-muted-foreground">
-                Ligue {league.name}
-              </h3>
-              {league.access === 'pro_only' && (
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                  Pro
-                </span>
-              )}
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {leagueChallenges.map(c => (
-                <ChallengeCard
-                  key={c.id}
-                  challenge={c}
-                  status="locked"
-                  participantCount={partCounts[c.id]}
-                  participants={participantsByChallenge[c.id]}
-                  lockedLeagueName={league.name}
-                  lockedLeagueIcon={league.icon}
-                />
-              ))}
-            </div>
-          </div>
-        )
-      })}
 
     </div>
   )
