@@ -68,6 +68,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [country, setCountry] = useState(profile.country ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
+  const specialtyLocked = Boolean(detectSpecialty(profile.specialty))
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
   const [tools, setTools] = useState<string[]>((profile.tools as string[]) ?? [])
   const [objectives, setObjectives] = useState<Objective[]>(
@@ -465,20 +466,30 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Specialty */}
       <section className="space-y-3">
-        <Label className="text-sm font-semibold block">Specialty</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold block">Specialty</Label>
+          {specialtyLocked && (
+            <span className="text-xs text-muted-foreground">Locked — picked at signup</span>
+          )}
+        </div>
         <div className="space-y-3">
           {SPECIALTY_OPTIONS.map((s) => {
             const selected = specialty === s.value
+            const disabled = specialtyLocked && !selected
             return (
               <button
                 key={s.value}
                 type="button"
-                onClick={() => setSpecialty(s.value)}
+                onClick={() => !specialtyLocked && setSpecialty(s.value)}
+                disabled={disabled}
+                aria-disabled={disabled}
                 className={cn(
                   'relative w-full text-left rounded-[var(--radius-card)] border p-5 transition-all',
                   selected
                     ? 'border-2 border-primary bg-primary/5'
                     : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30',
+                  disabled && 'opacity-40 cursor-not-allowed hover:border-border hover:bg-card',
+                  specialtyLocked && selected && 'cursor-default',
                 )}
               >
                 <div className="flex items-start gap-4">

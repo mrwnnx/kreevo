@@ -41,6 +41,24 @@ export async function PATCH(request: Request) {
     if (existing) return NextResponse.json({ error: 'Username already taken' }, { status: 409 })
   }
 
+  if ('specialty' in update && update.specialty) {
+    const { data: current } = await (supabase as any)
+      .from('profiles')
+      .select('specialty, onboarding_completed')
+      .eq('id', user.id)
+      .single()
+    if (
+      current?.onboarding_completed &&
+      current?.specialty &&
+      current.specialty !== update.specialty
+    ) {
+      return NextResponse.json(
+        { error: 'Specialty cannot be changed once selected' },
+        { status: 403 },
+      )
+    }
+  }
+
   if (update.first_name || update.last_name) {
     const { data: current } = await (supabase as any)
       .from('profiles')
