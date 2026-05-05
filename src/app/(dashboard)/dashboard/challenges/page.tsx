@@ -133,7 +133,15 @@ function ChallengeCard({
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-export default async function ChallengesPage() {
+type Filter = 'todo' | 'done'
+
+export default async function ChallengesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>
+}) {
+  const sp = await searchParams
+  const filter: Filter = sp.filter === 'done' ? 'done' : 'todo'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -346,37 +354,87 @@ export default async function ChallengesPage() {
           <span className="text-sm text-muted-foreground">({sortedMyLeague.length})</span>
         </div>
 
+        {/* Filter tabs */}
+        {(() => {
+          const todoCount = sortedMyLeague.filter(c => !submittedIds.has(c.id)).length
+          const doneCount = sortedMyLeague.filter(c => submittedIds.has(c.id)).length
+          const tabs: Array<{ key: Filter; label: string; count: number }> = [
+            { key: 'todo', label: 'À faire',   count: todoCount },
+            { key: 'done', label: 'Complétés', count: doneCount },
+          ]
+          return (
+            <div className="inline-flex p-1 bg-muted/60 rounded-full w-fit">
+              {tabs.map(t => {
+                const active = filter === t.key
+                const href = t.key === 'todo' ? '/dashboard/challenges' : `/dashboard/challenges?filter=${t.key}`
+                return (
+                  <Link
+                    key={t.key}
+                    href={href}
+                    className={cn(
+                      'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+                      active
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {t.label}
+                    <span className={cn(
+                      'text-[11px] font-semibold tabular-nums tracking-tight',
+                      active ? 'text-muted-foreground' : 'text-muted-foreground/60',
+                    )}>
+                      {t.count}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })()}
+
         {activeParticipation && (
           <div className="rounded-xl border border-green-200 bg-green-50/50 dark:border-green-900/40 dark:bg-green-900/10 px-4 py-3 text-sm text-green-700 dark:text-green-400">
             Tu as une participation active — termine-la avant d'en rejoindre une autre.
           </div>
         )}
 
-        {sortedMyLeague.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedMyLeague.map(c => {
-              let status: ChallengeStatus = 'available'
-              if (submittedIds.has(c.id))            status = 'completed'
-              else if (activeChallId === c.id)        status = 'active'
-              else if (activeParticipation)           status = 'blocked'
-              else if (isProGated)                    status = 'locked'
+        {(() => {
+          const visible = sortedMyLeague.filter(c =>
+            filter === 'done' ? submittedIds.has(c.id) : !submittedIds.has(c.id),
+          )
 
-              return (
-                <ChallengeCard
-                  key={c.id}
-                  challenge={c}
-                  status={status}
-                  participantCount={partCounts[c.id]}
-                  participants={participantsByChallenge[c.id]}
-                />
-              )
-            })}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-            Aucun challenge publié dans ta ligue pour l'instant.
-          </div>
-        )}
+          if (visible.length === 0) {
+            return (
+              <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+                {filter === 'done'
+                  ? 'Aucun challenge complété pour l\'instant.'
+                  : 'Aucun challenge à faire — tu es à jour ✨'}
+              </div>
+            )
+          }
+
+          return (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visible.map(c => {
+                let status: ChallengeStatus = 'available'
+                if (submittedIds.has(c.id))            status = 'completed'
+                else if (activeChallId === c.id)        status = 'active'
+                else if (activeParticipation)           status = 'blocked'
+                else if (isProGated)                    status = 'locked'
+
+                return (
+                  <ChallengeCard
+                    key={c.id}
+                    challenge={c}
+                    status={status}
+                    participantCount={partCounts[c.id]}
+                    participants={participantsByChallenge[c.id]}
+                  />
+                )
+              })}
+            </div>
+          )
+        })()}
       </div>
 
     </div>
