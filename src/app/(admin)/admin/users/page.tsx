@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import {
   Search, ChevronDown, ExternalLink, TrendingUp, TrendingDown,
-  Ban, Shield, Trash2, Plus, Crown,
+  Ban, Shield, Trash2, Plus, Crown, Palette,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
@@ -40,8 +40,10 @@ export default function AdminUsers() {
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [xpModal, setXpModal] = useState<string | null>(null)
   const [leagueModal, setLeagueModal] = useState<string | null>(null)
+  const [specialtyModal, setSpecialtyModal] = useState<string | null>(null)
   const [xpAmount, setXpAmount] = useState('')
   const [leagueVal, setLeagueVal] = useState('')
+  const [specialtyVal, setSpecialtyVal] = useState<'ux_ui' | 'graphic'>('ux_ui')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   useEffect(() => { load() }, [])
@@ -202,6 +204,10 @@ export default function AdminUsers() {
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
                           <Plus className="size-3.5" /> Ajouter XP
                         </button>
+                        <button onClick={() => { setSpecialtyVal('ux_ui'); setSpecialtyModal(u.id); setOpenMenu(null) }}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          <Palette className="size-3.5 text-violet-500" /> Changer spécialité
+                        </button>
                         <div className="border-t border-border" />
                         <button onClick={() => action(u.id, { is_suspended: !u.is_suspended })}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
@@ -254,6 +260,27 @@ export default function AdminUsers() {
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setLeagueModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
             <button onClick={() => { action(leagueModal, { league: leagueVal }); setLeagueModal(null) }}
+              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85">
+              Confirmer
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Specialty Modal */}
+      {specialtyModal && (
+        <Modal title="Changer spécialité" onClose={() => setSpecialtyModal(null)}>
+          <select value={specialtyVal} onChange={e => setSpecialtyVal(e.target.value as 'ux_ui' | 'graphic')}
+            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring">
+            <option value="ux_ui">UX / UI Designer</option>
+            <option value="graphic">Graphic Designer</option>
+          </select>
+          <p className="text-xs text-muted-foreground mt-2">
+            ⚠️ Les outils choisis par l&apos;user dans son profil ne seront plus tous valides après le switch.
+          </p>
+          <div className="flex justify-end gap-2 mt-4">
+            <button onClick={() => setSpecialtyModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
+            <button onClick={() => { action(specialtyModal, { specialty: specialtyVal }); setSpecialtyModal(null) }}
               className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-full hover:opacity-85">
               Confirmer
             </button>

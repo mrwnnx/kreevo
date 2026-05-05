@@ -16,6 +16,7 @@ export async function PATCH(request: Request, { params }: Props) {
   if ('league' in body)       update.league = body.league
   if ('role' in body)         update.role = body.role
   if ('is_suspended' in body) update.is_suspended = body.is_suspended
+  if ('specialty' in body)    update.specialty = body.specialty
 
   let triggerLeagueCheck = false
   if ('xp_add' in body) {
