@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, ArrowRight, Zap } from 'lucide-react'
+import { ArrowRight, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -160,14 +160,11 @@ export default async function LeaderboardPage() {
                     opacity: isLocked ? 0.45 : isPast ? 0.6 : 1,
                   }}
                 >
-                  {isLocked ? (
-                    <Lock className="text-muted-foreground" style={{ width: sz * 0.38, height: sz * 0.38 }} />
-                  ) : (
-                    <LeagueIcon
-                      icon={league.icon}
-                      size={isActive ? 'xl' : dist === 1 ? 'lg' : 'md'}
-                    />
-                  )}
+                  <LeagueIcon
+                    icon={league.icon}
+                    size={isActive ? 'xl' : dist === 1 ? 'lg' : 'md'}
+                    className={isLocked ? 'grayscale opacity-50' : undefined}
+                  />
                 </div>
 
                 {/* Name */}
@@ -189,11 +186,12 @@ export default async function LeaderboardPage() {
       {/* ── Hero ── */}
       {userLeagueRow ? (
         <div className="text-center space-y-3 py-2">
-          <div
-            className="size-16 rounded-2xl mx-auto flex items-center justify-center shadow-md"
-            style={{ background: `linear-gradient(135deg, ${userLeagueRow.color}55, ${userLeagueRow.color})` }}
-          >
-            <LeagueIcon icon={userLeagueRow.icon} size="xl" />
+          <div className="size-32 mx-auto flex items-center justify-center">
+            <LeagueIcon
+              icon={userLeagueRow.icon}
+              size="xl"
+              className="size-28 text-7xl"
+            />
           </div>
           <div>
             <h1 className="text-2xl font-bold">{userLeagueRow.name} League</h1>
@@ -331,7 +329,9 @@ export default async function LeaderboardPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-sm font-medium truncate">@{u.username}</span>
+                      <span className="text-sm font-medium truncate">
+                        {u.full_name?.trim() || u.username}
+                      </span>
                       <ProBadge plan={u.plan} />
                       {isMe && (
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-violet-200 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300 shrink-0">
@@ -345,12 +345,12 @@ export default async function LeaderboardPage() {
                   </div>
 
                   {/* XP */}
-                  <div className="text-right shrink-0">
-                    <div className="flex items-center gap-1 justify-end">
-                      <Zap className="size-3 text-amber-500" />
-                      <span className="text-sm font-bold font-mono">{u.leagueXp.toLocaleString()}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">XP</p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Zap className="size-3 text-amber-500" />
+                    <span className="text-sm font-bold font-mono">
+                      {u.leagueXp.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">XP</span>
                   </div>
                 </Link>
               )
