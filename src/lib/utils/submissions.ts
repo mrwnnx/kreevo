@@ -117,13 +117,47 @@ export async function approveSubmission(
   if (!wasAttributed) {
     const { data: prof } = await (supabaseAdmin as any)
       .from('profiles')
-      .select('xp')
+      .select('xp, referred_by')
       .eq('id', sub.user_id)
       .single()
     const newXP = (prof?.xp ?? 0) + xpReward
     await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', sub.user_id)
     const { checkAndUpdateLeague } = await import('@/lib/utils/leagues')
     await checkAndUpdateLeague(sub.user_id)
+
+    // Reward referrer +50 XP on referred user's first approved submission
+    if (prof?.referred_by) {
+      const { data: pendingReferral } = await (supabaseAdmin as any)
+        .from('referrals')
+        .select('id')
+        .eq('referrer_id', prof.referred_by)
+        .eq('referred_id', sub.user_id)
+        .eq('status', 'pending')
+        .maybeSingle()
+
+      if (pendingReferral?.id) {
+        const REFERRAL_XP = 50
+        const { data: referrer } = await (supabaseAdmin as any)
+          .from('profiles')
+          .select('xp')
+          .eq('id', prof.referred_by)
+          .single()
+        const newReferrerXP = (referrer?.xp ?? 0) + REFERRAL_XP
+        await (supabaseAdmin as any)
+          .from('profiles')
+          .update({ xp: newReferrerXP })
+          .eq('id', prof.referred_by)
+        await (supabaseAdmin as any)
+          .from('referrals')
+          .update({ status: 'completed', xp_awarded: REFERRAL_XP })
+          .eq('id', pendingReferral.id)
+        await checkAndUpdateLeague(prof.referred_by)
+        await notify(prof.referred_by, 'referral_completed', {
+          referred_id: sub.user_id,
+          xp: REFERRAL_XP,
+        })
+      }
+    }
   }
 
   await notify(sub.user_id, 'submission_approved', {

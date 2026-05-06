@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
         const { data: existing } = await (supabase as any)
           .from('profiles')
-          .select('first_name, last_name, avatar_url, full_name, linkedin_url')
+          .select('first_name, last_name, avatar_url, full_name, linkedin_url, referred_by')
           .eq('id', user.id)
           .single()
 
@@ -87,6 +87,27 @@ export async function GET(request: NextRequest) {
           if (provider === 'linkedin_oidc' && !existing.linkedin_url) {
             const linkedinId = meta.sub as string | undefined
             if (linkedinId) update.linkedin_url = `https://www.linkedin.com/in/${linkedinId}`
+          }
+
+          // Apply referral: read kreevo_ref cookie, find referrer, link profiles + create referral row
+          const refCode = cookieStore.get('kreevo_ref')?.value
+          if (refCode && !(existing as any).referred_by) {
+            const { data: referrer } = await (supabase as any)
+              .from('profiles')
+              .select('id')
+              .eq('referral_code', refCode)
+              .neq('id', user.id)
+              .maybeSingle()
+            if (referrer?.id) {
+              update.referred_by = referrer.id
+              await (supabase as any).from('referrals').insert({
+                referrer_id: referrer.id,
+                referred_id: user.id,
+                status: 'pending',
+                xp_awarded: 0,
+              })
+            }
+            cookieStore.set('kreevo_ref', '', { maxAge: 0, path: '/' })
           }
 
           if (Object.keys(update).length > 0) {
