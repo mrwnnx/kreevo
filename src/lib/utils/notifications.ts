@@ -12,6 +12,7 @@ export type NotificationType =
   | 'contest_rejected'
   | 'report_dismissed'
   | 'report_confirmed'
+  | 'referral_completed'
 
 export async function notify(
   userId: string,

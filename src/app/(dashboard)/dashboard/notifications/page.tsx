@@ -12,6 +12,7 @@ const TYPE_META: Record<string, { emoji: string; label: string }> = {
   xp_penalty:        { emoji: '⬇️', label: 'Pénalité XP — inactivité 60 jours' },
   joined_challenge:  { emoji: '🎯', label: 'Challenge rejoint — 3 jours pour soumettre' },
   deadline_missed:   { emoji: '❌', label: 'Deadline personnelle manquée — -50 XP' },
+  referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
 }
 
 function timeAgo(date: string): string {

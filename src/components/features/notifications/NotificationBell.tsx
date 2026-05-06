@@ -31,6 +31,7 @@ const TYPE_LABELS: Record<string, { label: string; emoji: string }> = {
   xp_penalty:        { emoji: '⬇️', label: 'Pénalité XP — inactivité' },
   joined_challenge:  { emoji: '🎯', label: 'Tu as rejoint un challenge — 3 jours pour soumettre !' },
   deadline_missed:   { emoji: '❌', label: 'Deadline manquée — -50 XP' },
+  referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
 }
 
 export function NotificationBell({ userId }: { userId: string }) {
