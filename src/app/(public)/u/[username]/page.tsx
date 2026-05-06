@@ -82,8 +82,16 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 }
 
 // ── Page ───────────────────────────────────────────────────────
-export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+export default async function ProfilePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ username: string }>
+  searchParams: Promise<{ track?: string }>
+}) {
   const { username } = await params
+  const sp = await searchParams
+  const activeTrack = sp.track?.trim() || 'All'
   const supabase = await createClient()
 
   const [
@@ -111,6 +119,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       .select('*, challenges(title, specialty, challenge_type, industry)', { count: 'exact' })
       .eq('user_id', p.id)
       .eq('is_visible', true)
+      .eq('is_draft', false)
+      .eq('validation_status', 'approved')
       .order('created_at', { ascending: false }),
     supabase.from('badges').select('*').eq('user_id', p.id),
     supabase
@@ -123,7 +133,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const rank = (rankData?.length ?? 0) + 1
   const rankLabel = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
   const submissions = (allSubmissions ?? []) as any[]
-  const top3 = submissions.slice(0, 3)
+  const top3 = [...submissions]
+    .sort((a, b) => (b.total_claps ?? 0) - (a.total_claps ?? 0))
+    .slice(0, 3)
+  const filteredSubmissions =
+    activeTrack === 'All'
+      ? submissions
+      : submissions.filter((s) => s.challenges?.specialty === activeTrack)
 
   return (
     <div className="min-h-screen bg-background">
@@ -291,7 +307,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         {/* ── ALL SUBMISSIONS ────────────────────────────────────── */}
         <section className="space-y-4">
           <h2 className="text-base font-bold tracking-tight">All Work</h2>
-          <TrackFilter submissions={submissions} />
+          <TrackFilter
+            allSubmissions={submissions}
+            visibleSubmissions={filteredSubmissions}
+            activeTrack={activeTrack}
+            username={p.username}
+          />
         </section>
 
         {/* ── BADGES ─────────────────────────────────────────────── */}
@@ -361,28 +382,51 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
   )
 }
 
-function TrackFilter({ submissions }: { submissions: any[] }) {
-  const specialties = ['All', ...Array.from(new Set(submissions.map((s: any) => s.challenges?.specialty).filter(Boolean)))]
+function TrackFilter({
+  allSubmissions,
+  visibleSubmissions,
+  activeTrack,
+  username,
+}: {
+  allSubmissions: any[]
+  visibleSubmissions: any[]
+  activeTrack: string
+  username: string
+}) {
+  const specialties = ['All', ...Array.from(new Set(allSubmissions.map((s: any) => s.challenges?.specialty).filter(Boolean)))] as string[]
 
-  if (submissions.length === 0) return <EmptyState text="No public work yet." />
+  if (allSubmissions.length === 0) return <EmptyState text="No public work yet." />
 
   return (
     <div className="space-y-4">
       <div className="flex gap-2 flex-wrap">
-        {specialties.map(spec => (
-          <span
-            key={spec}
-            className="text-xs font-mono px-3 py-1.5 rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
-          >
-            {spec}
-          </span>
-        ))}
+        {specialties.map(spec => {
+          const active = spec === activeTrack
+          const href = spec === 'All' ? `/u/${username}` : `/u/${username}?track=${encodeURIComponent(spec)}`
+          return (
+            <a
+              key={spec}
+              href={href}
+              className={
+                active
+                  ? 'text-xs font-mono px-3 py-1.5 rounded-full border border-foreground bg-foreground text-background transition-colors'
+                  : 'text-xs font-mono px-3 py-1.5 rounded-full border border-border hover:bg-muted transition-colors'
+              }
+            >
+              {spec}
+            </a>
+          )
+        })}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {submissions.map((s: any) => (
-          <SubmissionCard key={s.id} submission={s} />
-        ))}
-      </div>
+      {visibleSubmissions.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {visibleSubmissions.map((s: any) => (
+            <SubmissionCard key={s.id} submission={s} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState text="No work in this track yet." />
+      )}
     </div>
   )
 }
