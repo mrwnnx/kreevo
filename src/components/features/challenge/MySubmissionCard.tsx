@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, AlertCircle, Clock, Loader2 } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Clock, Loader2, Sparkles, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,6 +23,14 @@ interface Submission {
   validation_status: string | null
   rejection_reason: string | null
   validated_at: string | null
+  ai_feedback?: AIFeedback | null
+}
+
+interface AIFeedback {
+  score: number
+  summary: string
+  strengths: string[]
+  improvements: string[]
 }
 
 const CONTEST_WINDOW_HOURS = 24
@@ -32,11 +40,13 @@ export function MySubmissionCard({
   challengeId,
   canResubmit,
   participationStatus,
+  userPlan,
 }: {
   submission: Submission
   challengeId: string
   canResubmit: boolean
   participationStatus: string
+  userPlan?: string
 }) {
   const status = submission.validation_status ?? 'pending'
   const isDraft = !!submission.is_draft
@@ -75,7 +85,116 @@ export function MySubmissionCard({
             {isDraft ? 'Continuer' : 'Modifier'}
           </Link>
         )}
+
+        {status === 'approved' && (
+          <FeedbackPanel
+            submissionId={submission.id}
+            initialFeedback={submission.ai_feedback ?? null}
+            userPlan={userPlan}
+          />
+        )}
       </div>
+    </div>
+  )
+}
+
+function FeedbackPanel({
+  submissionId,
+  initialFeedback,
+  userPlan,
+}: {
+  submissionId: string
+  initialFeedback: AIFeedback | null
+  userPlan?: string
+}) {
+  const [feedback, setFeedback] = useState<AIFeedback | null>(initialFeedback)
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const isPro = userPlan === 'pro' || userPlan === 'studio'
+
+  function fetchFeedback() {
+    setError(null)
+    startTransition(async () => {
+      const res = await fetch(`/api/submissions/${submissionId}/ai-feedback`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Erreur')
+        return
+      }
+      setFeedback(data.feedback)
+    })
+  }
+
+  if (!isPro && !feedback) {
+    return (
+      <div className="rounded-lg border border-dashed border-violet-300 dark:border-violet-900/40 bg-violet-50/50 dark:bg-violet-900/10 p-3 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-400">
+          <Lock className="size-3.5" /> Feedback IA détaillé
+        </div>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          Score, points forts et axes d&apos;amélioration. Réservé aux comptes Pro.
+        </p>
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center justify-center gap-1 rounded-full bg-violet-600 text-white text-xs font-semibold h-8 px-3 w-full hover:opacity-90"
+        >
+          Passer Pro
+        </Link>
+      </div>
+    )
+  }
+
+  if (!feedback) {
+    return (
+      <Button
+        type="button"
+        onClick={fetchFeedback}
+        disabled={pending}
+        variant="outline"
+        className="w-full h-8 gap-1.5 text-xs"
+      >
+        {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+        {pending ? 'Analyse en cours…' : 'Demander un feedback IA'}
+        {error && <span className="text-destructive">{error}</span>}
+      </Button>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card/50 p-3 space-y-2.5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <Sparkles className="size-3.5 text-violet-500" /> Feedback IA
+        </div>
+        <span className="text-xs font-mono font-bold tabular-nums">
+          {feedback.score}<span className="text-muted-foreground font-normal">/10</span>
+        </span>
+      </div>
+      {feedback.summary && (
+        <p className="text-[11px] text-muted-foreground leading-relaxed">{feedback.summary}</p>
+      )}
+      {feedback.strengths.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Points forts</p>
+          <ul className="text-[11px] text-foreground/80 leading-relaxed space-y-0.5">
+            {feedback.strengths.map((s, i) => (
+              <li key={i} className="flex gap-1.5"><span className="text-green-500 shrink-0">+</span><span>{s}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {feedback.improvements.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">À améliorer</p>
+          <ul className="text-[11px] text-foreground/80 leading-relaxed space-y-0.5">
+            {feedback.improvements.map((s, i) => (
+              <li key={i} className="flex gap-1.5"><span className="text-amber-500 shrink-0">→</span><span>{s}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
