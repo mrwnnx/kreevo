@@ -41,7 +41,15 @@ const RANK_BG: Record<number, string> = {
 const RANK_MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-export default async function LeaderboardPage() {
+type Track = 'all' | 'ux_ui' | 'graphic'
+
+export default async function LeaderboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ track?: string }>
+}) {
+  const sp = await searchParams
+  const track: Track = sp.track === 'ux_ui' || sp.track === 'graphic' ? sp.track : 'all'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -108,7 +116,10 @@ export default async function LeaderboardPage() {
       }
     }
 
-    const sorted = [...(leagueUsers ?? []) as any[]].sort((a, b) => {
+    const filteredUsers = ((leagueUsers ?? []) as any[]).filter(u =>
+      track === 'all' ? true : u.specialty === track,
+    )
+    const sorted = [...filteredUsers].sort((a, b) => {
       const diff = (scoreByUser[b.id] ?? 0) - (scoreByUser[a.id] ?? 0)
       return diff !== 0 ? diff : (b.xp ?? 0) - (a.xp ?? 0)
     })
@@ -264,14 +275,46 @@ export default async function LeaderboardPage() {
       )}
 
       {/* ── Classement ── */}
-      {userLeagueRow && rankedUsers.length > 0 && (
-        <div className="space-y-2">
+      {userLeagueRow && (
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Classement</h2>
             <span className="text-xs text-muted-foreground">{rankedUsers.length} designers</span>
           </div>
 
-          <div className="rounded-2xl border border-border overflow-hidden">
+          {/* Track filter */}
+          <div className="inline-flex p-1 bg-muted/60 rounded-full w-fit">
+            {([
+              { key: 'all',    label: 'Tous' },
+              { key: 'ux_ui',  label: 'UX / UI' },
+              { key: 'graphic',label: 'Graphic' },
+            ] as const).map(t => {
+              const active = track === t.key
+              const href = t.key === 'all' ? '/dashboard/leaderboard' : `/dashboard/leaderboard?track=${t.key}`
+              return (
+                <Link
+                  key={t.key}
+                  href={href}
+                  className={cn(
+                    'inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+                    active
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {t.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          {rankedUsers.length === 0 && (
+            <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+              Aucun designer dans cette catégorie pour l&apos;instant.
+            </div>
+          )}
+
+          <div className={cn('rounded-2xl border border-border overflow-hidden', rankedUsers.length === 0 && 'hidden')}>
             {rankedUsers.map((u, i) => {
               const isMe = u.id === user.id
               const isTop3 = u.rank <= 3
