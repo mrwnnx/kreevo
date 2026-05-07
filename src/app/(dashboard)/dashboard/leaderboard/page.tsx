@@ -6,6 +6,7 @@ import { ArrowRight, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { LeaguesRow } from '@/components/features/league/LeaguesRow'
 import { cn } from '@/lib/utils'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -23,13 +24,6 @@ interface RankedUser {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function initials(name: string | null, username: string): string {
   return (name ?? username).slice(0, 2).toUpperCase()
-}
-
-function iconSize(dist: number): number {
-  if (dist === 0) return 56
-  if (dist === 1) return 44
-  if (dist === 2) return 36
-  return 28
 }
 
 const RANK_BG: Record<number, string> = {
@@ -142,69 +136,12 @@ export default async function LeaderboardPage({
   return (
     <div className="max-w-[720px] mx-auto px-6 py-8 pb-16 space-y-8">
 
-      {/* ── Leagues navigation row ── */}
-      <div className="overflow-x-auto -mx-6 px-6">
-        <div className="flex items-end justify-center gap-4 min-w-max mx-auto py-2">
-          {leagues.map(league => {
-            const dist = Math.abs(league.order_index - userLeagueIndex)
-            const isActive = league.order_index === userLeagueIndex
-            const isPast = league.order_index < userLeagueIndex
-            const isLocked = league.order_index > userLeagueIndex
-            const sz = iconSize(dist)
-
-            return (
-              <div key={league.id} className="flex flex-col items-center gap-2">
-                {/* Icon bubble */}
-                <div
-                  className={cn(
-                    'rounded-full flex items-center justify-center transition-all duration-300',
-                  )}
-                  style={{
-                    width: sz,
-                    height: sz,
-                    background: isActive
-                      ? `linear-gradient(135deg, ${league.color}66, ${league.color})`
-                      : isPast
-                      ? 'hsl(var(--muted))'
-                      : 'hsl(var(--muted))',
-                    boxShadow: isActive ? `0 0 0 2.5px ${league.color}, 0 0 0 5px ${league.color}22` : undefined,
-                    opacity: isLocked ? 0.45 : isPast ? 0.6 : 1,
-                  }}
-                >
-                  <LeagueIcon
-                    icon={league.icon}
-                    size={isActive ? 'xl' : dist === 1 ? 'lg' : 'md'}
-                    className={isLocked ? 'grayscale opacity-50' : undefined}
-                  />
-                </div>
-
-                {/* Name */}
-                <span
-                  className={cn(
-                    'text-[11px] font-medium leading-none whitespace-nowrap transition-all',
-                    isActive ? 'font-semibold' : 'text-muted-foreground',
-                  )}
-                  style={isActive ? { color: league.color } : undefined}
-                >
-                  {league.name}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ── Hero ── */}
+      {/* ── Hero — all leagues in 1 row, active always centered (auto-scroll) ── */}
       {userLeagueRow ? (
         <div className="text-center space-y-3 py-2">
-          <div className="size-32 mx-auto flex items-center justify-center">
-            <LeagueIcon
-              icon={userLeagueRow.icon}
-              size="xl"
-              className="size-28 text-7xl"
-            />
-          </div>
-          <div>
+          <LeaguesRow leagues={leagues} userLeagueIndex={userLeagueIndex} />
+
+          <div className="pt-2">
             <h1 className="text-2xl font-bold">{userLeagueRow.name} League</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Complète des défis pour accumuler des XP
