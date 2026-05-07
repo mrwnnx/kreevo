@@ -169,7 +169,7 @@ export function DashboardProfileHeader({
     'U'
 
   return (
-    <div className="bg-card rounded-[24px] border border-border px-6 py-4 flex items-start gap-4">
+    <div className="bg-card rounded-[24px] border border-border px-4 py-4 sm:px-6 flex items-start gap-3 sm:gap-4">
       {/* Avatar + league badge overlay */}
       <div className="relative flex-shrink-0">
         {profile.avatar_url ? (
@@ -177,10 +177,10 @@ export function DashboardProfileHeader({
           <img
             src={profile.avatar_url}
             alt={profile.full_name || profile.username || ''}
-            className="w-20 h-20 rounded-full object-cover ring-2 ring-border"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-border"
           />
         ) : (
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
             {initials}
           </div>
         )}
@@ -190,15 +190,15 @@ export function DashboardProfileHeader({
       <div className="flex-1 min-w-0">
         {/* Ligne 1 — nom + badges */}
         <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className="font-bold text-xl text-foreground leading-tight truncate">
+          <span className="font-bold text-lg sm:text-xl text-foreground leading-tight truncate">
             {profile.full_name || profile.username}
           </span>
 
-          <ProBadge plan={profile.plan} size={22} />
+          <ProBadge plan={profile.plan} size={20} />
 
           {flag && (
             <span
-              className="text-xl leading-none"
+              className="text-lg sm:text-xl leading-none"
               title={profile.country || ''}
             >
               {flag}
@@ -208,12 +208,12 @@ export function DashboardProfileHeader({
 
         {/* Ligne 2 — job title */}
         {jobTitle && (
-          <div className="text-sm text-muted-foreground">{jobTitle}</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">{jobTitle}</div>
         )}
 
-        {/* Ligne 3 — réseaux sociaux */}
+        {/* Ligne 3 — réseaux sociaux (scroll horizontal si trop nombreux) */}
         {socialLinks.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex items-center gap-1.5 mt-2 -mx-1 px-1 overflow-x-auto scrollbar-hide">
             {socialLinks.map((social) => (
               <a
                 key={social.key}
@@ -221,7 +221,7 @@ export function DashboardProfileHeader({
                 target="_blank"
                 rel="noopener noreferrer"
                 title={social.label}
-                className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform duration-150 hover:scale-110 hover:shadow-sm"
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform duration-150 hover:scale-110 hover:shadow-sm flex-shrink-0"
                 style={{
                   backgroundColor: social.bg,
                   color: social.color,
@@ -234,12 +234,14 @@ export function DashboardProfileHeader({
         )}
       </div>
 
-      {/* Edit profile */}
+      {/* Edit profile — texte caché sur mobile, juste icône */}
       <Link
         href="/dashboard/profile"
-        className="flex-shrink-0 text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-800 px-4 py-2 rounded-full transition-colors duration-150 whitespace-nowrap dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-100"
+        aria-label="Edit profile"
+        className="flex-shrink-0 inline-flex items-center justify-center text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-800 px-3 py-2 sm:px-4 rounded-full transition-colors duration-150 whitespace-nowrap dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-100"
       >
-        Edit profile →
+        <span className="hidden sm:inline">Edit profile →</span>
+        <span className="sm:hidden text-base leading-none">✏️</span>
       </Link>
     </div>
   )

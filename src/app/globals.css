@@ -272,6 +272,14 @@
 
 /* ─── LEAGUE BADGE UTILITY CLASSES ─────────────────────────── */
 @layer utilities {
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .league-stone    { color: var(--league-stone);    }
   .league-bronze   { color: var(--league-bronze);   }
   .league-silver   { color: var(--league-silver);   }

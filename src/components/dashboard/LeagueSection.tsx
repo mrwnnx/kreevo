@@ -164,7 +164,7 @@ export function LeagueCountdownCard({
         {nextLeague?.name || 'Silver'}.
       </p>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {[
           { v: timeLeft.days, l: 'DAYS' },
           { v: timeLeft.hours, l: 'HOURS' },
@@ -173,10 +173,10 @@ export function LeagueCountdownCard({
         ].map(t => (
           <div
             key={t.l}
-            className="bg-white/20 rounded-lg px-3 py-2 text-center min-w-[52px]"
+            className="bg-white/20 rounded-lg px-2.5 sm:px-3 py-2 text-center min-w-[48px] sm:min-w-[52px] flex-1 max-w-[80px]"
           >
-            <p className="text-xl font-bold">{String(t.v).padStart(2, '0')}</p>
-            <p className="text-xs text-white/60">{t.l}</p>
+            <p className="text-lg sm:text-xl font-bold">{String(t.v).padStart(2, '0')}</p>
+            <p className="text-[10px] sm:text-xs text-white/60">{t.l}</p>
           </div>
         ))}
       </div>

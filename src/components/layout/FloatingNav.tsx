@@ -42,9 +42,10 @@ export function FloatingNav({ profile }: { profile: Profile }) {
   }, [])
 
   return (
+    <>
     <div
       className={cn(
-        'sticky top-0 z-40 flex items-center px-6 gap-4 h-14 transition-all duration-200',
+        'sticky top-0 z-40 flex items-center px-3 sm:px-6 gap-2 sm:gap-4 h-14 transition-all duration-200',
         scrolled ? 'border-b' : 'border-b border-transparent'
       )}
       style={{
@@ -57,11 +58,11 @@ export function FloatingNav({ profile }: { profile: Profile }) {
       {/* Logo — left */}
       <Link href="/dashboard" className="shrink-0 flex items-baseline gap-1">
         <span className="text-sm font-bold tracking-tight">kreevo</span>
-        <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
+        <span className="hidden sm:inline text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
       </Link>
 
-      {/* Nav pill — center */}
-      <div className="flex-1 flex justify-center">
+      {/* Nav pill — center (desktop seulement) */}
+      <div className="hidden sm:flex flex-1 justify-center min-w-0">
         <div
           className={cn(
             'flex items-center gap-0.5 px-1.5 py-1.5 rounded-full transition-opacity duration-300',
@@ -75,6 +76,7 @@ export function FloatingNav({ profile }: { profile: Profile }) {
               <Link
                 key={href}
                 href={href}
+                aria-label={label}
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-150',
                   active
@@ -90,12 +92,15 @@ export function FloatingNav({ profile }: { profile: Profile }) {
         </div>
       </div>
 
+      {/* Spacer mobile (pill rendue en bas en fixed) */}
+      <div className="flex-1 sm:hidden" />
+
       {/* Right — notifications + avatar */}
       <div className="shrink-0 flex items-center gap-1">
         <NotificationBell userId={profile.id} />
 
-        {/* League chip */}
-        <div className="flex items-center gap-2 pl-3 border-l border-border mr-1">
+        {/* League chip — masqué sur mobile */}
+        <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-border mr-1">
           <span
             className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full leading-none"
             style={{ background: leagueColor(league) + '18', color: leagueColor(league) }}
@@ -105,8 +110,8 @@ export function FloatingNav({ profile }: { profile: Profile }) {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground font-mono">
+          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-1.5 sm:pr-2.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
+            <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
               <Zap className="size-3 text-violet-500" />
               {profile.xp.toLocaleString()} XP
             </span>
@@ -152,5 +157,37 @@ export function FloatingNav({ profile }: { profile: Profile }) {
         </DropdownMenu>
       </div>
     </div>
+
+    {/* Mobile-only floating bottom nav */}
+    <div
+      className={cn(
+        'sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50',
+        'flex items-center gap-1 px-2 py-2 rounded-full shadow-lg border border-border',
+        'bg-background/95 backdrop-blur-md transition-opacity duration-300',
+        mounted ? 'opacity-100' : 'opacity-0',
+      )}
+      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+    >
+      {NAV.map(({ href, label, icon: Icon, match }) => {
+        const active = match(pathname)
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-label={label}
+            className={cn(
+              'flex flex-col items-center justify-center gap-0.5 rounded-full px-4 py-2 transition-all duration-150 min-w-[64px]',
+              active
+                ? 'bg-foreground text-background shadow-sm'
+                : 'text-zinc-500 hover:text-foreground dark:text-zinc-400',
+            )}
+          >
+            <Icon className="size-5 shrink-0" strokeWidth={active ? 2.4 : 1.8} />
+            <span className="text-[10px] font-medium leading-none">{label}</span>
+          </Link>
+        )
+      })}
+    </div>
+    </>
   )
 }

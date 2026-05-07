@@ -87,7 +87,7 @@ export function HeroBanner({
   return (
     <div
       className={cn(
-        'rounded-2xl overflow-hidden p-8 relative text-white min-h-[180px]',
+        'rounded-2xl overflow-hidden p-5 sm:p-8 pb-10 sm:pb-12 relative text-white min-h-[180px]',
         'bg-gradient-to-r',
         config.gradient,
       )}
@@ -98,13 +98,13 @@ export function HeroBanner({
         </div>
       )}
 
-      <div className="max-w-[60%]">
-        <h1 className="text-2xl font-bold mb-1">{config.title}</h1>
+      <div className="max-w-full sm:max-w-[60%]">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1">{config.title}</h1>
         {config.subtitle && (
-          <p className="text-lg font-semibold text-white/90 mb-2">{config.subtitle}</p>
+          <p className="text-base sm:text-lg font-semibold text-white/90 mb-2">{config.subtitle}</p>
         )}
         {config.body && (
-          <p className="text-white/75 text-sm mb-4">{config.body}</p>
+          <p className="text-white/75 text-xs sm:text-sm mb-4">{config.body}</p>
         )}
 
         {state === 'urgent' && (
@@ -149,13 +149,13 @@ export function HeroBanner({
       </div>
 
       {tip && state === 'active' && (
-        <div className="absolute bottom-12 right-6 max-w-[35%] bg-white/10 backdrop-blur-sm rounded-xl p-3">
+        <div className="hidden sm:block absolute bottom-12 right-6 max-w-[35%] bg-white/10 backdrop-blur-sm rounded-xl p-3">
           <p className="text-xs text-white/60 mb-1">💡 Tip</p>
           <p className="text-xs text-white/90 leading-relaxed">{tip}</p>
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 px-8 pb-4">
+      <div className="absolute bottom-0 left-0 right-0 px-5 sm:px-8 pb-4">
         <div className="flex justify-between text-xs text-white/50 mb-1">
           <span>Today&apos;s progress</span>
           <span>{completedToday} / 5 tasks</span>
@@ -169,7 +169,7 @@ export function HeroBanner({
       </div>
 
       {xpToday > 0 && (
-        <div className="absolute top-4 right-4 bg-amber-400 text-amber-900 rounded-full px-3 py-1 text-xs font-bold shadow-lg">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-400 text-amber-900 rounded-full px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold shadow-lg whitespace-nowrap">
           +{xpToday} XP today
         </div>
       )}
