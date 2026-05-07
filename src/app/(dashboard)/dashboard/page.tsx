@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
 import { StatCards } from '@/components/dashboard/StatCards'
-import { LeagueSection } from '@/components/dashboard/LeagueSection'
+import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
 import { InviteFriends } from '@/components/dashboard/InviteFriends'
 import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
 import { Analytics } from '@/components/dashboard/Analytics'
@@ -182,22 +182,32 @@ export default async function DashboardPage() {
 
       <DashboardProfileHeader profile={profile} />
 
-      <StatCards
-        profile={profile}
-        streak={streak}
-        completedTotal={totalCompleted}
-        completedThisWeek={completedThisWeek}
-        xpToday={xpToday}
-        leagueIndex={leagueIndex}
-        userLeague={userLeague}
-      />
+      <div className="grid lg:grid-cols-2 gap-4">
+        <LeagueSection
+          profile={profile}
+          league={userLeague}
+          nextLeague={nextLeague}
+          userRank={userRank}
+          totalInLeague={totalInLeague || 50}
+          currentXP={currentXP}
+          threshold={threshold}
+          suggestedChallenge={suggestedChallenge}
+        />
 
-      <LeagueSection
+        <StatCards
+          profile={profile}
+          streak={streak}
+          completedTotal={totalCompleted}
+          completedThisWeek={completedThisWeek}
+          xpToday={xpToday}
+          leagueIndex={leagueIndex}
+          userLeague={userLeague}
+        />
+      </div>
+
+      <LeagueCountdownCard
         profile={profile}
-        league={userLeague}
         nextLeague={nextLeague}
-        userRank={userRank}
-        totalInLeague={totalInLeague || 50}
         currentXP={currentXP}
         threshold={threshold}
         suggestedChallenge={suggestedChallenge}
