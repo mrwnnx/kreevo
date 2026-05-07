@@ -17,6 +17,9 @@ type Props = {
   currentXP: number
   threshold: number
   suggestedChallenge: any
+  completedInLeague: number
+  minChallenges: number
+  minChallengesEnabled: boolean
 }
 
 export function LeagueSection({
@@ -26,8 +29,13 @@ export function LeagueSection({
   totalInLeague,
   currentXP,
   threshold,
+  completedInLeague,
+  minChallenges,
+  minChallengesEnabled,
 }: Props) {
   const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
+  const challengesPercent =
+    minChallenges > 0 ? Math.min((completedInLeague / minChallenges) * 100, 100) : 0
   const leagueStyle = getLeagueStyle(profile?.league)
 
   return (
@@ -48,19 +56,38 @@ export function LeagueSection({
           </div>
         </div>
 
-        <div className="mb-3">
-          <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
-            <span>Tier progress</span>
-            <span>
-              {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
-            </span>
+        <div className="mb-3 space-y-2.5">
+          <div>
+            <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
+              <span className="inline-flex items-center gap-1">⚡ XP progress</span>
+              <span>
+                {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
+              </span>
+            </div>
+            <div className="h-2.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
+              <div
+                className={cn('h-full rounded-full transition-all duration-700', leagueStyle.accent)}
+                style={{ width: `${xpPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
-            <div
-              className={cn('h-full rounded-full transition-all duration-700', leagueStyle.accent)}
-              style={{ width: `${xpPercent}%` }}
-            />
-          </div>
+
+          {minChallengesEnabled && (
+            <div>
+              <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
+                <span className="inline-flex items-center gap-1">🎯 Challenges progress</span>
+                <span>
+                  {completedInLeague} / {minChallenges}
+                </span>
+              </div>
+              <div className="h-2.5 bg-white/50 dark:bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all duration-700', leagueStyle.accent)}
+                  style={{ width: `${challengesPercent}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between p-2 bg-white dark:bg-white/10 rounded-lg">

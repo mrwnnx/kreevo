@@ -136,6 +136,26 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .limit(1)
     .maybeSingle()
 
+  // Completed challenges in current league (for 2nd progress bar)
+  const { data: leagueChallengeIds } = await (supabaseAdmin as any)
+    .from('challenges')
+    .select('id')
+    .eq('league_id', userLeague?.id)
+    .eq('is_published', true)
+  const challengeIdList = (leagueChallengeIds ?? []).map((c: any) => c.id)
+  let completedInLeague = 0
+  if (challengeIdList.length > 0) {
+    const { count } = await (supabase as any)
+      .from('participations')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'submitted')
+      .in('challenge_id', challengeIdList)
+    completedInLeague = count ?? 0
+  }
+  const minChallenges = userLeague?.min_challenges ?? 3
+  const minChallengesEnabled = userLeague?.min_challenges_enabled ?? true
+
   // XP earned today
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -268,6 +288,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           currentXP={currentXP}
           threshold={threshold}
           suggestedChallenge={suggestedChallenge}
+          completedInLeague={completedInLeague}
+          minChallenges={minChallenges}
+          minChallengesEnabled={minChallengesEnabled}
         />
 
         <StatCards
