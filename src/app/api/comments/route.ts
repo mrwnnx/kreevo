@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/utils/notifications'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -30,6 +31,13 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': 'application/json', Cookie: request.headers.get('cookie') ?? '' },
       body: JSON.stringify({ userId: sub.user_id, action: 'comment_received' }),
     })
+    try {
+      await notify(sub.user_id, 'submission_commented', {
+        submission_id: submissionId,
+        comment_id: comment?.id,
+        commenter_id: user.id,
+      })
+    } catch { /* ignore */ }
   }
 
   return NextResponse.json({ comment })

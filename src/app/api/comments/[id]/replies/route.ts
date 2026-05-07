@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { notify } from '@/lib/utils/notifications'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -23,7 +24,7 @@ export async function POST(req: Request, { params }: Params) {
   // Find parent
   const { data: parent } = await (supabaseAdmin as any)
     .from('comments')
-    .select('id, submission_id, parent_id')
+    .select('id, submission_id, parent_id, user_id')
     .eq('id', parentId)
     .single()
   if (!parent) return NextResponse.json({ error: 'Commentaire parent introuvable' }, { status: 404 })
@@ -60,6 +61,26 @@ export async function POST(req: Request, { params }: Params) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Notify the parent comment author (or top-level author if reply-to-reply was flattened)
+  const notifyUserId = parent.parent_id
+    ? // Reply-to-reply was flattened → notify the original top-level comment author
+      await (async () => {
+        const { data: top } = await (supabaseAdmin as any)
+          .from('comments').select('user_id').eq('id', parent.parent_id).single()
+        return top?.user_id ?? parent.user_id
+      })()
+    : parent.user_id
+  if (notifyUserId && notifyUserId !== user.id) {
+    try {
+      await notify(notifyUserId, 'comment_replied', {
+        submission_id: parent.submission_id,
+        parent_comment_id: parentId,
+        reply_id: reply?.id,
+        replier_id: user.id,
+      })
+    } catch { /* ignore */ }
+  }
 
   return NextResponse.json({ comment: { ...reply, liked_by_me: false } })
 }

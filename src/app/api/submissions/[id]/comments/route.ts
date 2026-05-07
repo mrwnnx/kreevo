@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { updateStreak } from '@/lib/utils/streaks'
+import { notify } from '@/lib/utils/notifications'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -119,6 +120,14 @@ export async function POST(req: Request, { params }: Params) {
       .from('profiles').select('xp').eq('id', submission.user_id).single()
     const newXP = (ownerProf?.xp ?? 0) + 5
     await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
+
+    try {
+      await notify(submission.user_id, 'submission_commented', {
+        submission_id: submissionId,
+        comment_id: comment?.id,
+        commenter_id: user.id,
+      })
+    } catch { /* ignore */ }
   }
 
   return NextResponse.json({ comment: { ...comment, liked_by_me: false } })

@@ -13,6 +13,9 @@ const TYPE_META: Record<string, { emoji: string; label: string }> = {
   joined_challenge:  { emoji: '🎯', label: 'Challenge rejoint — 3 jours pour soumettre' },
   deadline_missed:   { emoji: '❌', label: 'Deadline personnelle manquée — -50 XP' },
   referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
+  submission_liked:    { emoji: '❤️', label: 'Quelqu\'un a aimé ta soumission' },
+  submission_commented:{ emoji: '💬', label: 'Nouveau commentaire sur ta soumission' },
+  comment_replied:     { emoji: '↩️', label: 'Quelqu\'un a répondu à ton commentaire' },
 }
 
 function timeAgo(date: string): string {

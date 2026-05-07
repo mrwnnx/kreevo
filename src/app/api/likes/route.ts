@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { notify } from '@/lib/utils/notifications'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -36,13 +37,19 @@ export async function POST(request: Request) {
     await (supabase.from('submissions') as any)
       .update({ likes_count: newCount }).eq('id', submissionId)
 
-    // Award XP to submission owner
+    // Award XP + notify submission owner
     if (sub?.user_id && sub.user_id !== user.id) {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/xp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Cookie: request.headers.get('cookie') ?? '' },
         body: JSON.stringify({ userId: sub.user_id, action: 'like_received' }),
       })
+      try {
+        await notify(sub.user_id, 'submission_liked', {
+          submission_id: submissionId,
+          liker_id: user.id,
+        })
+      } catch { /* ignore */ }
     }
 
     return NextResponse.json({ liked: true, likes_count: newCount })

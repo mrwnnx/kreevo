@@ -14,6 +14,9 @@ export type NotificationType =
   | 'report_confirmed'
   | 'referral_completed'
   | 'league_window_failed'
+  | 'submission_liked'
+  | 'submission_commented'
+  | 'comment_replied'
 
 export async function notify(
   userId: string,
