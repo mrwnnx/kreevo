@@ -2,13 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
+import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
+import { WhatToDoNow } from '@/components/dashboard/WhatToDoNow'
+import { ContextualLeaderboard } from '@/components/dashboard/ContextualLeaderboard'
 import { InviteFriends } from '@/components/dashboard/InviteFriends'
 import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
 import { Analytics } from '@/components/dashboard/Analytics'
 
-export default async function DashboardPage() {
+interface PageProps {
+  searchParams: Promise<{ submitted?: string }>
+}
+
+export default async function DashboardPage({ searchParams }: PageProps) {
+  const sp = await searchParams
+  const justSubmitted = sp?.submitted === 'true'
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -21,6 +31,7 @@ export default async function DashboardPage() {
     leagueResult,
     completedResult,
     thisWeekResult,
+    lastSubResult,
   ] = await Promise.all([
     (supabase as any).from('profiles').select('*').eq('id', user.id).single(),
 
@@ -54,6 +65,14 @@ export default async function DashboardPage() {
       .eq('user_id', user.id)
       .eq('status', 'submitted')
       .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+
+    (supabase as any)
+      .from('submissions')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const profile = profileResult.data
@@ -65,6 +84,9 @@ export default async function DashboardPage() {
   const allLeagues: any[] = leagueResult.data ?? []
   const totalCompleted = completedResult.count ?? 0
   const completedThisWeek = thisWeekResult.count ?? 0
+  const lastSubmissionDate = lastSubResult.data?.created_at
+    ? new Date(lastSubResult.data.created_at)
+    : null
 
   const userLeagueName = profile?.league || 'Stone'
   const userLeague = allLeagues.find(
@@ -88,6 +110,8 @@ export default async function DashboardPage() {
   const thresholdPercent = userLeague?.xp_threshold_percent ?? 60
   const threshold = Math.floor((totalLeagueXP * thresholdPercent) / 100)
   const currentXP = profile?.xp || 0
+  const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
+  const xpGap = Math.max(0, threshold - currentXP)
 
   // User rank in league
   const { count: rankCount } = await (supabaseAdmin as any)
@@ -126,6 +150,43 @@ export default async function DashboardPage() {
       (s: number, sub: any) => s + (sub.xp_earned || 0),
       0,
     ) || 0
+
+  // Completed today (submitted participations updated today)
+  const { count: completedTodayCount } = await (supabase as any)
+    .from('participations')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'submitted')
+    .gte('updated_at', today.toISOString())
+
+  // Contextual leaderboard — neighbors around current user
+  const startRange = Math.max(0, userRank - 3)
+  const endRange = userRank + 1
+  const { data: leaderboardNeighbors } = await (supabaseAdmin as any)
+    .from('profiles')
+    .select('id, username, full_name, avatar_url, xp')
+    .eq('league', userLeagueName)
+    .order('xp', { ascending: false })
+    .range(startRange, endRange)
+
+  const neighborUsers = (leaderboardNeighbors ?? []).map((u: any, i: number) => ({
+    rank: startRange + 1 + i,
+    username: u.username,
+    full_name: u.full_name,
+    avatar_url: u.avatar_url,
+    xp: u.xp || 0,
+    isCurrentUser: u.id === user.id,
+  }))
+
+  // XP gap to top 10
+  const { data: top10User } = await (supabaseAdmin as any)
+    .from('profiles')
+    .select('xp')
+    .eq('league', userLeagueName)
+    .order('xp', { ascending: false })
+    .range(9, 9)
+    .maybeSingle()
+  const xpToTop10 = userRank > 10 ? Math.max(0, (top10User?.xp || 0) - currentXP) : 0
 
   // Analytics — last 7 days (actual data)
   const since = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
@@ -178,9 +239,24 @@ export default async function DashboardPage() {
     'Designer'
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-[1200px] mx-auto px-6 py-8 space-y-6">
 
       <DashboardProfileHeader profile={profile} />
+
+      <HeroBanner
+        profile={profile}
+        participation={participation}
+        streak={streak}
+        xpToday={xpToday}
+        xpPercent={xpPercent}
+        xpGap={xpGap}
+        nextLeague={nextLeague?.name || ''}
+        justSubmitted={justSubmitted}
+        lastSubmissionDate={lastSubmissionDate}
+        suggestedChallenge={suggestedChallenge}
+        completedTotal={totalCompleted}
+        completedToday={completedTodayCount || 0}
+      />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <LeagueSection
@@ -213,7 +289,22 @@ export default async function DashboardPage() {
         suggestedChallenge={suggestedChallenge}
       />
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-4">
+      <div className="grid lg:grid-cols-2 gap-4">
+        <WhatToDoNow
+          suggestedChallenge={suggestedChallenge}
+          referralsCount={referrals.length}
+          profile={profile}
+        />
+        <ContextualLeaderboard
+          users={neighborUsers}
+          userRank={userRank || 1}
+          totalInLeague={totalInLeague || 50}
+          league={userLeagueName}
+          xpToTop10={xpToTop10}
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr_320px] gap-4" id="invite">
         <InviteFriends profile={profile} referrals={referrals} />
         <CompleteProfile profile={profile} />
       </div>
