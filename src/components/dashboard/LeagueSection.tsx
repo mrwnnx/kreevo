@@ -118,78 +118,47 @@ export function LeagueCountdownCard({
     return () => clearInterval(interval)
   }, [])
 
+  if (!isCloseToPromotion) return null
+
   return (
-    <div
-      className={cn(
-        'rounded-[24px] p-4 relative overflow-hidden',
-        isCloseToPromotion
-          ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white'
-          : 'bg-gradient-to-br from-violet-600 to-indigo-700 text-white',
-      )}
-    >
-      {isCloseToPromotion ? (
-        <>
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-              ⏰ League ends soon
-            </span>
-            <span className="text-xs bg-red-400/40 px-2 py-1 rounded-full">
-              🔺 High stakes
-            </span>
+    <div className="rounded-[24px] p-4 relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+          ⏰ League ends soon
+        </span>
+        <span className="text-xs bg-red-400/40 px-2 py-1 rounded-full">
+          🔺 High stakes
+        </span>
+      </div>
+
+      <h3 className="font-bold text-lg mb-1">Don&apos;t lose your spot.</h3>
+      <p className="text-white/80 text-sm mb-4">
+        Stay active to remain in {leagueStyle.name}. Top 20 stay. Others drop to{' '}
+        {nextLeague?.name || 'Silver'}.
+      </p>
+
+      <div className="flex gap-2 mb-4">
+        {[
+          { v: timeLeft.days, l: 'DAYS' },
+          { v: timeLeft.hours, l: 'HOURS' },
+          { v: timeLeft.min, l: 'MIN' },
+          { v: timeLeft.sec, l: 'SEC' },
+        ].map(t => (
+          <div
+            key={t.l}
+            className="bg-white/20 rounded-lg px-3 py-2 text-center min-w-[52px]"
+          >
+            <p className="text-xl font-bold">{String(t.v).padStart(2, '0')}</p>
+            <p className="text-xs text-white/60">{t.l}</p>
           </div>
+        ))}
+      </div>
 
-          <h3 className="font-bold text-lg mb-1">Don&apos;t lose your spot.</h3>
-          <p className="text-white/80 text-sm mb-4">
-            Stay active to remain in {leagueStyle.name}. Top 20 stay. Others drop to{' '}
-            {nextLeague?.name || 'Silver'}.
-          </p>
-
-          <div className="flex gap-2 mb-4">
-            {[
-              { v: timeLeft.days, l: 'DAYS' },
-              { v: timeLeft.hours, l: 'HOURS' },
-              { v: timeLeft.min, l: 'MIN' },
-              { v: timeLeft.sec, l: 'SEC' },
-            ].map(t => (
-              <div
-                key={t.l}
-                className="bg-white/20 rounded-lg px-3 py-2 text-center min-w-[52px]"
-              >
-                <p className="text-xl font-bold">{String(t.v).padStart(2, '0')}</p>
-                <p className="text-xs text-white/60">{t.l}</p>
-              </div>
-            ))}
-          </div>
-
-          <Link href="/dashboard/challenges">
-            <Button className="bg-white text-orange-600 hover:bg-white/90 w-full font-semibold">
-              ⚡ Complete a Challenge
-            </Button>
-          </Link>
-        </>
-      ) : (
-        <>
-          <p className="text-sm text-white/70 mb-2">Suggested for you</p>
-          <h3 className="font-bold text-lg mb-1 leading-tight">
-            {suggestedChallenge?.title || 'Pick your next challenge'}
-          </h3>
-          {suggestedChallenge && (
-            <p className="text-white/70 text-sm mb-1">
-              +{suggestedChallenge.xp_reward} XP · {suggestedChallenge.deadline_days} days
-            </p>
-          )}
-          <p className="text-white/60 text-xs mb-5">
-            {[suggestedChallenge?.specialty, suggestedChallenge?.challenge_type]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-          <Link href="/dashboard/challenges">
-            <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30 w-full">
-              Complete a Challenge ⚡
-            </Button>
-          </Link>
-        </>
-      )}
+      <Link href="/dashboard/challenges">
+        <Button className="bg-white text-orange-600 hover:bg-white/90 w-full font-semibold">
+          ⚡ Complete a Challenge
+        </Button>
+      </Link>
     </div>
   )
 }
