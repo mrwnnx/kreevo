@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { demoteLeague } from '@/lib/utils/leagues'
+import { demoteLeague, getLeagueThreshold } from '@/lib/utils/leagues'
 
 export async function POST(request: Request) {
   const secret = request.headers.get('authorization')?.replace('Bearer ', '')
@@ -42,16 +42,50 @@ export async function POST(request: Request) {
     deadlineMissed++
   }
 
-  // ── 2. Inactivity checks ──
+  // ── 2. Inactivity checks + tier window failures ──
   const { data: profiles } = await (supabaseAdmin as any)
     .from('profiles')
-    .select('id, xp, league')
+    .select('id, xp, league, league_entered_at, created_at')
 
-  if (!profiles?.length) return NextResponse.json({ deadlineMissed, warned: 0, penalized: 0, demoted: 0 })
+  if (!profiles?.length) {
+    return NextResponse.json({ deadlineMissed, warned: 0, penalized: 0, demoted: 0, windowFailed: 0 })
+  }
 
-  let warned = 0, penalized = 0, demoted = 0
+  // Pre-fetch tier_window config per league name
+  const { data: leagues } = await (supabaseAdmin as any)
+    .from('leagues')
+    .select('id, name, tier_window_enabled, tier_window_days, tier_window_xp_penalty, tier_window_set_at')
+
+  const leagueByName = new Map<string, any>()
+  for (const l of leagues ?? []) leagueByName.set(l.name, l)
+
+  let warned = 0, penalized = 0, demoted = 0, windowFailed = 0
 
   for (const profile of profiles) {
+    // ── 2a. Tier window check (independent of activity) ──
+    const lg = leagueByName.get(profile.league)
+    if (lg?.tier_window_enabled && lg.tier_window_days > 0) {
+      const enteredAt = profile.league_entered_at
+        ? new Date(profile.league_entered_at)
+        : new Date(profile.created_at)
+      const setAt = lg.tier_window_set_at ? new Date(lg.tier_window_set_at) : enteredAt
+      const start = enteredAt.getTime() > setAt.getTime() ? enteredAt : setAt
+      const deadline = new Date(start.getTime() + lg.tier_window_days * 24 * 60 * 60 * 1000)
+
+      if (now > deadline) {
+        const threshold = await getLeagueThreshold(lg.id)
+        if (threshold > 0 && (profile.xp ?? 0) < threshold) {
+          await demoteLeague(profile.id, {
+            reason: 'tier_window_failed',
+            xpPenalty: lg.tier_window_xp_penalty ?? 0,
+          })
+          windowFailed++
+          continue // skip inactivity branch — already demoted
+        }
+      }
+    }
+
+    // ── 2b. Inactivity branch (uses last submission) ──
     const { data: lastSub } = await (supabaseAdmin as any)
       .from('submissions')
       .select('created_at')
@@ -95,5 +129,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ deadlineMissed, warned, penalized, demoted })
+  return NextResponse.json({ deadlineMissed, warned, penalized, demoted, windowFailed })
 }

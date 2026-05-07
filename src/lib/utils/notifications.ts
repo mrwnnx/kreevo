@@ -13,6 +13,7 @@ export type NotificationType =
   | 'report_dismissed'
   | 'report_confirmed'
   | 'referral_completed'
+  | 'league_window_failed'
 
 export async function notify(
   userId: string,

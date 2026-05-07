@@ -31,6 +31,9 @@ export default async function EditLeague({ params }: Props) {
           min_challenges: String(data.min_challenges),
           min_challenges_enabled: data.min_challenges_enabled ?? true,
           xp_threshold_percent: String(data.xp_threshold_percent ?? 60),
+          tier_window_enabled: data.tier_window_enabled ?? false,
+          tier_window_days: String(data.tier_window_days ?? 30),
+          tier_window_xp_penalty: String(data.tier_window_xp_penalty ?? 0),
           access: data.access,
           is_active: data.is_active,
         }}

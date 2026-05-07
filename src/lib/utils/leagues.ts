@@ -7,7 +7,12 @@ export type LeagueRow = {
   color: string
   order_index: number
   min_challenges: number
+  min_challenges_enabled: boolean
   xp_threshold_percent: number
+  tier_window_enabled: boolean
+  tier_window_days: number
+  tier_window_xp_penalty: number
+  tier_window_set_at: string | null
   access: 'all' | 'pro_only'
   is_active: boolean
   specialty?: string | null
@@ -74,8 +79,9 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
   }
 
   const minChallenges = currentLeague.min_challenges ?? 3
+  const minChallengesEnabled = currentLeague.min_challenges_enabled ?? true
   const meetsXP = threshold === 0 || currentXP >= threshold
-  const meetsChallenges = completedCount >= minChallenges
+  const meetsChallenges = !minChallengesEnabled || completedCount >= minChallenges
 
   if (!meetsXP || !meetsChallenges) return
 
@@ -90,7 +96,7 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   await (supabaseAdmin as any)
     .from('profiles')
-    .update({ league: nextLeague.name })
+    .update({ league: nextLeague.name, league_entered_at: new Date().toISOString() })
     .eq('id', userId)
 
   try {
@@ -102,11 +108,18 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
   } catch { /* ignore */ }
 }
 
-// Sanction inactivité : descend d'une ligue (sauf si déjà à la première).
-export async function demoteLeague(userId: string): Promise<void> {
+// Sanction : descend d'une ligue (sauf si déjà à la première).
+// Reason 'inactivity' (90j sans soumission) ou 'tier_window_failed' (seuil non atteint dans la fenêtre).
+// xpPenalty optionnel : retire X XP au passage (cap à 0).
+export async function demoteLeague(
+  userId: string,
+  options: { reason?: 'inactivity' | 'tier_window_failed'; xpPenalty?: number } = {},
+): Promise<void> {
+  const { reason = 'inactivity', xpPenalty = 0 } = options
+
   const { data: profile } = await (supabaseAdmin as any)
     .from('profiles')
-    .select('league')
+    .select('league, xp')
     .eq('id', userId)
     .single()
   if (!profile) return
@@ -126,16 +139,27 @@ export async function demoteLeague(userId: string): Promise<void> {
     .maybeSingle()
   if (!prevLeague) return
 
+  const newXP = Math.max(0, (profile.xp ?? 0) - Math.max(0, xpPenalty))
+
   await (supabaseAdmin as any)
     .from('profiles')
-    .update({ league: prevLeague.name })
+    .update({
+      league: prevLeague.name,
+      xp: newXP,
+      league_entered_at: new Date().toISOString(),
+    })
     .eq('id', userId)
 
   try {
     await (supabaseAdmin as any).from('notifications').insert({
       user_id: userId,
-      type: 'league_down',
-      data: { old_league: profile.league, new_league: prevLeague.name },
+      type: reason === 'tier_window_failed' ? 'league_window_failed' : 'league_down',
+      data: {
+        old_league: profile.league,
+        new_league: prevLeague.name,
+        xp_penalty: xpPenalty,
+        reason,
+      },
     })
   } catch { /* ignore */ }
 }
