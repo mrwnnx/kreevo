@@ -11,6 +11,7 @@ interface LeagueFormData {
   color: string
   order_index: string
   min_challenges: string
+  min_challenges_enabled: boolean
   xp_threshold_percent: string
   access: 'all' | 'pro_only'
   is_active: boolean
@@ -22,6 +23,7 @@ const EMPTY: LeagueFormData = {
   color: '#8B8B8B',
   order_index: '1',
   min_challenges: '3',
+  min_challenges_enabled: true,
   xp_threshold_percent: '60',
   access: 'all',
   is_active: true,
@@ -189,8 +191,9 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
       body: JSON.stringify({
         ...form,
         order_index: parseInt(form.order_index),
-        min_challenges: parseInt(form.min_challenges),
-        xp_threshold_percent: Math.max(0, Math.min(100, parseInt(form.xp_threshold_percent) || 60)),
+        min_challenges: Math.max(1, Math.min(20, parseInt(form.min_challenges) || 3)),
+        min_challenges_enabled: form.min_challenges_enabled,
+        xp_threshold_percent: Math.max(10, Math.min(100, parseInt(form.xp_threshold_percent) || 60)),
       }),
     })
     const data = await res.json()
@@ -243,24 +246,13 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
         </div>
 
         <div className="space-y-1.5">
-          <label className={labelClass}>Min challenges requis</label>
-          <input
-            type="number"
-            value={form.min_challenges}
-            onChange={e => set('min_challenges')(e.target.value)}
-            min={1}
-            className={inputClass}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className={labelClass}>Seuil XP (%)</label>
+          <label className={labelClass}>XP threshold (%)</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={form.xp_threshold_percent}
               onChange={e => set('xp_threshold_percent')(e.target.value)}
-              min={0}
+              min={10}
               max={100}
               step={5}
               className={inputClass}
@@ -270,6 +262,37 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
           <p className="text-[11px] text-muted-foreground">
             Pourcentage du total des <code className="font-mono">xp_reward</code> de cette ligue requis pour la promotion. Défaut 60.
           </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={labelClass}>Require minimum challenges</label>
+          <div className="flex items-center gap-3 h-9">
+            <button
+              type="button"
+              onClick={() => set('min_challenges_enabled')(!form.min_challenges_enabled)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${form.min_challenges_enabled ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow transition-transform ${form.min_challenges_enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+            <span className="text-sm text-muted-foreground">
+              {form.min_challenges_enabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={cn(labelClass, !form.min_challenges_enabled && 'opacity-50')}>
+            Minimum challenges to level up
+          </label>
+          <input
+            type="number"
+            value={form.min_challenges}
+            onChange={e => set('min_challenges')(e.target.value)}
+            min={1}
+            max={20}
+            disabled={!form.min_challenges_enabled}
+            className={cn(inputClass, !form.min_challenges_enabled && 'opacity-50 cursor-not-allowed')}
+          />
         </div>
 
         <div className="space-y-1.5">

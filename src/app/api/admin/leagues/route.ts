@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       color: body.color,
       order_index: body.order_index,
       min_challenges: body.min_challenges ?? 3,
+      min_challenges_enabled: body.min_challenges_enabled ?? true,
       xp_threshold_percent: body.xp_threshold_percent ?? 60,
       access: body.access ?? 'all',
       is_active: body.is_active ?? true,
