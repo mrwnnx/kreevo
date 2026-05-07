@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
-import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection } from '@/components/dashboard/LeagueSection'
 import { InviteFriends } from '@/components/dashboard/InviteFriends'
@@ -178,21 +177,10 @@ export default async function DashboardPage() {
     profile?.username ||
     'Designer'
 
-  const isCloseToPromotion = threshold > 0 && currentXP / threshold >= 0.8
-
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 space-y-6">
 
       <DashboardProfileHeader profile={profile} />
-
-      <HeroBanner
-        profile={profile}
-        participation={participation}
-        xpToday={xpToday}
-        completedToday={completedThisWeek}
-        justSubmitted={false}
-        isCloseToPromotion={isCloseToPromotion}
-      />
 
       <StatCards
         profile={profile}
