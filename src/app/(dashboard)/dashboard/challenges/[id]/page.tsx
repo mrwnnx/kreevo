@@ -179,6 +179,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 currentUserId={user.id}
                 isRevealed={true}
                 challengeTitle={c.title}
+                t={t.gallery}
               />
             </section>
           )}
@@ -337,6 +338,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 currentUserId={user.id}
                 isRevealed={true}
                 challengeTitle={c.title}
+                t={t.gallery}
               />
             </section>
           )}
@@ -430,6 +432,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               canResubmit={canResubmit}
               participationStatus={participationStatus}
               userPlan={p.plan}
+              t={t.mySubmission}
             />
           )}
 

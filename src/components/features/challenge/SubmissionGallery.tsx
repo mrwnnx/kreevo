@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
 import { ReportButton } from './ReportButton'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface Submission {
   id: string
@@ -25,6 +26,16 @@ interface GalleryProps {
   currentUserId: string | null
   isRevealed: boolean
   challengeTitle: string
+  t?: Dictionary['challengeDetail']['gallery']
+}
+
+const FALLBACK_T: Dictionary['challengeDetail']['gallery'] = {
+  countSingularUpcoming: 'designer a déjà soumis',
+  countPluralUpcoming: 'designers ont déjà soumis',
+  countSingularRevealed: 'designer a soumis',
+  countPluralRevealed: 'designers ont soumis',
+  revealsAtDeadline: 'Révélé à la deadline',
+  submissionAlt: 'Soumission',
 }
 
 // Keys = noms DB de la table `leagues` (7ajra = Stone)
@@ -42,14 +53,15 @@ const LEAGUE_COLOR: Record<string, string> = {
 
 const LEAGUE_LABEL: Record<string, string> = { '7ajra': 'Stone' }
 
-export function SubmissionGallery({ submissions, currentUserId, isRevealed }: GalleryProps) {
+export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = FALLBACK_T }: GalleryProps) {
   if (submissions.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
-        No submissions yet. Be the first to submit.
-      </div>
-    )
+    return null
   }
+
+  const isPlural = submissions.length !== 1
+  const countLabel = isRevealed
+    ? (isPlural ? t.countPluralRevealed : t.countSingularRevealed)
+    : (isPlural ? t.countPluralUpcoming : t.countSingularUpcoming)
 
   return (
     <div className="space-y-4">
@@ -57,11 +69,11 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed }: Ga
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground font-mono">{submissions.length}</span>
-          {' '}designer{submissions.length !== 1 ? 's' : ''} {isRevealed ? 'submitted' : 'already submitted'}
+          {' '}{countLabel}
         </p>
         {!isRevealed && (
           <span className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground border border-border px-3 py-1 rounded-full">
-            <Lock className="size-3" /> Reveals at deadline
+            <Lock className="size-3" /> {t.revealsAtDeadline}
           </span>
         )}
       </div>
@@ -84,7 +96,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed }: Ga
                 {s.cover_url ? (
                   <img
                     src={s.cover_url}
-                    alt="Submission"
+                    alt={t.submissionAlt}
                     className={cn(
                       'w-full h-full object-cover transition-all duration-300',
                       blurred ? 'blur-xl scale-110' : 'group-hover:scale-105'

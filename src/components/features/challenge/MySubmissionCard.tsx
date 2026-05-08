@@ -14,6 +14,10 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type MySubT = Dictionary['challengeDetail']['mySubmission']
 
 interface Submission {
   id: string
@@ -41,12 +45,14 @@ export function MySubmissionCard({
   canResubmit,
   participationStatus,
   userPlan,
+  t,
 }: {
   submission: Submission
   challengeId: string
   canResubmit: boolean
   participationStatus: string
   userPlan?: string
+  t: MySubT
 }) {
   const status = submission.validation_status ?? 'pending'
   const isDraft = !!submission.is_draft
@@ -67,13 +73,13 @@ export function MySubmissionCard({
     <div className="relative aspect-video overflow-hidden bg-muted">
       <img
         src={submission.cover_url}
-        alt={submission.title ?? 'Ma soumission'}
+        alt={submission.title ?? t.heading}
         className={cn(
           'w-full h-full object-cover transition-transform duration-300',
           detailHref && 'group-hover:scale-[1.02]',
         )}
       />
-      <StatusBadge isDraft={isDraft} status={status} />
+      <StatusBadge isDraft={isDraft} status={status} t={t} />
     </div>
   )
 
@@ -88,7 +94,7 @@ export function MySubmissionCard({
       )}
 
       <div className="p-3 space-y-2">
-        <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Ma soumission</p>
+        <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{t.heading}</p>
         {submission.title && (
           detailHref ? (
             <Link
@@ -102,10 +108,10 @@ export function MySubmissionCard({
           )
         )}
 
-        {!isDraft && <StatusInline status={status} rejectionReason={submission.rejection_reason} />}
+        {!isDraft && <StatusInline status={status} rejectionReason={submission.rejection_reason} t={t} />}
 
         {canContest && (
-          <ContestButton submissionId={submission.id} hoursLeft={CONTEST_WINDOW_HOURS - (hoursSinceRejection ?? 0)} />
+          <ContestButton submissionId={submission.id} hoursLeft={CONTEST_WINDOW_HOURS - (hoursSinceRejection ?? 0)} t={t} />
         )}
 
         {(canResubmit || isDraft) && participationStatus !== 'expired' && status !== 'approved' && (
@@ -113,7 +119,7 @@ export function MySubmissionCard({
             href={`/dashboard/challenges/${challengeId}/submit`}
             className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-border text-xs font-medium h-8 px-3 hover:bg-muted transition-colors"
           >
-            {isDraft ? 'Continuer' : 'Modifier'}
+            {isDraft ? t.continue : t.edit}
           </Link>
         )}
 
@@ -122,6 +128,7 @@ export function MySubmissionCard({
             submissionId={submission.id}
             initialFeedback={submission.ai_feedback ?? null}
             userPlan={userPlan}
+            t={t}
           />
         )}
       </div>
@@ -133,10 +140,12 @@ function FeedbackPanel({
   submissionId,
   initialFeedback,
   userPlan,
+  t,
 }: {
   submissionId: string
   initialFeedback: AIFeedback | null
   userPlan?: string
+  t: MySubT
 }) {
   const [feedback, setFeedback] = useState<AIFeedback | null>(initialFeedback)
   const [pending, startTransition] = useTransition()
@@ -151,7 +160,7 @@ function FeedbackPanel({
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Erreur')
+        setError(data.error ?? t.genericError)
         return
       }
       setFeedback(data.feedback)
@@ -162,16 +171,16 @@ function FeedbackPanel({
     return (
       <div className="rounded-lg border border-dashed border-violet-300 dark:border-violet-900/40 bg-violet-50/50 dark:bg-violet-900/10 p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-400">
-          <Lock className="size-3.5" /> Feedback IA détaillé
+          <Lock className="size-3.5" /> {t.feedback.proLockTitle}
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Score, points forts et axes d&apos;amélioration. Réservé aux comptes Pro.
+          {t.feedback.proLockBody}
         </p>
         <Link
           href="/dashboard/settings"
           className="inline-flex items-center justify-center gap-1 rounded-full bg-violet-600 text-white text-xs font-semibold h-8 px-3 w-full hover:opacity-90"
         >
-          Passer Pro
+          {t.feedback.proLockCta}
         </Link>
       </div>
     )
@@ -187,7 +196,7 @@ function FeedbackPanel({
         className="w-full h-8 gap-1.5 text-xs"
       >
         {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
-        {pending ? 'Analyse en cours…' : 'Demander un feedback IA'}
+        {pending ? t.feedback.analyzing : t.feedback.request}
         {error && <span className="text-destructive">{error}</span>}
       </Button>
     )
@@ -197,7 +206,7 @@ function FeedbackPanel({
     <div className="rounded-lg border border-border bg-card/50 p-3 space-y-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <Sparkles className="size-3.5 text-violet-500" /> Feedback IA
+          <Sparkles className="size-3.5 text-violet-500" /> {t.feedback.title}
         </div>
         <span className="text-xs font-mono font-bold tabular-nums">
           {feedback.score}<span className="text-muted-foreground font-normal">/10</span>
@@ -208,7 +217,7 @@ function FeedbackPanel({
       )}
       {feedback.strengths.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">Points forts</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">{t.feedback.strengths}</p>
           <ul className="text-[11px] text-foreground/80 leading-relaxed space-y-0.5">
             {feedback.strengths.map((s, i) => (
               <li key={i} className="flex gap-1.5"><span className="text-green-500 shrink-0">+</span><span>{s}</span></li>
@@ -218,7 +227,7 @@ function FeedbackPanel({
       )}
       {feedback.improvements.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">À améliorer</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">{t.feedback.improvements}</p>
           <ul className="text-[11px] text-foreground/80 leading-relaxed space-y-0.5">
             {feedback.improvements.map((s, i) => (
               <li key={i} className="flex gap-1.5"><span className="text-amber-500 shrink-0">→</span><span>{s}</span></li>
@@ -230,15 +239,15 @@ function FeedbackPanel({
   )
 }
 
-function StatusBadge({ isDraft, status }: { isDraft: boolean; status: string }) {
-  let label = 'Publié'
+function StatusBadge({ isDraft, status, t }: { isDraft: boolean; status: string; t: MySubT }) {
+  let label = t.badges.published
   let cls = 'bg-green-600/90 text-white'
 
-  if (isDraft) { label = 'Brouillon'; cls = 'bg-amber-500/90 text-white' }
-  else if (status === 'pending') { label = 'En validation'; cls = 'bg-zinc-700/90 text-white' }
-  else if (status === 'approved') { label = 'Validée'; cls = 'bg-green-600/90 text-white' }
-  else if (status === 'rejected') { label = 'Rejetée'; cls = 'bg-red-600/90 text-white' }
-  else if (status === 'on_hold') { label = 'En vérification'; cls = 'bg-amber-600/90 text-white' }
+  if (isDraft) { label = t.badges.draft; cls = 'bg-amber-500/90 text-white' }
+  else if (status === 'pending') { label = t.badges.pending; cls = 'bg-zinc-700/90 text-white' }
+  else if (status === 'approved') { label = t.badges.approved; cls = 'bg-green-600/90 text-white' }
+  else if (status === 'rejected') { label = t.badges.rejected; cls = 'bg-red-600/90 text-white' }
+  else if (status === 'on_hold') { label = t.badges.on_hold; cls = 'bg-amber-600/90 text-white' }
 
   return (
     <span className={cn('absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm', cls)}>
@@ -247,12 +256,12 @@ function StatusBadge({ isDraft, status }: { isDraft: boolean; status: string }) 
   )
 }
 
-function StatusInline({ status, rejectionReason }: { status: string; rejectionReason: string | null }) {
+function StatusInline({ status, rejectionReason, t }: { status: string; rejectionReason: string | null; t: MySubT }) {
   if (status === 'approved') {
     return (
       <div className="flex items-center gap-1.5 text-xs text-green-700 dark:text-green-400">
         <CheckCircle2 className="size-3.5" />
-        <span>Soumission validée</span>
+        <span>{t.statusInline.approved}</span>
       </div>
     )
   }
@@ -260,7 +269,7 @@ function StatusInline({ status, rejectionReason }: { status: string; rejectionRe
     return (
       <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
         <Clock className="size-3.5 mt-px shrink-0" />
-        <span>⏳ En cours de validation. Un admin va examiner ton travail sous 48h.</span>
+        <span>{t.statusInline.pending}</span>
       </div>
     )
   }
@@ -269,7 +278,7 @@ function StatusInline({ status, rejectionReason }: { status: string; rejectionRe
       <div className="space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-400">
           <AlertCircle className="size-3.5" />
-          <span className="font-semibold">Soumission rejetée</span>
+          <span className="font-semibold">{t.statusInline.rejected}</span>
         </div>
         {rejectionReason && (
           <p className="text-[11px] text-muted-foreground leading-relaxed">{rejectionReason}</p>
@@ -281,14 +290,14 @@ function StatusInline({ status, rejectionReason }: { status: string; rejectionRe
     return (
       <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400">
         <AlertCircle className="size-3.5 mt-px shrink-0" />
-        <span>Ta soumission a été signalée par la communauté. Un admin va la vérifier.</span>
+        <span>{t.statusInline.on_hold}</span>
       </div>
     )
   }
   return null
 }
 
-function ContestButton({ submissionId, hoursLeft }: { submissionId: string; hoursLeft: number }) {
+function ContestButton({ submissionId, hoursLeft, t }: { submissionId: string; hoursLeft: number; t: MySubT }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -297,7 +306,7 @@ function ContestButton({ submissionId, hoursLeft }: { submissionId: string; hour
 
   function submit() {
     if (!message.trim()) {
-      setError('Message requis')
+      setError(t.contest.messageRequired)
       return
     }
     setError(null)
@@ -309,7 +318,7 @@ function ContestButton({ submissionId, hoursLeft }: { submissionId: string; hour
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Erreur')
+        setError(data.error ?? t.genericError)
         return
       }
       setOpen(false)
@@ -324,34 +333,33 @@ function ContestButton({ submissionId, hoursLeft }: { submissionId: string; hour
         onClick={() => setOpen(true)}
         className="text-xs font-medium text-primary hover:underline"
       >
-        Contester cette décision · {Math.max(0, Math.floor(hoursLeft))}h restantes
+        {tx(t.contest.cta, { hours: Math.max(0, Math.floor(hoursLeft)) })}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Contester le rejet</DialogTitle>
+            <DialogTitle>{t.contest.dialogTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              Explique pourquoi tu penses que ton travail mérite d&apos;être validé.
-              Un admin examinera ta contestation.
+              {t.contest.dialogBody}
             </p>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
               maxLength={1000}
-              placeholder="Mon argument…"
+              placeholder={t.contest.placeholder}
               className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" disabled={pending} />}>Annuler</DialogClose>
+            <DialogClose render={<Button variant="outline" disabled={pending} />}>{t.contest.cancel}</DialogClose>
             <Button onClick={submit} disabled={pending}>
               {pending && <Loader2 className="size-4 animate-spin" />}
-              Envoyer la contestation
+              {t.contest.submit}
             </Button>
           </DialogFooter>
         </DialogContent>
