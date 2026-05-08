@@ -14,6 +14,7 @@ import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import { CancelParticipationButton } from '@/components/features/challenge/CancelParticipationButton'
 import type { Profile } from '@/types/database.types'
+import { getDict, tx } from '@/lib/i18n/lang'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -78,6 +79,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
   }
   const specialtyColor = SPECIALTY_COLOR[c.specialty ?? ''] ?? 'text-muted-foreground bg-muted'
 
+  const dict = await getDict()
+  const t = dict.challengeDetail
+
   // ── State 1: PREVIEW (no participation) ─────────────────────────────────────
   if (participationStatus === 'none') {
     return (
@@ -85,7 +89,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
         <div className="mb-6">
           <Link href="/dashboard/challenges" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="size-3.5" /> Challenges
+            <ChevronLeft className="size-3.5" /> {t.backToChallenges}
           </Link>
         </div>
 
@@ -120,7 +124,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               {c.deadline_days != null && (
                 <span className="flex items-center gap-1.5">
                   <Clock className="size-4" />
-                  <strong className="text-foreground">{c.deadline_days}</strong> jours
+                  <strong className="text-foreground">{c.deadline_days}</strong> {t.daysSuffix}
                 </span>
               )}
               {totalParticipants > 0 && (
@@ -132,7 +136,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Brief (only) */}
           {c.brief && (
             <section className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 p-6 space-y-2">
-              <h2 className="text-base font-semibold">Brief</h2>
+              <h2 className="text-base font-semibold">{t.sections.brief}</h2>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
             </section>
           )}
@@ -142,21 +146,19 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <span className="text-xl shrink-0">⚠️</span>
             <div>
               <p className="font-semibold text-amber-900 dark:text-amber-300">
-                Avant de participer
+                {t.warning.title}
               </p>
-              <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1 leading-relaxed">
-                En cliquant sur &quot;Je participe&quot;, tu découvriras le brief complet
-                (contexte, livrable, contraintes et critères d&apos;évaluation) et ton chrono
-                de <strong>{c.deadline_days ?? 3} jours</strong> démarrera immédiatement.
-                Tu ne pourras pas choisir un autre défi avant d&apos;avoir soumis ton travail.
-              </p>
+              <p
+                className="text-amber-800 dark:text-amber-200/90 text-sm mt-1 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: tx(t.warning.body, { days: c.deadline_days ?? 3 }) }}
+              />
             </div>
           </div>
 
           {/* Other active blocker */}
           {hasOtherActive ? (
             <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-              Tu as déjà un défi en cours. Termine-le avant d&apos;en rejoindre un autre.
+              {t.blockedActive}
             </div>
           ) : (
             <div className="space-y-3">
@@ -171,7 +173,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {allSubmissions && allSubmissions.length > 0 && (
             <section className="space-y-4 pt-6">
               <div className="h-px bg-border" />
-              <h2 className="text-base font-semibold">Autres soumissions ({allSubmissions.length})</h2>
+              <h2 className="text-base font-semibold">{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
@@ -207,9 +209,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-900/40 rounded-2xl p-4 flex items-center gap-3 mb-6">
               <span className="text-2xl">🎉</span>
               <div>
-                <p className="font-semibold text-green-800 dark:text-green-300">Travail soumis et validé !</p>
+                <p className="font-semibold text-green-800 dark:text-green-300">{t.justSubmitted.approvedTitle}</p>
                 <p className="text-sm text-green-700 dark:text-green-400/90">
-                  +{c.xp_reward ?? 150} XP ajoutés à ton profil.
+                  {tx(t.justSubmitted.approvedBody, { xp: c.xp_reward ?? 150 })}
                 </p>
               </div>
             </div>
@@ -220,7 +222,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-900/40 rounded-2xl p-4 flex items-start gap-3 mb-6">
               <span className="text-2xl">❌</span>
               <div>
-                <p className="font-semibold text-red-800 dark:text-red-300">Travail soumis mais non validé</p>
+                <p className="font-semibold text-red-800 dark:text-red-300">{t.justSubmitted.rejectedTitle}</p>
                 {sub.rejection_reason && (
                   <p className="text-sm text-red-700 dark:text-red-400/90">{sub.rejection_reason}</p>
                 )}
@@ -233,8 +235,8 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4 flex items-center gap-3 mb-6">
               <span className="text-2xl">⏳</span>
               <div>
-                <p className="font-semibold text-amber-800 dark:text-amber-300">Travail soumis — en attente de validation</p>
-                <p className="text-sm text-amber-700 dark:text-amber-400/90">Un admin va examiner ton travail sous 48h.</p>
+                <p className="font-semibold text-amber-800 dark:text-amber-300">{t.justSubmitted.pendingTitle}</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400/90">{t.justSubmitted.pendingBody}</p>
               </div>
             </div>
           )
@@ -280,7 +282,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Context */}
           {c.context && (
             <section className="space-y-3">
-              <h2 className="text-base font-semibold">Le scénario</h2>
+              <h2 className="text-base font-semibold">{t.sections.scenario}</h2>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.context}</p>
             </section>
           )}
@@ -290,7 +292,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <section className="space-y-3">
               <h2 className="text-base font-semibold flex items-center gap-2">
                 <Package className="size-4 text-muted-foreground" />
-                Livrable attendu
+                {t.sections.deliverable}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.deliverable}</p>
             </section>
@@ -301,7 +303,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <section className="space-y-3">
               <h2 className="text-base font-semibold flex items-center gap-2">
                 <AlertCircle className="size-4 text-muted-foreground" />
-                Contraintes
+                {t.sections.constraints}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.constraints}</p>
             </section>
@@ -311,8 +313,8 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {c.criteria && (
             <section className="space-y-4">
               <div>
-                <h2 className="text-base font-semibold">Critères d&apos;évaluation</h2>
-                <p className="text-sm text-muted-foreground mt-1">Ton travail sera évalué sur les critères suivants.</p>
+                <h2 className="text-base font-semibold">{t.sections.criteria}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{t.sections.criteriaIntro}</p>
               </div>
               <div className="space-y-3">
                 {c.criteria.split(/[.•\n]/).filter((s: string) => s.trim().length > 10).map((criterion: string, i: number) => (
@@ -329,7 +331,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {allSubmissions && allSubmissions.length > 0 && (
             <section className="space-y-4 pt-2">
               <div className="h-px bg-border" />
-              <h2 className="text-base font-semibold">Autres soumissions ({allSubmissions.length})</h2>
+              <h2 className="text-base font-semibold">{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
@@ -347,21 +349,21 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm font-semibold text-green-700 dark:text-green-400">Participation active</span>
+                <span className="text-sm font-semibold text-green-700 dark:text-green-400">{t.sidebar.activeStatus}</span>
               </div>
-              <CountdownTimer deadline={participation.personal_deadline} label="Deadline dans" />
+              <CountdownTimer deadline={participation.personal_deadline} label={t.sidebar.deadlineLabel} />
               <Link
                 href={`/dashboard/challenges/${c.id}/submit`}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green-600 text-white text-sm font-semibold h-11 px-4 hover:bg-green-700 transition-colors"
               >
                 <Play className="size-4" fill="currentColor" />
-                {existingSubmission ? 'Continuer ma soumission' : 'Soumettre mon travail'}
+                {existingSubmission ? t.sidebar.continueCta : t.sidebar.submitCta}
               </Link>
               {!(existingSubmission && !(existingSubmission as any).is_draft) && (
                 <CancelParticipationButton challengeId={c.id} />
               )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
-                {currentAttempts}/{maxAttempts} soumissions utilisées
+                {tx(t.sidebar.attemptsUsed, { cur: currentAttempts, max: maxAttempts })}
               </p>
             </div>
           )}
@@ -370,46 +372,46 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-red-500" />
-                <span className="text-sm font-semibold text-red-700 dark:text-red-400">Délai expiré</span>
+                <span className="text-sm font-semibold text-red-700 dark:text-red-400">{t.sidebar.expiredStatus}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Tu n&apos;as pas soumis dans les {c.deadline_days ?? 3} jours impartis.
+                {tx(t.sidebar.expiredBody, { days: c.deadline_days ?? 3 })}
               </p>
               <Link
                 href="/dashboard/challenges"
                 className="inline-flex items-center gap-1 text-xs font-medium text-red-700 dark:text-red-400 hover:underline"
               >
-                Voir les challenges disponibles →
+                {t.sidebar.seeAvailable}
               </Link>
             </div>
           )}
 
           {/* Challenge meta card */}
           <div className="rounded-xl border border-border p-4 space-y-3">
-            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Détails</p>
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{t.sidebar.detailsTitle}</p>
             <div className="space-y-2.5">
               {c.specialty && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Spécialité</span>
+                  <span className="text-muted-foreground">{t.sidebar.specialty}</span>
                   <span className="font-medium">{c.specialty}</span>
                 </div>
               )}
               {c.challenge_type && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Type</span>
+                  <span className="text-muted-foreground">{t.sidebar.type}</span>
                   <span className="font-medium">{c.challenge_type}</span>
                 </div>
               )}
               {c.industry && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Industrie</span>
+                  <span className="text-muted-foreground">{t.sidebar.industry}</span>
                   <span className="font-medium">{c.industry}</span>
                 </div>
               )}
               {c.deadline_days && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Durée</span>
-                  <span className="font-medium">{c.deadline_days} jours</span>
+                  <span className="text-muted-foreground">{t.sidebar.duration}</span>
+                  <span className="font-medium">{tx(t.sidebar.durationDays, { n: c.deadline_days })}</span>
                 </div>
               )}
               {totalParticipants > 0 && (
