@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { notify } from '@/lib/utils/notifications'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -56,6 +57,16 @@ export async function POST(_req: Request, { params }: Params) {
     .from('profiles').select('xp').eq('id', submission.user_id).single()
   const newXP = Math.max(0, (ownerProf?.xp ?? 0) + xpDelta)
   await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
+
+  // Notify owner only on like add (not on unlike)
+  if (liked) {
+    try {
+      await notify(submission.user_id, 'submission_liked', {
+        submission_id: submissionId,
+        liker_id: user.id,
+      })
+    } catch { /* ignore — notif is best-effort */ }
+  }
 
   return NextResponse.json({ liked, totalLikes: newTotal })
 }

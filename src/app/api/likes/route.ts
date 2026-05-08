@@ -1,6 +1,8 @@
+// Legacy endpoint — superseded by /api/submissions/[id]/clap which is the
+// single source of truth for like toggling + notifications + XP.
+// Kept here for backwards compat in case any old client still calls it.
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { notify } from '@/lib/utils/notifications'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -37,19 +39,14 @@ export async function POST(request: Request) {
     await (supabase.from('submissions') as any)
       .update({ likes_count: newCount }).eq('id', submissionId)
 
-    // Award XP + notify submission owner
+    // Award XP to submission owner. Notification is now handled by
+    // /api/submissions/[id]/clap (the canonical path) to avoid duplicates.
     if (sub?.user_id && sub.user_id !== user.id) {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/xp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Cookie: request.headers.get('cookie') ?? '' },
         body: JSON.stringify({ userId: sub.user_id, action: 'like_received' }),
       })
-      try {
-        await notify(sub.user_id, 'submission_liked', {
-          submission_id: submissionId,
-          liker_id: user.id,
-        })
-      } catch { /* ignore */ }
     }
 
     return NextResponse.json({ liked: true, likes_count: newCount })

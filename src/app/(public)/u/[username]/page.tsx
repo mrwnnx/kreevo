@@ -370,7 +370,7 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
           </span>
           <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-0.5">
-              <Heart className="size-3" /> {s.likes_count ?? 0}
+              <Heart className="size-3" /> {s.total_claps ?? 0}
             </span>
             <span className="flex items-center gap-0.5">
               <MessageCircle className="size-3" /> {s.comments_count ?? 0}

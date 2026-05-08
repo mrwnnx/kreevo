@@ -86,7 +86,7 @@ export default async function UserDetail({ params }: Props) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{s.challenges?.title ?? 'Challenge'}</p>
                 <p className="text-xs text-muted-foreground font-mono">
-                  {new Date(s.created_at).toLocaleDateString('fr')} · {s.likes_count} likes · {s.comments_count} commentaires
+                  {new Date(s.created_at).toLocaleDateString('fr')} · {s.total_claps ?? 0} likes · {s.comments_count ?? 0} commentaires
                 </p>
               </div>
               <span className="text-xs font-mono text-primary">{s.xp_earned > 0 ? `+${s.xp_earned} XP` : ''}</span>
