@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { AvatarUpload } from '@/components/features/dashboard/AvatarUpload'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 import { TOOLS_BY_SPECIALTY, type Specialty, type ExperienceLevel, type Objective } from '@/components/onboarding/types'
 import {
@@ -19,21 +21,14 @@ import {
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { ALL_COUNTRIES, MENA_SUGGESTED } from '@/components/onboarding/countries'
 
-const SPECIALTY_OPTIONS: Array<{ value: 'ux_ui' | 'graphic'; icon: string; label: string; description: string }> = [
-  { value: 'ux_ui',   icon: '✏️', label: 'UX/UI Designer',   description: 'Design digital experiences and interfaces' },
-  { value: 'graphic', icon: '🎨', label: 'Graphic Designer', description: 'Create visual identities and brand assets' },
-]
+type ProfileFormT = Dictionary['profileForm']
 
-const LEVELS: Array<{ value: ExperienceLevel; label: string }> = [
-  { value: 'entry',  label: 'Entry Level' },
-  { value: 'junior', label: 'Junior' },
-  { value: 'senior', label: 'Senior' },
-]
-
-const OBJECTIVES_OPTIONS: Array<{ value: Objective; icon: string; title: string; subtitle: string }> = [
-  { value: 'getting_hired',     icon: '💼', title: 'Getting hired',     subtitle: 'Land your first design job' },
-  { value: 'improving_skills',  icon: '📈', title: 'Improving my skills', subtitle: 'Level up through challenges' },
-]
+const ICONS = {
+  ux_ui: '✏️',
+  graphic: '🎨',
+  getting_hired: '💼',
+  improving_skills: '📈',
+}
 
 const isValidUrl = (v: string) => v.length === 0 || v.trim().toLowerCase().startsWith('https://')
 
@@ -57,9 +52,26 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 interface ProfileFormProps {
   profile: Profile
+  t: ProfileFormT
 }
 
-export function ProfileForm({ profile }: ProfileFormProps) {
+export function ProfileForm({ profile, t }: ProfileFormProps) {
+  // Re-build option lists with i18n labels
+  const SPECIALTY_OPTIONS: Array<{ value: 'ux_ui' | 'graphic'; icon: string; label: string; description: string }> = [
+    { value: 'ux_ui',   icon: ICONS.ux_ui,   label: t.specialty.ux_uiLabel,   description: t.specialty.ux_uiDescription },
+    { value: 'graphic', icon: ICONS.graphic, label: t.specialty.graphicLabel, description: t.specialty.graphicDescription },
+  ]
+
+  const LEVELS: Array<{ value: ExperienceLevel; label: string }> = [
+    { value: 'entry',  label: t.levels.entry },
+    { value: 'junior', label: t.levels.junior },
+    { value: 'senior', label: t.levels.senior },
+  ]
+
+  const OBJECTIVES_OPTIONS: Array<{ value: Objective; icon: string; title: string; subtitle: string }> = [
+    { value: 'getting_hired',    icon: ICONS.getting_hired,    title: t.objectives.gettingHiredTitle,    subtitle: t.objectives.gettingHiredSubtitle },
+    { value: 'improving_skills', icon: ICONS.improving_skills, title: t.objectives.improvingSkillsTitle, subtitle: t.objectives.improvingSkillsSubtitle },
+  ]
   // Onboarding-aligned fields
   const [avatar, setAvatar] = useState<string | null>(profile.avatar_url ?? null)
   const [firstName, setFirstName] = useState(profile.first_name ?? profile.full_name?.split(' ')[0] ?? '')
@@ -195,10 +207,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   function submitCustomPlatform() {
     setCustomError(null)
     const name = customName.trim()
-    if (!name) return setCustomError('Give it a name')
-    if (!isValidUrl(customUrl)) return setCustomError('URL must start with https://')
+    if (!name) return setCustomError(t.socialLinks.giveItName)
+    if (!isValidUrl(customUrl)) return setCustomError(t.socialLinks.invalidUrl)
     const key = slugifyPlatform(name)
-    if (!key) return setCustomError('Invalid name')
+    if (!key) return setCustomError(t.socialLinks.invalidName)
     if (!SOCIAL_DEFS[key]) {
       SOCIAL_DEFS[key] = {
         key,
@@ -240,7 +252,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const newLinkErrors: Record<string, string> = {}
     for (const key of activeKeys) {
       const v = (linkValues[key] ?? '').trim()
-      if (v && !isValidUrl(v)) newLinkErrors[key] = 'URL must start with https://'
+      if (v && !isValidUrl(v)) newLinkErrors[key] = t.socialLinks.invalidUrl
     }
     if (Object.keys(newLinkErrors).length > 0) {
       setLinkErrors(newLinkErrors)
@@ -272,7 +284,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
           setStatus('error')
-          setErrorMsg(data?.error ?? 'Could not save')
+          setErrorMsg(data?.error ?? t.couldNotSave)
           return
         }
         setStatus('saved')
@@ -280,7 +292,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         savedTimer.current = setTimeout(() => setStatus('idle'), 2000)
       } catch {
         setStatus('error')
-        setErrorMsg('Network error')
+        setErrorMsg(t.networkError)
       }
     }, 700)
 
@@ -308,12 +320,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       <div className="sticky top-16 z-10 -mt-4 mb-2 flex justify-end pointer-events-none h-6">
         {status === 'saving' && (
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 rounded-full">
-            <Loader2 className="size-3 animate-spin" /> Saving…
+            <Loader2 className="size-3 animate-spin" /> {t.saving}
           </span>
         )}
         {status === 'saved' && (
           <span className="inline-flex items-center gap-1.5 text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full transition-opacity">
-            <CheckCircle className="size-3" /> Saved
+            <CheckCircle className="size-3" /> {t.saved}
           </span>
         )}
         {status === 'error' && errorMsg && (
@@ -325,7 +337,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Avatar */}
       <section>
-        <Label className="text-sm font-semibold mb-3 block">Profile photo</Label>
+        <Label className="text-sm font-semibold mb-3 block">{t.sections.photo}</Label>
         <div className="flex flex-col items-center">
           <AvatarUpload
             userId={profile.id}
@@ -339,25 +351,25 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Basic info — one input per row */}
       <section className="space-y-4">
-        <Label className="text-sm font-semibold block">Basic info</Label>
+        <Label className="text-sm font-semibold block">{t.sections.basicInfo}</Label>
 
         <div className="space-y-2">
-          <Label htmlFor="firstName">First name</Label>
-          <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+          <Label htmlFor="firstName">{t.fields.firstName}</Label>
+          <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t.fields.firstNamePlaceholder} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last name</Label>
-          <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+          <Label htmlFor="lastName">{t.fields.lastName}</Label>
+          <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t.fields.lastNamePlaceholder} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
-          <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="your_username" />
+          <Label htmlFor="username">{t.fields.username}</Label>
+          <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t.fields.usernamePlaceholder} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="country">{t.fields.country}</Label>
           <div ref={countryWrapRef} className="relative">
             <button
               id="country"
@@ -367,7 +379,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               aria-expanded={countryOpen}
             >
               <span className={country ? 'text-foreground' : 'text-muted-foreground'}>
-                {country || 'Select your country…'}
+                {country || t.fields.countryPlaceholder}
               </span>
               <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', countryOpen && 'rotate-180')} />
             </button>
@@ -381,18 +393,18 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     type="text"
                     value={countryQuery}
                     onChange={(e) => setCountryQuery(e.target.value)}
-                    placeholder="Search country…"
+                    placeholder={t.fields.countrySearch}
                     className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                   />
                 </div>
                 <div className="max-h-64 overflow-auto p-1">
                   {filteredCountries.suggested.length === 0 && filteredCountries.others.length === 0 && (
-                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">No country matches</p>
+                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t.fields.countryNoMatch}</p>
                   )}
                   {filteredCountries.suggested.length > 0 && (
                     <>
                       <p className="px-3 pt-2 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Suggested
+                        {t.fields.countrySuggested}
                       </p>
                       {filteredCountries.suggested.map((c) => {
                         const active = country === c
@@ -417,7 +429,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                       })}
                       {filteredCountries.others.length > 0 && (
                         <p className="px-3 pt-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                          All countries
+                          {t.fields.countryAll}
                         </p>
                       )}
                     </>
@@ -451,14 +463,14 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="bio">
-            Bio <span className="text-muted-foreground font-normal">({bio.length}/160)</span>
+            {t.fields.bio} <span className="text-muted-foreground font-normal">({bio.length}/160)</span>
           </Label>
           <textarea
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value.slice(0, 160))}
             rows={3}
-            placeholder="Tell the community about yourself..."
+            placeholder={t.fields.bioPlaceholder}
             className="w-full rounded-[var(--radius-input)] border border-input bg-transparent px-2.5 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring resize-none dark:bg-input/30"
           />
         </div>
@@ -467,9 +479,9 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       {/* Specialty */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold block">Specialty</Label>
+          <Label className="text-sm font-semibold block">{t.sections.specialty}</Label>
           {specialtyLocked && (
-            <span className="text-xs text-muted-foreground">Locked — picked at signup</span>
+            <span className="text-xs text-muted-foreground">{t.specialty.locked}</span>
           )}
         </div>
         <div className="space-y-3">
@@ -510,7 +522,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         </div>
 
         <div className="pt-2">
-          <Label className="text-sm font-semibold mb-3 block">Experience level</Label>
+          <Label className="text-sm font-semibold mb-3 block">{t.sections.experienceLevel}</Label>
           <div className="grid grid-cols-3 gap-2">
             {LEVELS.map((l) => {
               const active = experienceLevel === l.value
@@ -536,7 +548,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Tools */}
       <section className="space-y-3">
-        <Label className="text-sm font-semibold block">Tools you use</Label>
+        <Label className="text-sm font-semibold block">{t.sections.tools}</Label>
         <div ref={toolsWrapRef}>
           <div className="relative">
             <button
@@ -547,10 +559,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             >
               <span className={tools.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
                 {!specialty
-                  ? 'Pick a specialty first'
+                  ? t.tools.pickSpecialtyFirst
                   : tools.length === 0
-                    ? 'Select your tools…'
-                    : `${tools.length} tool${tools.length > 1 ? 's' : ''} selected`}
+                    ? t.tools.selectTools
+                    : tx(tools.length > 1 ? t.tools.selectedPlural : t.tools.selectedSingular, { n: tools.length })}
               </span>
               <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', toolsOpen && 'rotate-180')} />
             </button>
@@ -564,13 +576,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     type="text"
                     value={toolsQuery}
                     onChange={(e) => setToolsQuery(e.target.value)}
-                    placeholder="Search tools…"
+                    placeholder={t.tools.search}
                     className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                   />
                 </div>
                 <div className="max-h-64 overflow-auto p-1">
                   {filteredTools.length === 0 ? (
-                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">No tools match</p>
+                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t.tools.noMatch}</p>
                   ) : (
                     filteredTools.map((tool) => {
                       const active = tools.includes(tool)
@@ -606,7 +618,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   <button
                     type="button"
                     onClick={() => removeTool(tool)}
-                    aria-label={`Remove ${tool}`}
+                    aria-label={tx(t.tools.removeAria, { tool })}
                     className="hover:opacity-70"
                   >
                     <X className="size-3" strokeWidth={2.5} />
@@ -620,7 +632,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Objectives */}
       <section className="space-y-3">
-        <Label className="text-sm font-semibold block">Goals</Label>
+        <Label className="text-sm font-semibold block">{t.sections.goals}</Label>
         <div className="space-y-3">
           {OBJECTIVES_OPTIONS.map((opt) => {
             const active = objectives.includes(opt.value)
@@ -656,7 +668,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
       {/* Social links */}
       <section className="space-y-3">
-        <Label className="text-sm font-semibold block">Portfolio &amp; social links</Label>
+        <Label className="text-sm font-semibold block">{t.sections.socialLinks}</Label>
 
         {activeKeys.length > 0 && (
           <div className="space-y-3">
@@ -681,7 +693,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     <button
                       type="button"
                       onClick={() => removeNetwork(key)}
-                      aria-label={`Remove ${def.name}`}
+                      aria-label={tx(t.socialLinks.removeAria, { name: def.name })}
                       className="size-8 inline-flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
                     >
                       <X className="size-3.5" />
@@ -701,7 +713,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         {suggestedSocialKeys.length > 0 && (
           <div>
             <p className="text-sm text-muted-foreground mb-2">
-              {activeKeys.length === 0 ? 'Where can people find you?' : 'Add another network'}
+              {activeKeys.length === 0 ? t.socialLinks.whereCanFind : t.socialLinks.addAnother}
             </p>
             <div className="flex flex-wrap gap-2">
               {suggestedSocialKeys.map((key) => {
@@ -727,7 +739,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           {showCustom ? (
             <div className="rounded-[var(--radius-card)] border border-border bg-card p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">Add a custom platform</p>
+                <p className="text-sm font-semibold">{t.socialLinks.addCustomTitle}</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -735,7 +747,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     setCustomError(null)
                   }}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="Close"
+                  aria-label={t.socialLinks.closeAria}
                 >
                   <X className="size-4" />
                 </button>
@@ -745,7 +757,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   type="text"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="Platform name"
+                  placeholder={t.socialLinks.platformName}
                   className={inputClass}
                 />
                 <input
@@ -758,7 +770,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               </div>
               {customError && <p className="text-xs text-destructive">{customError}</p>}
               <Button type="button" onClick={submitCustomPlatform} size="sm">
-                Add platform
+                {t.socialLinks.addPlatform}
               </Button>
             </div>
           ) : (
@@ -768,7 +780,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80"
             >
               <Plus className="size-3.5" strokeWidth={2.5} />
-              Add a custom platform
+              {t.socialLinks.addCustom}
             </button>
           )}
         </div>
