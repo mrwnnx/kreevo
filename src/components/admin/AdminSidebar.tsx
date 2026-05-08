@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
-  Mail, Settings, ArrowLeft, Palette, Medal, FileCheck,
+  Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,7 @@ const NAV = [
   { href: '/admin/moderation',   label: 'Modération',     icon: ShieldAlert, badge: true },
   { href: '/admin/feedbacks',    label: 'Feedbacks Pro',  icon: MessageSquare },
   { href: '/admin/emails',       label: 'Emails',         icon: Mail },
+  { href: '/admin/help',         label: 'Help Center',    icon: BookOpen },
   { href: '/admin/design',       label: 'Design System',  icon: Palette },
   { href: '/admin/settings',     label: 'Paramètres',     icon: Settings },
 ]

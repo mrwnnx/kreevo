@@ -13,7 +13,10 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
 })
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kreevo-tau.vercel.app'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Kreevo — Design Challenges & Leagues",
   description: "Weekly design challenges, AI feedback, and a league system that rewards your progress.",
 }
