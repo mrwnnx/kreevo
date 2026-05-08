@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface CountdownTimerProps {
   deadline: string
   label?: string
   onExpired?: () => void
   compact?: boolean
+  t?: Dictionary['challengeDetail']['countdown']
+}
+
+const FALLBACK_T: Dictionary['challengeDetail']['countdown'] = {
+  expired: '⏰ Délai expiré',
+  days: 'jours',
+  hours: 'h',
+  min: 'min',
+  sec: 'sec',
 }
 
 interface TimeLeft {
@@ -32,7 +42,7 @@ function calc(deadline: string): TimeLeft {
 
 function pad(n: number) { return String(n).padStart(2, '0') }
 
-export function CountdownTimer({ deadline, label, onExpired, compact = false }: CountdownTimerProps) {
+export function CountdownTimer({ deadline, label, onExpired, compact = false, t = FALLBACK_T }: CountdownTimerProps) {
   const [time, setTime] = useState<TimeLeft | null>(null)
   const [fired, setFired] = useState(false)
 
@@ -63,7 +73,7 @@ export function CountdownTimer({ deadline, label, onExpired, compact = false }: 
   if (isExpired) {
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-mono font-bold text-red-500">
-        ⏰ Délai expiré
+        {t.expired}
       </span>
     )
   }
@@ -77,7 +87,7 @@ export function CountdownTimer({ deadline, label, onExpired, compact = false }: 
   if (compact) {
     return (
       <span className={cn('font-mono text-xs font-semibold', colorClass)}>
-        {time.days > 0 && `${time.days}j `}{pad(time.hours)}h {pad(time.minutes)}m {pad(time.seconds)}s
+        {time.days > 0 && `${time.days}${t.days.charAt(0)} `}{pad(time.hours)}{t.hours} {pad(time.minutes)}m {pad(time.seconds)}s
       </span>
     )
   }
@@ -91,26 +101,26 @@ export function CountdownTimer({ deadline, label, onExpired, compact = false }: 
             <div className="font-mono text-2xl font-bold leading-none bg-muted rounded-lg px-3 py-2 min-w-[52px] text-center">
               {pad(time.days)}
             </div>
-            <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">jours</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">{t.days}</p>
           </div>
         )}
         <div className="text-center">
           <div className="font-mono text-2xl font-bold leading-none bg-muted rounded-lg px-3 py-2 min-w-[52px] text-center">
             {pad(time.hours)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">h</p>
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">{t.hours}</p>
         </div>
         <div className="text-center">
           <div className="font-mono text-2xl font-bold leading-none bg-muted rounded-lg px-3 py-2 min-w-[52px] text-center">
             {pad(time.minutes)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">min</p>
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">{t.min}</p>
         </div>
         <div className="text-center">
           <div className="font-mono text-2xl font-bold leading-none bg-muted rounded-lg px-3 py-2 min-w-[52px] text-center">
             {pad(time.seconds)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">sec</p>
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono uppercase">{t.sec}</p>
         </div>
       </div>
     </div>

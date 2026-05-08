@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import {
   Avatar,
   AvatarImage,
@@ -29,13 +31,17 @@ export function ParticipantsDialog({
   participants,
   total,
   size = 'sm',
+  t,
 }: {
   participants: Participant[]
   total: number
   size?: 'sm' | 'default'
+  t: Dictionary['challengeDetail']['participants']
 }) {
   const [open, setOpen] = useState(false)
   if (total === 0) return null
+
+  const countLabel = tx(total === 1 ? t.countSingular : t.countPlural, { n: total })
 
   return (
     <>
@@ -53,11 +59,9 @@ export function ParticipantsDialog({
           ))}
           {total > 4 && <AvatarGroupCount>+{total - 4}</AvatarGroupCount>}
         </AvatarGroup>
-        <span className="text-sm">
+        <span className="text-sm text-muted-foreground">
           <strong className="font-semibold text-foreground">{total}</strong>{' '}
-          <span className="text-muted-foreground">
-            participant{total !== 1 ? 's' : ''}
-          </span>
+          {(total === 1 ? t.countSingular : t.countPlural).replace('{n}', '').trim()}
         </span>
       </button>
 
@@ -65,7 +69,7 @@ export function ParticipantsDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {total} participant{total !== 1 ? 's' : ''}
+              {countLabel}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto -mx-2">

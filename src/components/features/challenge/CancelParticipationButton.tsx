@@ -13,8 +13,15 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-export function CancelParticipationButton({ challengeId }: { challengeId: string }) {
+export function CancelParticipationButton({
+  challengeId,
+  t,
+}: {
+  challengeId: string
+  t: Dictionary['challengeDetail']['cancel']
+}) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,25 +49,23 @@ export function CancelParticipationButton({ challengeId }: { challengeId: string
         className="inline-flex w-full items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
       >
         <X className="size-3.5" />
-        Annuler ma participation
+        {t.cta}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Annuler ta participation ?</DialogTitle>
-            <DialogDescription>
-              Le chrono sera arrêté et les <strong>+50 XP</strong> de participation te seront retirés.
-              Si tu as un brouillon, il sera supprimé. Tu pourras choisir un autre défi
-              ou revenir sur celui-ci plus tard.
-            </DialogDescription>
+            <DialogTitle>{t.dialogTitle}</DialogTitle>
+            <DialogDescription
+              dangerouslySetInnerHTML={{ __html: t.dialogBody }}
+            />
           </DialogHeader>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" disabled={pending} />}>Garder ma participation</DialogClose>
+            <DialogClose render={<Button variant="outline" disabled={pending} />}>{t.keep}</DialogClose>
             <Button variant="destructive" onClick={cancel} disabled={pending}>
               {pending && <Loader2 className="size-4 animate-spin" />}
-              Oui, annuler
+              {t.confirm}
             </Button>
           </DialogFooter>
         </DialogContent>

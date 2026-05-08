@@ -7,15 +7,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 export function RulesDialog({
   xpReward,
   deadlineDays,
+  t,
 }: {
   xpReward: number
   deadlineDays: number
+  t: Dictionary['challengeDetail']['rules']
 }) {
   const [open, setOpen] = useState(false)
+
+  const rows = [
+    { emoji: '✅', title: t.participating,    detail: t.participatingDetail,  badge: '+50 XP',         badgeClass: 'text-green-600' },
+    { emoji: '🏆', title: t.submitting,       detail: t.submittingDetail,     badge: `+${xpReward} XP`, badgeClass: 'text-green-600' },
+    { emoji: '⏱️', title: tx(t.timeLimit, { days: deadlineDays }), detail: t.timeLimitDetail, badge: '', badgeClass: '' },
+    { emoji: '🔒', title: t.oneAtATime,       detail: t.oneAtATimeDetail,     badge: '', badgeClass: '' },
+    { emoji: '❌', title: t.noShow,           detail: t.noShowDetail,         badge: '−100 XP', badgeClass: 'text-red-500' },
+    { emoji: '👍', title: t.likeReceived,     detail: t.likeReceivedDetail,   badge: '+2 XP',  badgeClass: 'text-green-600' },
+    { emoji: '💬', title: t.commentReceived,  detail: t.commentReceivedDetail, badge: '+5 XP', badgeClass: 'text-green-600' },
+  ]
 
   return (
     <>
@@ -24,76 +38,30 @@ export function RulesDialog({
         onClick={() => setOpen(true)}
         className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
       >
-        📋 Voir les règles & XP à gagner
+        {t.seeRules}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">
           <DialogHeader className="px-5 py-4 border-b border-border bg-zinc-50 dark:bg-zinc-900">
-            <DialogTitle className="text-sm">📋 Les règles de ce défi</DialogTitle>
+            <DialogTitle className="text-sm">{t.title}</DialogTitle>
           </DialogHeader>
 
           <div className="divide-y divide-border max-h-[70vh] overflow-y-auto">
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">✅</span>
-              <div>
-                <p className="text-sm font-medium">En participant tu gagnes</p>
-                <p className="text-sm text-muted-foreground">+50 XP dès que tu cliques sur &quot;Je participe&quot;</p>
+            {rows.map((row, i) => (
+              <div key={i} className="flex items-start gap-3 px-5 py-4">
+                <span className="text-lg">{row.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{row.title}</p>
+                  <p className="text-sm text-muted-foreground">{row.detail}</p>
+                </div>
+                {row.badge && (
+                  <span className={`ml-auto text-sm font-semibold shrink-0 ${row.badgeClass}`}>
+                    {row.badge}
+                  </span>
+                )}
               </div>
-              <span className="ml-auto text-sm font-semibold text-green-600 shrink-0">+50 XP</span>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">🏆</span>
-              <div>
-                <p className="text-sm font-medium">En soumettant ton travail tu gagnes</p>
-                <p className="text-sm text-muted-foreground">XP attribués si ton travail est validé</p>
-              </div>
-              <span className="ml-auto text-sm font-semibold text-green-600 shrink-0">+{xpReward} XP</span>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">⏱️</span>
-              <div>
-                <p className="text-sm font-medium">Tu as {deadlineDays} jours pour soumettre</p>
-                <p className="text-sm text-muted-foreground">Le chrono démarre dès que tu cliques sur &quot;Je participe&quot;</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">🔒</span>
-              <div>
-                <p className="text-sm font-medium">Un seul défi à la fois</p>
-                <p className="text-sm text-muted-foreground">Tu ne pourras pas choisir un autre défi tant que tu n&apos;as pas soumis ce travail</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">❌</span>
-              <div>
-                <p className="text-sm font-medium">Si tu ne soumets pas avant la deadline</p>
-                <p className="text-sm text-muted-foreground">Tu perdras les 50 XP de participation + 50 XP de sanction</p>
-              </div>
-              <span className="ml-auto text-sm font-semibold text-red-500 shrink-0">-100 XP</span>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">👍</span>
-              <div>
-                <p className="text-sm font-medium">Chaque like reçu sur ta soumission</p>
-                <p className="text-sm text-muted-foreground">La communauté peut voter après le reveal collectif</p>
-              </div>
-              <span className="ml-auto text-sm font-semibold text-green-600 shrink-0">+2 XP</span>
-            </div>
-
-            <div className="flex items-start gap-3 px-5 py-4">
-              <span className="text-lg">💬</span>
-              <div>
-                <p className="text-sm font-medium">Chaque commentaire reçu sur ta soumission</p>
-                <p className="text-sm text-muted-foreground">Plus tu reçois de feedback, plus tu gagnes d&apos;XP</p>
-              </div>
-              <span className="ml-auto text-sm font-semibold text-green-600 shrink-0">+5 XP</span>
-            </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>

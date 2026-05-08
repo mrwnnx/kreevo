@@ -128,7 +128,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 </span>
               )}
               {totalParticipants > 0 && (
-                <ParticipantsDialog participants={avatars} total={totalParticipants} />
+                <ParticipantsDialog participants={avatars} total={totalParticipants} t={t.participants} />
               )}
             </div>
           </div>
@@ -162,9 +162,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </div>
           ) : (
             <div className="space-y-3">
-              <ParticipateButton challengeId={c.id} deadlineDays={c.deadline_days ?? 3} />
+              <ParticipateButton challengeId={c.id} deadlineDays={c.deadline_days ?? 3} t={t.participate} />
               <div className="text-center">
-                <RulesDialog xpReward={c.xp_reward ?? 150} deadlineDays={c.deadline_days ?? 3} />
+                <RulesDialog xpReward={c.xp_reward ?? 150} deadlineDays={c.deadline_days ?? 3} t={t.rules} />
               </div>
             </div>
           )}
@@ -351,7 +351,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 <span className="size-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-sm font-semibold text-green-700 dark:text-green-400">{t.sidebar.activeStatus}</span>
               </div>
-              <CountdownTimer deadline={participation.personal_deadline} label={t.sidebar.deadlineLabel} />
+              <CountdownTimer deadline={participation.personal_deadline} label={t.sidebar.deadlineLabel} t={t.countdown} />
               <Link
                 href={`/dashboard/challenges/${c.id}/submit`}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green-600 text-white text-sm font-semibold h-11 px-4 hover:bg-green-700 transition-colors"
@@ -360,7 +360,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 {existingSubmission ? t.sidebar.continueCta : t.sidebar.submitCta}
               </Link>
               {!(existingSubmission && !(existingSubmission as any).is_draft) && (
-                <CancelParticipationButton challengeId={c.id} />
+                <CancelParticipationButton challengeId={c.id} t={t.cancel} />
               )}
               <p className="text-[11px] text-center text-muted-foreground font-mono">
                 {tx(t.sidebar.attemptsUsed, { cur: currentAttempts, max: maxAttempts })}
@@ -416,7 +416,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               )}
               {totalParticipants > 0 && (
                 <div className="flex items-center justify-start text-sm">
-                  <ParticipantsDialog participants={avatars} total={totalParticipants} />
+                  <ParticipantsDialog participants={avatars} total={totalParticipants} t={t.participants} />
                 </div>
               )}
             </div>
