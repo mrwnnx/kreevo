@@ -11,6 +11,8 @@ import {
   Trophy, Zap, Star, Link as LinkIcon,
 } from 'lucide-react'
 import type { Profile } from '@/types/database.types'
+import { getDict } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -46,12 +48,12 @@ function parseLinks(links: unknown): SocialLinks {
 // ── Rank calculation ───────────────────────────────────────────
 function getRankLabel(rank: number, total: number): string {
   const pct = Math.round((rank / total) * 100)
-  if (pct <= 1)  return 'Top 1%'
-  if (pct <= 5)  return 'Top 5%'
-  if (pct <= 10) return 'Top 10%'
-  if (pct <= 25) return 'Top 25%'
-  if (pct <= 50) return 'Top 50%'
-  return 'Participant'
+  if (pct <= 1)  return 'top1'
+  if (pct <= 5)  return 'top5'
+  if (pct <= 10) return 'top10'
+  if (pct <= 25) return 'top25'
+  if (pct <= 50) return 'top50'
+  return 'participant'
 }
 
 // ── Metadata ───────────────────────────────────────────────────
@@ -62,7 +64,10 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     .from('profiles').select('full_name,specialty,bio,league,avatar_url').eq('username', username).single()
   const profile = rawProfile as any
 
-  if (!profile) return { title: 'Profile not found | Kreevo' }
+  if (!profile) {
+    const dict = await getDict()
+    return { title: dict.publicProfile.notFoundFull }
+  }
 
   const name = profile.full_name ?? username
   const specialty = profile.specialty ? ` · ${profile.specialty}` : ''
@@ -131,7 +136,10 @@ export default async function ProfilePage({
   ])
 
   const rank = (rankData?.length ?? 0) + 1
-  const rankLabel = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
+  const dict = await getDict()
+  const t = dict.publicProfile
+  const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
+  const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
   const submissions = (allSubmissions ?? []) as any[]
   const top3 = [...submissions]
     .sort((a, b) => (b.total_claps ?? 0) - (a.total_claps ?? 0))
@@ -243,7 +251,7 @@ export default async function ProfilePage({
               )}
               {isPro && (
                 <button className="flex items-center gap-1.5 text-xs font-semibold bg-foreground text-background px-3 py-1.5 rounded-md hover:opacity-80 transition-opacity ml-1">
-                  <Mail className="size-3.5" /> Contact
+                  <Mail className="size-3.5" /> {t.contact}
                 </button>
               )}
             </div>
@@ -253,10 +261,10 @@ export default async function ProfilePage({
         {/* ── STATS BAR ──────────────────────────────────────────── */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Zap,    label: 'Total XP',    value: p.xp.toLocaleString(), mono: true },
-            { icon: Trophy, label: 'Challenges',  value: String(submissionCount ?? 0), mono: true },
-            { icon: Star,   label: 'League',      value: league.label, mono: false },
-            { icon: Trophy, label: 'Rank',        value: rankLabel, mono: true },
+            { icon: Zap,    label: t.stats.totalXp,    value: p.xp.toLocaleString(), mono: true },
+            { icon: Trophy, label: t.stats.challenges, value: String(submissionCount ?? 0), mono: true },
+            { icon: Star,   label: t.stats.league,     value: league.label, mono: false },
+            { icon: Trophy, label: t.stats.rank,       value: rankLabel, mono: true },
           ].map(({ icon: Icon, label, value, mono }) => (
             <div key={label} className="border border-border rounded-xl p-4 space-y-1">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -269,7 +277,7 @@ export default async function ProfilePage({
 
         {/* ── TOP 3 PROJETS ──────────────────────────────────────── */}
         <section className="space-y-4">
-          <h2 className="text-base font-bold tracking-tight">Featured Work</h2>
+          <h2 className="text-base font-bold tracking-tight">{t.featuredWork}</h2>
 
           {isPro ? (
             top3.length > 0 ? (
@@ -279,7 +287,7 @@ export default async function ProfilePage({
                 ))}
               </div>
             ) : (
-              <EmptyState text="No featured work yet." />
+              <EmptyState text={t.empty.noFeatured} />
             )
           ) : (
             <div className="relative">
@@ -293,9 +301,9 @@ export default async function ProfilePage({
               )}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/60 backdrop-blur-sm rounded-xl border border-dashed border-border">
                 <Lock className="size-5 text-muted-foreground" />
-                <p className="text-sm font-semibold">Featured work is Pro only</p>
+                <p className="text-sm font-semibold">{t.featuredProGate}</p>
                 <a href="/signup" className="text-xs bg-primary text-primary-foreground px-4 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity">
-                  Upgrade to Pro
+                  {t.upgradeProCta}
                 </a>
               </div>
             </div>
@@ -306,12 +314,13 @@ export default async function ProfilePage({
 
         {/* ── ALL SUBMISSIONS ────────────────────────────────────── */}
         <section className="space-y-4">
-          <h2 className="text-base font-bold tracking-tight">All Work</h2>
+          <h2 className="text-base font-bold tracking-tight">{t.allWork}</h2>
           <TrackFilter
             allSubmissions={submissions}
             visibleSubmissions={filteredSubmissions}
             activeTrack={activeTrack}
             username={p.username}
+            t={t}
           />
         </section>
 
@@ -320,7 +329,7 @@ export default async function ProfilePage({
           <>
             <Separator />
             <section className="space-y-4">
-              <h2 className="text-base font-bold tracking-tight">Badges</h2>
+              <h2 className="text-base font-bold tracking-tight">{t.badges}</h2>
               <div className="flex flex-wrap gap-3">
                 {badges.map((b: any) => (
                   <div key={b.id} className="flex items-center gap-2 border border-border rounded-lg px-3 py-2">
@@ -387,15 +396,17 @@ function TrackFilter({
   visibleSubmissions,
   activeTrack,
   username,
+  t,
 }: {
   allSubmissions: any[]
   visibleSubmissions: any[]
   activeTrack: string
   username: string
+  t: Dictionary['publicProfile']
 }) {
   const specialties = ['All', ...Array.from(new Set(allSubmissions.map((s: any) => s.challenges?.specialty).filter(Boolean)))] as string[]
 
-  if (allSubmissions.length === 0) return <EmptyState text="No public work yet." />
+  if (allSubmissions.length === 0) return <EmptyState text={t.empty.noPublic} />
 
   return (
     <div className="space-y-4">
@@ -403,6 +414,7 @@ function TrackFilter({
         {specialties.map(spec => {
           const active = spec === activeTrack
           const href = spec === 'All' ? `/u/${username}` : `/u/${username}?track=${encodeURIComponent(spec)}`
+          const label = spec === 'All' ? t.trackAll : spec
           return (
             <a
               key={spec}
@@ -413,7 +425,7 @@ function TrackFilter({
                   : 'text-xs font-mono px-3 py-1.5 rounded-full border border-border hover:bg-muted transition-colors'
               }
             >
-              {spec}
+              {label}
             </a>
           )
         })}
@@ -425,7 +437,7 @@ function TrackFilter({
           ))}
         </div>
       ) : (
-        <EmptyState text="No work in this track yet." />
+        <EmptyState text={t.empty.noTrack} />
       )}
     </div>
   )

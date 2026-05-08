@@ -1,33 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
+import { getDict, getLang } from '@/lib/i18n/lang'
 
 import type { Profile } from '@/types/database.types'
 
-const TYPE_META: Record<string, { emoji: string; label: string }> = {
-  feedback_ready:    { emoji: '💬', label: 'Feedback publié sur ta soumission' },
-  league_up:         { emoji: '🚀', label: 'Promotion de league !' },
-  league_down:       { emoji: '📉', label: 'Rétrogradation de league' },
-  badge_earned:      { emoji: '🏅', label: 'Nouveau badge obtenu' },
-  warning_inactivity:{ emoji: '⚠️', label: 'Avertissement d\'inactivité — soumets pour conserver ta ligue' },
-  xp_deducted:       { emoji: '⬇️', label: 'XP déduit pour inactivité' },
-  xp_penalty:        { emoji: '⬇️', label: 'Pénalité XP — inactivité 60 jours' },
-  joined_challenge:  { emoji: '🎯', label: 'Challenge rejoint — 3 jours pour soumettre' },
-  deadline_missed:   { emoji: '❌', label: 'Deadline personnelle manquée — -50 XP' },
-  referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
-  submission_liked:    { emoji: '❤️', label: 'Quelqu\'un a aimé ta soumission' },
-  submission_commented:{ emoji: '💬', label: 'Nouveau commentaire sur ta soumission' },
-  comment_replied:     { emoji: '↩️', label: 'Quelqu\'un a répondu à ton commentaire' },
-}
-
-function timeAgo(date: string): string {
+function timeAgo(date: string, lang: 'fr' | 'en'): string {
   const diff = Date.now() - new Date(date).getTime()
   const m = Math.floor(diff / 60000)
-  if (m < 1) return 'just now'
-  if (m < 60) return `${m}m ago`
+  if (m < 1) return lang === 'en' ? 'just now' : 'à l\'instant'
+  if (m < 60) return lang === 'en' ? `${m}m ago` : `il y a ${m}m`
   const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h ago`
+  if (h < 24) return lang === 'en' ? `${h}h ago` : `il y a ${h}h`
   const d = Math.floor(h / 24)
-  if (d < 30) return `${d}d ago`
-  return new Date(date).toLocaleDateString()
+  if (d < 30) return lang === 'en' ? `${d}d ago` : `il y a ${d}j`
+  return new Date(date).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR')
 }
 
 export default async function NotificationsPage() {
@@ -40,6 +25,7 @@ export default async function NotificationsPage() {
   ])
 
   const profile = profileRes.data as Profile
+  void profile
   const notifications = notifRes.data ?? []
 
   // Mark all as read
@@ -49,21 +35,24 @@ export default async function NotificationsPage() {
     .eq('user_id', user!.id)
     .eq('is_read', false)
 
+  const [dict, lang] = await Promise.all([getDict(), getLang()])
+  const t = dict.notificationsPage
+
   return (
     <div className="pb-10">
-      
+
       <div className="max-w-[960px] mx-auto px-6 py-8 space-y-6">
 
         {notifications.length === 0 ? (
           <div className="text-center py-24 space-y-3">
-            <p className="text-4xl">🔔</p>
-            <p className="text-muted-foreground">No notifications yet</p>
-            <p className="text-xs text-muted-foreground">Activity like likes, comments, and badge awards will appear here.</p>
+            <p className="text-4xl">{t.empty.icon}</p>
+            <p className="text-muted-foreground">{t.empty.title}</p>
+            <p className="text-xs text-muted-foreground">{t.empty.subtitle}</p>
           </div>
         ) : (
           <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
             {notifications.map((n: any) => {
-              const meta = TYPE_META[n.type] ?? { emoji: '🔔', label: n.type }
+              const meta = t.types[n.type] ?? { emoji: '🔔', label: n.type }
               return (
                 <div key={n.id} className={`flex gap-4 px-5 py-4 ${!n.is_read ? 'bg-primary/5' : 'bg-background'}`}>
                   <span className="text-xl shrink-0 mt-0.5">{meta.emoji}</span>
@@ -71,7 +60,7 @@ export default async function NotificationsPage() {
                     <p className="text-sm font-medium">{meta.label}</p>
                     {n.data?.league && (
                       <p className="text-xs text-muted-foreground capitalize mt-0.5">
-                        League: {String(n.data.league)}
+                        {dict.publicProfile.stats.league}: {String(n.data.league)}
                       </p>
                     )}
                     {n.data?.badge_type && (
@@ -79,7 +68,7 @@ export default async function NotificationsPage() {
                         Badge: {String(n.data.badge_type).replace(/_/g, ' ')}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-1">{timeAgo(n.created_at)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{timeAgo(n.created_at, lang)}</p>
                   </div>
                   {!n.is_read && (
                     <div className="size-2 rounded-full bg-primary shrink-0 mt-2" />
