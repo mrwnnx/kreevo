@@ -202,12 +202,14 @@ export function MultiStepSubmitForm({
       const finalStatus = (result as any)?.status as 'approved' | 'rejected' | 'pending' | undefined
       setSuccess({ draft: !!result?.draft, status: finalStatus })
 
-      // Redirect to dashboard with ?submitted=true → triggers HeroBanner just_submitted state.
+      // Redirect back to the challenge page → user sees their cover + status
+      // via MySubmissionCard in the sidebar, plus a celebration banner up top
+      // that reads `just_submitted` from searchParams.
       // Celebrate 2s if approved, immediate otherwise.
       if (asDraft) return
       const delay = finalStatus === 'approved' ? 2000 : 600
       setTimeout(() => {
-        router.push(`/dashboard?submitted=true&status=${finalStatus ?? 'pending'}`)
+        router.push(`/dashboard/challenges/${challengeId}?just_submitted=${finalStatus ?? 'pending'}`)
       }, delay)
     })
   }
@@ -246,7 +248,7 @@ export function MultiStepSubmitForm({
               <Button variant="outline" onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}>
                 Retour au challenge
               </Button>
-              <Button onClick={() => router.push('/dashboard?submitted=true')}>Mon dashboard</Button>
+              <Button onClick={() => router.push('/dashboard')}>Mon dashboard</Button>
             </div>
           )}
           {!success.draft && (
