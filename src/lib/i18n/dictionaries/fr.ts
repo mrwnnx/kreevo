@@ -192,8 +192,45 @@ export const fr = {
         'Motion': 'Vérifie la fluidité à 24 fps, 30 fps et 60 fps.',
       } as Record<string, string>,
     },
+    inviteFriends: {
+      title: 'Invite des amis. Gagne de l\'XP 🚀',
+      subtitle: 'Tu gagnes +50 XP pour chaque ami qui rejoint et complète 1 défi.',
+      friendsJoined: '{n} ami a rejoint',
+      friendsJoinedPlural: '{n} amis ont rejoint',
+      inviteCta: 'Inviter des amis',
+      copyCta: 'Copier le lien',
+      shareTitle: 'Rejoins-moi sur Kreevo',
+      shareText: 'Rejoins-moi sur Kreevo — des défis design pour progresser.',
+      copiedToast: 'Lien copié dans le presse-papier !',
+    },
+    completeProfile: {
+      title: 'Complète ton profil',
+      subtitle: 'Débloque des défis personnalisés et de meilleures récompenses.',
+      cta: 'Finir mon profil →',
+      checklist: {
+        full_name: 'Infos de base',
+        avatar_url: 'Avatar',
+        experience_level: 'Niveau d\'expérience',
+        objectives: 'Objectifs',
+        specialty: 'Spécialité',
+      },
+    },
+    analytics: {
+      title: 'Statistiques',
+      subtitle: 'Tu as fait mieux que <strong>{n}%</strong> des users cette semaine ✨',
+      week: 'Semaine',
+      month: 'Mois',
+      xpGained: 'XP gagné',
+      challengesPerDay: 'Défis / jour',
+      stats: {
+        totalXp: 'XP TOTAL',
+        timeSpent: 'TEMPS PASSÉ',
+        challenges: 'DÉFIS',
+        bestStreak: 'MEILLEUR STREAK',
+      },
+      record: 'record',
+    },
   },
-
   settings: {
     title: 'Paramètres',
     sections: {

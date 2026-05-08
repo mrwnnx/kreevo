@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { cn } from '@/lib/utils'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {
   profile: any
@@ -20,6 +22,7 @@ type Props = {
   streak: any
   totalCompleted: number
   firstName: string
+  t: Dictionary['dashboard']['analytics']
 }
 
 export function Analytics({
@@ -28,7 +31,7 @@ export function Analytics({
   challengeData,
   streak,
   totalCompleted,
-  firstName,
+  t,
 }: Props) {
   const [period, setPeriod] = useState<'week' | 'month'>('week')
 
@@ -37,27 +40,27 @@ export function Analytics({
 
   const stats = [
     {
-      label: 'TOTAL XP',
+      label: t.stats.totalXp,
       value: totalXP.toLocaleString(),
       delta: '+18%',
       positive: true,
     },
     {
-      label: 'TIME SPENT',
+      label: t.stats.timeSpent,
       value: '4h 12m',
       delta: '+22m',
       positive: true,
     },
     {
-      label: 'CHALLENGES',
+      label: t.stats.challenges,
       value: totalCompleted.toString(),
       delta: '+6',
       positive: true,
     },
     {
-      label: 'BEST STREAK',
+      label: t.stats.bestStreak,
       value: `${streak?.longest_streak || 0}d`,
-      delta: streak?.longest_streak > 30 ? 'record' : null,
+      delta: streak?.longest_streak > 30 ? t.record : null,
       positive: true,
     },
   ]
@@ -66,12 +69,11 @@ export function Analytics({
     <div className="bg-card border border-border rounded-[24px] p-4">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h3 className="font-semibold">Analytics</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            You performed better than{' '}
-            <span className="font-semibold text-foreground">{betterThan}%</span>
-            {' '}of users this week ✨
-          </p>
+          <h3 className="font-semibold">{t.title}</h3>
+          <p
+            className="text-xs text-muted-foreground mt-0.5"
+            dangerouslySetInnerHTML={{ __html: tx(t.subtitle, { n: betterThan }) }}
+          />
         </div>
         <div className="flex rounded-lg border border-border overflow-hidden text-sm">
           {(['week', 'month'] as const).map(p => (
@@ -80,13 +82,13 @@ export function Analytics({
               type="button"
               onClick={() => setPeriod(p)}
               className={cn(
-                'px-4 py-1.5 capitalize',
+                'px-4 py-1.5',
                 period === p
                   ? 'bg-muted font-medium'
                   : 'text-muted-foreground hover:bg-muted/60',
               )}
             >
-              {p === 'week' ? 'Week' : 'Month'}
+              {p === 'week' ? t.week : t.month}
             </button>
           ))}
         </div>
@@ -94,7 +96,7 @@ export function Analytics({
 
       <div className="grid md:grid-cols-3 gap-6">
         <div>
-          <p className="text-xs text-muted-foreground mb-3">XP gained</p>
+          <p className="text-xs text-muted-foreground mb-3">{t.xpGained}</p>
           <ResponsiveContainer width="100%" height={120}>
             <LineChart data={xpData}>
               <XAxis
@@ -111,7 +113,7 @@ export function Analytics({
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground mb-3">Challenges / day</p>
+          <p className="text-xs text-muted-foreground mb-3">{t.challengesPerDay}</p>
           <ResponsiveContainer width="100%" height={120}>
             <BarChart data={challengeData}>
               <XAxis
@@ -155,9 +157,6 @@ export function Analytics({
         </div>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground mt-6">
-        Keep going, {firstName}. Tomorrow&apos;s another XP day. 🌟
-      </p>
     </div>
   )
 }

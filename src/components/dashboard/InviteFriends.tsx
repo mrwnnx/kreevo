@@ -3,26 +3,29 @@
 import { UserPlus, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {
   profile: any
   referrals: any[]
+  t: Dictionary['dashboard']['inviteFriends']
 }
 
-export function InviteFriends({ profile, referrals }: Props) {
+export function InviteFriends({ profile, referrals, t }: Props) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kreevo.app'
   const referralLink = `${baseUrl}/signup?ref=${profile?.referral_code ?? ''}`
 
   function copyLink() {
     navigator.clipboard.writeText(referralLink)
-    toast.success('Link copied to clipboard!')
+    toast.success(t.copiedToast)
   }
 
   function shareLink() {
     if (navigator.share) {
       navigator.share({
-        title: 'Join Kreevo',
-        text: 'Join me on Kreevo — design challenges to level up.',
+        title: t.shareTitle,
+        text: t.shareText,
         url: referralLink,
       }).catch(() => {})
     } else {
@@ -34,9 +37,9 @@ export function InviteFriends({ profile, referrals }: Props) {
     <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-100 dark:border-teal-900/30 rounded-[24px] p-4 relative overflow-hidden">
       <div className="absolute right-4 top-4 text-5xl opacity-10 select-none">🚀</div>
 
-      <h3 className="font-bold text-lg mb-1">Invite friends. Earn XP 🚀</h3>
+      <h3 className="font-bold text-lg mb-1">{t.title}</h3>
       <p className="text-sm text-muted-foreground mb-4">
-        Get +50 XP for every friend who joins and completes 1 challenge.
+        {t.subtitle}
       </p>
 
       {referrals?.length > 0 && (
@@ -66,7 +69,7 @@ export function InviteFriends({ profile, referrals }: Props) {
             )}
           </div>
           <span className="text-sm text-muted-foreground">
-            {referrals.length} friend{referrals.length > 1 ? 's' : ''} joined
+            {tx(referrals.length > 1 ? t.friendsJoinedPlural : t.friendsJoined, { n: referrals.length })}
           </span>
         </div>
       )}
@@ -74,11 +77,11 @@ export function InviteFriends({ profile, referrals }: Props) {
       <div className="flex items-center gap-3 flex-wrap">
         <Button onClick={shareLink} className="bg-teal-600 hover:bg-teal-700 text-white">
           <UserPlus className="w-4 h-4 mr-2" />
-          Invite Friends
+          {t.inviteCta}
         </Button>
         <Button variant="outline" onClick={copyLink}>
           <Copy className="w-4 h-4 mr-2" />
-          Copy link
+          {t.copyCta}
         </Button>
       </div>
     </div>

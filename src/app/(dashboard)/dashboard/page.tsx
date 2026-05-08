@@ -338,8 +338,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-4" id="invite">
-        <InviteFriends profile={profile} referrals={referrals} />
-        <CompleteProfile profile={profile} />
+        <InviteFriends profile={profile} referrals={referrals} t={dict.dashboard.inviteFriends} />
+        <CompleteProfile profile={profile} t={dict.dashboard.completeProfile} />
       </div>
 
       <Analytics
@@ -349,6 +349,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         streak={streak}
         totalCompleted={totalCompleted}
         firstName={firstName}
+        t={dict.dashboard.analytics}
       />
 
       <p className="text-center text-xs text-muted-foreground pb-8">
