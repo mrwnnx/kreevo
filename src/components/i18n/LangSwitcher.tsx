@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { setLang } from '@/lib/i18n/actions'
 import { cn } from '@/lib/utils'
-import type { Lang } from '@/lib/i18n/lang'
+import type { Lang } from '@/lib/i18n/tx'
 
 interface Props {
   current: Lang

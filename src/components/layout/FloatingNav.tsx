@@ -17,7 +17,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import type { Profile } from '@/types/database.types'
 import { leagueLabel, leagueColor } from '@/lib/utils/xp'
-import type { Lang } from '@/lib/i18n/lang'
+import type { Lang } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 const NAV_BASE = [

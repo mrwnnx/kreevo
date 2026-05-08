@@ -1,7 +1,7 @@
 // Date helpers (inlined — pas de dépendance date-fns)
-import { tx } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
-import type { Lang } from '@/lib/i18n/lang'
+import type { Lang } from '@/lib/i18n/tx'
 
 function diffHours(a: Date, b: Date): number {
   return Math.floor((a.getTime() - b.getTime()) / 3600000)

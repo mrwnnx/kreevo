@@ -1,11 +1,13 @@
 /**
- * Global app i18n.
+ * Global app i18n — SERVER side helpers.
+ * Client components must import `tx` from `./tx` (pure, no `next/headers`).
+ *
  * - Cookie `lang` is the source of truth on every request.
  * - Authenticated users sync their choice to `profiles.preferred_language`
  *   (so it follows them across devices).
- * - `tx()` does simple `{var}` interpolation.
  */
 
+import 'server-only'
 import { cookies } from 'next/headers'
 import { fr, type Dictionary } from './dictionaries/fr'
 import { en } from './dictionaries/en'
@@ -26,13 +28,5 @@ export async function getDict(): Promise<Dictionary> {
   return lang === 'en' ? en : fr
 }
 
-/**
- * Simple `{var}` interpolation for dictionary strings.
- * @example tx('Hello {name}', { name: 'Marwen' }) → 'Hello Marwen'
- */
-export function tx(
-  template: string,
-  params: Record<string, string | number> = {},
-): string {
-  return template.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? ''))
-}
+// Re-export the client-safe interpolation helper for server-side ergonomics.
+export { tx } from './tx'

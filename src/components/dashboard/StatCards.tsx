@@ -1,7 +1,7 @@
 import { Trophy, Zap, Target } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
-import { tx } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {

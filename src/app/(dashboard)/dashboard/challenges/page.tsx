@@ -6,6 +6,8 @@ import { Lock, Zap, Trophy, Clock, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { getDict, tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── Specialty visual config ───────────────────────────────────────────────────
 const SPECIALTY_VISUAL: Record<string, { icon: string }> = {
@@ -33,12 +35,13 @@ type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocke
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, participantCount, participants,
+  challenge, status, participantCount, t,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
   participantCount?: number
   participants?: Array<{ username: string; avatar_url: string | null }>
+  t: Dictionary['challengesPage']
 }) {
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
   const visual = SPECIALTY_VISUAL[challenge.specialty ?? ''] ?? DEFAULT_VISUAL
@@ -66,7 +69,7 @@ function ChallengeCard({
         {status === 'active' && (
           <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-green-600/85 rounded-full px-2 py-0.5 backdrop-blur-sm">
             <span className="size-1.5 rounded-full bg-green-200 animate-pulse" />
-            <span className="text-[11px] font-medium text-white">En cours</span>
+            <span className="text-[11px] font-medium text-white">{t.inProgress}</span>
           </div>
         )}
 
@@ -90,7 +93,7 @@ function ChallengeCard({
         {status === 'blocked' && (
           <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center rounded-b-2xl z-10 p-4">
             <p className="text-xs text-center text-muted-foreground font-medium leading-relaxed">
-              Termine ton challenge en cours d'abord
+              {t.blockedOverlay}
             </p>
           </div>
         )}
@@ -110,13 +113,13 @@ function ChallengeCard({
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
             <span className="flex items-center gap-1.5">
               <Zap className="size-4 text-amber-500" />
-              <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> XP
+              <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> {t.xp}
             </span>
           )}
           {challenge.deadline_days != null && (
             <span className="flex items-center gap-1.5">
               <Clock className="size-4" />
-              <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>j
+              <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>{t.daysSuffix}
             </span>
           )}
           <span className="flex items-center gap-1.5">
@@ -268,23 +271,26 @@ export default async function ChallengesPage({
   const xpPercent = leagueXpThreshold > 0 ? Math.min(100, Math.round((userXp / leagueXpThreshold) * 100)) : 0
   const challengesPercent = Math.min(100, Math.round((leagueChallengesCompleted / minCh) * 100))
 
+  const dict = await getDict()
+  const t = dict.challengesPage
+
   return (
     <div className="p-6 max-w-[960px] mx-auto pb-16 space-y-8">
 
       {/* ── Header ── */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold">Challenges</h2>
+          <h2 className="text-2xl font-bold">{t.title}</h2>
           {userLeagueRow ? (
             <p className="text-sm text-muted-foreground mt-1">
-              Ligue actuelle :{' '}
+              {t.currentLeague}{' '}
               <span className="inline-flex items-center gap-1 font-semibold" style={{ color: userLeagueRow.color }}>
                 <LeagueIcon icon={userLeagueRow.icon} size="sm" />{userLeagueRow.name}
               </span>
             </p>
           ) : (
             <p className="text-sm text-muted-foreground mt-1">
-              Rejoins un challenge pour commencer ta progression.
+              {t.joinFirst}
             </p>
           )}
         </div>
@@ -296,7 +302,7 @@ export default async function ChallengesPage({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1">
-                  <Zap className="size-3 text-amber-500" /> XP
+                  <Zap className="size-3 text-amber-500" /> {t.xp}
                 </span>
                 <span className="font-mono font-semibold">
                   {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()}
@@ -314,9 +320,9 @@ export default async function ChallengesPage({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1">
-                  <Trophy className="size-3 text-violet-500" /> Challenges complétés
+                  <Trophy className="size-3 text-violet-500" /> {t.challengesCompleted}
                 </span>
-                <span className="font-mono font-semibold">{leagueChallengesCompleted} / {minCh} min.</span>
+                <span className="font-mono font-semibold">{leagueChallengesCompleted} / {minCh} {t.minSuffix}</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <div
@@ -333,13 +339,13 @@ export default async function ChallengesPage({
       {isProGated && (
         <div className="rounded-2xl border border-purple-200 dark:border-purple-900/40 bg-purple-50/50 dark:bg-purple-900/10 p-5 flex items-center justify-between gap-4">
           <p className="text-sm font-medium text-purple-700 dark:text-purple-400">
-            🔒 Passe en Pro pour accéder à {userLeagueRow?.icon} {userLeagueRow?.name} et au-delà
+            {tx(t.proGate, { icon: userLeagueRow?.icon ?? '', league: userLeagueRow?.name ?? '' })}
           </p>
           <Link
             href="/dashboard/settings"
             className="shrink-0 inline-flex items-center gap-1.5 bg-purple-600 text-white text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
           >
-            Upgrade Pro
+            {t.upgradeCta}
           </Link>
         </div>
       )}
@@ -349,7 +355,7 @@ export default async function ChallengesPage({
         <div className="flex items-center gap-2">
           {userLeagueRow && <LeagueIcon icon={userLeagueRow.icon} size="lg" />}
           <h3 className="text-base font-semibold">
-            {userLeagueRow ? `Ligue ${userLeagueRow.name}` : 'Mes challenges'}
+            {userLeagueRow ? tx(t.leaguePrefix, { name: userLeagueRow.name }) : t.fallbackTitle}
           </h3>
           <span className="text-sm text-muted-foreground">({sortedMyLeague.length})</span>
         </div>
@@ -359,8 +365,8 @@ export default async function ChallengesPage({
           const todoCount = sortedMyLeague.filter(c => !submittedIds.has(c.id)).length
           const doneCount = sortedMyLeague.filter(c => submittedIds.has(c.id)).length
           const tabs: Array<{ key: Filter; label: string; count: number }> = [
-            { key: 'todo', label: 'À faire',   count: todoCount },
-            { key: 'done', label: 'Complétés', count: doneCount },
+            { key: 'todo', label: t.tabs.todo, count: todoCount },
+            { key: 'done', label: t.tabs.done, count: doneCount },
           ]
           return (
             <div className="inline-flex p-1 bg-muted/60 rounded-full w-fit">
@@ -394,7 +400,7 @@ export default async function ChallengesPage({
 
         {activeParticipation && (
           <div className="rounded-xl border border-green-200 bg-green-50/50 dark:border-green-900/40 dark:bg-green-900/10 px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            Tu as une participation active — termine-la avant d'en rejoindre une autre.
+            {t.activeWarning}
           </div>
         )}
 
@@ -406,9 +412,7 @@ export default async function ChallengesPage({
           if (visible.length === 0) {
             return (
               <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-                {filter === 'done'
-                  ? 'Aucun challenge complété pour l\'instant.'
-                  : 'Aucun challenge à faire — tu es à jour ✨'}
+                {filter === 'done' ? t.empty.done : t.empty.todo}
               </div>
             )
           }
@@ -429,6 +433,7 @@ export default async function ChallengesPage({
                     status={status}
                     participantCount={partCounts[c.id]}
                     participants={participantsByChallenge[c.id]}
+                    t={t}
                   />
                 )
               })}

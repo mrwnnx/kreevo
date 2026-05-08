@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getDashboardState, getHeroConfig } from '@/lib/utils/dashboard'
-import { tx } from '@/lib/i18n/lang'
-import type { Lang } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
+import type { Lang } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface HeroBannerProps {

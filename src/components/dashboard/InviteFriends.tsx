@@ -3,7 +3,7 @@
 import { UserPlus, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { tx } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {

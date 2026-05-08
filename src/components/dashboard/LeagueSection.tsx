@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getLeagueStyle } from '@/lib/utils/league-style'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
-import { tx } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {

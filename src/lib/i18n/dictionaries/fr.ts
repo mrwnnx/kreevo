@@ -231,6 +231,30 @@ export const fr = {
       record: 'record',
     },
   },
+  challengesPage: {
+    title: 'Challenges',
+    currentLeague: 'Ligue actuelle :',
+    joinFirst: 'Rejoins un challenge pour commencer ta progression.',
+    xp: 'XP',
+    challengesCompleted: 'Défis complétés',
+    minSuffix: 'min.',
+    proGate: '🔒 Passe en Pro pour accéder à {icon} {league} et au-delà',
+    upgradeCta: 'Passer en Pro',
+    leaguePrefix: 'Ligue {name}',
+    fallbackTitle: 'Mes challenges',
+    activeWarning: 'Tu as une participation active — termine-la avant d\'en rejoindre une autre.',
+    tabs: {
+      todo: 'À faire',
+      done: 'Complétés',
+    },
+    empty: {
+      todo: 'Aucun challenge à faire — tu es à jour ✨',
+      done: 'Aucun challenge complété pour l\'instant.',
+    },
+    blockedOverlay: 'Termine ton challenge en cours d\'abord',
+    inProgress: 'En cours',
+    daysSuffix: 'j',
+  },
   settings: {
     title: 'Paramètres',
     sections: {

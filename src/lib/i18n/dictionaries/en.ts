@@ -234,6 +234,30 @@ export const en: Dictionary = {
     },
   },
 
+  challengesPage: {
+    title: 'Challenges',
+    currentLeague: 'Current league:',
+    joinFirst: 'Join a challenge to start your progression.',
+    xp: 'XP',
+    challengesCompleted: 'Completed challenges',
+    minSuffix: 'min.',
+    proGate: '🔒 Upgrade to Pro to access {icon} {league} and beyond',
+    upgradeCta: 'Upgrade Pro',
+    leaguePrefix: '{name} League',
+    fallbackTitle: 'My challenges',
+    activeWarning: 'You have an active participation — finish it before joining another.',
+    tabs: {
+      todo: 'To do',
+      done: 'Completed',
+    },
+    empty: {
+      todo: 'No challenges to do — you\'re all caught up ✨',
+      done: 'No challenges completed yet.',
+    },
+    blockedOverlay: 'Finish your active challenge first',
+    inProgress: 'In progress',
+    daysSuffix: 'd',
+  },
   settings: {
     title: 'Settings',
     sections: {
