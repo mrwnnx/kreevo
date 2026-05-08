@@ -7,6 +7,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { cn } from '@/lib/utils'
 
+type ProfilePanelT = {
+  you: string
+  challengeLabel: string
+  seeChallenge: string
+  linksLabel: string
+}
+
+const FALLBACK_T: ProfilePanelT = {
+  you: 'Vous',
+  challengeLabel: 'Challenge',
+  seeChallenge: 'Voir le challenge',
+  linksLabel: 'Liens',
+}
+
 interface Author {
   id: string
   username: string
@@ -35,6 +49,7 @@ interface Props {
   author: Author | null
   isOwn: boolean
   challenge?: Challenge | null
+  t?: ProfilePanelT
 }
 
 const LINK_LABELS: Record<string, string> = {
@@ -54,7 +69,7 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function ProfilePanel({ author, isOwn, challenge }: Props) {
+export function ProfilePanel({ author, isOwn, challenge, t = FALLBACK_T }: Props) {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60)
@@ -94,7 +109,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
               </Link>
               {isOwn && (
                 <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                  Vous
+                  {t.you}
                 </span>
               )}
             </div>
@@ -129,7 +144,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
       {/* Links */}
       {activeLinks.length > 0 && (
         <div>
-          <Label>Liens</Label>
+          <Label>{t.linksLabel}</Label>
           <div className="space-y-2">
             {activeLinks.map(([key, url]) => (
               <a
@@ -150,7 +165,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
       {/* Challenge */}
       {challenge && (
         <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-          <Label>Challenge</Label>
+          <Label>{t.challengeLabel}</Label>
           <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
           <div className="space-y-1.5">
             {(challenge.specialty || challenge.challenge_type) && (
@@ -170,7 +185,7 @@ export function ProfilePanel({ author, isOwn, challenge }: Props) {
             href={`/dashboard/challenges/${challenge.id}`}
             className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
           >
-            Voir le challenge <ArrowRight className="size-3" />
+            {t.seeChallenge} <ArrowRight className="size-3" />
           </Link>
         </div>
       )}

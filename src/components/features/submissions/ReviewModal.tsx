@@ -11,16 +11,32 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 const MIN_CONTENT = 10
+
+type ReviewT = Dictionary['submissionDetail']['review']
+
+const FALLBACK_T: ReviewT = {
+  title: 'Laisser un commentaire',
+  placeholder: 'Écris ton commentaire… (min 10 caractères)',
+  minHint: '{n} caractères min',
+  counter: '{n} / 500',
+  cancel: 'Annuler',
+  publish: 'Publier →',
+  publishing: 'Publication…',
+  genericError: 'Une erreur est survenue.',
+}
 
 interface ReviewModalProps {
   open: boolean
   onOpenChange: (v: boolean) => void
   onSubmit: (data: { content: string }) => Promise<void>
+  t?: ReviewT
 }
 
-export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) {
+export function ReviewModal({ open, onOpenChange, onSubmit, t = FALLBACK_T }: ReviewModalProps) {
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,7 +52,7 @@ export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) 
       setContent('')
       onOpenChange(false)
     } catch {
-      setError('Une erreur est survenue.')
+      setError(t.genericError)
     } finally {
       setLoading(false)
     }
@@ -46,7 +62,7 @@ export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Laisser un commentaire</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -56,7 +72,7 @@ export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) 
               onChange={(e) => setContent(e.target.value)}
               rows={4}
               maxLength={500}
-              placeholder="Écris ton commentaire… (min 10 caractères)"
+              placeholder={t.placeholder}
               className={cn(
                 'w-full resize-none rounded-xl border border-border bg-transparent p-3 text-sm',
                 'placeholder:text-muted-foreground',
@@ -65,7 +81,9 @@ export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) 
               autoFocus
             />
             <p className={cn('text-xs', content.length < MIN_CONTENT ? 'text-muted-foreground' : 'text-emerald-500')}>
-              {content.length < MIN_CONTENT ? `${MIN_CONTENT - content.length} caractères min` : `${content.length} / 500`}
+              {content.length < MIN_CONTENT
+                ? tx(t.minHint, { n: MIN_CONTENT - content.length })
+                : tx(t.counter, { n: content.length })}
             </p>
           </div>
 
@@ -73,9 +91,9 @@ export function ReviewModal({ open, onOpenChange, onSubmit }: ReviewModalProps) 
         </div>
 
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" disabled={loading} />}>Annuler</DialogClose>
+          <DialogClose render={<Button variant="outline" disabled={loading} />}>{t.cancel}</DialogClose>
           <Button onClick={submit} disabled={!canSubmit}>
-            {loading ? 'Publication…' : 'Publier →'}
+            {loading ? t.publishing : t.publish}
           </Button>
         </DialogFooter>
       </DialogContent>

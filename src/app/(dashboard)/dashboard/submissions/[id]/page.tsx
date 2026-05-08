@@ -7,6 +7,7 @@ import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ShareButton } from '@/components/features/challenge/ShareButton'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentSection } from '@/components/features/submissions/CommentSection'
+import { getDict, getLang, tx } from '@/lib/i18n/lang'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -45,6 +46,11 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const figmaUrl = (submission.files as any)?.figma
   const userLiked = !!likeData
 
+  const dict = await getDict()
+  const lang = await getLang()
+  const t = dict.submissionDetail
+  const dateLocale = lang === 'en' ? 'en-US' : 'fr-FR'
+
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
 
@@ -54,7 +60,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ChevronLeft className="size-4" />
-        {challenge?.title ?? 'Retour'}
+        {challenge?.title ?? t.backFallback}
       </Link>
 
       {/* 2-col layout */}
@@ -72,7 +78,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
               {submission.created_at && (
                 <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Calendar className="size-3.5" />
-                  {new Date(submission.created_at).toLocaleDateString('fr-FR', {
+                  {new Date(submission.created_at).toLocaleDateString(dateLocale, {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',
@@ -86,10 +92,15 @@ export default async function SubmissionDetailPage({ params }: Props) {
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
             <div className="relative aspect-video bg-muted">
               {submission.cover_url ? (
-                <ImageLightbox src={submission.cover_url} alt="Submission cover" />
+                <ImageLightbox
+                  src={submission.cover_url}
+                  alt={t.coverAlt}
+                  openLabel={t.lightbox.open}
+                  closeLabel={t.lightbox.close}
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                  Pas de preview
+                  {t.noPreview}
                 </div>
               )}
             </div>
@@ -100,7 +111,12 @@ export default async function SubmissionDetailPage({ params }: Props) {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {(((submission.files as any).images ?? []) as string[]).map((url, i) => (
                 <div key={i} className="rounded-xl border border-border overflow-hidden bg-muted aspect-square">
-                  <ImageLightbox src={url} alt={`Visuel ${i + 1}`} />
+                  <ImageLightbox
+                    src={url}
+                    alt={tx(t.additionalAlt, { n: i + 1 })}
+                    openLabel={t.lightbox.open}
+                    closeLabel={t.lightbox.close}
+                  />
                 </div>
               ))}
             </div>
@@ -109,9 +125,9 @@ export default async function SubmissionDetailPage({ params }: Props) {
           {/* Share + report */}
           {(!isOwn || true) && (
             <div className="flex items-center gap-3 justify-end">
-              <ShareButton />
+              <ShareButton label={t.share.label} />
               {!isOwn && submission.created_at && (
-                <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} />
+                <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} t={t.report} />
               )}
             </div>
           )}
@@ -119,7 +135,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
           {/* Card description */}
           {(submission.description || figmaUrl) && (
             <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Description</p>
+              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">{t.descriptionLabel}</p>
               {submission.description && (
                 <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                   {submission.description}
@@ -133,7 +149,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
                   className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
                 >
                   <ExternalLink className="size-3" />
-                  Voir sur Figma →
+                  {t.seeFigma}
                 </a>
               )}
             </div>
@@ -150,6 +166,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 initialTotalLikes={submission.total_claps ?? 0}
                 initialCommentsCount={submission.comments_count ?? 0}
                 submissionOwnerId={submission.user_id}
+                t={t.comments}
+                tReview={t.review}
               />
             </>
           )}
@@ -160,6 +178,12 @@ export default async function SubmissionDetailPage({ params }: Props) {
           author={author}
           isOwn={isOwn}
           challenge={challenge}
+          t={{
+            you: t.you,
+            challengeLabel: t.challengeLabel,
+            seeChallenge: t.seeChallenge,
+            linksLabel: t.linksLabel,
+          }}
         />
       </div>
     </div>

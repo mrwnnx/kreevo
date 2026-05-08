@@ -9,11 +9,15 @@ export function ImageLightbox({
   alt,
   className,
   thumbnailClassName,
+  openLabel = 'Agrandir l\'image',
+  closeLabel = 'Fermer',
 }: {
   src: string
   alt?: string
   className?: string
   thumbnailClassName?: string
+  openLabel?: string
+  closeLabel?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -23,7 +27,7 @@ export function ImageLightbox({
         type="button"
         onClick={() => setOpen(true)}
         className={cn('group block w-full h-full overflow-hidden cursor-zoom-in', className)}
-        aria-label="Agrandir l'image"
+        aria-label={openLabel}
       >
         <img
           src={src}
@@ -41,7 +45,7 @@ export function ImageLightbox({
             type="button"
             onClick={() => setOpen(false)}
             className="block max-h-[90vh] cursor-zoom-out"
-            aria-label="Fermer"
+            aria-label={closeLabel}
           >
             <img
               src={src}

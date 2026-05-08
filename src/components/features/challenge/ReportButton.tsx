@@ -12,22 +12,40 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 const REPORT_WINDOW_HOURS = 24
 
-const REASONS = [
-  { id: 'not_design', label: 'Ce n\'est pas un travail de design' },
-  { id: 'off_brief',  label: 'Ça ne correspond pas au brief' },
-  { id: 'inappropriate', label: 'Contenu inapproprié' },
-]
+type ReportT = Dictionary['submissionDetail']['report']
+
+const FALLBACK_T: ReportT = {
+  tooltip: 'Signaler',
+  reportedLabel: 'Signalé',
+  dialogTitle: 'Signaler cette soumission',
+  dialogPrompt: 'Pourquoi signales-tu cette soumission ?',
+  reasonNotDesign: 'Ce n\'est pas un travail de design',
+  reasonOffBrief: 'Ça ne correspond pas au brief',
+  reasonInappropriate: 'Contenu inapproprié',
+  cancel: 'Annuler',
+  submit: 'Signaler',
+  genericError: 'Erreur',
+}
 
 export function ReportButton({
   submissionId,
   submissionCreatedAt,
+  t = FALLBACK_T,
 }: {
   submissionId: string
   submissionCreatedAt: string
+  t?: ReportT
 }) {
+  const REASONS = [
+    { id: 'not_design', label: t.reasonNotDesign },
+    { id: 'off_brief',  label: t.reasonOffBrief },
+    { id: 'inappropriate', label: t.reasonInappropriate },
+  ]
+
   const [open, setOpen] = useState(false)
   const [reported, setReported] = useState(false)
   const [reason, setReason] = useState<string>(REASONS[0].id)
@@ -57,7 +75,7 @@ export function ReportButton({
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Erreur')
+        setError(data.error ?? t.genericError)
         return
       }
       setOpen(false)
@@ -70,7 +88,7 @@ export function ReportButton({
       <span className={cn(
         'inline-flex items-center gap-1 text-xs font-mono text-muted-foreground'
       )}>
-        <Check className="size-3" /> Signalé
+        <Check className="size-3" /> {t.reportedLabel}
       </span>
     )
   }
@@ -81,7 +99,7 @@ export function ReportButton({
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-red-500 transition-colors"
-        title="Signaler"
+        title={t.tooltip}
       >
         <Flag className="size-3" />
       </button>
@@ -89,12 +107,12 @@ export function ReportButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Signaler cette soumission</DialogTitle>
+            <DialogTitle>{t.dialogTitle}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Pourquoi signales-tu cette soumission ?
+              {t.dialogPrompt}
             </p>
             <div className="space-y-2">
               {REASONS.map((r) => (
@@ -114,10 +132,10 @@ export function ReportButton({
           </div>
 
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" disabled={pending} />}>Annuler</DialogClose>
+            <DialogClose render={<Button variant="outline" disabled={pending} />}>{t.cancel}</DialogClose>
             <Button onClick={submit} disabled={pending} variant="destructive">
               {pending && <Loader2 className="size-4 animate-spin" />}
-              Signaler
+              {t.submit}
             </Button>
           </DialogFooter>
         </DialogContent>

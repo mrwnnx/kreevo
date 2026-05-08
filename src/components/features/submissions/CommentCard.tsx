@@ -4,6 +4,40 @@ import { useState } from 'react'
 import { Flag, MessageCircle, Trash2, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ProBadge } from '@/components/ui/ProBadge'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type CommentsT = Dictionary['submissionDetail']['comments']
+
+const FALLBACK_T: CommentsT = {
+  sectionTitle: 'Commentaires',
+  countSingular: '{n} commentaire',
+  countPlural: '{n} commentaires',
+  commentCta: 'Laisser un commentaire',
+  cantCommentOwn: 'Tu ne peux pas commenter ton propre travail',
+  freeLimitTitle: '{n} commentaires/jour — limite atteinte',
+  freeLimitBody: 'Passe en Pro pour commenter sans limite',
+  emptyState: 'Sois le premier à laisser un commentaire !',
+  likeAria: 'Liker',
+  unlikeAria: 'Retirer le like',
+  reply: 'Répondre',
+  replyPlaceholder: 'Écris ta réponse…',
+  replyCancel: 'Annuler',
+  replySend: 'Répondre →',
+  replySending: 'Envoi…',
+  report: 'Signaler',
+  reported: '✓ Signalé',
+  delete: 'Supprimer',
+  confirmReport: 'Signaler ce commentaire ?',
+  confirmDelete: 'Supprimer ce commentaire ?',
+  genericError: 'Erreur',
+  timeAgo: {
+    justNow: 'à l\'instant',
+    minutes: 'il y a {n}m',
+    hours: 'il y a {n}h',
+    days: 'il y a {n}j',
+  },
+}
 
 export interface ReviewComment {
   id: string
@@ -33,18 +67,19 @@ interface CommentCardProps {
   onReportReply?: (id: string) => Promise<void>
   onDeleteReply?: (id: string) => Promise<void>
   isReply?: boolean
+  t?: CommentsT
 }
 
-function timeAgo(date: string): string {
+function timeAgo(date: string, t: CommentsT['timeAgo']): string {
   const diff = Date.now() - new Date(date).getTime()
   const min = Math.floor(diff / 60000)
-  if (min < 1) return "à l'instant"
-  if (min < 60) return `il y a ${min}m`
+  if (min < 1) return t.justNow
+  if (min < 60) return tx(t.minutes, { n: min })
   const h = Math.floor(min / 60)
-  if (h < 24) return `il y a ${h}h`
+  if (h < 24) return tx(t.hours, { n: h })
   const d = Math.floor(h / 24)
-  if (d < 30) return `il y a ${d}j`
-  return new Date(date).toLocaleDateString('fr', { month: 'short', day: 'numeric' })
+  if (d < 30) return tx(t.days, { n: d })
+  return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 export function CommentCard({
@@ -58,6 +93,7 @@ export function CommentCard({
   onReportReply,
   onDeleteReply,
   isReply = false,
+  t = FALLBACK_T,
 }: CommentCardProps) {
   const [reported, setReported] = useState(comment.is_reported)
   const [replyOpen, setReplyOpen] = useState(false)
@@ -69,13 +105,13 @@ export function CommentCard({
   const likesCount = comment.likes_count ?? 0
 
   async function handleReport() {
-    if (!confirm('Signaler ce commentaire ?')) return
+    if (!confirm(t.confirmReport)) return
     await onReport(comment.id)
     setReported(true)
   }
 
   async function handleDelete() {
-    if (!confirm('Supprimer ce commentaire ?')) return
+    if (!confirm(t.confirmDelete)) return
     setDeletePending(true)
     try {
       await onDelete(comment.id)
@@ -115,7 +151,7 @@ export function CommentCard({
             <ProBadge plan={comment.user.plan} size={12} />
           </span>
           {comment.user.league && <span className="text-xs text-muted-foreground">{comment.user.league}</span>}
-          <span className="text-xs text-muted-foreground ml-auto">{timeAgo(comment.created_at)}</span>
+          <span className="text-xs text-muted-foreground ml-auto">{timeAgo(comment.created_at, t.timeAgo)}</span>
         </div>
 
         <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{comment.content}</p>
@@ -124,7 +160,7 @@ export function CommentCard({
           {!isOwn && (
             <button
               onClick={() => onLike(comment.id)}
-              aria-label={liked ? 'Retirer le like' : 'Liker'}
+              aria-label={liked ? t.unlikeAria : t.likeAria}
               className={cn(
                 'flex items-center gap-1 text-xs transition-colors',
                 liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
@@ -146,7 +182,7 @@ export function CommentCard({
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <MessageCircle className="w-3 h-3" />
-              <span>Répondre</span>
+              <span>{t.reply}</span>
             </button>
           )}
           {!isOwn && !reported && (
@@ -155,10 +191,10 @@ export function CommentCard({
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors"
             >
               <Flag className="w-3 h-3" />
-              <span>Signaler</span>
+              <span>{t.report}</span>
             </button>
           )}
-          {reported && <span className="text-xs text-muted-foreground">✓ Signalé</span>}
+          {reported && <span className="text-xs text-muted-foreground">{t.reported}</span>}
           {isOwn && (
             <button
               onClick={handleDelete}
@@ -166,7 +202,7 @@ export function CommentCard({
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors ml-auto"
             >
               <Trash2 className="w-3 h-3" />
-              <span>Supprimer</span>
+              <span>{t.delete}</span>
             </button>
           )}
         </div>
@@ -178,7 +214,7 @@ export function CommentCard({
               onChange={(e) => setReplyText(e.target.value)}
               rows={2}
               maxLength={300}
-              placeholder="Écris ta réponse…"
+              placeholder={t.replyPlaceholder}
               className="w-full resize-none rounded-lg border border-border bg-transparent p-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             />
             <div className="flex items-center justify-end gap-2">
@@ -187,7 +223,7 @@ export function CommentCard({
                 onClick={() => { setReplyOpen(false); setReplyText('') }}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                Annuler
+                {t.replyCancel}
               </button>
               <button
                 type="button"
@@ -195,7 +231,7 @@ export function CommentCard({
                 disabled={replyText.trim().length < 3 || replyPending}
                 className="text-xs font-semibold text-primary disabled:opacity-50"
               >
-                {replyPending ? 'Envoi…' : 'Répondre →'}
+                {replyPending ? t.replySending : t.replySend}
               </button>
             </div>
           </div>
@@ -214,6 +250,7 @@ export function CommentCard({
                 onReply={onReply}
                 onLike={onLike}
                 isReply
+                t={t}
               />
             ))}
           </div>

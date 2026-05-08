@@ -6,6 +6,41 @@ import { ReviewModal } from './ReviewModal'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, MessageCircle, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type CommentsT = Dictionary['submissionDetail']['comments']
+type ReviewT = Dictionary['submissionDetail']['review']
+
+const FALLBACK_COMMENTS_T: CommentsT = {
+  sectionTitle: 'Commentaires',
+  countSingular: '{n} commentaire',
+  countPlural: '{n} commentaires',
+  commentCta: 'Laisser un commentaire',
+  cantCommentOwn: 'Tu ne peux pas commenter ton propre travail',
+  freeLimitTitle: '{n} commentaires/jour — limite atteinte',
+  freeLimitBody: 'Passe en Pro pour commenter sans limite',
+  emptyState: 'Sois le premier à laisser un commentaire !',
+  likeAria: 'Liker',
+  unlikeAria: 'Retirer le like',
+  reply: 'Répondre',
+  replyPlaceholder: 'Écris ta réponse…',
+  replyCancel: 'Annuler',
+  replySend: 'Répondre →',
+  replySending: 'Envoi…',
+  report: 'Signaler',
+  reported: '✓ Signalé',
+  delete: 'Supprimer',
+  confirmReport: 'Signaler ce commentaire ?',
+  confirmDelete: 'Supprimer ce commentaire ?',
+  genericError: 'Erreur',
+  timeAgo: {
+    justNow: 'à l\'instant',
+    minutes: 'il y a {n}m',
+    hours: 'il y a {n}h',
+    days: 'il y a {n}j',
+  },
+}
 
 interface CommentSectionProps {
   submissionId: string
@@ -17,6 +52,8 @@ interface CommentSectionProps {
   initialCommentsCount?: number
   /** Stretch trigger button to fill its container width */
   fullWidthTrigger?: boolean
+  t?: CommentsT
+  tReview?: ReviewT
 }
 
 const FREE_LIMIT = 5
@@ -30,6 +67,8 @@ export function CommentSection({
   initialTotalLikes = 0,
   initialCommentsCount = 0,
   fullWidthTrigger = false,
+  t = FALLBACK_COMMENTS_T,
+  tReview,
 }: CommentSectionProps) {
   const [comments, setComments] = useState<ReviewComment[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -128,7 +167,7 @@ export function CommentSection({
     const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      throw new Error(data.error ?? 'Erreur')
+      throw new Error(data.error ?? t.genericError)
     }
     const removed = comments.find((c) => c.id === commentId)
     if (removed && !removed.parent_id) {
@@ -145,7 +184,7 @@ export function CommentSection({
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      throw new Error(data.error ?? 'Erreur')
+      throw new Error(data.error ?? t.genericError)
     }
     const json = await res.json()
     setComments((prev) => [...prev, json.comment])
@@ -158,7 +197,7 @@ export function CommentSection({
         <button
           onClick={handleLike}
           disabled={isOwner || likePending}
-          aria-label={liked ? 'Retirer le like' : 'Liker'}
+          aria-label={liked ? t.unlikeAria : t.likeAria}
           className={cn(
             'inline-flex items-center gap-1.5 text-sm font-semibold transition-colors',
             isOwner ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
@@ -176,7 +215,7 @@ export function CommentSection({
           size="sm"
         >
           <MessageSquare className="size-4" />
-          Laisser un commentaire
+          {t.commentCta}
         </Button>
 
         <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
@@ -186,24 +225,26 @@ export function CommentSection({
       </div>
 
       {isOwner && (
-        <p className="text-xs text-muted-foreground text-center">Tu ne peux pas commenter ton propre travail</p>
+        <p className="text-xs text-muted-foreground text-center">{t.cantCommentOwn}</p>
       )}
       {isFreeLimited && !isOwner && (
         <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-2xl p-3 text-center">
           <p className="text-xs font-medium text-violet-800 dark:text-violet-300">
-            {FREE_LIMIT} commentaires/jour — limite atteinte
+            {tx(t.freeLimitTitle, { n: FREE_LIMIT })}
           </p>
-          <p className="text-[11px] text-violet-600 dark:text-violet-400">Passe en Pro pour commenter sans limite</p>
+          <p className="text-[11px] text-violet-600 dark:text-violet-400">{t.freeLimitBody}</p>
         </div>
       )}
 
-      <ReviewModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleSubmit} />
+      <ReviewModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleSubmit} t={tReview} />
 
       {/* Comments list */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-base">Commentaires</h3>
-          <span className="text-sm text-muted-foreground">{comments.length} commentaire{comments.length !== 1 ? 's' : ''}</span>
+          <h3 className="font-semibold text-base">{t.sectionTitle}</h3>
+          <span className="text-sm text-muted-foreground">
+            {tx(comments.length === 1 ? t.countSingular : t.countPlural, { n: comments.length })}
+          </span>
         </div>
 
         {isLoading ? (
@@ -233,7 +274,7 @@ export function CommentSection({
             return (
               <div className="text-center py-10">
                 <p className="text-2xl mb-2">💬</p>
-                <p className="text-sm text-muted-foreground">Sois le premier à laisser un commentaire !</p>
+                <p className="text-sm text-muted-foreground">{t.emptyState}</p>
               </div>
             )
           }
@@ -247,6 +288,7 @@ export function CommentSection({
               onDelete={handleDelete}
               onReply={handleReply}
               onLike={handleCommentLike}
+              t={t}
             />
           ))
         })()}
