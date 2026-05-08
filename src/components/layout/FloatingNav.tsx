@@ -14,16 +14,25 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import type { Profile } from '@/types/database.types'
 import { leagueLabel, leagueColor } from '@/lib/utils/xp'
+import type { Lang } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-const NAV = [
-  { href: '/dashboard',             label: 'Dashboard',  icon: House,     match: (p: string) => p === '/dashboard' },
-  { href: '/dashboard/challenges',  label: 'Challenges', icon: Trophy,    match: (p: string) => p.startsWith('/dashboard/challenges') },
-  { href: '/dashboard/leaderboard', label: 'Leagues',    icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
+const NAV_BASE = [
+  { href: '/dashboard',             icon: House,     match: (p: string) => p === '/dashboard',                key: 'dashboard'  as const },
+  { href: '/dashboard/challenges',  icon: Trophy,    match: (p: string) => p.startsWith('/dashboard/challenges'),  key: 'challenges' as const },
+  { href: '/dashboard/leaderboard', icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard'), key: 'leagues'    as const },
 ]
 
-export function FloatingNav({ profile }: { profile: Profile }) {
+interface Props {
+  profile: Profile
+  lang: Lang
+  t: Dictionary['header']
+}
+
+export function FloatingNav({ profile, lang, t }: Props) {
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -68,8 +77,9 @@ export function FloatingNav({ profile }: { profile: Profile }) {
           mounted ? 'opacity-100' : 'opacity-0'
         )}
       >
-        {NAV.map(({ href, label, match }) => {
+        {NAV_BASE.map(({ href, key, match }) => {
           const active = match(pathname)
+          const label = t.nav[key]
           return (
             <Link
               key={href}
@@ -118,35 +128,40 @@ export function FloatingNav({ profile }: { profile: Profile }) {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl mt-1">
+          <DropdownMenuContent align="end" className="w-56 rounded-xl mt-1">
             <div className="px-3 py-2 border-b border-border mb-1">
               <p className="text-sm font-semibold inline-flex items-center gap-1.5">
                 @{profile.username}
                 <ProBadge plan={profile.plan} />
               </p>
-              <p className="text-xs text-muted-foreground font-mono capitalize">{profile.plan} plan</p>
+              <p className="text-xs text-muted-foreground font-mono capitalize">{profile.plan} {t.menu.planSuffix}</p>
             </div>
             <DropdownMenuItem>
-              <Link href={`/u/${profile.username}`} className="w-full text-sm font-medium">Profil public</Link>
+              <Link href={`/u/${profile.username}`} className="w-full text-sm font-medium">{t.menu.publicProfile}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/profile" className="w-full text-sm font-medium">Modifier le profil</Link>
+              <Link href="/dashboard/profile" className="w-full text-sm font-medium">{t.menu.editProfile}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/settings" className="w-full text-sm font-medium">Paramètres</Link>
+              <Link href="/dashboard/settings" className="w-full text-sm font-medium">{t.menu.settings}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/notifications" className="w-full text-sm font-medium">Notifications</Link>
+              <Link href="/dashboard/notifications" className="w-full text-sm font-medium">{t.menu.notifications}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <div className="px-2 py-1.5 space-y-2">
+              <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Language</p>
+              <LangSwitcher current={lang} variant="pill" />
+            </div>
+            <DropdownMenuSeparator />
             <div className="px-2 py-1.5">
-              <p className="text-sm text-muted-foreground mb-2">Apparence</p>
+              <p className="text-sm text-muted-foreground mb-2">{t.menu.appearance}</p>
               <ThemeToggle />
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">
-                <button type="submit" className="w-full text-left text-sm">Se déconnecter</button>
+                <button type="submit" className="w-full text-left text-sm">{t.menu.signOut}</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -164,8 +179,9 @@ export function FloatingNav({ profile }: { profile: Profile }) {
       )}
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
-      {NAV.map(({ href, label, icon: Icon, match }) => {
+      {NAV_BASE.map(({ href, key, icon: Icon, match }) => {
         const active = match(pathname)
+        const label = t.nav[key]
         return (
           <Link
             key={href}

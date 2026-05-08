@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
+import { getDict, tx } from '@/lib/i18n/lang'
 import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
@@ -258,6 +259,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     profile?.username ||
     'Designer'
 
+  const dict = await getDict()
+
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4 sm:space-y-6">
 
@@ -342,7 +345,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       />
 
       <p className="text-center text-xs text-muted-foreground pb-8">
-        Keep going, {firstName}. Tomorrow&apos;s another XP day. 🌟
+        {tx(dict.dashboard.keepGoing, { name: firstName })}
       </p>
     </div>
   )
