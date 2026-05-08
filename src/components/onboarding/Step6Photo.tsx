@@ -5,6 +5,9 @@ import { Camera, Check, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step6Props {
   avatarUrl: string
@@ -12,6 +15,8 @@ interface Step6Props {
   onBack: () => void
   onSkip: () => void
   saving?: boolean
+  t: OnbT['step6']
+  tc: OnbT['common']
 }
 
 const MAX_MB = 5
@@ -57,7 +62,7 @@ function compressImage(file: File): Promise<Blob> {
   })
 }
 
-export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6Props) {
+export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving, t, tc }: Step6Props) {
   const [photo, setPhoto] = useState(avatarUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -67,7 +72,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
   const upload = useCallback(async (file: File) => {
     setError(null)
     if (!file.type.startsWith('image/')) {
-      setError('Please choose an image file')
+      setError(t.errorImageOnly)
       return
     }
     setUploading(true)
@@ -76,7 +81,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error(t.errorNotAuth)
       const blob = await compressImage(file)
       const path = `${user.id}/${Date.now()}.jpg`
       const { error: upErr } = await supabase.storage
@@ -88,11 +93,11 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
       } = supabase.storage.from('avatars').getPublicUrl(path)
       setPhoto(publicUrl)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      setError(err instanceof Error ? err.message : t.errorUploadFailed)
     } finally {
       setUploading(false)
     }
-  }, [])
+  }, [t])
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -103,10 +108,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
 
   return (
     <div>
-      <StepHeader
-        title="Add your profile photo 📸"
-        subtitle="Put a face to your work — designers with photos get 3x more views."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       {photo ? (
         <div className="flex flex-col items-center">
@@ -126,7 +128,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
             disabled={uploading}
             className="mt-4 text-sm font-medium text-primary hover:opacity-80 underline underline-offset-4 disabled:opacity-50"
           >
-            {uploading ? 'Uploading…' : 'Change photo'}
+            {uploading ? t.uploading : t.changePhoto}
           </button>
         </div>
       ) : (
@@ -147,14 +149,14 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
           {uploading ? (
             <>
               <Loader2 className="size-10 mx-auto text-primary animate-spin" />
-              <p className="mt-3 text-sm text-muted-foreground">Uploading…</p>
+              <p className="mt-3 text-sm text-muted-foreground">{t.uploading}</p>
             </>
           ) : (
             <>
               <Camera className="size-10 mx-auto text-muted-foreground" strokeWidth={1.5} />
-              <p className="mt-3 text-sm font-semibold text-foreground">Drop your photo here</p>
-              <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
-              <p className="text-[11px] text-muted-foreground/70 mt-3">PNG, JPG — Max 5MB</p>
+              <p className="mt-3 text-sm font-semibold text-foreground">{t.dropHere}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t.orBrowse}</p>
+              <p className="text-[11px] text-muted-foreground/70 mt-3">{t.formatHint}</p>
             </>
           )}
         </div>
@@ -176,7 +178,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -185,7 +187,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
 
@@ -194,7 +196,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving }: Step6P
         onClick={onSkip}
         className="mx-auto block mt-4 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
       >
-        Skip for now →
+        {tc.skip}
       </button>
     </div>
   )

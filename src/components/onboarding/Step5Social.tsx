@@ -12,6 +12,10 @@ import {
   slugifyPlatform,
 } from './socials'
 import type { Specialty } from './types'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step5Props {
   specialty: Specialty
@@ -20,11 +24,13 @@ interface Step5Props {
   onBack: () => void
   onSkip: () => void
   saving?: boolean
+  t: OnbT['step5']
+  tc: OnbT['common']
 }
 
 const isValidUrl = (v: string) => v.length === 0 || v.trim().toLowerCase().startsWith('https://')
 
-export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }: Step5Props) {
+export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving, t, tc }: Step5Props) {
   const [activeKeys, setActiveKeys] = useState<string[]>(() => Object.keys(links))
   const [values, setValues] = useState<Record<string, string>>(() => ({ ...links }))
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -74,16 +80,16 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
     setCustomError(null)
     const name = customName.trim()
     if (!name) {
-      setCustomError('Give it a name')
+      setCustomError(t.errorName)
       return
     }
     if (!isValidUrl(customUrl)) {
-      setCustomError('URL must start with https://')
+      setCustomError(t.errorUrl)
       return
     }
     const key = slugifyPlatform(name)
     if (!key) {
-      setCustomError('Invalid name')
+      setCustomError(t.errorInvalidName)
       return
     }
     if (!SOCIAL_DEFS[key]) {
@@ -106,7 +112,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
     const newErrors: Record<string, string> = {}
     for (const key of activeKeys) {
       const v = (values[key] ?? '').trim()
-      if (v && !isValidUrl(v)) newErrors[key] = 'URL must start with https://'
+      if (v && !isValidUrl(v)) newErrors[key] = t.errorUrl
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -123,10 +129,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
 
   return (
     <div>
-      <StepHeader
-        title="Connect your portfolio 🔗"
-        subtitle="Add the platforms where you share your work."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       {activeKeys.length > 0 && (
         <div className="space-y-3 mb-6">
@@ -151,7 +154,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
                   <button
                     type="button"
                     onClick={() => removeNetwork(key)}
-                    aria-label={`Remove ${def.name}`}
+                    aria-label={tx(t.removeAria, { name: def.name })}
                     className="size-9 inline-flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
                   >
                     <X className="size-4" />
@@ -171,7 +174,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
       {suggestedKeys.length > 0 && (
         <div>
           <p className="text-sm font-semibold text-foreground mb-3">
-            {activeKeys.length === 0 ? 'Where can people find you?' : 'Add another network'}
+            {activeKeys.length === 0 ? t.whereFindYou : t.addAnother}
           </p>
           <div className="flex flex-wrap gap-2">
             {suggestedKeys.map((key) => {
@@ -197,7 +200,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
         {showCustom ? (
           <div className="rounded-[var(--radius-card)] border border-border bg-card p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-foreground">Add a custom platform</p>
+              <p className="text-sm font-semibold text-foreground">{t.addCustomTitle}</p>
               <button
                 type="button"
                 onClick={() => {
@@ -205,7 +208,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
                   setCustomError(null)
                 }}
                 className="text-muted-foreground hover:text-foreground"
-                aria-label="Close"
+                aria-label={t.closeAria}
               >
                 <X className="size-4" />
               </button>
@@ -215,20 +218,20 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Platform name"
+                placeholder={t.customNamePlaceholder}
                 className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
               />
               <input
                 type="url"
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
-                placeholder="https://..."
+                placeholder={t.customUrlPlaceholder}
                 className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
               />
             </div>
             {customError && <p className="text-xs text-destructive">{customError}</p>}
             <Button type="button" onClick={submitCustom} size="sm" className="w-full sm:w-auto">
-              Add platform
+              {t.addCustomButton}
             </Button>
           </div>
         ) : (
@@ -238,14 +241,14 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80"
           >
             <Plus className="size-3.5" strokeWidth={2.5} />
-            Add a custom platform
+            {t.addCustomCta}
           </button>
         )}
       </div>
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -254,7 +257,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
 
@@ -263,7 +266,7 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving }
         onClick={onSkip}
         className="mx-auto block mt-4 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
       >
-        Skip for now →
+        {tc.skip}
       </button>
     </div>
   )

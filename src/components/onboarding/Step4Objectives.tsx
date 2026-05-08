@@ -5,31 +5,26 @@ import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { type Objective } from './types'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step4Props {
   objectives: Objective[]
   onNext: (data: { objectives: Objective[] }) => void
   onBack: () => void
   saving?: boolean
+  t: OnbT['step4']
+  tc: OnbT['common']
 }
 
-const OPTIONS: Array<{ value: Objective; icon: string; title: string; subtitle: string }> = [
-  {
-    value: 'getting_hired',
-    icon: '💼',
-    title: 'Getting hired',
-    subtitle: 'Land your first design job',
-  },
-  {
-    value: 'improving_skills',
-    icon: '📈',
-    title: 'Improving my skills',
-    subtitle: 'Level up through challenges',
-  },
-]
-
-export function Step4Objectives({ objectives, onNext, onBack, saving }: Step4Props) {
+export function Step4Objectives({ objectives, onNext, onBack, saving, t, tc }: Step4Props) {
   const [selected, setSelected] = useState<Objective[]>(objectives)
+
+  const OPTIONS: Array<{ value: Objective; icon: string; title: string; subtitle: string }> = [
+    { value: 'getting_hired', icon: '💼', title: t.hiredTitle, subtitle: t.hiredSubtitle },
+    { value: 'improving_skills', icon: '📈', title: t.improveTitle, subtitle: t.improveSubtitle },
+  ]
 
   const toggle = (value: Objective) => {
     setSelected((prev) =>
@@ -41,10 +36,7 @@ export function Step4Objectives({ objectives, onNext, onBack, saving }: Step4Pro
 
   return (
     <div>
-      <StepHeader
-        title="What's your main goal? 🎯"
-        subtitle="We'll personalize your experience based on your objectives."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="space-y-3">
         {OPTIONS.map((opt) => {
@@ -79,7 +71,7 @@ export function Step4Objectives({ objectives, onNext, onBack, saving }: Step4Pro
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -88,7 +80,7 @@ export function Step4Objectives({ objectives, onNext, onBack, saving }: Step4Pro
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
     </div>

@@ -3,15 +3,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step1Props {
   firstName: string
   lastName: string
   onNext: (data: { firstName: string; lastName: string }) => void
   saving?: boolean
+  t: OnbT['step1']
+  tc: OnbT['common']
 }
 
-export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Props) {
+export function Step1BasicInfo({ firstName, lastName, onNext, saving, t, tc }: Step1Props) {
   const [first, setFirst] = useState(firstName)
   const [last, setLast] = useState(lastName)
   const [firstError, setFirstError] = useState<string | null>(null)
@@ -28,11 +33,11 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
   const validate = () => {
     let ok = true
     if (!first.trim()) {
-      setFirstError('Please enter your first name')
+      setFirstError(t.firstNameError)
       ok = false
     }
     if (!last.trim()) {
-      setLastError('Please enter your last name')
+      setLastError(t.lastNameError)
       ok = false
     }
     return ok
@@ -52,14 +57,11 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
 
   return (
     <div>
-      <StepHeader
-        title="Let's get started 👋"
-        subtitle="Tell us your name to personalize your experience."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">First Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">{t.firstNameLabel}</label>
           <input
             ref={firstRef}
             type="text"
@@ -69,7 +71,7 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
               if (firstError) setFirstError(null)
             }}
             onBlur={() => {
-              if (!first.trim()) setFirstError('Please enter your first name')
+              if (!first.trim()) setFirstError(t.firstNameError)
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -77,14 +79,14 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
                 lastRef.current?.focus()
               }
             }}
-            placeholder="e.g. Sara"
+            placeholder={t.firstNamePlaceholder}
             className={inputCls(firstError)}
           />
           {firstError && <p className="text-xs text-destructive mt-1.5">{firstError}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Last Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">{t.lastNameLabel}</label>
           <input
             ref={lastRef}
             type="text"
@@ -94,7 +96,7 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
               if (lastError) setLastError(null)
             }}
             onBlur={() => {
-              if (!last.trim()) setLastError('Please enter your last name')
+              if (!last.trim()) setLastError(t.lastNameError)
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -102,7 +104,7 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
                 submit()
               }
             }}
-            placeholder="e.g. Essalah"
+            placeholder={t.lastNamePlaceholder}
             className={inputCls(lastError)}
           />
           {lastError && <p className="text-xs text-destructive mt-1.5">{lastError}</p>}
@@ -115,7 +117,7 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving }: Step1Pro
           size="lg"
           className="w-full h-12 mt-2"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
     </div>

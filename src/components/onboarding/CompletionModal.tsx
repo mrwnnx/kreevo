@@ -1,13 +1,18 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type CompletionT = Dictionary['onboarding']['completion']
 
 interface CompletionModalProps {
   firstName: string
   onStart: () => void
+  t: CompletionT
 }
 
-export function CompletionModal({ firstName, onStart }: CompletionModalProps) {
+export function CompletionModal({ firstName, onStart, t }: CompletionModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 supports-[backdrop-filter]:backdrop-blur-sm px-4 onb-overlay">
       <div className="onb-pop relative w-full max-w-md rounded-[var(--radius-card)] bg-popover text-popover-foreground border border-border p-8 sm:p-10 shadow-lg text-center">
@@ -16,15 +21,15 @@ export function CompletionModal({ firstName, onStart }: CompletionModalProps) {
           🎉
         </div>
         <h2 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          You&apos;re all set, {firstName}!
+          {tx(t.title, { firstName })}
         </h2>
         <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-          Your Kreevo profile is ready.
+          {t.bodyLine1}
           <br />
-          Time to show the MENA design world what you&apos;re made of.
+          {t.bodyLine2}
         </p>
         <Button onClick={onStart} size="lg" className="mt-7 w-full h-12">
-          Start exploring →
+          {t.cta}
         </Button>
       </div>
 

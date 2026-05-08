@@ -5,6 +5,9 @@ import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { type ExperienceLevel, type Specialty } from './types'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step2Props {
   specialty: Specialty
@@ -12,33 +15,9 @@ interface Step2Props {
   onNext: (data: { specialty: Specialty; experienceLevel: ExperienceLevel }) => void
   onBack: () => void
   saving?: boolean
+  t: OnbT['step2']
+  tc: OnbT['common']
 }
-
-const SPECIALTIES: Array<{
-  value: 'ux_ui' | 'graphic'
-  icon: string
-  label: string
-  description: string
-}> = [
-  {
-    value: 'ux_ui',
-    icon: '✏️',
-    label: 'UX/UI Designer',
-    description: 'Design digital experiences and interfaces',
-  },
-  {
-    value: 'graphic',
-    icon: '🎨',
-    label: 'Graphic Designer',
-    description: 'Create visual identities and brand assets',
-  },
-]
-
-const LEVELS: Array<{ value: ExperienceLevel; label: string }> = [
-  { value: 'entry', label: 'Entry Level' },
-  { value: 'junior', label: 'Junior' },
-  { value: 'senior', label: 'Senior' },
-]
 
 export function Step2Specialty({
   specialty,
@@ -46,22 +25,37 @@ export function Step2Specialty({
   onNext,
   onBack,
   saving,
+  t,
+  tc,
 }: Step2Props) {
   const [selSpec, setSelSpec] = useState<Specialty>(specialty)
   const [selLevel, setSelLevel] = useState<ExperienceLevel>(experienceLevel)
+
+  const SPECIALTIES: Array<{
+    value: 'ux_ui' | 'graphic'
+    icon: string
+    label: string
+    description: string
+  }> = [
+    { value: 'ux_ui', icon: '✏️', label: t.uxuiLabel, description: t.uxuiDescription },
+    { value: 'graphic', icon: '🎨', label: t.graphicLabel, description: t.graphicDescription },
+  ]
+
+  const LEVELS: Array<{ value: ExperienceLevel; label: string }> = [
+    { value: 'entry', label: t.levelEntry },
+    { value: 'junior', label: t.levelJunior },
+    { value: 'senior', label: t.levelSenior },
+  ]
 
   const canSubmit = !!selSpec && !saving
 
   return (
     <div>
-      <StepHeader
-        title="What's your specialty? 🎯"
-        subtitle="Pick your discipline and tell us where you're at."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-semibold text-foreground mb-3">Your specialty</p>
+          <p className="text-sm font-semibold text-foreground mb-3">{t.specialtyLabel}</p>
           <div className="space-y-3">
             {SPECIALTIES.map((s) => {
               const selected = selSpec === s.value
@@ -95,7 +89,7 @@ export function Step2Specialty({
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-foreground mb-3">Your experience level</p>
+          <p className="text-sm font-semibold text-foreground mb-3">{t.experienceLabel}</p>
           <div className="flex gap-2">
             {LEVELS.map((lvl) => {
               const active = selLevel === lvl.value
@@ -120,7 +114,7 @@ export function Step2Specialty({
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -129,7 +123,7 @@ export function Step2Specialty({
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
     </div>

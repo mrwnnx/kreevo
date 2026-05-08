@@ -5,15 +5,20 @@ import { Check, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { ALL_COUNTRIES, MENA_SUGGESTED } from './countries'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step7Props {
   country: string
   onNext: (data: { country: string }) => void
   onBack: () => void
   saving?: boolean
+  t: OnbT['step7']
+  tc: OnbT['common']
 }
 
-export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
+export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7Props) {
   const [value, setValue] = useState(country)
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -45,12 +50,9 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
 
   return (
     <div>
-      <StepHeader
-        title="Where are you based? 📍"
-        subtitle="Help us connect you with designers from your region."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
-      <label className="block text-sm font-medium text-foreground mb-2">Country</label>
+      <label className="block text-sm font-medium text-foreground mb-2">{t.countryLabel}</label>
       <div ref={wrapRef} className="relative">
         <div
           onClick={() => setOpen(true)}
@@ -65,7 +67,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search your country..."
+              placeholder={t.searchPlaceholder}
               className="w-full h-full bg-transparent pl-10 pr-4 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           ) : (
@@ -79,7 +81,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
                   <MapPin className="size-3.5 text-primary" /> {value}
                 </span>
               ) : (
-                <span className="text-muted-foreground">Search your country...</span>
+                <span className="text-muted-foreground">{t.searchPlaceholder}</span>
               )}
             </button>
           )}
@@ -90,7 +92,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
             {list.suggested.length > 0 && (
               <>
                 <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Suggested
+                  {t.suggestedLabel}
                 </p>
                 {list.suggested.map((c) => (
                   <CountryRow key={c} country={c} selected={value === c} onSelect={select} />
@@ -100,7 +102,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
             {list.others.length > 0 && (
               <>
                 <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  All countries
+                  {t.allLabel}
                 </p>
                 {list.others.map((c) => (
                   <CountryRow key={c} country={c} selected={value === c} onSelect={select} />
@@ -109,7 +111,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
             )}
             {list.suggested.length === 0 && list.others.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                No country found
+                {t.noCountry}
               </p>
             )}
           </div>
@@ -118,7 +120,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -127,7 +129,7 @@ export function Step7Location({ country, onNext, onBack, saving }: Step7Props) {
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Complete my profile →'}
+          {saving ? tc.saving : t.completeCta}
         </Button>
       </div>
     </div>

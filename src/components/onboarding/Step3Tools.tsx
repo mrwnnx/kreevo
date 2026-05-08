@@ -5,6 +5,10 @@ import { Check, ChevronDown, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StepHeader } from './StepHeader'
 import { TOOLS_BY_SPECIALTY, type Specialty } from './types'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type OnbT = Dictionary['onboarding']
 
 interface Step3Props {
   specialty: Specialty
@@ -12,15 +16,17 @@ interface Step3Props {
   onNext: (data: { tools: string[] }) => void
   onBack: () => void
   saving?: boolean
+  t: OnbT['step3']
+  tc: OnbT['common']
 }
 
-export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Props) {
+export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: Step3Props) {
   const available = useMemo(
     () => (specialty ? TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic'] : []),
     [specialty]
   )
   const [selTools, setSelTools] = useState<string[]>(() =>
-    tools.filter((t) => available.includes(t))
+    tools.filter((tool) => available.includes(tool))
   )
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -40,23 +46,20 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return available
-    return available.filter((t) => t.toLowerCase().includes(q))
+    return available.filter((tool) => tool.toLowerCase().includes(q))
   }, [query, available])
 
   const toggleTool = (tool: string) => {
-    setSelTools((prev) => (prev.includes(tool) ? prev.filter((t) => t !== tool) : [...prev, tool]))
+    setSelTools((prev) => (prev.includes(tool) ? prev.filter((x) => x !== tool) : [...prev, tool]))
   }
-  const removeTool = (tool: string) => setSelTools((prev) => prev.filter((t) => t !== tool))
+  const removeTool = (tool: string) => setSelTools((prev) => prev.filter((x) => x !== tool))
 
   return (
     <div>
-      <StepHeader
-        title="Which tools do you use? 🧰"
-        subtitle="Pick everything you're comfortable with."
-      />
+      <StepHeader title={t.title} subtitle={t.subtitle} />
 
       <div ref={wrapRef}>
-        <p className="text-sm font-semibold text-foreground mb-2">Tools you use</p>
+        <p className="text-sm font-semibold text-foreground mb-2">{t.label}</p>
 
         <div className="relative">
           <button
@@ -68,8 +71,8 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
           >
             <span className={selTools.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
               {selTools.length === 0
-                ? 'Select your tools…'
-                : `${selTools.length} tool${selTools.length > 1 ? 's' : ''} selected`}
+                ? t.placeholder
+                : tx(selTools.length === 1 ? t.countSingular : t.countPlural, { n: selTools.length })}
             </span>
             <ChevronDown
               className={`size-4 text-muted-foreground transition-transform ${
@@ -87,14 +90,14 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search tools…"
+                  placeholder={t.searchPlaceholder}
                   className="w-full h-9 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                 />
               </div>
               <div className="max-h-64 overflow-auto p-1">
                 {filtered.length === 0 ? (
                   <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                    {available.length === 0 ? 'Pick a specialty first' : 'No tools match'}
+                    {available.length === 0 ? t.pickSpecialtyFirst : t.noToolsMatch}
                   </p>
                 ) : (
                   filtered.map((tool) => {
@@ -130,7 +133,7 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
                 <button
                   type="button"
                   onClick={() => removeTool(tool)}
-                  aria-label={`Remove ${tool}`}
+                  aria-label={tx(t.removeAria, { tool })}
                   className="hover:opacity-70"
                 >
                   <X className="size-3" strokeWidth={2.5} />
@@ -139,15 +142,13 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground mt-2">
-            Selected tools will appear here as removable chips.
-          </p>
+          <p className="text-xs text-muted-foreground mt-2">{t.hint}</p>
         )}
       </div>
 
       <div className="flex gap-3 mt-8">
         <Button type="button" onClick={onBack} variant="outline" size="lg" className="h-12">
-          ← Back
+          {tc.back}
         </Button>
         <Button
           type="button"
@@ -156,7 +157,7 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving }: Step3Pr
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? 'Saving…' : 'Continue →'}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
     </div>
