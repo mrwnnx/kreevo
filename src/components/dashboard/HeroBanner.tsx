@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getDashboardState, getHeroConfig, CHALLENGE_TIPS } from '@/lib/utils/dashboard'
+import { getDashboardState, getHeroConfig } from '@/lib/utils/dashboard'
+import { tx } from '@/lib/i18n/lang'
+import type { Lang } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface HeroBannerProps {
   profile: any
@@ -19,6 +22,8 @@ interface HeroBannerProps {
   suggestedChallenge: any | null
   completedTotal: number
   completedToday: number
+  lang: Lang
+  t: Dictionary['dashboard']['heroBanner']
 }
 
 export function HeroBanner({
@@ -34,6 +39,8 @@ export function HeroBanner({
   suggestedChallenge,
   completedTotal,
   completedToday,
+  lang,
+  t,
 }: HeroBannerProps) {
   const firstName =
     profile?.first_name ||
@@ -59,6 +66,8 @@ export function HeroBanner({
     xpToday,
     suggestedChallenge,
     completedTotal,
+    lang,
+    t,
   })
 
   // Countdown pour état urgent
@@ -79,9 +88,9 @@ export function HeroBanner({
     return () => clearInterval(id)
   }, [state, participation])
 
-  // Tip contextuel si défi actif
+  // Tip contextuel si défi actif (fallback FR si la clé n'existe pas)
   const tip = participation?.challenges?.challenge_type
-    ? CHALLENGE_TIPS[participation.challenges.challenge_type]
+    ? t.tips[participation.challenges.challenge_type]
     : null
 
   return (
@@ -150,15 +159,15 @@ export function HeroBanner({
 
       {tip && state === 'active' && (
         <div className="hidden sm:block absolute bottom-12 right-6 max-w-[35%] bg-white/10 backdrop-blur-sm rounded-xl p-3">
-          <p className="text-xs text-white/60 mb-1">💡 Tip</p>
+          <p className="text-xs text-white/60 mb-1">{t.tipLabel}</p>
           <p className="text-xs text-white/90 leading-relaxed">{tip}</p>
         </div>
       )}
 
       <div className="absolute bottom-0 left-0 right-0 px-5 sm:px-8 pb-4">
         <div className="flex justify-between text-xs text-white/50 mb-1">
-          <span>Today&apos;s progress</span>
-          <span>{completedToday} / 5 tasks</span>
+          <span>{t.todayProgress}</span>
+          <span>{tx(t.tasksLabel, { done: completedToday })}</span>
         </div>
         <div className="h-1 bg-white/20 rounded-full">
           <div
@@ -170,7 +179,7 @@ export function HeroBanner({
 
       {xpToday > 0 && (
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-400 text-amber-900 rounded-full px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold shadow-lg whitespace-nowrap">
-          +{xpToday} XP today
+          {tx(t.xpTodayBadge, { n: xpToday })}
         </div>
       )}
     </div>

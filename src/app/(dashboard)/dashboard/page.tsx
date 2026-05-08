@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
-import { getDict, tx } from '@/lib/i18n/lang'
+import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
@@ -259,7 +259,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     profile?.username ||
     'Designer'
 
-  const dict = await getDict()
+  const [dict, lang] = await Promise.all([getDict(), getLang()])
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4 sm:space-y-6">
@@ -279,6 +279,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         suggestedChallenge={suggestedChallenge}
         completedTotal={totalCompleted}
         completedToday={completedTodayCount || 0}
+        lang={lang}
+        t={dict.dashboard.heroBanner}
       />
 
       <div className="grid lg:grid-cols-2 gap-4">
