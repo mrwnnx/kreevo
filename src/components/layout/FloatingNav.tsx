@@ -61,39 +61,35 @@ export function FloatingNav({ profile }: { profile: Profile }) {
         <span className="hidden sm:inline text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
       </Link>
 
-      {/* Nav pill — center (desktop seulement) */}
-      <div className="hidden sm:flex flex-1 justify-center min-w-0">
-        <div
-          className={cn(
-            'flex items-center gap-0.5 px-1.5 py-1.5 rounded-full transition-opacity duration-300',
-            mounted ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{ background: 'var(--nav-pill-bg)' }}
-        >
-          {NAV.map(({ href, label, icon: Icon, match }) => {
-            const active = match(pathname)
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-label={label}
-                className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-150',
-                  active
-                    ? 'bg-foreground text-background shadow-sm'
-                    : 'text-zinc-500 hover:text-foreground hover:bg-foreground/[0.06] dark:text-zinc-400 dark:hover:text-white'
-                )}
-              >
-                <Icon className="size-[15px] shrink-0" strokeWidth={active ? 2.4 : 1.8} />
-                <span className="text-[13px] font-medium leading-none">{label}</span>
-              </Link>
-            )
-          })}
-        </div>
+      {/* Nav links — centered absolutely on the viewport (desktop only) */}
+      <div
+        className={cn(
+          'hidden sm:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-opacity duration-300',
+          mounted ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        {NAV.map(({ href, label, match }) => {
+          const active = match(pathname)
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-label={label}
+              className={cn(
+                'rounded-full px-3 py-1.5 transition-colors duration-150',
+                active
+                  ? 'text-foreground font-semibold'
+                  : 'text-zinc-500 hover:text-foreground dark:text-zinc-400 dark:hover:text-white'
+              )}
+            >
+              <span className="text-base leading-none">{label}</span>
+            </Link>
+          )
+        })}
       </div>
 
-      {/* Spacer mobile (pill rendue en bas en fixed) */}
-      <div className="flex-1 sm:hidden" />
+      {/* Spacer to push right actions to the edge */}
+      <div className="flex-1" />
 
       {/* Right — notifications + avatar */}
       <div className="shrink-0 flex items-center gap-1">
