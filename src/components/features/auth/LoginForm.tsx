@@ -6,8 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { signInWithEmail } from '@/app/(auth)/actions'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-export function LoginForm() {
+type AuthT = Dictionary['auth']
+
+interface LoginFormProps {
+  t: AuthT['login']
+  tc: AuthT['common']
+}
+
+export function LoginForm({ t, tc }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -22,31 +30,31 @@ export function LoginForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{tc.emailLabel}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={tc.emailPlaceholder}
           required
           autoComplete="email"
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{tc.passwordLabel}</Label>
           <Link
             href="/forgot-password"
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            Forgot password?
+            {t.forgotPassword}
           </Link>
         </div>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={tc.passwordPlaceholder}
           required
           autoComplete="current-password"
         />
@@ -57,13 +65,13 @@ export function LoginForm() {
       )}
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Signing in…' : 'Sign in'}
+        {isPending ? t.submitting : t.submit}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        No account?{' '}
+        {t.noAccount}{' '}
         <Link href="/signup" className="font-medium text-foreground hover:underline">
-          Sign up
+          {t.signupCta}
         </Link>
       </p>
     </form>

@@ -6,8 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { signUpWithEmail } from '@/app/(auth)/actions'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-export function SignupForm() {
+type AuthT = Dictionary['auth']
+
+interface SignupFormProps {
+  t: AuthT['signup']
+  tc: AuthT['common']
+}
+
+export function SignupForm({ t, tc }: SignupFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -25,36 +33,36 @@ export function SignupForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
+        <Label htmlFor="username">{t.usernameLabel}</Label>
         <Input
           id="username"
           name="username"
           type="text"
-          placeholder="yourhandle"
+          placeholder={t.usernamePlaceholder}
           required
           autoComplete="username"
           pattern="^[a-z0-9_]{3,20}$"
-          title="3–20 lowercase letters, numbers or underscores"
+          title={t.usernameTitle}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{tc.emailLabel}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={tc.emailPlaceholder}
           required
           autoComplete="email"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{tc.passwordLabel}</Label>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={tc.passwordPlaceholder}
           required
           autoComplete="new-password"
           minLength={8}
@@ -65,13 +73,13 @@ export function SignupForm() {
       {success && <p className="text-sm text-green-600">{success}</p>}
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? 'Creating account…' : 'Create account'}
+        {isPending ? t.submitting : t.submit}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
+        {t.hasAccount}{' '}
         <Link href="/login" className="font-medium text-foreground hover:underline">
-          Sign in
+          {t.loginCta}
         </Link>
       </p>
     </form>

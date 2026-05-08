@@ -797,6 +797,42 @@ export const fr = {
       defaultName: 'designer',
     },
   },
+  auth: {
+    common: {
+      orDivider: 'ou',
+      emailLabel: 'Email',
+      emailPlaceholder: 'toi@exemple.com',
+      passwordLabel: 'Mot de passe',
+      passwordPlaceholder: '••••••••',
+      checkEmail: 'Vérifie ton email pour confirmer ton compte.',
+      resetSent: 'Lien de réinitialisation envoyé à ton email.',
+    },
+    oauth: {
+      google: 'Google',
+      linkedin: 'LinkedIn',
+    },
+    login: {
+      title: 'Bon retour',
+      subtitle: 'Connecte-toi à ton compte',
+      forgotPassword: 'Mot de passe oublié ?',
+      submit: 'Se connecter',
+      submitting: 'Connexion…',
+      noAccount: 'Pas de compte ?',
+      signupCta: 'Créer un compte',
+    },
+    signup: {
+      title: 'Rejoins l\'arène',
+      subtitle: 'Crée ton profil designer',
+      invitedByFriend: '✨ Tu as été invité par un ami',
+      usernameLabel: 'Nom d\'utilisateur',
+      usernamePlaceholder: 'tonpseudo',
+      usernameTitle: '3 à 20 lettres minuscules, chiffres ou underscores',
+      submit: 'Créer mon compte',
+      submitting: 'Création du compte…',
+      hasAccount: 'Tu as déjà un compte ?',
+      loginCta: 'Se connecter',
+    },
+  },
 } as const
 
 type DeepStringify<T> = {

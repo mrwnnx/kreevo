@@ -2,9 +2,11 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getDict } from '@/lib/i18n/lang'
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
+  const dict = await getDict()
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -20,7 +22,7 @@ export async function signUpWithEmail(formData: FormData) {
   })
 
   if (error) return { error: error.message }
-  return { success: 'Check your email to confirm your account.' }
+  return { success: dict.auth.common.checkEmail }
 }
 
 export async function signInWithEmail(formData: FormData) {
@@ -72,6 +74,7 @@ export async function signOut() {
 
 export async function resetPassword(formData: FormData) {
   const supabase = await createClient()
+  const dict = await getDict()
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -79,5 +82,5 @@ export async function resetPassword(formData: FormData) {
   })
 
   if (error) return { error: error.message }
-  return { success: 'Password reset link sent to your email.' }
+  return { success: dict.auth.common.resetSent }
 }
