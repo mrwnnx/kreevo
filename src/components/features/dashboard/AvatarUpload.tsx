@@ -14,11 +14,32 @@ interface Props {
   onChange: (url: string) => void
 }
 
+// Try WebP first, fall back to JPEG on browsers that don't encode WebP.
+function encodeCanvas(canvas: HTMLCanvasElement, quality = 0.85): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob && blob.type === 'image/webp') {
+          resolve(blob)
+        } else {
+          canvas.toBlob(
+            (jpeg) => (jpeg ? resolve(jpeg) : reject(new Error('Encode failed'))),
+            'image/jpeg',
+            quality,
+          )
+        }
+      },
+      'image/webp',
+      quality,
+    )
+  })
+}
+
 function compress(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const src = URL.createObjectURL(file)
-    img.onload = () => {
+    img.onload = async () => {
       URL.revokeObjectURL(src)
       const MAX = 400
       let { width, height } = img
@@ -31,11 +52,11 @@ function compress(file: File): Promise<Blob> {
       canvas.width = width
       canvas.height = height
       canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
-      canvas.toBlob(
-        blob => blob ? resolve(blob) : reject(new Error('Compression failed')),
-        'image/jpeg',
-        0.85
-      )
+      try {
+        resolve(await encodeCanvas(canvas, 0.85))
+      } catch (e) {
+        reject(e instanceof Error ? e : new Error('Compression failed'))
+      }
     }
     img.onerror = () => reject(new Error('Image load failed'))
     img.src = src
@@ -67,10 +88,11 @@ export function AvatarUpload({ userId, value, name, league, onChange }: Props) {
     try {
       const blob = await compress(file)
       const supabase = createClient()
-      const path = `${userId}/avatar.jpg`
+      const isWebp = blob.type === 'image/webp'
+      const path = `${userId}/avatar.${isWebp ? 'webp' : 'jpg'}`
       const { error } = await supabase.storage
         .from('avatars')
-        .upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+        .upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: true })
       if (error) throw error
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
       // bust cache

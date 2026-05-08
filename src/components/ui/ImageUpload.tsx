@@ -27,11 +27,33 @@ export function ImageUpload({
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Encode the canvas, preferring WebP. Falls back to JPEG if WebP is unsupported
+  // by the browser (rare — Chrome 32+, FF 65+, Safari 14+).
+  const encode = (canvas: HTMLCanvasElement, quality: number): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob && blob.type === 'image/webp') {
+            resolve(blob)
+          } else {
+            canvas.toBlob(
+              (jpeg) => (jpeg ? resolve(jpeg) : reject(new Error('Encode failed'))),
+              'image/jpeg',
+              quality,
+            )
+          }
+        },
+        'image/webp',
+        quality,
+      )
+    })
+  }
+
   const compressImage = useCallback((file: File, maxMB: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image()
       const url = URL.createObjectURL(file)
-      img.onload = () => {
+      img.onload = async () => {
         URL.revokeObjectURL(url)
         const canvas = document.createElement('canvas')
         const maxPx = 1800
@@ -46,23 +68,17 @@ export function ImageUpload({
         const ctx = canvas.getContext('2d')!
         ctx.drawImage(img, 0, 0, width, height)
 
-        let quality = 0.85
-        const tryCompress = () => {
-          canvas.toBlob(
-            blob => {
-              if (!blob) return reject(new Error('Compression failed'))
-              if (blob.size <= maxMB * 1024 * 1024 || quality <= 0.3) {
-                resolve(blob)
-              } else {
-                quality -= 0.1
-                tryCompress()
-              }
-            },
-            'image/jpeg',
-            quality
-          )
+        try {
+          let quality = 0.85
+          let blob = await encode(canvas, quality)
+          while (blob.size > maxMB * 1024 * 1024 && quality > 0.3) {
+            quality -= 0.1
+            blob = await encode(canvas, quality)
+          }
+          resolve(blob)
+        } catch (e) {
+          reject(e instanceof Error ? e : new Error('Compression failed'))
         }
-        tryCompress()
       }
       img.onerror = () => reject(new Error('Failed to load image'))
       img.src = url
@@ -78,12 +94,14 @@ export function ImageUpload({
       if (!user) throw new Error('Not authenticated')
 
       const blob = await compressImage(file, maxSizeMB)
-      const ext = 'jpg'
+      // The actual MIME type drives the file extension and Storage Content-Type.
+      const isWebp = blob.type === 'image/webp'
+      const ext = isWebp ? 'webp' : 'jpg'
       const path = `${user.id}/${Date.now()}.${ext}`
 
       const { error: upErr } = await supabase.storage
         .from(bucket)
-        .upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+        .upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: true })
 
       if (upErr) throw upErr
 
