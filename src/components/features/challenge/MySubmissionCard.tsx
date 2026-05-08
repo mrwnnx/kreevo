@@ -58,18 +58,49 @@ export function MySubmissionCard({
     : null
   const canContest = status === 'rejected' && hoursSinceRejection !== null && hoursSinceRejection < CONTEST_WINDOW_HOURS
 
+  // Drafts are not yet publicly viewable → keep them as static (no link).
+  // Published submissions link to their detail page so the user can review,
+  // see comments/claps, share their work.
+  const detailHref = !isDraft ? `/dashboard/submissions/${submission.id}` : null
+
+  const cover = submission.cover_url && (
+    <div className="relative aspect-video overflow-hidden bg-muted">
+      <img
+        src={submission.cover_url}
+        alt={submission.title ?? 'Ma soumission'}
+        className={cn(
+          'w-full h-full object-cover transition-transform duration-300',
+          detailHref && 'group-hover:scale-[1.02]',
+        )}
+      />
+      <StatusBadge isDraft={isDraft} status={status} />
+    </div>
+  )
+
   return (
     <div className="rounded-xl border border-border overflow-hidden">
-      {submission.cover_url && (
-        <div className="relative aspect-video overflow-hidden bg-muted">
-          <img src={submission.cover_url} alt={submission.title ?? 'Ma soumission'} className="w-full h-full object-cover" />
-          <StatusBadge isDraft={isDraft} status={status} />
-        </div>
+      {detailHref && cover ? (
+        <Link href={detailHref} className="block group" aria-label="Voir ma soumission">
+          {cover}
+        </Link>
+      ) : (
+        cover
       )}
 
       <div className="p-3 space-y-2">
         <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Ma soumission</p>
-        {submission.title && <p className="text-sm font-semibold leading-snug line-clamp-2">{submission.title}</p>}
+        {submission.title && (
+          detailHref ? (
+            <Link
+              href={detailHref}
+              className="block text-sm font-semibold leading-snug line-clamp-2 hover:text-primary transition-colors"
+            >
+              {submission.title}
+            </Link>
+          ) : (
+            <p className="text-sm font-semibold leading-snug line-clamp-2">{submission.title}</p>
+          )
+        )}
 
         {!isDraft && <StatusInline status={status} rejectionReason={submission.rejection_reason} />}
 
