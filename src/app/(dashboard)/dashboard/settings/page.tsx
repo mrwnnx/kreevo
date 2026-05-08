@@ -36,7 +36,7 @@ export default async function SettingsPage() {
           <LangSwitcher current={lang} variant="radio" />
         </section>
 
-        <SettingsClient profile={profile as Profile} email={user?.email ?? ''} />
+        <SettingsClient profile={profile as Profile} email={user?.email ?? ''} t={dict.settings} />
       </div>
     </div>
   )

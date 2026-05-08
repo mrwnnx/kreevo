@@ -9,8 +9,20 @@ import { getLeagueLabel, getLeagueColor } from '@/lib/utils/xp'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
 import { CheckCircle, Loader2, Shield, Zap } from 'lucide-react'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-export function SettingsClient({ profile, email }: { profile: Profile; email: string }) {
+type SettingsT = Dictionary['settings']
+
+export function SettingsClient({
+  profile,
+  email,
+  t,
+}: {
+  profile: Profile
+  email: string
+  t: SettingsT
+}) {
   const [isPending, startTransition] = useTransition()
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -23,13 +35,13 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
   async function handlePasswordChange() {
     setError(null)
     setSuccess(null)
-    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return }
-    if (newPassword.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (newPassword !== confirmPassword) { setError(t.account.passwordsDontMatch); return }
+    if (newPassword.length < 8) { setError(t.account.passwordTooShort); return }
     startTransition(async () => {
       const supabase = createClient()
       const { error: err } = await supabase.auth.updateUser({ password: newPassword })
       if (err) { setError(err.message); return }
-      setSuccess('Password updated successfully')
+      setSuccess(t.account.passwordSuccess)
       setNewPassword('')
       setConfirmPassword('')
     })
@@ -43,15 +55,15 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
         <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
           <div className="flex items-center gap-2">
             <Zap className="size-4 text-primary" />
-            <h2 className="text-sm font-semibold">Plan & League</h2>
+            <h2 className="text-sm font-semibold">{t.plan.sectionTitle}</h2>
           </div>
         </div>
         <div className="p-5 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Current Plan</p>
+              <p className="text-sm font-medium">{t.plan.currentPlan}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {profile.plan === 'free' ? 'Free — accès aux ligues Stone et Bronze' : 'Pro — accès à toutes les ligues'}
+                {profile.plan === 'free' ? t.plan.freeDescription : t.plan.proDescription}
               </p>
             </div>
             <span className={cn(
@@ -64,13 +76,13 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
 
           {profile.plan === 'free' && (
             <Button size="sm" className="w-full">
-              Upgrade to Pro — Coming Soon
+              {t.plan.upgradeCta}
             </Button>
           )}
 
           <div className="pt-2 border-t border-border space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Ligue actuelle</span>
+              <span className="text-sm font-medium">{t.plan.currentLeague}</span>
               <span
                 className="text-xs font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-white"
                 style={{ backgroundColor: leagueColor }}
@@ -79,7 +91,7 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Total : {(profile.xp ?? 0).toLocaleString()} XP — la progression vers la prochaine ligue est visible sur le dashboard.
+              {tx(t.plan.total, { n: (profile.xp ?? 0).toLocaleString() })}
             </p>
           </div>
         </div>
@@ -90,36 +102,36 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
         <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
           <div className="flex items-center gap-2">
             <Shield className="size-4 text-primary" />
-            <h2 className="text-sm font-semibold">Account</h2>
+            <h2 className="text-sm font-semibold">{t.account.sectionTitle}</h2>
           </div>
         </div>
         <div className="p-5 space-y-4">
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Email</Label>
+            <Label className="text-xs text-muted-foreground">{t.account.email}</Label>
             <p className="text-sm font-medium">{email}</p>
           </div>
 
           <div className="pt-3 border-t border-border space-y-4">
-            <p className="text-sm font-medium">Change Password</p>
+            <p className="text-sm font-medium">{t.account.changePassword}</p>
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="newPw" className="text-xs">New Password</Label>
+                <Label htmlFor="newPw" className="text-xs">{t.account.newPassword}</Label>
                 <Input
                   id="newPw"
                   type="password"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  placeholder="Min 8 characters"
+                  placeholder={t.account.newPasswordPlaceholder}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPw" className="text-xs">Confirm Password</Label>
+                <Label htmlFor="confirmPw" className="text-xs">{t.account.confirmPassword}</Label>
                 <Input
                   id="confirmPw"
                   type="password"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat new password"
+                  placeholder={t.account.confirmPasswordPlaceholder}
                 />
               </div>
             </div>
@@ -132,7 +144,7 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
             )}
 
             <Button onClick={handlePasswordChange} disabled={isPending || !newPassword} size="sm">
-              {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Update Password'}
+              {isPending ? <Loader2 className="size-4 animate-spin" /> : t.account.updatePassword}
             </Button>
           </div>
         </div>
@@ -141,24 +153,24 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
       {/* Danger zone */}
       <section className="rounded-xl border border-destructive/30 overflow-hidden">
         <div className="px-5 py-4 border-b border-destructive/30 bg-destructive/5">
-          <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
+          <h2 className="text-sm font-semibold text-destructive">{t.danger.sectionTitle}</h2>
         </div>
         <div className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Delete Account</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Permanently delete your account and all data</p>
+              <p className="text-sm font-medium">{t.danger.deleteAccount}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.danger.deleteAccountBody}</p>
             </div>
             <Button
               variant="destructive"
               size="sm"
               onClick={() => {
-                if (confirm('Are you sure? This action cannot be undone.')) {
-                  alert('Contact support@kreevo.io to delete your account.')
+                if (confirm(t.danger.confirmDelete)) {
+                  alert(t.danger.contactSupport)
                 }
               }}
             >
-              Delete Account
+              {t.danger.deleteAccount}
             </Button>
           </div>
         </div>
