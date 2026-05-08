@@ -1,26 +1,30 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface WhatToDoNowProps {
   suggestedChallenge: any | null
   referralsCount: number
   profile: any
+  t: Dictionary['dashboard']['whatToDoNow']
 }
 
 export function WhatToDoNow({
   suggestedChallenge,
   referralsCount,
+  t,
 }: WhatToDoNowProps) {
   const actions = [
     {
       rank: '🥇',
       label: suggestedChallenge
-        ? `Compléter "${suggestedChallenge.title}"`
-        : 'Compléter un défi',
-      xp: `+${suggestedChallenge?.xp_reward || 200} XP`,
+        ? tx(t.complete, { title: suggestedChallenge.title })
+        : t.completeAny,
+      xp: tx(t.xp, { n: suggestedChallenge?.xp_reward || 200 }),
       detail: suggestedChallenge
-        ? `${suggestedChallenge.deadline_days} jours · ${suggestedChallenge.challenge_type}`
-        : 'Meilleure action pour monter',
+        ? tx(t.daysType, { days: suggestedChallenge.deadline_days, type: suggestedChallenge.challenge_type })
+        : t.bestAction,
       href: suggestedChallenge
         ? `/dashboard/challenges/${suggestedChallenge.id}`
         : '/dashboard/challenges',
@@ -28,17 +32,17 @@ export function WhatToDoNow({
     },
     {
       rank: '🥈',
-      label: 'Commenter 3 soumissions',
-      xp: '+30 XP',
-      detail: '5 min · boost ton streak',
+      label: t.commentSubmissions,
+      xp: tx(t.xp, { n: 30 }),
+      detail: t.commentDetail,
       href: '/dashboard/challenges',
       xpColor: 'text-blue-600',
     },
     {
       rank: '🥉',
-      label: referralsCount < 5 ? 'Inviter un ami' : 'Partager ton profil',
-      xp: '+50 XP',
-      detail: 'Instantané · partage ton lien',
+      label: referralsCount < 5 ? t.inviteFriend : t.shareProfile,
+      xp: tx(t.xp, { n: 50 }),
+      detail: t.shareDetail,
       href: '#invite',
       xpColor: 'text-teal-600',
     },
@@ -47,9 +51,9 @@ export function WhatToDoNow({
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-semibold text-sm">🎯 Quoi faire maintenant</h3>
+        <h3 className="font-semibold text-sm">{t.title}</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Actions classées par XP gagnable
+          {t.subtitle}
         </p>
       </div>
 

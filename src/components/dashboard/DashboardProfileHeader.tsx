@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ProBadge } from '@/components/ui/ProBadge'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface DashboardProfileHeaderProps {
   profile: {
@@ -13,6 +14,7 @@ interface DashboardProfileHeaderProps {
     league: string
     links: Record<string, string> | null
   }
+  t: Dictionary['dashboard']['profileHeader']
 }
 
 function getCountryFlag(country: string | null): string {
@@ -47,20 +49,22 @@ function getCountryFlag(country: string | null): string {
 function getJobTitle(
   specialty: string | null,
   level: string | null,
+  jt: Dictionary['dashboard']['profileHeader']['jobTitles'],
 ): string {
   const levelLabel: Record<string, string> = {
-    entry: 'Entry Level',
-    junior: 'Junior',
-    senior: 'Senior',
+    entry: jt.entry,
+    junior: jt.junior,
+    senior: jt.senior,
   }
   const specialtyLabel: Record<string, string> = {
-    ux_ui: 'UX/UI Designer',
-    graphic: 'Graphic Designer',
-    'UX Designer': 'UX Designer',
-    'UI Designer': 'UI Designer',
-    'Graphic Designer': 'Graphic Designer',
+    ux_ui: jt.ux_ui,
+    graphic: jt.graphic,
+    // English source values from Step2Specialty fall back to canonical i18n labels
+    'UX Designer': jt.ux_ui,
+    'UI Designer': jt.ux_ui,
+    'Graphic Designer': jt.graphic,
   }
-  const spec = specialtyLabel[specialty || ''] || 'Designer'
+  const spec = specialtyLabel[specialty || ''] || jt.designer
   const lvl = levelLabel[level || ''] || ''
   return lvl ? `${lvl} ${spec}` : spec
 }
@@ -141,9 +145,10 @@ const SOCIAL_ICONS: Record<
 
 export function DashboardProfileHeader({
   profile,
+  t,
 }: DashboardProfileHeaderProps) {
   const flag = getCountryFlag(profile.country)
-  const jobTitle = getJobTitle(profile.specialty, profile.experience_level)
+  const jobTitle = getJobTitle(profile.specialty, profile.experience_level, t.jobTitles)
   const links = profile.links || {}
 
   const socialLinks = Object.entries(SOCIAL_ICONS)
@@ -240,7 +245,7 @@ export function DashboardProfileHeader({
         aria-label="Edit profile"
         className="flex-shrink-0 inline-flex items-center justify-center text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-800 px-3 py-2 sm:px-4 rounded-full transition-colors duration-150 whitespace-nowrap dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-100"
       >
-        <span className="hidden sm:inline">Edit profile →</span>
+        <span className="hidden sm:inline">{t.editProfile}</span>
         <span className="sm:hidden text-base leading-none">✏️</span>
       </Link>
     </div>

@@ -1,6 +1,8 @@
 import { Trophy, Zap, Target } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {
   profile: any
@@ -10,6 +12,7 @@ type Props = {
   xpToday: number
   leagueIndex: number
   userLeague?: { name?: string; icon?: string } | null
+  t: Dictionary['dashboard']['statCards']
 }
 
 export function StatCards({
@@ -20,6 +23,7 @@ export function StatCards({
   xpToday,
   leagueIndex,
   userLeague,
+  t,
 }: Props) {
   const leagueName = userLeague?.name || (profile?.league === '7ajra' ? 'Stone' : profile?.league) || 'Stone'
   const leagueIcon = userLeague?.icon || '🪨'
@@ -31,7 +35,7 @@ export function StatCards({
     valueClass: string
   }> = [
     {
-      label: 'LEAGUE',
+      label: t.league,
       icon: <Trophy className="w-4 h-4 text-amber-500" />,
       value: (
         <span className="inline-flex items-center gap-2">
@@ -39,31 +43,31 @@ export function StatCards({
           {leagueName}
         </span>
       ),
-      subtext: `Tier ${leagueIndex} of 8`,
+      subtext: tx(t.tierOf, { n: leagueIndex }),
       valueClass: 'text-xl font-bold',
     },
     {
-      label: 'TOTAL XP',
+      label: t.totalXp,
       icon: <Zap className="w-4 h-4 text-violet-500" />,
       value: (profile?.xp || 0).toLocaleString(),
-      subtext: xpToday > 0 ? `+${xpToday} XP today` : 'Keep going!',
+      subtext: xpToday > 0 ? tx(t.xpToday, { n: xpToday }) : t.keepGoing,
       valueClass: 'text-xl font-bold text-violet-600',
     },
     {
-      label: 'STREAK',
+      label: t.streak,
       icon: <span className="text-base leading-none">🔥</span>,
       value: `${streak?.current_streak || 0}d`,
       subtext:
         streak?.current_streak === streak?.longest_streak && streak?.current_streak > 0
-          ? 'Personal best 🏆'
-          : `Best: ${streak?.longest_streak || 0}d`,
+          ? t.personalBest
+          : tx(t.best, { n: streak?.longest_streak || 0 }),
       valueClass: 'text-xl font-bold text-orange-500',
     },
     {
-      label: 'CHALLENGES',
+      label: t.challenges,
       icon: <Target className="w-4 h-4 text-green-500" />,
       value: (completedTotal || 0).toString(),
-      subtext: completedThisWeek > 0 ? `+${completedThisWeek} this week` : 'Complete your first!',
+      subtext: completedThisWeek > 0 ? tx(t.thisWeek, { n: completedThisWeek }) : t.completeFirst,
       valueClass: 'text-xl font-bold text-green-500',
     },
   ]

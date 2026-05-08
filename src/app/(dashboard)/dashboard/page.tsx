@@ -264,7 +264,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4 sm:space-y-6">
 
-      <DashboardProfileHeader profile={profile} />
+      <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
 
       <HeroBanner
         profile={profile}
@@ -294,6 +294,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           completedInLeague={completedInLeague}
           minChallenges={minChallenges}
           minChallengesEnabled={minChallengesEnabled}
+          t={dict.dashboard.leagueSection}
         />
 
         <StatCards
@@ -304,6 +305,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           xpToday={xpToday}
           leagueIndex={leagueIndex}
           userLeague={userLeague}
+          t={dict.dashboard.statCards}
         />
       </div>
 
@@ -313,6 +315,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         currentXP={currentXP}
         threshold={threshold}
         suggestedChallenge={suggestedChallenge}
+        t={dict.dashboard.countdownCard}
       />
 
       <div className="grid lg:grid-cols-2 gap-4">
@@ -320,6 +323,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           suggestedChallenge={suggestedChallenge}
           referralsCount={referrals.length}
           profile={profile}
+          t={dict.dashboard.whatToDoNow}
         />
         <ContextualLeaderboard
           users={neighborUsers}
@@ -327,6 +331,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           totalInLeague={totalInLeague || 50}
           league={userLeagueName}
           xpToTop10={xpToTop10}
+          t={dict.dashboard.contextualLeaderboard}
         />
       </div>
 

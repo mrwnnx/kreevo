@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getLeagueStyle } from '@/lib/utils/league-style'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {
   profile: any
@@ -20,6 +22,7 @@ type Props = {
   completedInLeague: number
   minChallenges: number
   minChallengesEnabled: boolean
+  t: Dictionary['dashboard']['leagueSection']
 }
 
 export function LeagueSection({
@@ -32,6 +35,7 @@ export function LeagueSection({
   completedInLeague,
   minChallenges,
   minChallengesEnabled,
+  t,
 }: Props) {
   const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
   const challengesPercent =
@@ -42,7 +46,7 @@ export function LeagueSection({
     <div className={cn('relative overflow-hidden border border-border rounded-[24px] p-4', leagueStyle.bgClass)}>
       <div className="relative">
         <p className={cn('text-xs font-bold uppercase tracking-widest mb-3', leagueStyle.textPrimary)}>
-          YOUR LEAGUE
+          {t.yourLeague}
         </p>
 
         <div className="flex items-center justify-between mb-4">
@@ -51,7 +55,7 @@ export function LeagueSection({
               <LeagueIcon icon={league?.icon ?? leagueStyle.emoji} size="lg" />
             </div>
             <h3 className="text-xl font-bold text-foreground">
-              {league?.name ?? leagueStyle.name} League
+              {league?.name ?? leagueStyle.name} {t.leagueSuffix}
             </h3>
           </div>
         </div>
@@ -59,7 +63,7 @@ export function LeagueSection({
         <div className="mb-3 space-y-2.5">
           <div>
             <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
-              <span className="inline-flex items-center gap-1">⚡ XP progress</span>
+              <span className="inline-flex items-center gap-1">{t.xpProgress}</span>
               <span>
                 {currentXP.toLocaleString()} / {threshold.toLocaleString()} XP
               </span>
@@ -75,7 +79,7 @@ export function LeagueSection({
           {minChallengesEnabled && (
             <div>
               <div className={cn('flex justify-between text-xs opacity-70 mb-1.5', leagueStyle.textSecondary)}>
-                <span className="inline-flex items-center gap-1">🎯 Challenges progress</span>
+                <span className="inline-flex items-center gap-1">{t.challengesProgress}</span>
                 <span>
                   {completedInLeague} / {minChallenges}
                 </span>
@@ -94,14 +98,14 @@ export function LeagueSection({
           <div className="flex items-center gap-1.5 text-sm">
             <TrendingUp className={cn('w-4 h-4', leagueStyle.textPrimary)} />
             <span className={cn('font-semibold', leagueStyle.textSecondary)}>
-              Rank #{userRank || '—'} of {totalInLeague || 50}
+              {tx(t.rank, { rank: userRank || '—', total: totalInLeague || 50 })}
             </span>
           </div>
           <Link
             href="/dashboard/leaderboard"
             className={cn('text-xs font-medium', leagueStyle.textPrimary)}
           >
-            Push to top 10 🔥
+            {t.pushToTop}
           </Link>
         </div>
       </div>
@@ -115,6 +119,7 @@ type CountdownProps = {
   currentXP: number
   threshold: number
   suggestedChallenge: any
+  t: Dictionary['dashboard']['countdownCard']
 }
 
 export function LeagueCountdownCard({
@@ -122,7 +127,7 @@ export function LeagueCountdownCard({
   nextLeague,
   currentXP,
   threshold,
-  suggestedChallenge,
+  t,
 }: CountdownProps) {
   const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
   const isCloseToPromotion = xpPercent >= 80
@@ -151,39 +156,38 @@ export function LeagueCountdownCard({
     <div className="rounded-[24px] p-4 relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white">
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-          ⏰ League ends soon
+          {t.leagueEndsSoon}
         </span>
         <span className="text-xs bg-red-400/40 px-2 py-1 rounded-full">
-          🔺 High stakes
+          {t.highStakes}
         </span>
       </div>
 
-      <h3 className="font-bold text-lg mb-1">Don&apos;t lose your spot.</h3>
+      <h3 className="font-bold text-lg mb-1">{t.dontLose}</h3>
       <p className="text-white/80 text-sm mb-4">
-        Stay active to remain in {leagueStyle.name}. Top 20 stay. Others drop to{' '}
-        {nextLeague?.name || 'Silver'}.
+        {tx(t.stayActive, { league: leagueStyle.name, next: nextLeague?.name || 'Silver' })}
       </p>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {[
-          { v: timeLeft.days, l: 'DAYS' },
-          { v: timeLeft.hours, l: 'HOURS' },
-          { v: timeLeft.min, l: 'MIN' },
-          { v: timeLeft.sec, l: 'SEC' },
-        ].map(t => (
+          { v: timeLeft.days, l: t.days },
+          { v: timeLeft.hours, l: t.hours },
+          { v: timeLeft.min, l: t.min },
+          { v: timeLeft.sec, l: t.sec },
+        ].map(unit => (
           <div
-            key={t.l}
+            key={unit.l}
             className="bg-white/20 rounded-lg px-2.5 sm:px-3 py-2 text-center min-w-[48px] sm:min-w-[52px] flex-1 max-w-[80px]"
           >
-            <p className="text-lg sm:text-xl font-bold">{String(t.v).padStart(2, '0')}</p>
-            <p className="text-[10px] sm:text-xs text-white/60">{t.l}</p>
+            <p className="text-lg sm:text-xl font-bold">{String(unit.v).padStart(2, '0')}</p>
+            <p className="text-[10px] sm:text-xs text-white/60">{unit.l}</p>
           </div>
         ))}
       </div>
 
       <Link href="/dashboard/challenges">
         <Button className="bg-white text-orange-600 hover:bg-white/90 w-full font-semibold">
-          ⚡ Complete a Challenge
+          {t.completeChallenge}
         </Button>
       </Link>
     </div>

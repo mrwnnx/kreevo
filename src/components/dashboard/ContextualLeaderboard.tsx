@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { tx } from '@/lib/i18n/lang'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface LeaderboardUser {
   rank: number
@@ -17,6 +19,7 @@ interface ContextualLeaderboardProps {
   totalInLeague: number
   league: string
   xpToTop10: number
+  t: Dictionary['dashboard']['contextualLeaderboard']
 }
 
 export function ContextualLeaderboard({
@@ -25,6 +28,7 @@ export function ContextualLeaderboard({
   totalInLeague,
   league,
   xpToTop10,
+  t,
 }: ContextualLeaderboardProps) {
   const maxXP = Math.max(...users.map((u) => u.xp), 1)
 
@@ -34,25 +38,26 @@ export function ContextualLeaderboard({
         <div>
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-violet-500" />
-            Ton rang en {league}
+            {tx(t.yourRank, { league })}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            #{userRank} sur {totalInLeague} designers
+            {tx(t.countLine, { rank: userRank, total: totalInLeague })}
           </p>
         </div>
         <Link
           href="/dashboard/leaderboard"
           className="text-xs text-violet-600 hover:text-violet-700 font-medium"
         >
-          Voir tout →
+          {t.seeAll}
         </Link>
       </div>
 
       {xpToTop10 > 0 && (
         <div className="px-5 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-border">
-          <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            🔥 Seulement <span className="font-bold">{xpToTop10} XP</span> te séparent du top 10 !
-          </p>
+          <p
+            className="text-xs font-medium text-amber-700 dark:text-amber-400"
+            dangerouslySetInnerHTML={{ __html: tx(t.onlyXpToTop10, { n: xpToTop10 }) }}
+          />
         </div>
       )}
 
@@ -98,7 +103,7 @@ export function ContextualLeaderboard({
                   user.isCurrentUser && 'text-violet-700 dark:text-violet-400',
                 )}
               >
-                {user.isCurrentUser ? 'Toi' : user.full_name || `@${user.username}`}
+                {user.isCurrentUser ? t.you : user.full_name || `@${user.username}`}
               </p>
             </div>
 
@@ -113,7 +118,7 @@ export function ContextualLeaderboard({
                 />
               </div>
               <span className="text-xs text-muted-foreground tabular-nums w-14 text-right">
-                {user.xp.toLocaleString()} XP
+                {user.xp.toLocaleString()} {t.xpSuffix}
               </span>
             </div>
           </div>
