@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 
 import { MultiStepSubmitForm } from '@/components/features/challenge/MultiStepSubmitForm'
 import type { Profile, Submission } from '@/types/database.types'
+import { getDict } from '@/lib/i18n/lang'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -40,6 +41,8 @@ export default async function ChallengeSubmitPage({ params }: Props) {
   const attemptsLeft = wasDraft ? maxAttempts : maxAttempts - currentAttempts
   if (!wasDraft && attemptsLeft <= 0) redirect(`/dashboard/challenges/${id}`)
 
+  const dict = await getDict()
+
   return (
     <MultiStepSubmitForm
       challengeId={c.id}
@@ -47,6 +50,7 @@ export default async function ChallengeSubmitPage({ params }: Props) {
       participationId={participation.id}
       attemptsLeft={attemptsLeft}
       existing={existingSubmission as Submission | null}
+      t={dict.submitForm}
     />
   )
 }

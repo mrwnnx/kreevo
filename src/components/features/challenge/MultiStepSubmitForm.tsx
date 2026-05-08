@@ -15,6 +15,10 @@ import { submitChallenge } from './actions'
 import type { Submission } from '@/types/database.types'
 import { CheckCircle, X, Plus, Loader2, ArrowLeft, ArrowRight, Sparkles, Search, ShieldCheck, ShieldAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { tx } from '@/lib/i18n/tx'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+
+type SubmitT = Dictionary['submitForm']
 
 interface Collaborator {
   id: string
@@ -29,6 +33,7 @@ interface Props {
   participationId: string
   attemptsLeft: number
   existing: Submission | null
+  t: SubmitT
 }
 
 export function MultiStepSubmitForm({
@@ -37,6 +42,7 @@ export function MultiStepSubmitForm({
   participationId,
   attemptsLeft,
   existing,
+  t,
 }: Props) {
   const router = useRouter()
   const [step, setStep] = useState<1 | 2>(1)
@@ -95,7 +101,7 @@ export function MultiStepSubmitForm({
         const data = await res.json()
         if (data.skipped) { setAiState({ phase: 'skipped' }); return }
         if (data.valid === true) { setAiState({ phase: 'approved' }); return }
-        if (data.valid === false) { setAiState({ phase: 'rejected', reason: data.reason ?? 'Travail non accepté' }); return }
+        if (data.valid === false) { setAiState({ phase: 'rejected', reason: data.reason ?? t.aiVerdict.defaultRejection }); return }
         setAiState({ phase: 'error' })
       })
       .catch((e) => {
@@ -104,7 +110,7 @@ export function MultiStepSubmitForm({
       })
 
     return () => ctrl.abort()
-  }, [coverUrl, challengeId])
+  }, [coverUrl, challengeId, t.aiVerdict.defaultRejection])
 
   // Collaborator search
   const [collabQuery, setCollabQuery] = useState('')
@@ -218,16 +224,16 @@ export function MultiStepSubmitForm({
     const isApproved = success.status === 'approved'
     const isRejected = success.status === 'rejected'
     const headline = success.draft
-      ? 'Brouillon enregistré'
-      : isApproved ? '🎉 Soumission validée !'
-      : isRejected ? 'Soumission enregistrée'
-      : 'Soumission reçue'
+      ? t.success.draftSaved
+      : isApproved ? t.success.approved
+      : isRejected ? t.success.rejected
+      : t.success.pending
 
     const sub = success.draft
-      ? 'Tu peux revenir plus tard pour finaliser et publier ton travail.'
-      : isApproved ? 'Bravo ! Tes XP arrivent…'
-      : isRejected ? 'Ton travail a été enregistré sans XP.'
-      : 'Un admin va examiner ton travail.'
+      ? t.success.draftBody
+      : isApproved ? t.success.approvedBody
+      : isRejected ? t.success.rejectedBody
+      : t.success.pendingBody
 
     return (
       <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6">
@@ -246,13 +252,13 @@ export function MultiStepSubmitForm({
           {success.draft && (
             <div className="flex gap-2 justify-center pt-2">
               <Button variant="outline" onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}>
-                Retour au challenge
+                {t.success.backToChallenge}
               </Button>
-              <Button onClick={() => router.push('/dashboard')}>Mon dashboard</Button>
+              <Button onClick={() => router.push('/dashboard')}>{t.success.myDashboard}</Button>
             </div>
           )}
           {!success.draft && (
-            <p className="text-xs text-muted-foreground pt-2">Redirection en cours…</p>
+            <p className="text-xs text-muted-foreground pt-2">{t.success.redirecting}</p>
           )}
         </div>
       </div>
@@ -269,11 +275,11 @@ export function MultiStepSubmitForm({
             onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}
             className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
           >
-            <X className="size-4" /> Annuler
+            <X className="size-4" /> {t.cancel}
           </button>
           <p className="text-sm font-medium truncate text-center flex-1">{challengeTitle}</p>
           <div className="text-xs text-muted-foreground font-mono">
-            Étape {step}/2
+            {tx(t.step, { n: step })}
           </div>
         </div>
         {/* Progress bar */}
@@ -297,6 +303,8 @@ export function MultiStepSubmitForm({
             showMotivation={showMotivation}
             dismissMotivation={() => setShowMotivation(false)}
             aiState={aiState}
+            tStep1={t.step1}
+            tAi={t.aiVerdict}
           />
         ) : (
           <Step2
@@ -316,6 +324,7 @@ export function MultiStepSubmitForm({
             removeCollaborator={removeCollaborator}
             showOnProfile={showOnProfile}
             setShowOnProfile={setShowOnProfile}
+            t={t.step2}
           />
         )}
 
@@ -334,7 +343,7 @@ export function MultiStepSubmitForm({
                 onClick={() => router.push(`/dashboard/challenges/${challengeId}`)}
                 disabled={isPending}
               >
-                Annuler
+                {t.cancel}
               </Button>
               <Button
                 onClick={() => setStep(2)}
@@ -342,7 +351,7 @@ export function MultiStepSubmitForm({
                 className="gap-2"
               >
                 {aiState.phase === 'analyzing' ? <Loader2 className="size-4 animate-spin" /> : null}
-                Continuer <ArrowRight className="size-4" />
+                {t.next} <ArrowRight className="size-4" />
               </Button>
             </>
           ) : (
@@ -353,7 +362,7 @@ export function MultiStepSubmitForm({
                 disabled={isPending}
                 className="gap-2"
               >
-                <ArrowLeft className="size-4" /> Retour
+                <ArrowLeft className="size-4" /> {t.back}
               </Button>
               <div className="flex items-center gap-2">
                 <Button
@@ -362,7 +371,7 @@ export function MultiStepSubmitForm({
                   disabled={isPending}
                 >
                   {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Save as draft
+                  {t.saveDraft}
                 </Button>
                 <Button
                   onClick={() => handleSubmit(false)}
@@ -372,8 +381,8 @@ export function MultiStepSubmitForm({
                 >
                   {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
                   {aiState.phase === 'rejected'
-                    ? <>Soumettre quand même <span className="text-xs ml-1 opacity-70">(sans XP)</span></>
-                    : 'Publier maintenant'}
+                    ? <>{t.submitAnyway} <span className="text-xs ml-1 opacity-70">{t.noXpHint}</span></>
+                    : t.publish}
                 </Button>
               </div>
             </>
@@ -381,7 +390,7 @@ export function MultiStepSubmitForm({
         </div>
         {step === 2 && attemptsLeft < 2 && (
           <p className="text-[11px] text-center text-muted-foreground pb-2">
-            {attemptsLeft} soumission{attemptsLeft > 1 ? 's' : ''} restante{attemptsLeft > 1 ? 's' : ''}
+            {tx(attemptsLeft > 1 ? t.attemptsLeftPlural : t.attemptsLeft, { n: attemptsLeft })}
           </p>
         )}
       </div>
@@ -407,6 +416,8 @@ function Step1({
   showMotivation,
   dismissMotivation,
   aiState,
+  tStep1,
+  tAi,
 }: {
   coverUrl: string | null
   setCoverUrl: (url: string | null) => void
@@ -416,21 +427,23 @@ function Step1({
   showMotivation: boolean
   dismissMotivation: () => void
   aiState: AIStateProp
+  tStep1: SubmitT['step1']
+  tAi: SubmitT['aiVerdict']
 }) {
   const [tempUploadKey, setTempUploadKey] = useState(0)
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Choisis tes visuels</h1>
+        <h1 className="text-2xl font-bold">{tStep1.title}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Une image de couverture et jusqu&apos;à 3 visuels supplémentaires.
+          {tStep1.subtitle}
         </p>
       </div>
 
       {/* Cover */}
       <div className="space-y-2">
-        <Label className="text-sm">Image de couverture *</Label>
+        <Label className="text-sm">{tStep1.coverLabel}</Label>
         <ImageUpload
           bucket="submissions"
           value={coverUrl}
@@ -438,17 +451,17 @@ function Step1({
           className="aspect-[16/10]"
         />
         <p className="text-xs text-muted-foreground">
-          PNG / JPG / WebP — max 5MB. L&apos;image sera compressée automatiquement.
+          {tStep1.coverHint}
         </p>
 
         {/* AI verdict UI — appears after cover upload */}
-        {coverUrl && <AIVerdictPanel aiState={aiState} onChange={() => setCoverUrl(null)} />}
+        {coverUrl && <AIVerdictPanel aiState={aiState} onChange={() => setCoverUrl(null)} t={tAi} />}
       </div>
 
       {/* Additional images */}
       <div className="space-y-2">
         <Label className="text-sm">
-          Visuels supplémentaires{' '}
+          {tStep1.additionalLabel}{' '}
           <span className="text-muted-foreground font-normal">
             ({additionalImages.length}/3)
           </span>
@@ -461,7 +474,7 @@ function Step1({
                 type="button"
                 onClick={() => removeAdditionalImage(i)}
                 className="absolute top-2 right-2 size-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Retirer"
+                aria-label={tStep1.removeAlt}
               >
                 <X className="size-3.5" />
               </button>
@@ -487,17 +500,16 @@ function Step1({
         <div className="fixed bottom-24 right-6 z-20 max-w-xs rounded-2xl bg-violet-600 text-white p-4 shadow-lg flex items-start gap-3 animate-in slide-in-from-bottom-4 fade-in">
           <Sparkles className="size-5 shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
-            <p className="font-semibold">Tu vas gérer !</p>
+            <p className="font-semibold">{tStep1.motivationTitle}</p>
             <p className="text-white/85 text-xs mt-1 leading-relaxed">
-              Choisis un visuel qui raconte l&apos;essentiel de ton projet. Tu pourras
-              ajouter du contexte juste après.
+              {tStep1.motivationBody}
             </p>
           </div>
           <button
             type="button"
             onClick={dismissMotivation}
             className="size-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center shrink-0"
-            aria-label="Fermer"
+            aria-label={tStep1.motivationDismiss}
           >
             <X className="size-3.5" />
           </button>
@@ -507,7 +519,7 @@ function Step1({
   )
 }
 
-function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange: () => void }) {
+function AIVerdictPanel({ aiState, onChange, t }: { aiState: AIStateProp; onChange: () => void; t: SubmitT['aiVerdict'] }) {
   if (aiState.phase === 'idle') return null
 
   if (aiState.phase === 'analyzing') {
@@ -515,9 +527,9 @@ function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange:
       <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl p-4">
         <div className="animate-spin size-5 border-2 border-violet-500 border-t-transparent rounded-full shrink-0" />
         <div>
-          <p className="font-medium text-sm">Analyse en cours…</p>
+          <p className="font-medium text-sm">{t.analyzing}</p>
           <p className="text-xs text-muted-foreground">
-            Notre IA vérifie que ton travail correspond au brief.
+            {t.analyzingBody}
           </p>
         </div>
       </div>
@@ -529,9 +541,9 @@ function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange:
       <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-900/40 rounded-2xl p-4">
         <ShieldCheck className="size-6 text-green-600 dark:text-green-400 shrink-0" />
         <div>
-          <p className="font-medium text-sm text-green-800 dark:text-green-300">Travail validé !</p>
+          <p className="font-medium text-sm text-green-800 dark:text-green-300">{t.approved}</p>
           <p className="text-xs text-green-700 dark:text-green-400/90">
-            Ton travail correspond bien au brief. Tu peux soumettre.
+            {t.approvedBody}
           </p>
         </div>
       </div>
@@ -544,16 +556,15 @@ function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange:
         <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-900/40 rounded-2xl p-4">
           <ShieldAlert className="size-6 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-sm text-red-800 dark:text-red-300">Travail non accepté</p>
+            <p className="font-medium text-sm text-red-800 dark:text-red-300">{t.rejected}</p>
             <p className="text-xs text-red-700 dark:text-red-400/90 leading-relaxed">{aiState.reason}</p>
           </div>
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          Ton travail n&apos;a pas été accepté par notre IA. Tu ne recevras pas de XP pour cette soumission.
-          Tu peux changer de fichier ou soumettre quand même.
+          {t.rejectedHint}
         </p>
         <Button variant="outline" onClick={onChange} className="w-full">
-          Changer de fichier
+          {t.changeFile}
         </Button>
       </div>
     )
@@ -564,9 +575,9 @@ function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange:
       <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4">
         <Sparkles className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
         <div>
-          <p className="font-medium text-sm text-amber-800 dark:text-amber-300">Validation manuelle</p>
+          <p className="font-medium text-sm text-amber-800 dark:text-amber-300">{t.skipped}</p>
           <p className="text-xs text-amber-700 dark:text-amber-400/90">
-            Ton travail sera examiné par un admin sous 48h.
+            {t.skippedBody}
           </p>
         </div>
       </div>
@@ -578,7 +589,7 @@ function AIVerdictPanel({ aiState, onChange }: { aiState: AIStateProp; onChange:
     <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl p-4">
       <Sparkles className="size-5 text-muted-foreground shrink-0" />
       <p className="text-xs text-muted-foreground">
-        Validation IA indisponible — tu peux quand même soumettre, un admin examinera ton travail.
+        {t.errorBody}
       </p>
     </div>
   )
@@ -602,6 +613,7 @@ function Step2({
   removeCollaborator,
   showOnProfile,
   setShowOnProfile,
+  t,
 }: {
   title: string
   setTitle: (v: string) => void
@@ -619,56 +631,57 @@ function Step2({
   removeCollaborator: (id: string) => void
   showOnProfile: boolean
   setShowOnProfile: (v: boolean) => void
+  t: SubmitT['step2']
 }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Détails du projet</h1>
+        <h1 className="text-2xl font-bold">{t.title}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Donne du contexte sur ton travail.
+          {t.subtitle}
         </p>
       </div>
 
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="title" className="text-sm">Titre du projet *</Label>
+        <Label htmlFor="title" className="text-sm">{t.titleLabel}</Label>
         <Input
           id="title"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          placeholder="Ex : Refonte de l'app de banque mobile"
+          placeholder={t.titlePlaceholder}
           maxLength={120}
         />
       </div>
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description" className="text-sm">Description</Label>
+        <Label htmlFor="description" className="text-sm">{t.descriptionLabel}</Label>
         <textarea
           id="description"
           value={description}
           onChange={e => setDescription(e.target.value)}
           rows={5}
-          placeholder="Explique tes choix de design, ton process, les outils utilisés…"
+          placeholder={t.descriptionPlaceholder}
           className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
       </div>
 
       {/* Project link */}
       <div className="space-y-2">
-        <Label htmlFor="projectLink" className="text-sm">Link du projet</Label>
+        <Label htmlFor="projectLink" className="text-sm">{t.linkLabel}</Label>
         <Input
           id="projectLink"
           type="url"
           value={projectLink}
           onChange={e => setProjectLink(e.target.value)}
-          placeholder="https://figma.com/file/... ou https://behance.net/…"
+          placeholder={t.linkPlaceholder}
         />
       </div>
 
       {/* Collaborators */}
       <div className="space-y-2 relative">
-        <Label className="text-sm">Collaborateurs</Label>
+        <Label className="text-sm">{t.collaboratorsLabel}</Label>
 
         {/* Selected */}
         {collaborators.length > 0 && (
@@ -687,7 +700,7 @@ function Step2({
                   type="button"
                   onClick={() => removeCollaborator(c.id)}
                   className="ml-0.5 size-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-                  aria-label="Retirer"
+                  aria-label={t.collaboratorsRemove}
                 >
                   <X className="size-3" />
                 </button>
@@ -704,7 +717,7 @@ function Step2({
             onChange={e => { setCollabQuery(e.target.value); setCollabOpen(true) }}
             onFocus={() => setCollabOpen(true)}
             onBlur={() => setTimeout(() => setCollabOpen(false), 150)}
-            placeholder="Cherche par nom ou email"
+            placeholder={t.collaboratorsSearch}
             className="pl-9"
           />
         </div>
@@ -737,7 +750,7 @@ function Step2({
         )}
         {collabOpen && collabQuery.trim().length >= 2 && collabResults.length === 0 && (
           <div className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl border border-border bg-popover shadow-lg p-4 text-sm text-muted-foreground text-center">
-            Aucun utilisateur trouvé
+            {t.collaboratorsNone}
           </div>
         )}
       </div>
@@ -745,9 +758,9 @@ function Step2({
       {/* Profile toggle */}
       <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
         <div>
-          <p className="text-sm font-medium">Afficher dans mon profil public</p>
+          <p className="text-sm font-medium">{t.profileToggleLabel}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Les visiteurs de ton profil verront ce projet dans ta galerie.
+            {t.profileToggleBody}
           </p>
         </div>
         <button
