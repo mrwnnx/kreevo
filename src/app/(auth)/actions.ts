@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getDict } from '@/lib/i18n/lang'
+import { translateAuthError } from '@/lib/auth-errors'
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -21,24 +22,26 @@ export async function signUpWithEmail(formData: FormData) {
     },
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
   return { success: dict.auth.common.checkEmail }
 }
 
 export async function signInWithEmail(formData: FormData) {
   const supabase = await createClient()
+  const dict = await getDict()
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
   redirect('/dashboard')
 }
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
+  const dict = await getDict()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -48,12 +51,13 @@ export async function signInWithGoogle() {
     },
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
   if (data.url) redirect(data.url)
 }
 
 export async function signInWithLinkedIn() {
   const supabase = await createClient()
+  const dict = await getDict()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'linkedin_oidc',
@@ -62,7 +66,7 @@ export async function signInWithLinkedIn() {
     },
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
   if (data.url) redirect(data.url)
 }
 
@@ -81,6 +85,6 @@ export async function resetPassword(formData: FormData) {
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/update-password`,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
   return { success: dict.auth.common.resetSent }
 }

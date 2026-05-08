@@ -11,17 +11,21 @@ import type { Profile } from '@/types/database.types'
 import { CheckCircle, Loader2, Shield, Zap } from 'lucide-react'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { translateAuthError } from '@/lib/auth-errors'
 
 type SettingsT = Dictionary['settings']
+type AuthErrorsT = Dictionary['auth']['errors']
 
 export function SettingsClient({
   profile,
   email,
   t,
+  tErrors,
 }: {
   profile: Profile
   email: string
   t: SettingsT
+  tErrors: AuthErrorsT
 }) {
   const [isPending, startTransition] = useTransition()
   const [success, setSuccess] = useState<string | null>(null)
@@ -40,7 +44,7 @@ export function SettingsClient({
     startTransition(async () => {
       const supabase = createClient()
       const { error: err } = await supabase.auth.updateUser({ password: newPassword })
-      if (err) { setError(err.message); return }
+      if (err) { setError(translateAuthError(err, tErrors)); return }
       setSuccess(t.account.passwordSuccess)
       setNewPassword('')
       setConfirmPassword('')
