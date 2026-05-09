@@ -6,13 +6,15 @@ import { Badge } from '@/components/ui/badge'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { Separator } from '@/components/ui/separator'
 import {
-  MapPin, Globe,
+  MapPin,
   Heart, MessageCircle, Lock, ExternalLink, Mail,
-  Trophy, Zap, Star, Link as LinkIcon,
+  Trophy, Zap, Star,
 } from 'lucide-react'
 import type { Profile } from '@/types/database.types'
 import { getDict } from '@/lib/i18n/lang'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { SocialLogo } from '@/components/onboarding/SocialLogo'
+import { defForKey } from '@/components/onboarding/socials'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -32,17 +34,13 @@ function getLeague(league: string) {
 }
 
 // ── Links parser ───────────────────────────────────────────────
-interface SocialLinks {
-  website?: string
-  linkedin?: string
-  dribbble?: string
-  behance?: string
-  instagram?: string
-}
-
-function parseLinks(links: unknown): SocialLinks {
+function parseLinks(links: unknown): Record<string, string> {
   if (!links || typeof links !== 'object') return {}
-  return links as SocialLinks
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(links as Record<string, unknown>)) {
+    if (typeof v === 'string' && v.trim().length > 0) out[k] = v
+  }
+  return out
 }
 
 // ── Rank calculation ───────────────────────────────────────────
@@ -218,37 +216,23 @@ export default async function ProfilePage({
             )}
 
             {/* Social links + Contact */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {social.website && (
-                <a href={social.website} target="_blank" rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Globe className="size-4" />
-                </a>
-              )}
-              {social.linkedin && (
-                <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors">
-                  <LinkIcon className="size-4" />
-                </a>
-              )}
-              {social.dribbble && (
-                <a href={social.dribbble} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">
-                  <ExternalLink className="size-3.5" /> drib
-                </a>
-              )}
-              {social.behance && (
-                <a href={social.behance} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">
-                  <ExternalLink className="size-3.5" /> Bē
-                </a>
-              )}
-              {social.instagram && (
-                <a href={social.instagram} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">
-                  <ExternalLink className="size-3.5" /> ig
-                </a>
-              )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {Object.entries(social).map(([key, url]) => {
+                const def = defForKey(key)
+                return (
+                  <a
+                    key={key}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={def.name}
+                    title={def.name}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    <SocialLogo def={def} />
+                  </a>
+                )
+              })}
               {isPro && (
                 <button className="flex items-center gap-1.5 text-xs font-semibold bg-foreground text-background px-3 py-1.5 rounded-md hover:opacity-80 transition-opacity ml-1">
                   <Mail className="size-3.5" /> {t.contact}
