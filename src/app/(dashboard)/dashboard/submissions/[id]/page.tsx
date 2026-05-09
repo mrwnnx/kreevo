@@ -1,13 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ExternalLink, Calendar } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
-import { ReportButton } from '@/components/features/challenge/ReportButton'
-import { ShareButton } from '@/components/features/challenge/ShareButton'
-import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
-import { CommentSection } from '@/components/features/submissions/CommentSection'
-import { getDict, getLang, tx } from '@/lib/i18n/lang'
+import { SubmissionDetailContent } from '@/components/features/submissions/SubmissionDetailContent'
+import { getDict, getLang } from '@/lib/i18n/lang'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -41,10 +38,6 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const challenge = submission.challenges
   const author = submission.profiles
   const isOwn = submission.user_id === user.id
-
-
-  const figmaUrl = (submission.files as any)?.figma
-  const projectLink = (submission.files as any)?.link
   const userLiked = !!likeData
 
   const dict = await getDict()
@@ -66,130 +59,16 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
       {/* 2-col layout */}
       <div className="flex flex-col md:flex-row gap-4 items-start">
+        <SubmissionDetailContent
+          submission={submission}
+          currentUserId={user.id}
+          currentProfilePlan={currentProfile?.plan ?? null}
+          initialUserLiked={userLiked}
+          isOwn={isOwn}
+          t={t}
+          dateLocale={dateLocale}
+        />
 
-        {/* ── Colonne gauche ── */}
-        <div className="flex-1 min-w-0 space-y-4">
-
-          {/* Title + date */}
-          {(submission.title || submission.created_at) && (
-            <div className="space-y-1">
-              {submission.title && (
-                <h1 className="text-[36px] font-bold leading-tight">{submission.title}</h1>
-              )}
-              {submission.created_at && (
-                <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Calendar className="size-3.5" />
-                  {new Date(submission.created_at).toLocaleDateString(dateLocale, {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Card image — seule */}
-          <div className="rounded-2xl border border-border overflow-hidden bg-card">
-            <div className="relative aspect-video bg-muted">
-              {submission.cover_url ? (
-                <ImageLightbox
-                  src={submission.cover_url}
-                  alt={t.coverAlt}
-                  openLabel={t.lightbox.open}
-                  closeLabel={t.lightbox.close}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                  {t.noPreview}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Additional images */}
-          {(((submission.files as any)?.images ?? []) as string[]).length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {(((submission.files as any).images ?? []) as string[]).map((url, i) => (
-                <div key={i} className="rounded-xl border border-border overflow-hidden bg-muted aspect-square">
-                  <ImageLightbox
-                    src={url}
-                    alt={tx(t.additionalAlt, { n: i + 1 })}
-                    openLabel={t.lightbox.open}
-                    closeLabel={t.lightbox.close}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Share + report */}
-          {(!isOwn || true) && (
-            <div className="flex items-center gap-3 justify-end">
-              <ShareButton label={t.share.label} />
-              {!isOwn && submission.created_at && (
-                <ReportButton submissionId={id} submissionCreatedAt={submission.created_at} t={t.report} />
-              )}
-            </div>
-          )}
-
-          {/* Card description */}
-          {(submission.description || figmaUrl || projectLink) && (
-            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">{t.descriptionLabel}</p>
-              {submission.description && (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {submission.description}
-                </p>
-              )}
-              {(figmaUrl || projectLink) && (
-                <div className="flex flex-wrap items-center gap-2">
-                  {figmaUrl && (
-                    <a
-                      href={figmaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
-                    >
-                      <ExternalLink className="size-3" />
-                      {t.seeFigma}
-                    </a>
-                  )}
-                  {projectLink && (
-                    <a
-                      href={projectLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
-                    >
-                      <ExternalLink className="size-3" />
-                      {t.seeProject}
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Reviews & commentaires */}
-          {submission.validation_status === 'approved' && (
-            <>
-              <CommentSection
-                submissionId={id}
-                currentUserId={user.id}
-                userPlan={currentProfile?.plan ?? null}
-                initialUserLiked={userLiked}
-                initialTotalLikes={submission.total_claps ?? 0}
-                initialCommentsCount={submission.comments_count ?? 0}
-                submissionOwnerId={submission.user_id}
-                t={t.comments}
-                tReview={t.review}
-              />
-            </>
-          )}
-        </div>
-
-        {/* ── Colonne droite ── */}
         <ProfilePanel
           author={author}
           isOwn={isOwn}
