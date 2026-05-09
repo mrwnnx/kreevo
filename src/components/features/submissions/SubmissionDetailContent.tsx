@@ -196,8 +196,9 @@ export function SubmissionDetailContent({
 
   return (
     <div className="space-y-4">
-      {/* ── HEADER (full width) : title + authors left · actions right ── */}
+      {/* ── HEADER (sticky to top) : title + authors left · actions right ── */}
       {(submission.title || allAuthors.length > 0) && (
+        <div className="sticky top-14 z-20 -mx-6 px-6 py-3 bg-background/95 supports-[backdrop-filter]:backdrop-blur border-b border-border">
         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
             {submission.title && (
@@ -295,6 +296,7 @@ export function SubmissionDetailContent({
               </Button>
             </div>
           )}
+        </div>
         </div>
       )}
 
