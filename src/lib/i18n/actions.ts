@@ -21,17 +21,21 @@ export async function setLang(lang: Lang): Promise<void> {
     sameSite: 'lax',
   })
 
-  // Best-effort sync to profile (no error if user is not authenticated).
+  // Best-effort sync to profile + auth metadata (so Supabase email templates
+  // can read `{{ .Data.lang }}` for transactional emails).
   try {
     const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
     if (user) {
-      await (supabase as any)
-        .from('profiles')
-        .update({ preferred_language: lang })
-        .eq('id', user.id)
+      await Promise.all([
+        (supabase as any)
+          .from('profiles')
+          .update({ preferred_language: lang })
+          .eq('id', user.id),
+        supabase.auth.updateUser({ data: { lang } }),
+      ])
     }
   } catch {
     /* ignore — cookie is enough */

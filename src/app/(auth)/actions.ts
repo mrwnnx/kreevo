@@ -2,12 +2,13 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, getLang } from '@/lib/i18n/lang'
 import { translateAuthError } from '@/lib/auth-errors'
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
   const dict = await getDict()
+  const lang = await getLang()
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -17,7 +18,7 @@ export async function signUpWithEmail(formData: FormData) {
     email,
     password,
     options: {
-      data: { username, full_name: username },
+      data: { username, full_name: username, lang },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     },
   })
