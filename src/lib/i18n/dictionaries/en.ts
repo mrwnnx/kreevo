@@ -492,6 +492,9 @@ export const en: Dictionary = {
       confirmReport: 'Report this comment?',
       confirmDelete: 'Delete this comment?',
       genericError: 'Error',
+      panelTitle: 'Discussion',
+      closePanelAria: 'Close panel',
+      previewLabel: 'Submission',
       timeAgo: {
         justNow: 'just now',
         minutes: '{n}m ago',

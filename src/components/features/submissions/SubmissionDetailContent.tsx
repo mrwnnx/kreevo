@@ -5,8 +5,8 @@ import { Calendar, Heart, MessageSquare, MessageCircle, ExternalLink } from 'luc
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { ShareButton } from '@/components/features/challenge/ShareButton'
 import { ReportButton } from '@/components/features/challenge/ReportButton'
-import { ReviewModal } from './ReviewModal'
-import { CommentCard, type ReviewComment } from './CommentCard'
+import { CommentsPanel } from './CommentsPanel'
+import { type ReviewComment } from './CommentCard'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
@@ -55,7 +55,7 @@ export function SubmissionDetailContent({
   const [totalLikes, setTotalLikes] = useState(submission.total_claps ?? 0)
   const [likePending, setLikePending] = useState(false)
   const [commentsCount, setCommentsCount] = useState(submission.comments_count ?? 0)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   const isApproved = submission.validation_status === 'approved'
 
@@ -220,10 +220,10 @@ export function SubmissionDetailContent({
                 <span>{totalLikes}</span>
               </button>
 
-              {/* Comment (text label) */}
+              {/* Comment (text label) — opens slide-in panel */}
               <Button
-                onClick={() => setModalOpen(true)}
-                disabled={!canComment}
+                onClick={() => setPanelOpen(true)}
+                disabled={isOwn}
                 size="sm"
                 className="gap-1.5 h-8 px-3 text-xs"
               >
@@ -325,77 +325,32 @@ export function SubmissionDetailContent({
         </div>
       )}
 
-      {/* Owner notice + free limit warning */}
-      {isApproved && isOwn && (
-        <p className="text-xs text-muted-foreground text-center">{tc.cantCommentOwn}</p>
-      )}
-      {isApproved && isFreeLimited && !isOwn && (
-        <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-2xl p-3 text-center">
-          <p className="text-xs font-medium text-violet-800 dark:text-violet-300">
-            {tx(tc.freeLimitTitle, { n: FREE_LIMIT })}
-          </p>
-          <p className="text-[11px] text-violet-600 dark:text-violet-400">{tc.freeLimitBody}</p>
-        </div>
-      )}
-
-      <ReviewModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleSubmitComment} t={t.review} />
-
-      {/* Comments list (no inline action bar — actions are in the header above) */}
+      {/* Slide-in comments panel — opens via the header Comment button. */}
       {isApproved && (
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-base">{tc.sectionTitle}</h3>
-            <span className="text-sm text-muted-foreground">
-              {tx(comments.length === 1 ? tc.countSingular : tc.countPlural, { n: comments.length })}
-            </span>
-          </div>
-
-          {isLoadingComments ? (
-            Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="flex gap-3 animate-pulse">
-                <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-1/3 bg-zinc-200 dark:bg-zinc-700 rounded" />
-                  <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-700 rounded" />
-                  <div className="h-3 w-2/3 bg-zinc-200 dark:bg-zinc-700 rounded" />
-                </div>
-              </div>
-            ))
-          ) : (() => {
-            const topLevel = comments.filter((c) => !c.parent_id)
-            const repliesByParent = comments.reduce<Record<string, ReviewComment[]>>((acc, c) => {
-              if (c.parent_id) {
-                acc[c.parent_id] = acc[c.parent_id] ?? []
-                acc[c.parent_id].push(c)
-              }
-              return acc
-            }, {})
-            Object.values(repliesByParent).forEach((arr) =>
-              arr.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at)),
-            )
-            if (topLevel.length === 0) {
-              return (
-                <div className="text-center py-10">
-                  <p className="text-2xl mb-2">💬</p>
-                  <p className="text-sm text-muted-foreground">{tc.emptyState}</p>
-                </div>
-              )
-            }
-            return topLevel.map((comment) => (
-              <CommentCard
-                key={comment.id}
-                comment={comment}
-                currentUserId={currentUserId}
-                replies={repliesByParent[comment.id] ?? []}
-                onReport={handleReport}
-                onDelete={handleDelete}
-                onReply={handleReply}
-                onLike={handleCommentLike}
-                t={tc}
-              />
-            ))
-          })()}
-        </div>
+        <CommentsPanel
+          open={panelOpen}
+          onClose={() => setPanelOpen(false)}
+          submission={{
+            id: submission.id,
+            title: submission.title,
+            cover_url: submission.cover_url,
+            created_at: submission.created_at,
+          }}
+          comments={comments}
+          isLoadingComments={isLoadingComments}
+          commentsCount={commentsCount}
+          currentUserId={currentUserId}
+          isOwn={isOwn}
+          isFreeLimited={isFreeLimited}
+          canComment={canComment}
+          onSubmitComment={handleSubmitComment}
+          onCommentLike={handleCommentLike}
+          onReport={handleReport}
+          onDelete={handleDelete}
+          onReply={handleReply}
+          t={t}
+          dateLocale={dateLocale}
+        />
       )}
     </div>
   )
