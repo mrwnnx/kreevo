@@ -40,6 +40,19 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const isOwn = submission.user_id === user.id
   const userLiked = !!likeData
 
+  // Resolve collaborator profiles (stored as user-id array in submission.files.collaborators)
+  const collaboratorIds: string[] = Array.isArray((submission.files as any)?.collaborators)
+    ? ((submission.files as any).collaborators as unknown[]).filter((x): x is string => typeof x === 'string')
+    : []
+  let collaborators: Array<{ id: string; username: string; avatar_url: string | null }> = []
+  if (collaboratorIds.length > 0) {
+    const { data: collabRows } = await (supabase as any)
+      .from('profiles')
+      .select('id, username, avatar_url')
+      .in('id', collaboratorIds)
+    collaborators = (collabRows ?? []) as typeof collaborators
+  }
+
   const dict = await getDict()
   const lang = await getLang()
   const t = dict.submissionDetail
@@ -59,6 +72,8 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
       <SubmissionDetailContent
         submission={submission}
+        author={author ? { id: author.id, username: author.username, avatar_url: author.avatar_url } : null}
+        collaborators={collaborators}
         currentUserId={user.id}
         currentProfilePlan={currentProfile?.plan ?? null}
         initialUserLiked={userLiked}

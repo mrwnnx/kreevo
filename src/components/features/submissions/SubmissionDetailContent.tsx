@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Calendar, Heart, MessageSquare, MessageCircle, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
+import { Heart, MessageSquare, MessageCircle, ExternalLink } from 'lucide-react'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
-import { ShareButton } from '@/components/features/challenge/ShareButton'
-import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ReviewModal } from './ReviewModal'
 import { CommentCard, type ReviewComment } from './CommentCard'
 import { Button } from '@/components/ui/button'
@@ -29,8 +28,16 @@ interface SubmissionLite {
   user_id: string
 }
 
+interface AuthorLite {
+  id: string
+  username: string
+  avatar_url: string | null
+}
+
 interface Props {
   submission: SubmissionLite
+  author: AuthorLite | null
+  collaborators: AuthorLite[]
   currentUserId: string
   currentProfilePlan: string | null | undefined
   initialUserLiked: boolean
@@ -43,6 +50,8 @@ interface Props {
 
 export function SubmissionDetailContent({
   submission,
+  author,
+  collaborators,
   currentUserId,
   currentProfilePlan,
   initialUserLiked,
@@ -51,6 +60,7 @@ export function SubmissionDetailContent({
   dateLocale,
   sidebar,
 }: Props) {
+  void dateLocale // date no longer rendered in header — kept for future use
   const [comments, setComments] = useState<ReviewComment[]>([])
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [dailyCount, setDailyCount] = useState(0)
@@ -179,10 +189,15 @@ export function SubmissionDetailContent({
   const projectLink = typeof files.link === 'string' ? files.link : null
   const additionalImages = Array.isArray(files.images) ? (files.images as string[]) : []
 
+  // Authors list: author + collaborators (max 2 avatars shown, rest counted)
+  const allAuthors: AuthorLite[] = author ? [author, ...collaborators] : [...collaborators]
+  const visibleAvatars = allAuthors.slice(0, 2)
+  const overflowCount = Math.max(0, allAuthors.length - 2)
+
   return (
     <div className="space-y-4">
-      {/* ── HEADER (full width) : title + date left, actions right ── */}
-      {(submission.title || submission.created_at) && (
+      {/* ── HEADER (full width) : title + authors left · actions right ── */}
+      {(submission.title || allAuthors.length > 0) && (
         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
             {submission.title && (
@@ -190,28 +205,67 @@ export function SubmissionDetailContent({
                 {submission.title}
               </h1>
             )}
-            {submission.created_at && (
-              <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
-                <Calendar className="size-3" />
-                {new Date(submission.created_at).toLocaleDateString(dateLocale, {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </p>
+
+            {/* Authors row: avatar(s) + name(s) */}
+            {allAuthors.length > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex -space-x-2">
+                  {visibleAvatars.map((u) => (
+                    <Link
+                      key={u.id}
+                      href={`/u/${u.username}`}
+                      className="block size-7 rounded-full bg-muted ring-2 ring-background overflow-hidden hover:opacity-80 transition-opacity"
+                      aria-label={`@${u.username}`}
+                    >
+                      {u.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={u.avatar_url} alt={u.username} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                          {u.username[0]?.toUpperCase()}
+                        </div>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+                <span className="text-sm">
+                  {author && (
+                    <Link
+                      href={`/u/${author.username}`}
+                      className="font-medium text-foreground hover:underline"
+                    >
+                      @{author.username}
+                    </Link>
+                  )}
+                  {collaborators.length === 1 && (
+                    <>
+                      <span className="text-muted-foreground"> {t.coAuthorsAnd} </span>
+                      <Link
+                        href={`/u/${collaborators[0].username}`}
+                        className="font-medium text-foreground hover:underline"
+                      >
+                        @{collaborators[0].username}
+                      </Link>
+                    </>
+                  )}
+                  {overflowCount > 0 && (
+                    <span className="text-muted-foreground"> {tx(t.coAuthorsOthers, { n: overflowCount })}</span>
+                  )}
+                </span>
+              </div>
             )}
           </div>
 
           {/* Actions: only meaningful when submission is approved */}
           {isApproved && (
             <div className="flex items-center gap-3 shrink-0">
-              {/* Like */}
+              {/* Like (icon + count) */}
               <button
                 onClick={handleLike}
                 disabled={isOwn || likePending}
                 aria-label={liked ? tc.unlikeAria : tc.likeAria}
                 className={cn(
-                  'inline-flex items-center gap-1 text-xs font-semibold transition-colors',
+                  'inline-flex items-center gap-1 text-sm font-semibold transition-colors',
                   isOwn ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
                   liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
                 )}
@@ -223,7 +277,13 @@ export function SubmissionDetailContent({
                 <span>{totalLikes}</span>
               </button>
 
-              {/* Comment (text label) */}
+              {/* Comments count (icon + count) */}
+              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MessageCircle className="size-4" strokeWidth={1.8} />
+                <span>{commentsCount}</span>
+              </span>
+
+              {/* Comment button (text label) */}
               <Button
                 onClick={() => setModalOpen(true)}
                 disabled={!canComment}
@@ -233,24 +293,6 @@ export function SubmissionDetailContent({
                 <MessageSquare className="size-3.5" />
                 {tc.commentCta}
               </Button>
-
-              {/* Comments count (icon only) */}
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <MessageCircle className="size-4" strokeWidth={1.8} />
-                <span>{commentsCount}</span>
-              </span>
-
-              {/* Share (icon only) */}
-              <ShareButton label={t.share.label} />
-
-              {/* Report (icon only) */}
-              {!isOwn && submission.created_at && (
-                <ReportButton
-                  submissionId={submission.id}
-                  submissionCreatedAt={submission.created_at}
-                  t={t.report}
-                />
-              )}
             </div>
           )}
         </div>

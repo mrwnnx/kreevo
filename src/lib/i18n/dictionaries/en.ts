@@ -441,6 +441,8 @@ export const en: Dictionary = {
     challengeLabel: 'Challenge',
     seeChallenge: 'See challenge',
     linksLabel: 'Links',
+    coAuthorsAnd: '&',
+    coAuthorsOthers: '+{n} more',
     lightbox: {
       open: 'Open image',
       close: 'Close',

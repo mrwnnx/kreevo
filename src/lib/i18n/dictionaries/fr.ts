@@ -438,6 +438,8 @@ export const fr = {
     challengeLabel: 'Challenge',
     seeChallenge: 'Voir le challenge',
     linksLabel: 'Liens',
+    coAuthorsAnd: 'et',
+    coAuthorsOthers: '+{n} autres',
     lightbox: {
       open: 'Agrandir l\'image',
       close: 'Fermer',
