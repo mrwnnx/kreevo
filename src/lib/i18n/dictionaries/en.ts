@@ -854,4 +854,50 @@ export const en: Dictionary = {
       oauthError: 'OAuth sign-in error. Please try again.',
     },
   },
+  landing: {
+    nav: {
+      challenges: 'Challenges',
+      signIn: 'Sign in',
+      getStarted: 'Get started',
+    },
+    hero: {
+      badge: 'April 2026 challenges are live',
+      titleLine1: 'Design.',
+      titleLine2: 'Compete.',
+      titleLine3: 'Level up.',
+      subtitle: 'Weekly real-world design challenges, AI feedback on every submission, and a league system that ranks your progress from Stone to Legend.',
+      ctaPrimary: 'Start for free',
+      ctaHint: 'No credit card required',
+    },
+    leagues: {
+      label: 'League System',
+      caption: 'Earn XP on every submission → climb from Stone to Legend',
+    },
+    features: {
+      monthly: {
+        tag: 'Monthly',
+        title: 'Real Design Challenges',
+        desc: 'Briefs across Mobile UI, Web Design, Branding, Design Systems, Motion. Graded by AI + community.',
+      },
+      leagues: {
+        tag: 'Leagues',
+        title: '8 Leagues, real progression',
+        desc: 'From Stone to Legend — each league unlocks tougher briefs. XP and completed challenges promote you up.',
+      },
+      progress: {
+        tag: 'Always-on',
+        title: 'Progress & Feedback',
+        desc: 'AI analyzes every submission — visual quality, UX thinking, creativity. See exactly where to improve.',
+      },
+    },
+    cta: {
+      label: 'Ready?',
+      title: 'Join the arena',
+      subtitle: 'Free to start. No credit card. Your first challenge is waiting.',
+      button: 'Create free account',
+    },
+  },
+  publicChallenges: {
+    title: 'Challenges',
+  },
 }

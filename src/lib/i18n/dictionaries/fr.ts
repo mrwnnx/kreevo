@@ -851,6 +851,52 @@ export const fr = {
       oauthError: 'Erreur de connexion OAuth. Réessaye.',
     },
   },
+  landing: {
+    nav: {
+      challenges: 'Challenges',
+      signIn: 'Se connecter',
+      getStarted: 'Commencer',
+    },
+    hero: {
+      badge: 'Les challenges d\'avril 2026 sont ouverts',
+      titleLine1: 'Design.',
+      titleLine2: 'Compete.',
+      titleLine3: 'Level up.',
+      subtitle: 'Des challenges design hebdomadaires inspirés du monde réel, du feedback IA sur chaque soumission, et un système de ligues qui classe ta progression de Stone à Legend.',
+      ctaPrimary: 'Commencer gratuitement',
+      ctaHint: 'Aucune carte bancaire requise',
+    },
+    leagues: {
+      label: 'Système de ligues',
+      caption: 'Gagne de l\'XP à chaque soumission → grimpe de Stone à Legend',
+    },
+    features: {
+      monthly: {
+        tag: 'Mensuel',
+        title: 'Vrais challenges design',
+        desc: 'Briefs en Mobile UI, Web Design, Branding, Design Systems, Motion. Notés par IA et la communauté.',
+      },
+      leagues: {
+        tag: 'Ligues',
+        title: '8 ligues, vraie progression',
+        desc: 'De Stone à Legend — chaque ligue débloque des briefs plus exigeants. XP et challenges complétés te font monter.',
+      },
+      progress: {
+        tag: 'Toujours actif',
+        title: 'Progression & feedback',
+        desc: 'L\'IA analyse chaque soumission — qualité visuelle, réflexion UX, créativité. Vois exactement où t\'améliorer.',
+      },
+    },
+    cta: {
+      label: 'Prêt ?',
+      title: 'Rejoins l\'arène',
+      subtitle: 'Gratuit pour commencer. Pas de carte bancaire. Ton premier challenge t\'attend.',
+      button: 'Créer un compte gratuit',
+    },
+  },
+  publicChallenges: {
+    title: 'Challenges',
+  },
 } as const
 
 type DeepStringify<T> = {

@@ -15,6 +15,23 @@ const SUBJECT_LABELS: Record<Subject, { fr: string; en: string }> = {
   other: { fr: 'Autre', en: 'Other' },
 }
 
+const ERR: Record<'fr' | 'en', { name: string; email: string; subject: string; message: string; send: string }> = {
+  fr: {
+    name: 'Nom invalide (2-100 caractères)',
+    email: 'Email invalide',
+    subject: 'Sujet invalide',
+    message: 'Message trop court ou trop long (10-5000 caractères)',
+    send: 'Échec de l\'envoi de l\'email',
+  },
+  en: {
+    name: 'Invalid name (2–100 characters)',
+    email: 'Invalid email',
+    subject: 'Invalid subject',
+    message: 'Message too short or too long (10–5000 characters)',
+    send: 'Email send failed',
+  },
+}
+
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
@@ -27,6 +44,7 @@ export async function POST(request: Request) {
   const message = (body.message as string | undefined)?.trim() ?? ''
   const honeypot = (body.website as string | undefined) ?? ''
   const lang = (body.lang as 'fr' | 'en' | undefined) ?? 'fr'
+  const e = ERR[lang]
 
   // Honeypot — silently succeed if filled (bot)
   if (honeypot) {
@@ -35,16 +53,16 @@ export async function POST(request: Request) {
 
   // Validation
   if (name.length < 2 || name.length > 100) {
-    return NextResponse.json({ error: 'Nom invalide (2-100 caractères)' }, { status: 400 })
+    return NextResponse.json({ error: e.name }, { status: 400 })
   }
   if (!isValidEmail(email)) {
-    return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
+    return NextResponse.json({ error: e.email }, { status: 400 })
   }
   if (!subject || !VALID_SUBJECTS.includes(subject)) {
-    return NextResponse.json({ error: 'Sujet invalide' }, { status: 400 })
+    return NextResponse.json({ error: e.subject }, { status: 400 })
   }
   if (message.length < 10 || message.length > 5000) {
-    return NextResponse.json({ error: 'Message trop court ou trop long (10-5000 caractères)' }, { status: 400 })
+    return NextResponse.json({ error: e.message }, { status: 400 })
   }
 
   const subjectLabel = SUBJECT_LABELS[subject][lang]
@@ -110,9 +128,9 @@ export async function POST(request: Request) {
       }),
     ])
     return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    console.error('[help/contact] Resend error', e)
-    return NextResponse.json({ error: 'Email send failed' }, { status: 500 })
+  } catch (err: any) {
+    console.error('[help/contact] Resend error', err)
+    return NextResponse.json({ error: e.send }, { status: 500 })
   }
 }
 

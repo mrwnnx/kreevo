@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Trophy, Sparkles, TrendingUp } from 'lucide-react'
+import { getDict } from '@/lib/i18n/lang'
 
 const LEAGUES = [
   { name: 'Stone',    cls: 'league-stone',    bg: 'league-bg-stone',    icon: '○' },
@@ -12,7 +13,16 @@ const LEAGUES = [
   { name: 'Legend',   cls: 'league-legend',   bg: 'league-bg-legend',   icon: '★' },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const dict = await getDict()
+  const t = dict.landing
+
+  const features = [
+    { icon: Trophy, accent: 'text-league-gold', ...t.features.monthly },
+    { icon: Sparkles, accent: 'text-primary', ...t.features.leagues },
+    { icon: TrendingUp, accent: 'text-league-platinum', ...t.features.progress },
+  ]
+
   return (
     <div className="min-h-screen bg-background text-foreground">
 
@@ -21,16 +31,16 @@ export default function Home() {
         <span className="text-base font-bold tracking-tight">kreevo</span>
         <div className="flex items-center gap-6">
           <Link href="/dashboard/challenges" className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono uppercase tracking-wider">
-            Challenges
+            {t.nav.challenges}
           </Link>
           <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Sign in
+            {t.nav.signIn}
           </Link>
           <Link
             href="/signup"
             className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-full hover:opacity-85 transition-opacity glow-primary"
           >
-            Get started <ArrowRight className="size-3" />
+            {t.nav.getStarted} <ArrowRight className="size-3" />
           </Link>
         </div>
       </nav>
@@ -43,18 +53,17 @@ export default function Home() {
         <div className="relative">
           <div className="inline-flex items-center gap-2 border border-primary/20 bg-primary/8 text-primary text-xs font-mono px-3 py-1.5 rounded-full mb-8 tracking-wide">
             <span className="size-1.5 rounded-full bg-primary animate-pulse inline-block" />
-            April 2026 challenges are live
+            {t.hero.badge}
           </div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-[0.9] mb-6 text-foreground">
-            Design.<br />
-            <span className="text-primary">Compete.</span><br />
-            Level up.
+            {t.hero.titleLine1}<br />
+            <span className="text-primary">{t.hero.titleLine2}</span><br />
+            {t.hero.titleLine3}
           </h1>
 
           <p className="text-base text-muted-foreground max-w-lg mb-10 leading-relaxed">
-            Weekly real-world design challenges, AI feedback on every submission,
-            and a league system that ranks your progress from Stone to Legend.
+            {t.hero.subtitle}
           </p>
 
           <div className="flex items-center gap-4">
@@ -62,9 +71,9 @@ export default function Home() {
               href="/signup"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 rounded-full hover:opacity-85 transition-opacity glow-primary"
             >
-              Start for free <ArrowRight className="size-4" />
+              {t.hero.ctaPrimary} <ArrowRight className="size-4" />
             </Link>
-            <span className="text-xs text-muted-foreground font-mono">No credit card required</span>
+            <span className="text-xs text-muted-foreground font-mono">{t.hero.ctaHint}</span>
           </div>
         </div>
       </section>
@@ -73,7 +82,7 @@ export default function Home() {
       <section className="px-8 py-16 border-y border-border/50">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-8">
-            League System
+            {t.leagues.label}
           </p>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
             {LEAGUES.map((l) => (
@@ -89,7 +98,7 @@ export default function Home() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-4 font-mono">
-            Earn XP on every submission → climb from Stone to Legend
+            {t.leagues.caption}
           </p>
         </div>
       </section>
@@ -97,29 +106,7 @@ export default function Home() {
       {/* ── Features ────────────────────────────────────────── */}
       <section className="px-8 py-20 max-w-5xl mx-auto">
         <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              icon: Trophy,
-              tag: 'Monthly',
-              title: 'Real Design Challenges',
-              desc: 'Briefs across Mobile UI, Web Design, Branding, Design Systems, Motion. Graded by AI + community.',
-              accent: 'text-league-gold',
-            },
-            {
-              icon: Sparkles,
-              tag: 'Leagues',
-              title: '8 Leagues, real progression',
-              desc: 'From Stone to Legend — each league unlocks tougher briefs. XP and completed challenges promote you up.',
-              accent: 'text-primary',
-            },
-            {
-              icon: TrendingUp,
-              tag: 'Always-on',
-              title: 'Progress & Feedback',
-              desc: 'AI analyzes every submission — visual quality, UX thinking, creativity. See exactly where to improve.',
-              accent: 'text-league-platinum',
-            },
-          ].map(({ icon: Icon, tag, title, desc, accent }) => (
+          {features.map(({ icon: Icon, tag, title, desc, accent }) => (
             <div key={title} className="card-sharp rounded-lg p-4 space-y-4 hover:border-primary/30 transition-colors group">
               <div className="flex items-center justify-between">
                 <Icon className={`size-5 ${accent}`} />
@@ -140,16 +127,16 @@ export default function Home() {
       <section className="px-8 pb-24 max-w-5xl mx-auto">
         <div className="relative rounded-xl border border-primary/20 bg-primary/5 px-10 py-12 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-          <p className="text-xs font-mono text-primary uppercase tracking-widest mb-4">Ready?</p>
-          <h2 className="text-3xl font-bold tracking-tight mb-3">Join the arena</h2>
+          <p className="text-xs font-mono text-primary uppercase tracking-widest mb-4">{t.cta.label}</p>
+          <h2 className="text-3xl font-bold tracking-tight mb-3">{t.cta.title}</h2>
           <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
-            Free to start. No credit card. Your first challenge is waiting.
+            {t.cta.subtitle}
           </p>
           <Link
             href="/signup"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-8 py-3 rounded-full hover:opacity-85 transition-opacity glow-primary"
           >
-            Create free account <ArrowRight className="size-4" />
+            {t.cta.button} <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
