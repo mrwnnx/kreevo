@@ -44,6 +44,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
 
   const figmaUrl = (submission.files as any)?.figma
+  const projectLink = (submission.files as any)?.link
   const userLiked = !!likeData
 
   const dict = await getDict()
@@ -133,7 +134,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
           )}
 
           {/* Card description */}
-          {(submission.description || figmaUrl) && (
+          {(submission.description || figmaUrl || projectLink) && (
             <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
               <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">{t.descriptionLabel}</p>
               {submission.description && (
@@ -141,16 +142,31 @@ export default async function SubmissionDetailPage({ params }: Props) {
                   {submission.description}
                 </p>
               )}
-              {figmaUrl && (
-                <a
-                  href={figmaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
-                >
-                  <ExternalLink className="size-3" />
-                  {t.seeFigma}
-                </a>
+              {(figmaUrl || projectLink) && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {figmaUrl && (
+                    <a
+                      href={figmaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <ExternalLink className="size-3" />
+                      {t.seeFigma}
+                    </a>
+                  )}
+                  {projectLink && (
+                    <a
+                      href={projectLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <ExternalLink className="size-3" />
+                      {t.seeProject}
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           )}

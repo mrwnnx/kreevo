@@ -434,6 +434,7 @@ export const en: Dictionary = {
     noPreview: 'No preview',
     descriptionLabel: 'Description',
     seeFigma: 'See on Figma →',
+    seeProject: 'See project →',
     additionalAlt: 'Visual {n}',
     coverAlt: 'Submission cover',
     you: 'You',

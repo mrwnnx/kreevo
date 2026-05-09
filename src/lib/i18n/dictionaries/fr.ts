@@ -431,6 +431,7 @@ export const fr = {
     noPreview: 'Pas de preview',
     descriptionLabel: 'Description',
     seeFigma: 'Voir sur Figma →',
+    seeProject: 'Voir le projet →',
     additionalAlt: 'Visuel {n}',
     coverAlt: 'Cover de la soumission',
     you: 'Vous',
