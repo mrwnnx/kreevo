@@ -37,6 +37,8 @@ interface Props {
   isOwn: boolean
   t: DetailT
   dateLocale: string
+  /** Right column (e.g. ProfilePanel) — rendered alongside the secondary content below the cover. */
+  sidebar?: React.ReactNode
 }
 
 export function SubmissionDetailContent({
@@ -47,6 +49,7 @@ export function SubmissionDetailContent({
   isOwn,
   t,
   dateLocale,
+  sidebar,
 }: Props) {
   const [comments, setComments] = useState<ReviewComment[]>([])
   const [isLoadingComments, setIsLoadingComments] = useState(true)
@@ -177,8 +180,8 @@ export function SubmissionDetailContent({
   const additionalImages = Array.isArray(files.images) ? (files.images as string[]) : []
 
   return (
-    <div className="flex-1 min-w-0 space-y-4">
-      {/* ── HEADER : title + date left, actions right ── */}
+    <div className="space-y-4">
+      {/* ── HEADER (full width) : title + date left, actions right ── */}
       {(submission.title || submission.created_at) && (
         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
@@ -253,7 +256,7 @@ export function SubmissionDetailContent({
         </div>
       )}
 
-      {/* Cover */}
+      {/* Cover (full container width) */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
         <div className="relative aspect-video bg-muted">
           {submission.cover_url ? (
@@ -271,6 +274,9 @@ export function SubmissionDetailContent({
         </div>
       </div>
 
+      {/* ── 2-col layout under the cover ── */}
+      <div className="flex flex-col md:flex-row gap-4 items-start">
+        <div className="flex-1 min-w-0 space-y-4">
       {/* Additional images */}
       {additionalImages.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -397,6 +403,9 @@ export function SubmissionDetailContent({
           })()}
         </div>
       )}
+        </div>
+        {sidebar}
+      </div>
     </div>
   )
 }

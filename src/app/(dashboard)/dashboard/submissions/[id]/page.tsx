@@ -57,30 +57,28 @@ export default async function SubmissionDetailPage({ params }: Props) {
         {challenge?.title ?? t.backFallback}
       </Link>
 
-      {/* 2-col layout */}
-      <div className="flex flex-col md:flex-row gap-4 items-start">
-        <SubmissionDetailContent
-          submission={submission}
-          currentUserId={user.id}
-          currentProfilePlan={currentProfile?.plan ?? null}
-          initialUserLiked={userLiked}
-          isOwn={isOwn}
-          t={t}
-          dateLocale={dateLocale}
-        />
-
-        <ProfilePanel
-          author={author}
-          isOwn={isOwn}
-          challenge={challenge}
-          t={{
-            you: t.you,
-            challengeLabel: t.challengeLabel,
-            seeChallenge: t.seeChallenge,
-            linksLabel: t.linksLabel,
-          }}
-        />
-      </div>
+      <SubmissionDetailContent
+        submission={submission}
+        currentUserId={user.id}
+        currentProfilePlan={currentProfile?.plan ?? null}
+        initialUserLiked={userLiked}
+        isOwn={isOwn}
+        t={t}
+        dateLocale={dateLocale}
+        sidebar={
+          <ProfilePanel
+            author={author}
+            isOwn={isOwn}
+            challenge={challenge}
+            t={{
+              you: t.you,
+              challengeLabel: t.challengeLabel,
+              seeChallenge: t.seeChallenge,
+              linksLabel: t.linksLabel,
+            }}
+          />
+        }
+      />
     </div>
   )
 }
