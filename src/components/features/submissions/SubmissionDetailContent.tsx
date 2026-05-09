@@ -201,7 +201,7 @@ export function SubmissionDetailContent({
         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
             {submission.title && (
-              <h1 className="text-2xl font-bold leading-tight tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
                 {submission.title}
               </h1>
             )}
