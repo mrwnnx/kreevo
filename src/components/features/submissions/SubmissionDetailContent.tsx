@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Heart, MessageSquare, MessageCircle, ExternalLink } from 'lucide-react'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
@@ -69,6 +69,20 @@ export function SubmissionDetailContent({
   const [likePending, setLikePending] = useState(false)
   const [commentsCount, setCommentsCount] = useState(submission.comments_count ?? 0)
   const [modalOpen, setModalOpen] = useState(false)
+  const [isStuck, setIsStuck] = useState(false)
+  const stickySentinelRef = useRef<HTMLDivElement>(null)
+
+  // Detect when the sticky header pins to the FloatingNav (top: 56px)
+  useEffect(() => {
+    const el = stickySentinelRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { rootMargin: '-56px 0px 0px 0px', threshold: 0 },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
   const isApproved = submission.validation_status === 'approved'
 
@@ -196,19 +210,31 @@ export function SubmissionDetailContent({
 
   return (
     <div className="space-y-4">
-      {/* ── HEADER (sticky to top) : title + authors left · actions right ── */}
+      {/* ── HEADER (sticky to top, shrinks title on scroll) ── */}
       {(submission.title || allAuthors.length > 0) && (
-        <div className="sticky top-14 z-20 -mx-6 px-6 py-3 bg-background/95 supports-[backdrop-filter]:backdrop-blur border-b border-border">
+        <div>
+        <div ref={stickySentinelRef} aria-hidden className="h-px" />
+        <div
+          className={cn(
+            'sticky top-14 z-20 -mx-6 px-6 bg-background/95 supports-[backdrop-filter]:backdrop-blur border-b border-border transition-all duration-200',
+            isStuck ? 'py-2' : 'py-3',
+          )}
+        >
         <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
             {submission.title && (
-              <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
+              <h1
+                className={cn(
+                  'font-bold tracking-tight leading-tight transition-all duration-200',
+                  isStuck ? 'text-base sm:text-lg truncate' : 'text-3xl sm:text-4xl',
+                )}
+              >
                 {submission.title}
               </h1>
             )}
 
-            {/* Authors row: avatar(s) + name(s) */}
-            {allAuthors.length > 0 && (
+            {/* Authors row: avatar(s) + name(s) — hidden when sticky to keep bar compact */}
+            {allAuthors.length > 0 && !isStuck && (
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex -space-x-2">
                   {visibleAvatars.map((u) => (
@@ -296,6 +322,7 @@ export function SubmissionDetailContent({
               </Button>
             </div>
           )}
+        </div>
         </div>
         </div>
       )}
