@@ -489,9 +489,6 @@ export const fr = {
       confirmReport: 'Signaler ce commentaire ?',
       confirmDelete: 'Supprimer ce commentaire ?',
       genericError: 'Erreur',
-      panelTitle: 'Discussion',
-      closePanelAria: 'Fermer le panneau',
-      previewLabel: 'Soumission',
       timeAgo: {
         justNow: 'à l\'instant',
         minutes: 'il y a {n}m',
