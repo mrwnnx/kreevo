@@ -218,6 +218,8 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
         placeholder: 'https://...',
         iconText: name.slice(0, 2),
         iconBg: '#71717A',
+        softBg: '#F4F4F5',
+        softColor: '#3F3F46',
       }
     }
     addNetwork(key)

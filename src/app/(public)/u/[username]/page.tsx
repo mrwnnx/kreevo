@@ -216,7 +216,7 @@ export default async function ProfilePage({
             )}
 
             {/* Social links + Contact */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {Object.entries(social).map(([key, url]) => {
                 const def = defForKey(key)
                 return (
@@ -227,9 +227,8 @@ export default async function ProfilePage({
                     rel="noopener noreferrer"
                     aria-label={def.name}
                     title={def.name}
-                    className="hover:opacity-80 transition-opacity"
                   >
-                    <SocialLogo def={def} />
+                    <SocialLogo def={def} variant="soft" />
                   </a>
                 )
               })}

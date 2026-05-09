@@ -3,8 +3,14 @@ export interface SocialDef {
   name: string
   placeholder: string
   iconText: string
+  /** Solid brand color (for filled circle / pill variant). */
   iconBg: string
+  /** Optional fg on solid bg (default white). */
   iconColor?: string
+  /** Pastel background for the soft tile variant (matches dashboard look). */
+  softBg: string
+  /** Brand color used as icon foreground on the soft tile variant. */
+  softColor: string
 }
 
 export const SOCIAL_DEFS: Record<string, SocialDef> = {
@@ -14,6 +20,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://behance.net/username',
     iconText: 'Bē',
     iconBg: '#1769FF',
+    softBg: '#EEF2FF',
+    softColor: '#3B5BDB',
   },
   dribbble: {
     key: 'dribbble',
@@ -21,6 +29,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://dribbble.com/username',
     iconText: 'Dr',
     iconBg: '#EA4C89',
+    softBg: '#FFF0F6',
+    softColor: '#E64980',
   },
   linkedin: {
     key: 'linkedin',
@@ -28,6 +38,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://linkedin.com/in/username',
     iconText: 'in',
     iconBg: '#0A66C2',
+    softBg: '#EFF8FF',
+    softColor: '#0A66C2',
   },
   instagram: {
     key: 'instagram',
@@ -35,6 +47,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://instagram.com/username',
     iconText: 'Ig',
     iconBg: '#E4405F',
+    softBg: '#FFF0F6',
+    softColor: '#C13584',
   },
   twitter: {
     key: 'twitter',
@@ -42,6 +56,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://x.com/username',
     iconText: 'X',
     iconBg: '#000000',
+    softBg: '#F1F1F1',
+    softColor: '#0F172A',
   },
   pinterest: {
     key: 'pinterest',
@@ -49,6 +65,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://pinterest.com/username',
     iconText: 'P',
     iconBg: '#E60023',
+    softBg: '#FFF0F0',
+    softColor: '#E60023',
   },
   readcv: {
     key: 'readcv',
@@ -56,6 +74,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://read.cv/username',
     iconText: 'rd',
     iconBg: '#000000',
+    softBg: '#F4F4F5',
+    softColor: '#0F172A',
   },
   bento: {
     key: 'bento',
@@ -64,6 +84,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     iconText: 'B',
     iconBg: '#FFCD00',
     iconColor: '#000000',
+    softBg: '#FFFBEB',
+    softColor: '#B45309',
   },
   awwwards: {
     key: 'awwwards',
@@ -71,6 +93,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://awwwards.com/@username',
     iconText: 'Aw',
     iconBg: '#000000',
+    softBg: '#F4F4F5',
+    softColor: '#0F172A',
   },
   arena: {
     key: 'arena',
@@ -78,6 +102,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://are.na/username',
     iconText: 'a',
     iconBg: '#000000',
+    softBg: '#F4F4F5',
+    softColor: '#0F172A',
   },
   cara: {
     key: 'cara',
@@ -85,6 +111,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://cara.app/username',
     iconText: 'C',
     iconBg: '#FF6700',
+    softBg: '#FFF7ED',
+    softColor: '#C2410C',
   },
   tumblr: {
     key: 'tumblr',
@@ -92,6 +120,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://username.tumblr.com',
     iconText: 't',
     iconBg: '#36465D',
+    softBg: '#EEF2FF',
+    softColor: '#36465D',
   },
   github: {
     key: 'github',
@@ -99,6 +129,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://github.com/username',
     iconText: 'gh',
     iconBg: '#181717',
+    softBg: '#F4F4F5',
+    softColor: '#0F172A',
   },
   youtube: {
     key: 'youtube',
@@ -106,6 +138,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://youtube.com/@username',
     iconText: 'Yt',
     iconBg: '#FF0000',
+    softBg: '#FFF0F0',
+    softColor: '#DC2626',
   },
   tiktok: {
     key: 'tiktok',
@@ -113,6 +147,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://tiktok.com/@username',
     iconText: 'Tt',
     iconBg: '#000000',
+    softBg: '#F1F1F1',
+    softColor: '#0F172A',
   },
   website: {
     key: 'website',
@@ -120,6 +156,8 @@ export const SOCIAL_DEFS: Record<string, SocialDef> = {
     placeholder: 'https://yourdomain.com',
     iconText: '🌐',
     iconBg: '#71717A',
+    softBg: '#F0FDF4',
+    softColor: '#16A34A',
   },
 }
 
@@ -169,6 +207,8 @@ export function defForKey(key: string): SocialDef {
       placeholder: 'https://...',
       iconText: key.slice(0, 2),
       iconBg: '#71717A',
+      softBg: '#F4F4F5',
+      softColor: '#3F3F46',
     }
   )
 }

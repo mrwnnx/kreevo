@@ -39,11 +39,33 @@ const LOGO_PATHS: Record<string, string> = {
 interface SocialLogoProps {
   def: SocialDef
   size?: 'sm' | 'md'
+  /** `solid` = filled brand circle (default). `soft` = pastel rounded tile, matches dashboard. */
+  variant?: 'solid' | 'soft'
   className?: string
 }
 
-export function SocialLogo({ def, size = 'md', className }: SocialLogoProps) {
+export function SocialLogo({ def, size = 'md', variant = 'solid', className }: SocialLogoProps) {
   const path = LOGO_PATHS[def.key]
+
+  if (variant === 'soft') {
+    // Square pastel tile à la DashboardProfileHeader (w-7 h-7, rounded-lg, hover scale)
+    return (
+      <span
+        className={`size-7 shrink-0 inline-flex items-center justify-center rounded-lg font-bold tracking-tight transition-transform duration-150 hover:scale-110 ${className ?? ''}`}
+        style={{ backgroundColor: def.softBg, color: def.softColor }}
+        aria-hidden
+      >
+        {path ? (
+          <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d={path} />
+          </svg>
+        ) : (
+          <span className="text-xs">{def.iconText}</span>
+        )}
+      </span>
+    )
+  }
+
   const isLarge = size === 'md'
   const wrapCls = isLarge ? 'size-9' : 'size-5'
   const iconCls = isLarge ? 'size-5' : 'size-3'
