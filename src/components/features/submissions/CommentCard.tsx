@@ -50,6 +50,7 @@ export interface ReviewComment {
   user: {
     id: string
     username: string
+    full_name: string | null
     avatar_url: string | null
     plan: string | null
     league: string | null
@@ -147,10 +148,9 @@ export function CommentCard({
       <div className="flex-1 space-y-1.5 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-sm inline-flex items-center gap-1">
-            @{comment.user.username}
+            {comment.user.full_name || comment.user.username}
             <ProBadge plan={comment.user.plan} size={12} />
           </span>
-          {comment.user.league && <span className="text-xs text-muted-foreground">{comment.user.league}</span>}
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo(comment.created_at, t.timeAgo)}</span>
         </div>
 

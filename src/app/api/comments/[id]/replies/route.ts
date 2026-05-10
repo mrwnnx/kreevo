@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: Params) {
     })
     .select(`
       id, content, parent_id, likes_count, is_reported, created_at,
-      user:profiles(id, username, avatar_url, plan, league)
+      user:profiles(id, username, full_name, avatar_url, plan, league)
     `)
     .single()
 
