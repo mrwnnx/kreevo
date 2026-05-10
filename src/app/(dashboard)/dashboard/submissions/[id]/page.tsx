@@ -44,11 +44,11 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const collaboratorIds: string[] = Array.isArray((submission.files as any)?.collaborators)
     ? ((submission.files as any).collaborators as unknown[]).filter((x): x is string => typeof x === 'string')
     : []
-  let collaborators: Array<{ id: string; username: string; avatar_url: string | null }> = []
+  let collaborators: Array<{ id: string; username: string; full_name: string | null; avatar_url: string | null }> = []
   if (collaboratorIds.length > 0) {
     const { data: collabRows } = await (supabase as any)
       .from('profiles')
-      .select('id, username, avatar_url')
+      .select('id, username, full_name, avatar_url')
       .in('id', collaboratorIds)
     collaborators = (collabRows ?? []) as typeof collaborators
   }
@@ -72,7 +72,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
 
       <SubmissionDetailContent
         submission={submission}
-        author={author ? { id: author.id, username: author.username, avatar_url: author.avatar_url } : null}
+        author={author ? { id: author.id, username: author.username, full_name: author.full_name ?? null, avatar_url: author.avatar_url } : null}
         collaborators={collaborators}
         currentUserId={user.id}
         currentProfilePlan={currentProfile?.plan ?? null}

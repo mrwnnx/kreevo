@@ -31,6 +31,7 @@ interface SubmissionLite {
 interface AuthorLite {
   id: string
   username: string
+  full_name: string | null
   avatar_url: string | null
 }
 
@@ -261,7 +262,7 @@ export function SubmissionDetailContent({
                       href={`/u/${author.username}`}
                       className="font-medium text-foreground hover:underline"
                     >
-                      @{author.username}
+                      {author.full_name || author.username}
                     </Link>
                   )}
                   {collaborators.length === 1 && (
@@ -271,7 +272,7 @@ export function SubmissionDetailContent({
                         href={`/u/${collaborators[0].username}`}
                         className="font-medium text-foreground hover:underline"
                       >
-                        @{collaborators[0].username}
+                        {collaborators[0].full_name || collaborators[0].username}
                       </Link>
                     </>
                   )}
