@@ -209,10 +209,10 @@ export function SubmissionDetailContent({
   const overflowCount = Math.max(0, allAuthors.length - 2)
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* ── HEADER (sticky to top, shrinks title on scroll) ── */}
       {(submission.title || allAuthors.length > 0) && (
-        <div>
+        <>
         <div ref={stickySentinelRef} aria-hidden className="h-px" />
         <div
           className={cn(
@@ -324,9 +324,11 @@ export function SubmissionDetailContent({
           )}
         </div>
         </div>
-        </div>
+        </>
       )}
 
+      {/* Body content under sticky header */}
+      <div className="space-y-4 mt-4">
       {/* Cover (full container width) */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
         <div className="relative aspect-video bg-muted">
@@ -476,6 +478,7 @@ export function SubmissionDetailContent({
       )}
         </div>
         {sidebar}
+      </div>
       </div>
     </div>
   )
