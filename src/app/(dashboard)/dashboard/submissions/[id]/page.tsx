@@ -39,6 +39,17 @@ export default async function SubmissionDetailPage({ params }: Props) {
   const author = submission.profiles
   const isOwn = submission.user_id === user.id
   const userLiked = !!likeData
+  const filesObj = (submission.files as Record<string, unknown> | null) ?? {}
+  const projectLink = typeof filesObj.link === 'string' ? filesObj.link : null
+
+  // Increment view count (skip own submission)
+  if (!isOwn) {
+    await (supabase as any).rpc('increment_submission_views', { sub_id: id }).then(
+      () => null,
+      () => null,
+    )
+  }
+  const viewsCount = (submission.views_count ?? 0) + (isOwn ? 0 : 1)
 
   // Resolve collaborator profiles (stored as user-id array in submission.files.collaborators)
   const collaboratorIds: string[] = Array.isArray((submission.files as any)?.collaborators)
@@ -85,11 +96,14 @@ export default async function SubmissionDetailPage({ params }: Props) {
             author={author}
             isOwn={isOwn}
             challenge={challenge}
+            projectLink={projectLink}
+            viewsCount={viewsCount}
             t={{
               you: t.you,
               challengeLabel: t.challengeLabel,
               seeChallenge: t.seeChallenge,
               linksLabel: t.linksLabel,
+              seeProject: t.seeProject,
             }}
           />
         }
