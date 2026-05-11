@@ -360,54 +360,51 @@ export function SubmissionDetailContent({
         </div>
       </div>
 
-      {/* ── 2-col layout under the cover ── */}
+      {/* ── 2-col: description (left) + sidebar (right) ── */}
       <div className="flex flex-col md:flex-row gap-4 items-start">
         <div className="flex-1 min-w-0 space-y-4">
-      {/* Additional images */}
-      {additionalImages.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {additionalImages.map((url, i) => (
-            <div key={i} className="rounded-xl border border-border overflow-hidden bg-muted aspect-square">
-              <ImageLightbox
-                src={url}
-                alt={tx(t.additionalAlt, { n: i + 1 })}
-                openLabel={t.lightbox.open}
-                closeLabel={t.lightbox.close}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Description */}
-      {(submission.description || figmaUrl) && (
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-          <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
-            {t.descriptionLabel}
-          </p>
-          {submission.description && (
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {submission.description}
-            </p>
-          )}
-          {figmaUrl && (
-            <div className="flex flex-wrap items-center gap-2">
-              <a
-                href={figmaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
-              >
-                <ExternalLink className="size-3" /> {t.seeFigma}
-              </a>
+          {/* Description */}
+          {(submission.description || figmaUrl) && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
+                {t.descriptionLabel}
+              </p>
+              {submission.description && (
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {submission.description}
+                </p>
+              )}
+              {figmaUrl && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={figmaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                  >
+                    <ExternalLink className="size-3" /> {t.seeFigma}
+                  </a>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-
         </div>
         {sidebar}
       </div>
+
+      {/* Additional photos — full-width stacked, displayed like cover */}
+      {additionalImages.map((url, i) => (
+        <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
+          <div className="relative aspect-video bg-muted">
+            <ImageLightbox
+              src={url}
+              alt={tx(t.additionalAlt, { n: i + 1 })}
+              openLabel={t.lightbox.open}
+              closeLabel={t.lightbox.close}
+            />
+          </div>
+        </div>
+      ))}
       </div>
 
       {/* Slide-in comments panel */}
