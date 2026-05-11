@@ -17,9 +17,6 @@ export async function POST(_req: Request, { params }: Params) {
     .eq('id', commentId)
     .single()
   if (!comment) return NextResponse.json({ error: 'Commentaire introuvable' }, { status: 404 })
-  if (comment.user_id === user.id) {
-    return NextResponse.json({ error: 'Tu ne peux pas liker ton propre commentaire' }, { status: 403 })
-  }
 
   const { data: existing } = await (supabaseAdmin as any)
     .from('comment_likes')

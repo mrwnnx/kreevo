@@ -19,7 +19,7 @@ export async function GET(_req: Request, { params }: Params) {
   const { data: comments } = await (supabaseAdmin as any)
     .from('comments')
     .select(`
-      id, content, parent_id, likes_count, is_reported, created_at,
+      id, content, parent_id, likes_count, is_reported, created_at, edited_at,
       user:profiles(id, username, full_name, avatar_url, plan, league)
     `)
     .eq('submission_id', submissionId)
@@ -99,7 +99,7 @@ export async function POST(req: Request, { params }: Params) {
       content,
     })
     .select(`
-      id, content, parent_id, likes_count, is_reported, created_at,
+      id, content, parent_id, likes_count, is_reported, created_at, edited_at,
       user:profiles(id, username, full_name, avatar_url, plan, league)
     `)
     .single()

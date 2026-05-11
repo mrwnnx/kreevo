@@ -35,3 +35,35 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   return NextResponse.json({ ok: true })
 }
+
+export async function PATCH(req: Request, { params }: Params) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id: commentId } = await params
+  const body = await req.json().catch(() => ({}))
+  const content = typeof body?.content === 'string' ? body.content.trim() : ''
+  if (content.length < 10) {
+    return NextResponse.json({ error: 'Content too short' }, { status: 400 })
+  }
+
+  const { data: comment } = await (supabaseAdmin as any)
+    .from('comments')
+    .select('id, user_id')
+    .eq('id', commentId)
+    .single()
+  if (!comment) return NextResponse.json({ error: 'Commentaire introuvable' }, { status: 404 })
+  if (comment.user_id !== user.id) {
+    return NextResponse.json({ error: 'Tu ne peux modifier que tes propres commentaires' }, { status: 403 })
+  }
+
+  const editedAt = new Date().toISOString()
+  const { error } = await (supabaseAdmin as any)
+    .from('comments')
+    .update({ content, edited_at: editedAt })
+    .eq('id', commentId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ ok: true, content, editedAt })
+}
