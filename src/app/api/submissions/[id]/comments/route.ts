@@ -71,9 +71,6 @@ export async function POST(req: Request, { params }: Params) {
   if (submission.validation_status !== 'approved') {
     return NextResponse.json({ error: 'Soumission non publiée' }, { status: 403 })
   }
-  if (submission.user_id === user.id) {
-    return NextResponse.json({ error: 'Tu ne peux pas commenter ta propre soumission' }, { status: 403 })
-  }
 
   const { data: profile } = await (supabaseAdmin as any)
     .from('profiles').select('plan').eq('id', user.id).single()

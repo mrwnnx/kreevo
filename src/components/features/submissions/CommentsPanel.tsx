@@ -196,13 +196,8 @@ export function CommentsPanel({
           </div>
         )}
 
-        {/* Owner notice / free limit warning */}
-        {isOwn && (
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-xs text-muted-foreground text-center">{tc.cantCommentOwn}</p>
-          </div>
-        )}
-        {isFreeLimited && !isOwn && (
+        {/* Free limit warning (owner can comment freely on their own submission) */}
+        {isFreeLimited && (
           <div className="m-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl p-3 text-center">
             <p className="text-xs font-medium text-violet-800 dark:text-violet-300">
               {tx(tc.freeLimitTitle, { n: FREE_LIMIT })}

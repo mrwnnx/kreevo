@@ -103,7 +103,8 @@ export function SubmissionDetailContent({
 
   const isProUser = currentProfilePlan === 'pro' || currentProfilePlan === 'studio'
   const isFreeLimited = !isProUser && dailyCount >= FREE_LIMIT
-  const canComment = !isOwn && !isFreeLimited
+  // Owner CAN comment on their own submission; only the daily-free-limit gates them
+  const canComment = !isFreeLimited
 
   function handlePrimaryClick() {
     if (isOwn) {
