@@ -215,6 +215,8 @@ export function SubmissionDetailContent({
   // Total = top-level + replies. Use derived once API has fetched, else fall back to (incomplete) DB column.
   const commentsCount = isLoadingComments ? (submission.comments_count ?? 0) : comments.length
   const additionalImages = Array.isArray(files.images) ? (files.images as string[]) : []
+  // Full gallery shared across the cover + extra image lightboxes — enables ←/→ navigation
+  const galleryImages = [submission.cover_url, ...additionalImages].filter((u): u is string => !!u)
 
   // Authors list: author + collaborators (max 2 avatars shown, rest counted)
   const allAuthors: AuthorLite[] = author ? [author, ...collaborators] : [...collaborators]
@@ -225,7 +227,7 @@ export function SubmissionDetailContent({
     <div>
       {/* ── HEADER (sticky to top, shrinks title on scroll) ── */}
       {(submission.title || allAuthors.length > 0) && (
-        <>
+        <div>
         <div ref={stickySentinelRef} aria-hidden className="h-px" />
         <div
           className={cn(
@@ -233,7 +235,7 @@ export function SubmissionDetailContent({
             isStuck ? 'py-2' : 'py-3',
           )}
         >
-        <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex items-end justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div className="flex-1 min-w-0">
             {submission.title && (
               <h1
@@ -296,9 +298,9 @@ export function SubmissionDetailContent({
             )}
           </div>
 
-          {/* Actions: only meaningful when submission is approved */}
+          {/* Actions: only meaningful when submission is approved (hidden on mobile — moved to bottom bar) */}
           {isApproved && (
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden sm:flex items-center gap-3 shrink-0">
               {/* Like (icon + count) */}
               <button
                 onClick={handleLike}
@@ -337,11 +339,11 @@ export function SubmissionDetailContent({
           )}
         </div>
         </div>
-        </>
+        </div>
       )}
 
       {/* Body content under sticky header */}
-      <div className="space-y-4 mt-4">
+      <div className="space-y-4 mt-4 sm:pb-0 pb-24">
       {/* Cover (full container width) */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
         <div className="relative aspect-video bg-muted">
@@ -351,6 +353,8 @@ export function SubmissionDetailContent({
               alt={t.coverAlt}
               openLabel={t.lightbox.open}
               closeLabel={t.lightbox.close}
+              images={galleryImages}
+              index={0}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
@@ -401,6 +405,8 @@ export function SubmissionDetailContent({
               alt={tx(t.additionalAlt, { n: i + 1 })}
               openLabel={t.lightbox.open}
               closeLabel={t.lightbox.close}
+              images={galleryImages}
+              index={(submission.cover_url ? 1 : 0) + i}
             />
           </div>
         </div>
@@ -434,6 +440,46 @@ export function SubmissionDetailContent({
           t={t}
           dateLocale={dateLocale}
         />
+      )}
+
+      {/* Mobile bottom action bar — replaces FloatingNav for this page */}
+      {isApproved && (
+        <div
+          className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border px-4 pt-3 flex items-center gap-3"
+          style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+        >
+          {/* Like */}
+          <button
+            onClick={handleLike}
+            disabled={isOwn || likePending}
+            aria-label={liked ? tc.unlikeAria : tc.likeAria}
+            className={cn(
+              'inline-flex items-center gap-1 text-sm font-semibold transition-colors',
+              isOwn ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
+              liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
+            )}
+          >
+            <Heart className={cn('size-5 transition-all', liked && 'fill-red-500')} strokeWidth={1.8} />
+            <span>{totalLikes}</span>
+          </button>
+
+          {/* Comments count */}
+          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+            <MessageCircle className="size-5" strokeWidth={1.8} />
+            <span>{commentsCount}</span>
+          </span>
+
+          {/* Comment button — fills remaining width */}
+          <Button
+            onClick={() => setPanelOpen(true)}
+            disabled={!canComment}
+            size="sm"
+            className="ml-auto gap-1.5 h-10 px-4 text-sm flex-1 max-w-[60%] justify-center"
+          >
+            <MessageSquare className="size-4" />
+            {tc.commentCta}
+          </Button>
+        </div>
       )}
     </div>
   )

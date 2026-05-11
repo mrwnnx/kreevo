@@ -26,6 +26,13 @@ const NAV_BASE = [
   { href: '/dashboard/leaderboard', icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard'), key: 'leagues'    as const },
 ]
 
+// Detail routes where the mobile bottom nav doesn't belong (page-specific actions take over instead)
+const HIDE_MOBILE_NAV_PATTERNS = [
+  /^\/dashboard\/submissions\/[^/]+/,
+  /^\/dashboard\/challenges\/[^/]+/,
+  /^\/u\//,
+]
+
 interface Props {
   profile: Profile
   lang: Lang
@@ -169,7 +176,8 @@ export function FloatingNav({ profile, lang, t }: Props) {
       </div>
     </div>
 
-    {/* Mobile-only floating bottom nav */}
+    {/* Mobile-only floating bottom nav — hidden on detail pages */}
+    {!HIDE_MOBILE_NAV_PATTERNS.some((re) => re.test(pathname)) && (
     <div
       className={cn(
         'sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50',
@@ -200,6 +208,7 @@ export function FloatingNav({ profile, lang, t }: Props) {
         )
       })}
     </div>
+    )}
     </>
   )
 }
