@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Heart, MessageSquare, MessageCircle, ExternalLink } from 'lucide-react'
+import { Heart, MessageSquare, MessageCircle, ExternalLink, Sparkles } from 'lucide-react'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentsPanel } from './CommentsPanel'
+import { ProUpsellModal } from './ProUpsellModal'
 import { type ReviewComment } from './CommentCard'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
@@ -69,6 +71,8 @@ export function SubmissionDetailContent({
   const [likePending, setLikePending] = useState(false)
   // commentsCount is derived from comments.length once fetched (counts top-level + replies). Falls back to DB count during initial load.
   const [panelOpen, setPanelOpen] = useState(false)
+  const [proModalOpen, setProModalOpen] = useState(false)
+  const router = useRouter()
   const [isStuck, setIsStuck] = useState(false)
   const stickySentinelRef = useRef<HTMLDivElement>(null)
 
@@ -100,6 +104,15 @@ export function SubmissionDetailContent({
   const isProUser = currentProfilePlan === 'pro' || currentProfilePlan === 'studio'
   const isFreeLimited = !isProUser && dailyCount >= FREE_LIMIT
   const canComment = !isOwn && !isFreeLimited
+
+  function handlePrimaryClick() {
+    if (isOwn) {
+      if (isProUser) router.push(`/dashboard/submissions/${submission.id}/feedback`)
+      else setProModalOpen(true)
+    } else {
+      setPanelOpen(true)
+    }
+  }
 
   async function handleLike() {
     if (isOwn || likePending) return
@@ -330,15 +343,15 @@ export function SubmissionDetailContent({
                 <span>{commentsCount}</span>
               </button>
 
-              {/* Comment button (text label) */}
+              {/* Primary button: own → AI feedback (Pro/upsell) ; else → leave a comment */}
               <Button
-                onClick={() => setPanelOpen(true)}
-                disabled={!canComment}
+                onClick={handlePrimaryClick}
+                disabled={!isOwn && !canComment}
                 size="sm"
                 className="gap-1.5 h-8 px-3 text-xs"
               >
-                <MessageSquare className="size-3.5" />
-                {tc.commentCta}
+                {isOwn ? <Sparkles className="size-3.5" /> : <MessageSquare className="size-3.5" />}
+                {isOwn ? t.askFeedback : tc.commentCta}
               </Button>
             </div>
           )}
@@ -479,17 +492,26 @@ export function SubmissionDetailContent({
             <span>{commentsCount}</span>
           </button>
 
-          {/* Comment button — fills remaining width */}
+          {/* Primary mobile button — own: AI feedback ; else: comment */}
           <Button
-            onClick={() => setPanelOpen(true)}
-            disabled={!canComment}
+            onClick={handlePrimaryClick}
+            disabled={!isOwn && !canComment}
             size="sm"
             className="ml-auto gap-1.5 h-10 px-4 text-sm flex-1 max-w-[60%] justify-center"
           >
-            <MessageSquare className="size-4" />
-            {tc.commentCta}
+            {isOwn ? <Sparkles className="size-4" /> : <MessageSquare className="size-4" />}
+            {isOwn ? t.askFeedback : tc.commentCta}
           </Button>
         </div>
+      )}
+
+      {/* Pro upsell modal (own + free user) */}
+      {isOwn && !isProUser && (
+        <ProUpsellModal
+          open={proModalOpen}
+          onOpenChange={setProModalOpen}
+          t={t.feedbackPro}
+        />
       )}
     </div>
   )
