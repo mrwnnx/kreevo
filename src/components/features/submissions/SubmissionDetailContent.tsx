@@ -319,11 +319,16 @@ export function SubmissionDetailContent({
                 <span>{totalLikes}</span>
               </button>
 
-              {/* Comments count (icon + count) */}
-              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+              {/* Comments count (icon + count) — opens panel */}
+              <button
+                type="button"
+                onClick={() => setPanelOpen(true)}
+                aria-label={tc.sectionTitle}
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
                 <MessageCircle className="size-4" strokeWidth={1.8} />
                 <span>{commentsCount}</span>
-              </span>
+              </button>
 
               {/* Comment button (text label) */}
               <Button
@@ -463,11 +468,16 @@ export function SubmissionDetailContent({
             <span>{totalLikes}</span>
           </button>
 
-          {/* Comments count */}
-          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+          {/* Comments count — opens panel */}
+          <button
+            type="button"
+            onClick={() => setPanelOpen(true)}
+            aria-label={tc.sectionTitle}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          >
             <MessageCircle className="size-5" strokeWidth={1.8} />
             <span>{commentsCount}</span>
-          </span>
+          </button>
 
           {/* Comment button — fills remaining width */}
           <Button
