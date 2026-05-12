@@ -55,15 +55,26 @@ export async function POST(request: Request) {
     }
   }
 
-  // One active participation at a time
-  const { data: activeParticipation } = await (supabaseAdmin as any)
+  // One active participation at a time — but ignore those whose deadline has already passed
+  // (cron may not have flipped them to 'expired' yet). Auto-expire on the fly so the user isn't blocked.
+  const nowIso = new Date().toISOString()
+  const { data: activeRows } = await (supabaseAdmin as any)
     .from('participations')
-    .select('id')
+    .select('id, personal_deadline')
     .eq('user_id', user.id)
     .eq('status', 'active')
-    .maybeSingle()
 
-  if (activeParticipation) {
+  const live = (activeRows ?? []).filter((p: any) => p.personal_deadline && new Date(p.personal_deadline) > new Date(nowIso))
+  const stale = (activeRows ?? []).filter((p: any) => !p.personal_deadline || new Date(p.personal_deadline) <= new Date(nowIso))
+
+  if (stale.length > 0) {
+    await (supabaseAdmin as any)
+      .from('participations')
+      .update({ status: 'expired' })
+      .in('id', stale.map((p: any) => p.id))
+  }
+
+  if (live.length > 0) {
     return NextResponse.json({ error: 'Tu as déjà une participation active en cours' }, { status: 409 })
   }
 
