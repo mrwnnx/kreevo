@@ -174,6 +174,7 @@ export default async function ChallengesPage({
       .select('id, challenge_id, personal_deadline')
       .eq('user_id', user.id)
       .eq('status', 'active')
+      .gt('personal_deadline', new Date().toISOString())
       .limit(1),
     supabase.from('submissions').select('challenge_id').eq('user_id', user.id),
     (supabaseAdmin as any)

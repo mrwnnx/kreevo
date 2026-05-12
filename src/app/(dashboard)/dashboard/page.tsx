@@ -41,6 +41,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       .select('*, challenges(id, title, xp_reward, deadline_days, specialty, challenge_type)')
       .eq('user_id', user.id)
       .eq('status', 'active')
+      .gt('personal_deadline', new Date().toISOString())
       .order('personal_deadline', { ascending: true })
       .limit(1)
       .maybeSingle(),
