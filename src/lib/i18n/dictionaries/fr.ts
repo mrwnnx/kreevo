@@ -40,6 +40,7 @@ export const fr = {
       editProfile: 'Modifier le profil',
       settings: 'Paramètres',
       notifications: 'Notifications',
+      history: 'Historique',
       appearance: 'Apparence',
       signOut: 'Se déconnecter',
       planSuffix: 'plan',
@@ -261,6 +262,29 @@ export const fr = {
       noTrack: 'Aucun travail dans cette catégorie pour l\'instant.',
     },
   },
+  historyPage: {
+    title: 'Historique',
+    subtitle: 'Toutes tes soumissions, de la plus récente à la plus ancienne.',
+    filters: {
+      all: 'Toutes',
+      approved: 'Validées',
+      drafts: 'Brouillons',
+      rejected: 'Rejetées',
+    },
+    status: {
+      approved: 'Validée',
+      pending: 'En attente',
+      rejected: 'Rejetée',
+      draft: 'Brouillon',
+      on_hold: 'En vérification',
+    },
+    empty: {
+      icon: '🚀',
+      title: 'Aucune soumission pour le moment',
+      subtitle: 'Tes futures soumissions apparaîtront ici.',
+      cta: 'Faire mon premier challenge',
+    },
+  },
   notificationsPage: {
     title: 'Notifications',
     empty: {
@@ -451,6 +475,7 @@ export const fr = {
       scoreLabel: 'Score global',
     },
     backFallback: 'Retour',
+    backToHistory: 'Retour à l\'historique',
     noPreview: 'Pas de preview',
     descriptionLabel: 'Description',
     seeFigma: 'Voir sur Figma →',

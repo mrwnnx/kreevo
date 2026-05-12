@@ -6,10 +6,14 @@ import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { SubmissionDetailContent } from '@/components/features/submissions/SubmissionDetailContent'
 import { getDict, getLang } from '@/lib/i18n/lang'
 
-interface Props { params: Promise<{ id: string }> }
+interface Props {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
+}
 
-export default async function SubmissionDetailPage({ params }: Props) {
+export default async function SubmissionDetailPage({ params, searchParams }: Props) {
   const { id } = await params
+  const { from } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -72,13 +76,19 @@ export default async function SubmissionDetailPage({ params }: Props) {
   return (
     <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
 
-      {/* Back */}
+      {/* Back — context-aware: if user came from /history, return there; else default to challenge page */}
       <Link
-        href={challenge?.id ? `/dashboard/challenges/${challenge.id}` : '/dashboard/challenges'}
+        href={
+          from === 'history'
+            ? '/dashboard/history'
+            : challenge?.id
+              ? `/dashboard/challenges/${challenge.id}`
+              : '/dashboard/challenges'
+        }
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ChevronLeft className="size-4" />
-        {challenge?.title ?? t.backFallback}
+        {from === 'history' ? t.backToHistory : (challenge?.title ?? t.backFallback)}
       </Link>
 
       <SubmissionDetailContent

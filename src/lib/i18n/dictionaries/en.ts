@@ -42,6 +42,7 @@ export const en: Dictionary = {
       editProfile: 'Edit profile',
       settings: 'Settings',
       notifications: 'Notifications',
+      history: 'History',
       appearance: 'Appearance',
       signOut: 'Sign out',
       planSuffix: 'plan',
@@ -264,6 +265,29 @@ export const en: Dictionary = {
       noTrack: 'No work in this track yet.',
     },
   },
+  historyPage: {
+    title: 'History',
+    subtitle: 'All your submissions, newest first.',
+    filters: {
+      all: 'All',
+      approved: 'Approved',
+      drafts: 'Drafts',
+      rejected: 'Rejected',
+    },
+    status: {
+      approved: 'Approved',
+      pending: 'Pending',
+      rejected: 'Rejected',
+      draft: 'Draft',
+      on_hold: 'Under review',
+    },
+    empty: {
+      icon: '🚀',
+      title: 'No submissions yet',
+      subtitle: 'Your future submissions will show up here.',
+      cta: 'Take your first challenge',
+    },
+  },
   notificationsPage: {
     title: 'Notifications',
     empty: {
@@ -454,6 +478,7 @@ export const en: Dictionary = {
       scoreLabel: 'Overall score',
     },
     backFallback: 'Back',
+    backToHistory: 'Back to history',
     noPreview: 'No preview',
     descriptionLabel: 'Description',
     seeFigma: 'See on Figma →',

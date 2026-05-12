@@ -155,6 +155,9 @@ export function FloatingNav({ profile, lang, t }: Props) {
             <DropdownMenuItem>
               <Link href="/dashboard/notifications" className="w-full text-sm font-medium">{t.menu.notifications}</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/dashboard/history" className="w-full text-sm font-medium">{t.menu.history}</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5 space-y-2">
               <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Language</p>
