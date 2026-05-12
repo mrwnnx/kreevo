@@ -17,6 +17,10 @@ export type NotificationType =
   | 'submission_liked'
   | 'submission_commented'
   | 'comment_replied'
+  | 'submission_human_review_pending'
+  | 'submission_human_review_requested'
+  | 'submission_human_review_approved'
+  | 'submission_human_review_rejected'
 
 export async function notify(
   userId: string,

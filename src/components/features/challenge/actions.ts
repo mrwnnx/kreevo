@@ -21,8 +21,13 @@ export async function submitChallenge(formData: FormData) {
   const isVisible = formData.get('isVisible') !== 'false'
   const additionalImagesRaw = formData.get('additionalImages') as string | null
   const collaboratorsRaw = formData.get('collaborators') as string | null
-  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | null
+  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | 'human_review' | null
   const aiReason = formData.get('aiReason') as string | null
+  const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
+  const aiBypassed = formData.get('aiAnalysisBypassed') === 'true'
+  const descriptionBonusEligible = formData.get('descriptionBonusEligible') === 'true'
+  let aiAnalysis: unknown = null
+  try { aiAnalysis = aiAnalysisRaw ? JSON.parse(aiAnalysisRaw) : null } catch {}
 
   if (!coverUrl) return { error: 'Image de couverture requise' }
 
@@ -89,7 +94,16 @@ export async function submitChallenge(formData: FormData) {
   // Reset validation_status to pending on every publish (not on drafts)
   const finalPayload = isDraft
     ? payload
-    : { ...payload, validation_status: 'pending', xp_attributed: false, rejection_reason: null, validated_at: null, validated_by: null }
+    : {
+        ...payload,
+        validation_status: 'pending',
+        xp_attributed: false,
+        rejection_reason: null,
+        validated_at: null,
+        validated_by: null,
+        ...(aiAnalysis ? { ai_analysis: aiAnalysis } : {}),
+        ai_analysis_bypassed: aiBypassed,
+      }
 
   const table = supabase.from('submissions') as any
   const { data: upsertResult, error } = existing
@@ -116,18 +130,46 @@ export async function submitChallenge(formData: FormData) {
 
   try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
-  // Apply AI verdict from client (decided during upload), or fall back to server-side flow
+  // Apply AI verdict from client (decided sync at publish click), or fall back to server-side flow
+  let bonusXp = 0
   if (submissionId) {
     if (aiVerdict === 'approved') {
+      // Cases A (no rejection + maybe bonus) and B (1 rejected + bypassed → no bonus)
       const { approveSubmission } = await import('@/lib/utils/submissions')
-      await approveSubmission(submissionId, null)
+      const applyBonus = !aiBypassed && descriptionBonusEligible
+      const result = await approveSubmission(submissionId, null, { applyDescriptionBonus: applyBonus })
+      bonusXp = result.bonusXp ?? 0
     } else if (aiVerdict === 'rejected') {
-      const { rejectSubmission } = await import('@/lib/utils/submissions')
-      await rejectSubmission(
-        submissionId,
-        aiReason ?? 'Soumission rejetée par la validation automatique',
-        null
-      )
+      // Case C: blocking — submission upserted but kept pending (user will retry).
+      // Increment ai_rejection_count for THIS submission.
+      const { data: cur } = await (supabaseAdmin as any)
+        .from('submissions')
+        .select('ai_rejection_count')
+        .eq('id', submissionId)
+        .single()
+      await (supabaseAdmin as any)
+        .from('submissions')
+        .update({
+          ai_rejection_count: (cur?.ai_rejection_count ?? 0) + 1,
+          rejection_reason: aiReason ?? 'Soumission rejetée par la validation automatique',
+        })
+        .eq('id', submissionId)
+    } else if (aiVerdict === 'human_review') {
+      // Case D: 3+ rejections accumulated → user requested human review
+      await (supabaseAdmin as any)
+        .from('submissions')
+        .update({ validation_status: 'pending_human_review' })
+        .eq('id', submissionId)
+      const { notify, notifyAllAdmins } = await import('@/lib/utils/notifications')
+      await notify(user.id, 'submission_human_review_pending', {
+        submission_id: submissionId,
+        challenge_id: challengeId,
+      })
+      await notifyAllAdmins('submission_human_review_requested', {
+        submission_id: submissionId,
+        challenge_id: challengeId,
+        user_id: user.id,
+      })
     } else {
       // skipped (Gold+) or no verdict → run server-side flow (pending admin review)
       const { triggerValidationFlow } = await import('@/lib/utils/submissions')
@@ -139,9 +181,10 @@ export async function submitChallenge(formData: FormData) {
   revalidatePath('/dashboard')
 
   // Tell client which final status was applied so it can show the right UI
-  let finalStatus: 'approved' | 'rejected' | 'pending' = 'pending'
+  let finalStatus: 'approved' | 'rejected' | 'pending' | 'human_review' = 'pending'
   if (aiVerdict === 'approved') finalStatus = 'approved'
   else if (aiVerdict === 'rejected') finalStatus = 'rejected'
+  else if (aiVerdict === 'human_review') finalStatus = 'human_review'
 
-  return { success: true, draft: false, status: finalStatus }
+  return { success: true, draft: false, status: finalStatus, bonusXp }
 }

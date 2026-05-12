@@ -3,6 +3,184 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify, notifyAllAdmins } from './notifications'
 
 const AUTO_VALIDATE_LEAGUES = ['Stone', '7ajra', 'Bronze', 'Silver']
+const ANALYZE_MODEL = 'claude-sonnet-4-6'
+const MAX_IMAGES = 4
+const HUMAN_REVIEW_THRESHOLD = 3       // ai_rejection_count ≥ this → user can request human review
+export const DESCRIPTION_BONUS_MULT = 0.20  // +20% XP if description deemed relevant
+
+export interface ImageInput {
+  url: string
+  is_cover: boolean
+}
+
+export interface ImageVerdict {
+  index: number
+  is_cover: boolean
+  valid: boolean
+  reason: string | null
+}
+
+export interface AnalyzeForPublishResult {
+  global_valid: boolean
+  rejected_count: number
+  images: ImageVerdict[]
+  description_bonus_eligible: boolean
+  description_bonus_reason: string | null
+  model: string
+  duration_ms: number
+  error?: string
+}
+
+export interface ChallengeForAnalysis {
+  id: string
+  brief: string | null
+  context?: string | null
+  deliverable?: string | null
+  constraints?: string | null
+  criteria?: string | null
+  specialty: string | null
+  challenge_type: string | null
+  industry?: string | null
+}
+
+function buildAnalysisPrompt(c: ChallengeForAnalysis, n: number, hasDescription: boolean): string {
+  return `Tu es un expert en design qui valide STRICTEMENT des soumissions à un challenge créatif. Ton rôle est de protéger la qualité de la plateforme : rejeter tout ce qui n'a pas un rapport clair avec le brief.
+
+Challenge :
+- Brief : ${c.brief ?? '—'}
+- Contraintes : ${c.constraints || 'Aucune contrainte spécifique'}
+- Livrables attendus : ${c.deliverable || 'Non spécifié'}
+- Critères d'évaluation : ${c.criteria || 'Non spécifié'}
+- Spécialité : ${c.specialty ?? '—'}
+- Type de défi : ${c.challenge_type ?? '—'}
+
+Ta tâche :
+1. Analyse chacune des ${n} images (image n°1 = cover, suivantes = additionnelles).
+   REJETER (valid=false) si N'IMPORTE LEQUEL de ces critères s'applique :
+   - L'image n'est pas un travail de design (photo random, screenshot non pertinent, capture d'écran d'app inconnue, image vide, image de test, photo personnelle, meme, illustration générique, etc.)
+   - L'image n'a aucun lien identifiable avec le brief (sujet hors-thème)
+   - L'image ne correspond pas à la spécialité (ex: graphic design soumis à un challenge UX screen)
+   - L'image ne correspond pas aux livrables attendus (ex: photo de produit là où on attend un mockup d'écran)
+   - L'image n'est PAS clairement créée pour ce challenge précis (donc une image générique ou recyclée d'un autre projet doit être rejetée si on ne voit pas le lien avec le brief)
+
+   ACCEPTER (valid=true) UNIQUEMENT si :
+   - C'est clairement un design original conçu pour ce brief
+   - Le sujet, la palette, la composition, le format évoquent visiblement le brief
+   - Le travail correspond à la spécialité demandée
+
+   En cas de doute SÉRIEUX (image de design crédible mais lien au brief ambigu) → valid=false avec une raison qui demande à l'user de clarifier ou de soumettre une image plus alignée. Ne pas tomber dans le piège du "bénéfice du doute" — préfère un rejet justifié à un faux positif.
+
+2. ${hasDescription
+   ? 'Évalue la description fournie par l\'user. Est-elle pertinente, factuelle, et MATCH-T-ELLE les images visibles ? Une description vide, vague ("c\'est un design", "voilà"), ou hors sujet n\'est PAS éligible. Une description qui décrit concrètement le travail visible et explique des choix design EST éligible.'
+   : 'Pas de description fournie : description_bonus_eligible doit être false.'}
+
+Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans texte avant ou après :
+{
+  "images": [
+    { "index": 0, "is_cover": true, "valid": true, "reason": null },
+    { "index": 1, "is_cover": false, "valid": false, "reason": "Hors brief : photo de paysage sans lien avec le challenge UX dashboard fitness." }
+  ],
+  "description_bonus_eligible": true,
+  "description_bonus_reason": "Description claire qui décrit le travail visible"
+}
+
+Les "reason" doivent être : courtes (max 25 mots), en français, factuelles, actionnables. null si valide. JAMAIS de raison vide pour une image rejetée.`
+}
+
+/**
+ * Analyze submission images + title + description for publish.
+ * Single multimodal Anthropic call. Max 4 images. Returns full verdict + description bonus eligibility.
+ */
+export async function analyzeSubmissionForPublish(
+  challenge: ChallengeForAnalysis,
+  images: ImageInput[],
+  title: string,
+  description: string,
+): Promise<AnalyzeForPublishResult> {
+  const start = Date.now()
+  const sliced = images.slice(0, MAX_IMAGES)
+  const n = sliced.length
+  const hasDescription = description.trim().length > 0
+
+  if (n === 0) {
+    return {
+      global_valid: false,
+      rejected_count: 0,
+      images: [],
+      description_bonus_eligible: false,
+      description_bonus_reason: null,
+      model: ANALYZE_MODEL,
+      duration_ms: 0,
+      error: 'No images provided',
+    }
+  }
+
+  const content: Array<{ type: 'image'; source: { type: 'url'; url: string } } | { type: 'text'; text: string }> = []
+  for (const img of sliced) {
+    content.push({ type: 'image', source: { type: 'url', url: img.url } })
+  }
+  const textPayload = `${buildAnalysisPrompt(challenge, n, hasDescription)}
+
+Titre fourni par l'user : ${title.trim() || '(vide)'}
+Description fournie par l'user : ${hasDescription ? description.trim() : '(vide)'}`
+  content.push({ type: 'text', text: textPayload })
+
+  try {
+    const res = await anthropic.messages.create({
+      model: ANALYZE_MODEL,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: content as any }],
+    })
+
+    const text = res.content.map((b: any) => (b.type === 'text' ? b.text : '')).join('').trim()
+    const jsonStart = text.indexOf('{')
+    const jsonEnd = text.lastIndexOf('}')
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('AI did not return JSON')
+
+    const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1)) as {
+      images: Array<{ index: number; is_cover: boolean; valid: boolean; reason: string | null }>
+      description_bonus_eligible: boolean
+      description_bonus_reason: string | null
+    }
+    const arr = Array.isArray(parsed.images) ? parsed.images : []
+
+    const verdicts: ImageVerdict[] = sliced.map((img, i) => {
+      const m = arr.find((r) => r.index === i)
+      // If AI didn't return a verdict for this image, treat as rejected (don't silently pass).
+      return {
+        index: i,
+        is_cover: img.is_cover,
+        valid: m ? !!m.valid : false,
+        reason: m?.reason ?? (m && !m.valid ? 'Image hors brief.' : (m ? null : 'Analyse IA incomplète, réessaye.')),
+      }
+    })
+    const rejectedCount = verdicts.filter((v) => !v.valid).length
+
+    return {
+      global_valid: rejectedCount === 0,
+      rejected_count: rejectedCount,
+      images: verdicts,
+      description_bonus_eligible: hasDescription && !!parsed.description_bonus_eligible,
+      description_bonus_reason: parsed.description_bonus_reason ?? null,
+      model: ANALYZE_MODEL,
+      duration_ms: Date.now() - start,
+    }
+  } catch (err) {
+    // On AI failure, default to all-valid + no bonus (don't block the user, don't reward unfairly)
+    return {
+      global_valid: true,
+      rejected_count: 0,
+      images: sliced.map((img, i) => ({ index: i, is_cover: img.is_cover, valid: true, reason: null })),
+      description_bonus_eligible: false,
+      description_bonus_reason: null,
+      model: ANALYZE_MODEL,
+      duration_ms: Date.now() - start,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    }
+  }
+}
+
+export { HUMAN_REVIEW_THRESHOLD, MAX_IMAGES as MAX_PUBLISH_IMAGES }
 
 interface ChallengeForValidation {
   id: string
@@ -90,17 +268,21 @@ export function shouldAutoValidate(leagueName: string | null | undefined): boole
  */
 export async function approveSubmission(
   submissionId: string,
-  validatedBy: string | null
-): Promise<{ xpAwarded: number }> {
+  validatedBy: string | null,
+  options: { applyDescriptionBonus?: boolean } = {},
+): Promise<{ xpAwarded: number; bonusApplied: boolean; bonusXp: number }> {
   const { data: sub } = await (supabaseAdmin as any)
     .from('submissions')
     .select('id, user_id, challenge_id, xp_attributed, validation_status, challenges(xp_reward)')
     .eq('id', submissionId)
     .single()
 
-  if (!sub) return { xpAwarded: 0 }
+  if (!sub) return { xpAwarded: 0, bonusApplied: false, bonusXp: 0 }
 
-  const xpReward = sub.challenges?.xp_reward ?? 150
+  const baseXp = sub.challenges?.xp_reward ?? 150
+  const bonusApplied = !!options.applyDescriptionBonus
+  const bonusXp = bonusApplied ? Math.round(baseXp * DESCRIPTION_BONUS_MULT) : 0
+  const xpReward = baseXp + bonusXp
   const wasAttributed = !!sub.xp_attributed
 
   await (supabaseAdmin as any)
@@ -111,6 +293,7 @@ export async function approveSubmission(
       validated_by: validatedBy,
       xp_attributed: true,
       rejection_reason: null,
+      description_bonus_applied: bonusApplied,
     })
     .eq('id', submissionId)
 
@@ -166,7 +349,7 @@ export async function approveSubmission(
     xp: xpReward,
   })
 
-  return { xpAwarded: wasAttributed ? 0 : xpReward }
+  return { xpAwarded: wasAttributed ? 0 : xpReward, bonusApplied, bonusXp }
 }
 
 export async function rejectSubmission(
