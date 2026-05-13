@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 import { SettingsClient } from './SettingsClient'
+import { BlockedUsersSection } from './BlockedUsersSection'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
@@ -37,6 +38,18 @@ export default async function SettingsPage() {
         </section>
 
         <SettingsClient profile={profile as Profile} email={user?.email ?? ''} t={dict.settings} tErrors={dict.auth.errors} />
+
+        <BlockedUsersSection t={(dict.settings as any).blockedUsers ?? {
+          title: lang === 'en' ? 'Blocked users' : 'Utilisateurs bloqués',
+          description: lang === 'en'
+            ? 'Blocked users can\'t invite you as a coworker on their submissions.'
+            : 'Les utilisateurs bloqués ne peuvent pas t\'inviter comme co-auteur sur leurs soumissions.',
+          emptyTitle: lang === 'en' ? 'No one is blocked' : 'Personne n\'est bloqué',
+          emptyBody: lang === 'en'
+            ? 'You can block someone from their profile.'
+            : 'Tu peux bloquer un utilisateur depuis son profil.',
+          unblock: lang === 'en' ? 'Unblock' : 'Débloquer',
+        }} />
       </div>
     </div>
   )

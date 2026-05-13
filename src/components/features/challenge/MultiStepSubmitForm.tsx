@@ -25,7 +25,10 @@ interface Collaborator {
   username: string
   full_name: string | null
   avatar_url: string | null
+  status?: 'pending' | 'accepted' | 'declined'
 }
+
+const MAX_COWORKERS = 3
 
 interface Props {
   challengeId: string
@@ -33,6 +36,7 @@ interface Props {
   participationId: string
   attemptsLeft: number
   existing: Submission | null
+  existingCoworkers?: Collaborator[]
   t: SubmitT
 }
 
@@ -42,6 +46,7 @@ export function MultiStepSubmitForm({
   participationId,
   attemptsLeft,
   existing,
+  existingCoworkers,
   t,
 }: Props) {
   const router = useRouter()
@@ -59,7 +64,7 @@ export function MultiStepSubmitForm({
   const [title, setTitle] = useState<string>((existing as any)?.title ?? '')
   const [description, setDescription] = useState<string>((existing as any)?.description ?? '')
   const [projectLink, setProjectLink] = useState<string>(existingFiles?.link ?? '')
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(existingFiles?.collaboratorsResolved ?? [])
+  const [collaborators, setCollaborators] = useState<Collaborator[]>(existingCoworkers ?? [])
   const [showOnProfile, setShowOnProfile] = useState<boolean>(
     (existing as any)?.is_visible !== false
   )
@@ -117,7 +122,7 @@ export function MultiStepSubmitForm({
   }, [collabQuery, collaborators])
 
   function addCollaborator(c: Collaborator) {
-    setCollaborators(prev => [...prev, c])
+    setCollaborators(prev => prev.length >= MAX_COWORKERS ? prev : [...prev, { ...c, status: 'pending' }])
     setCollabQuery('')
     setCollabResults([])
   }
@@ -860,31 +865,46 @@ function Step2({
 
       {/* Collaborators */}
       <div className="space-y-2 relative">
-        <Label className="text-sm">{t.collaboratorsLabel}</Label>
+        <div className="flex items-baseline justify-between gap-3">
+          <Label className="text-sm">{t.collaboratorsLabel}</Label>
+          <span className="text-xs text-muted-foreground">{collaborators.length} / {MAX_COWORKERS}</span>
+        </div>
 
         {/* Selected */}
         {collaborators.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {collaborators.map(c => (
-              <span
-                key={c.id}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 pl-1 pr-2 py-1"
-              >
-                <Avatar size="sm">
-                  {c.avatar_url && <AvatarImage src={c.avatar_url} alt={c.username} />}
-                  <AvatarFallback>{c.username?.[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs font-medium">{c.username}</span>
-                <button
-                  type="button"
-                  onClick={() => removeCollaborator(c.id)}
-                  className="ml-0.5 size-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-                  aria-label={t.collaboratorsRemove}
+            {collaborators.map(c => {
+              const statusColor =
+                c.status === 'accepted' ? 'border-emerald-500/40 bg-emerald-500/10'
+                : c.status === 'declined' ? 'border-rose-500/40 bg-rose-500/10 opacity-70'
+                : 'border-border bg-muted/60'
+              const statusBadge =
+                c.status === 'accepted' ? '✓'
+                : c.status === 'declined' ? '✕'
+                : '…'
+              return (
+                <span
+                  key={c.id}
+                  className={cn('inline-flex items-center gap-2 rounded-full border pl-1 pr-2 py-1', statusColor)}
+                  title={c.status ?? 'pending'}
                 >
-                  <X className="size-3" />
-                </button>
-              </span>
-            ))}
+                  <Avatar size="sm">
+                    {c.avatar_url && <AvatarImage src={c.avatar_url} alt={c.username} />}
+                    <AvatarFallback>{c.username?.[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs font-medium">{c.username}</span>
+                  <span className="text-[10px] text-muted-foreground" aria-hidden>{statusBadge}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeCollaborator(c.id)}
+                    className="ml-0.5 size-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                    aria-label={t.collaboratorsRemove}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              )
+            })}
           </div>
         )}
 
@@ -898,6 +918,7 @@ function Step2({
             onBlur={() => setTimeout(() => setCollabOpen(false), 150)}
             placeholder={t.collaboratorsSearch}
             className="pl-9"
+            disabled={collaborators.length >= MAX_COWORKERS}
           />
         </div>
 

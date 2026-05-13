@@ -55,18 +55,14 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   }
   const viewsCount = (submission.views_count ?? 0) + (isOwn ? 0 : 1)
 
-  // Resolve collaborator profiles (stored as user-id array in submission.files.collaborators)
-  const collaboratorIds: string[] = Array.isArray((submission.files as any)?.collaborators)
-    ? ((submission.files as any).collaborators as unknown[]).filter((x): x is string => typeof x === 'string')
-    : []
-  let collaborators: Array<{ id: string; username: string; full_name: string | null; avatar_url: string | null }> = []
-  if (collaboratorIds.length > 0) {
-    const { data: collabRows } = await (supabase as any)
-      .from('profiles')
-      .select('id, username, full_name, avatar_url')
-      .in('id', collaboratorIds)
-    collaborators = (collabRows ?? []) as typeof collaborators
-  }
+  // Resolve accepted coworkers from submission_coworkers table.
+  const { data: coworkerRows } = await (supabase as any)
+    .from('submission_coworkers')
+    .select('profiles:user_id(id, username, full_name, avatar_url)')
+    .eq('submission_id', id)
+    .eq('status', 'accepted')
+  const collaborators: Array<{ id: string; username: string; full_name: string | null; avatar_url: string | null }> =
+    ((coworkerRows ?? []) as Array<{ profiles: any }>).map((r) => r.profiles).filter(Boolean)
 
   const dict = await getDict()
   const lang = await getLang()

@@ -349,6 +349,14 @@ export async function approveSubmission(
     xp: xpReward,
   })
 
+  // Share XP with accepted coworkers (50% of base XP each, idempotent).
+  try {
+    const { awardAllAcceptedCoworkers } = await import('@/lib/utils/coworkers')
+    await awardAllAcceptedCoworkers(submissionId, baseXp)
+  } catch (e) {
+    console.error('[approveSubmission] coworker xp share error', e)
+  }
+
   return { xpAwarded: wasAttributed ? 0 : xpReward, bonusApplied, bonusXp }
 }
 
@@ -393,6 +401,14 @@ export async function rejectSubmission(
     challenge_id: sub.challenge_id,
     reason,
   })
+
+  // Revoke any XP already paid out to coworkers on this submission.
+  try {
+    const { revokeAllCoworkerXp } = await import('@/lib/utils/coworkers')
+    await revokeAllCoworkerXp(submissionId)
+  } catch (e) {
+    console.error('[rejectSubmission] coworker xp revoke error', e)
+  }
 }
 
 /**

@@ -54,7 +54,6 @@ export async function submitChallenge(formData: FormData) {
   if (figmaUrl) files.figma = figmaUrl
   if (projectLink) files.link = projectLink
   if (additionalImages.length) files.images = additionalImages
-  if (collaborators.length) files.collaborators = collaborators
 
   // Check existing submission
   const { data: existing } = await (supabase.from('submissions') as any)
@@ -113,6 +112,16 @@ export async function submitChallenge(formData: FormData) {
   if (error) return { error: error.message }
 
   const submissionId = upsertResult?.id ?? existing?.id
+
+  // Sync coworker invitations (max 3, skip blocked users, notify newly invited).
+  if (submissionId && collaborators.length >= 0) {
+    try {
+      const { syncCoworkerInvitations } = await import('@/lib/utils/coworkers')
+      await syncCoworkerInvitations(submissionId, user.id, challengeId, title, collaborators)
+    } catch (e) {
+      console.error('[submitChallenge] coworker sync error', e)
+    }
+  }
 
   // For drafts: skip status updates and XP awards
   if (isDraft) {

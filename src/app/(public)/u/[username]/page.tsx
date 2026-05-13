@@ -15,6 +15,7 @@ import { getDict } from '@/lib/i18n/lang'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
+import { BlockToggleButton } from '@/components/features/profile/BlockToggleButton'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -100,12 +101,26 @@ export default async function ProfilePage({
   const [
     { data: profile },
     { count: totalUsers },
+    { data: { user: viewer } },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('username', username).single(),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.auth.getUser(),
   ])
 
   if (!profile) notFound()
+
+  const isOwnProfile = viewer?.id === (profile as Profile).id
+  let viewerBlocksTarget = false
+  if (viewer && !isOwnProfile) {
+    const { data: blockRow } = await (supabase as any)
+      .from('user_blocks')
+      .select('id')
+      .eq('blocker_id', viewer.id)
+      .eq('blocked_id', (profile as Profile).id)
+      .maybeSingle()
+    viewerBlocksTarget = !!blockRow
+  }
 
   const p = profile as Profile
   const social = parseLinks(p.links)
@@ -113,7 +128,8 @@ export default async function ProfilePage({
   const isPro = p.plan === 'pro' || p.plan === 'studio'
 
   const [
-    { data: allSubmissions, count: submissionCount },
+    { data: ownSubmissions, count: submissionCount },
+    { data: coworkerRows },
     { data: badges },
     { data: rankData },
   ] = await Promise.all([
@@ -125,6 +141,11 @@ export default async function ProfilePage({
       .eq('is_draft', false)
       .eq('validation_status', 'approved')
       .order('created_at', { ascending: false }),
+    (supabase as any)
+      .from('submission_coworkers')
+      .select('submission_id, submission:submission_id(*, challenges(title, specialty, challenge_type, industry))')
+      .eq('user_id', p.id)
+      .eq('status', 'accepted'),
     supabase.from('badges').select('*').eq('user_id', p.id),
     supabase
       .from('profiles')
@@ -138,7 +159,18 @@ export default async function ProfilePage({
   const t = dict.publicProfile
   const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
   const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
-  const submissions = (allSubmissions ?? []) as any[]
+
+  // Merge author submissions + coworker submissions (filter for visibility/approval), tag the role.
+  const ownTagged = ((ownSubmissions ?? []) as any[]).map((s) => ({ ...s, _role: 'author' as const }))
+  const coworkerTagged = (((coworkerRows ?? []) as any[])
+    .map((r) => r.submission)
+    .filter((s): s is any =>
+      !!s && s.is_visible !== false && s.is_draft === false && s.validation_status === 'approved',
+    )
+    .map((s) => ({ ...s, _role: 'coworker' as const })))
+  const submissions = [...ownTagged, ...coworkerTagged].sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )
   const top3 = [...submissions]
     .sort((a, b) => (b.total_claps ?? 0) - (a.total_claps ?? 0))
     .slice(0, 3)
@@ -237,6 +269,17 @@ export default async function ProfilePage({
                   <Mail className="size-3.5" /> {t.contact}
                 </button>
               )}
+              {viewer && !isOwnProfile && (
+                <BlockToggleButton
+                  targetUserId={p.id}
+                  initialBlocked={viewerBlocksTarget}
+                  labels={{
+                    block: t.blockButton ?? 'Bloquer les invitations',
+                    blocked: t.blockedLabel ?? 'Bloqué',
+                    confirm: (t.blockConfirm ?? 'Bloquer @{username} ? Cette personne ne pourra plus t\'inviter comme co-auteur.').replace('{username}', p.username),
+                  }}
+                />
+              )}
             </div>
           </div>
         </section>
@@ -245,7 +288,7 @@ export default async function ProfilePage({
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: Zap,    label: t.stats.totalXp,    value: p.xp.toLocaleString(), mono: true },
-            { icon: Trophy, label: t.stats.challenges, value: String(submissionCount ?? 0), mono: true },
+            { icon: Trophy, label: t.stats.challenges, value: String(submissions.length), mono: true },
             { icon: Star,   label: t.stats.league,     value: league.label, mono: false },
             { icon: Trophy, label: t.stats.rank,       value: rankLabel, mono: true },
           ].map(({ icon: Icon, label, value, mono }) => (
@@ -337,8 +380,14 @@ export default async function ProfilePage({
 // ── Sub-components ─────────────────────────────────────────────
 
 function SubmissionCard({ submission: s, featured }: { submission: any; featured?: boolean }) {
+  const isCoworker = s._role === 'coworker'
   return (
-    <div className="group border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
+    <div className="group relative border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
+      {isCoworker && (
+        <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 rounded-full bg-background/90 backdrop-blur-sm border border-border px-2 py-0.5 text-[10px] font-mono font-semibold">
+          🤝 Coworker
+        </span>
+      )}
       {s.cover_url ? (
         <div className="aspect-video bg-muted overflow-hidden">
           <img
