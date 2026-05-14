@@ -20,8 +20,7 @@ export async function submitChallenge(formData: FormData) {
   const isDraft = formData.get('isDraft') === 'true'
   const isVisible = formData.get('isVisible') !== 'false'
   const additionalImagesRaw = formData.get('additionalImages') as string | null
-  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | 'human_review' | null
-  const aiReason = formData.get('aiReason') as string | null
+  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'skipped' | 'human_review' | null
   const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
   const aiBypassed = formData.get('aiAnalysisBypassed') === 'true'
   const descriptionBonusEligible = formData.get('descriptionBonusEligible') === 'true'
@@ -135,21 +134,6 @@ export async function submitChallenge(formData: FormData) {
       const applyBonus = !aiBypassed && descriptionBonusEligible
       const result = await approveSubmission(submissionId, null, { applyDescriptionBonus: applyBonus })
       bonusXp = result.bonusXp ?? 0
-    } else if (aiVerdict === 'rejected') {
-      // Case C: blocking — submission upserted but kept pending (user will retry).
-      // Increment ai_rejection_count for THIS submission.
-      const { data: cur } = await (supabaseAdmin as any)
-        .from('submissions')
-        .select('ai_rejection_count')
-        .eq('id', submissionId)
-        .single()
-      await (supabaseAdmin as any)
-        .from('submissions')
-        .update({
-          ai_rejection_count: (cur?.ai_rejection_count ?? 0) + 1,
-          rejection_reason: aiReason ?? 'Soumission rejetée par la validation automatique',
-        })
-        .eq('id', submissionId)
     } else if (aiVerdict === 'human_review') {
       // Case D: 3+ rejections accumulated → user requested human review
       await (supabaseAdmin as any)
@@ -177,9 +161,8 @@ export async function submitChallenge(formData: FormData) {
   revalidatePath('/dashboard')
 
   // Tell client which final status was applied so it can show the right UI
-  let finalStatus: 'approved' | 'rejected' | 'pending' | 'human_review' = 'pending'
+  let finalStatus: 'approved' | 'pending' | 'human_review' = 'pending'
   if (aiVerdict === 'approved') finalStatus = 'approved'
-  else if (aiVerdict === 'rejected') finalStatus = 'rejected'
   else if (aiVerdict === 'human_review') finalStatus = 'human_review'
 
   return { success: true, draft: false, status: finalStatus, bonusXp }

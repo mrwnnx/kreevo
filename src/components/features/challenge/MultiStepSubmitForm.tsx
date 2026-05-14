@@ -71,7 +71,9 @@ export function MultiStepSubmitForm({
   const [bypassed, setBypassed] = useState(false)
   const [analyzeProgress, setAnalyzeProgress] = useState(0)
   const HUMAN_REVIEW_THRESHOLD = 3
-  const aiRejectionCount: number = (existing as any)?.ai_rejection_count ?? 0
+  // Session-only counter: a blocked attempt persists nothing in DB, so the
+  // "3 strikes → human review" guard lives in client state (resets on reload/cancel).
+  const [aiRejectionCount, setAiRejectionCount] = useState<number>((existing as any)?.ai_rejection_count ?? 0)
   const canRequestHumanReview = aiRejectionCount >= HUMAN_REVIEW_THRESHOLD
 
   function addAdditionalImage(url: string | null) {
@@ -161,18 +163,12 @@ export function MultiStepSubmitForm({
       return
     }
     // Case C — blocking modal: no valid image at all (incl. the single-photo case)
-    // OR 2+ rejected. No bypass — the user MUST replace the image(s).
+    // OR 2+ rejected. No bypass, and NOTHING is persisted — the user must replace
+    // the image(s) and retry. The rejection counter is client-side only.
     if (result.rejected_count === result.images.length || result.rejected_count >= 2) {
+      setAiRejectionCount((c) => c + 1)
       setAnalyzeModal('blocking')
-      return submitForm({
-        asDraft: false,
-        aiVerdict: 'rejected',
-        bypass: false,
-        bonusEligible: false,
-        analysis: result,
-        keepFormOpen: true,                  // do NOT redirect — modal stays, user retries
-        reason: result.images.length === 1 ? 'Image hors brief' : 'Plusieurs images hors brief',
-      })
+      return
     }
     // Case B — exactly 1 rejected but at least one valid image → warning modal with bypass
     setBypassed(false)
@@ -222,14 +218,12 @@ export function MultiStepSubmitForm({
 
   function submitForm(opts: {
     asDraft: boolean
-    aiVerdict: 'approved' | 'rejected' | 'skipped' | 'human_review' | null
+    aiVerdict: 'approved' | 'skipped' | 'human_review' | null
     bypass: boolean
     bonusEligible: boolean
     analysis?: AnalysisResult
-    keepFormOpen?: boolean
-    reason?: string
   }) {
-    const { asDraft, aiVerdict, bypass, bonusEligible, analysis, keepFormOpen, reason } = opts
+    const { asDraft, aiVerdict, bypass, bonusEligible, analysis } = opts
     const fd = new FormData()
     fd.set('challengeId', challengeId)
     fd.set('coverUrl', coverUrl!)
@@ -246,7 +240,6 @@ export function MultiStepSubmitForm({
       fd.set('aiAnalysisBypassed', bypass ? 'true' : 'false')
       fd.set('descriptionBonusEligible', bonusEligible ? 'true' : 'false')
       if (analysis) fd.set('aiAnalysis', JSON.stringify(analysis))
-      if (reason) fd.set('aiReason', reason)
     }
 
     startTransition(async () => {
@@ -256,10 +249,7 @@ export function MultiStepSubmitForm({
         return
       }
 
-      // Case C blocking: keep the form open so user can retry — modal already shown
-      if (keepFormOpen) return
-
-      const finalStatus = (result as any)?.status as 'approved' | 'rejected' | 'pending' | 'human_review' | undefined
+      const finalStatus = (result as any)?.status as 'approved' | 'pending' | 'human_review' | undefined
       setSuccess({ draft: !!result?.draft, status: finalStatus, bonusXp: (result as any)?.bonusXp })
 
       if (asDraft) return
