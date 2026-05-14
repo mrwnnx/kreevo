@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/coworker-invitations",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 4 * * *"
     }
   ]
 }
