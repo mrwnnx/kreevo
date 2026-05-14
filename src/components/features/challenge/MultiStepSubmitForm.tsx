@@ -106,7 +106,7 @@ export function MultiStepSubmitForm({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/users/search?q=${encodeURIComponent(collabQuery.trim())}`)
+        const res = await fetch(`/api/users/search?q=${encodeURIComponent(collabQuery.trim())}&sameLeague=1`)
         const data = await res.json()
         const filtered = (data.users ?? []).filter(
           (u: Collaborator) => !collaborators.some(c => c.id === u.id)
@@ -869,6 +869,7 @@ function Step2({
           <Label className="text-sm">{t.collaboratorsLabel}</Label>
           <span className="text-xs text-muted-foreground">{collaborators.length} / {MAX_COWORKERS}</span>
         </div>
+        <p className="text-xs text-muted-foreground">{t.collaboratorsLeagueHint}</p>
 
         {/* Selected */}
         {collaborators.length > 0 && (

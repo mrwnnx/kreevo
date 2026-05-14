@@ -52,10 +52,32 @@ export async function syncCoworkerInvitations(
 ): Promise<{ accepted: string[]; pending: string[]; skipped: string[] }> {
   const blockedBy = await getBlockedByUserIds(authorId)
   const dedupedTargets = Array.from(new Set(targetIds)).filter((id) => id && id !== authorId)
+
+  // Coworkers must be in the same league as the author.
+  const { data: authorProfile } = await (supabaseAdmin as any)
+    .from('profiles')
+    .select('league')
+    .eq('id', authorId)
+    .single()
+  const authorLeague: string | null = authorProfile?.league ?? null
+
+  let sameLeagueIds = new Set<string>(dedupedTargets)
+  if (authorLeague && dedupedTargets.length > 0) {
+    const { data: targetProfiles } = await (supabaseAdmin as any)
+      .from('profiles')
+      .select('id, league')
+      .in('id', dedupedTargets)
+    sameLeagueIds = new Set(
+      ((targetProfiles ?? []) as Array<{ id: string; league: string | null }>)
+        .filter((p) => p.league === authorLeague)
+        .map((p) => p.id),
+    )
+  }
+
   const allowed: string[] = []
   const skipped: string[] = []
   for (const id of dedupedTargets) {
-    if (blockedBy.has(id)) skipped.push(id)
+    if (blockedBy.has(id) || !sameLeagueIds.has(id)) skipped.push(id)
     else allowed.push(id)
   }
   const capped = allowed.slice(0, MAX_COWORKERS_PER_SUBMISSION)
