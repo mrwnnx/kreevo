@@ -160,23 +160,24 @@ export function MultiStepSubmitForm({
       setAnalyzeModal('success')
       return
     }
-    if (result.rejected_count === 1) {
-      // Case B — warning modal with bypass
-      setBypassed(false)
-      setAnalyzeModal('warning')
-      return
+    // Case C — blocking modal: no valid image at all (incl. the single-photo case)
+    // OR 2+ rejected. No bypass — the user MUST replace the image(s).
+    if (result.rejected_count === result.images.length || result.rejected_count >= 2) {
+      setAnalyzeModal('blocking')
+      return submitForm({
+        asDraft: false,
+        aiVerdict: 'rejected',
+        bypass: false,
+        bonusEligible: false,
+        analysis: result,
+        keepFormOpen: true,                  // do NOT redirect — modal stays, user retries
+        reason: result.images.length === 1 ? 'Image hors brief' : 'Plusieurs images hors brief',
+      })
     }
-    // Case C — blocking modal (≥2 rejected) → save submission with rejection_count++
-    setAnalyzeModal('blocking')
-    return submitForm({
-      asDraft: false,
-      aiVerdict: 'rejected',
-      bypass: false,
-      bonusEligible: false,
-      analysis: result,
-      keepFormOpen: true,                  // do NOT redirect — modal stays, user retries
-      reason: 'Plusieurs images hors brief',
-    })
+    // Case B — exactly 1 rejected but at least one valid image → warning modal with bypass
+    setBypassed(false)
+    setAnalyzeModal('warning')
+    return
   }
 
   /** Used by case B modal "Soumettre quand même" */
