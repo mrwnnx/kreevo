@@ -43,19 +43,6 @@ export default async function ChallengeSubmitPage({ params }: Props) {
 
   const dict = await getDict()
 
-  // Pre-populate the coworkers picker with the user's current invitations on this submission
-  // (any status — author keeps control over the full set, including declined ones can be re-invited).
-  let existingCoworkers: Array<{ id: string; username: string; full_name: string | null; avatar_url: string | null; status: 'pending' | 'accepted' | 'declined' }> = []
-  if (existingSubmission) {
-    const { data: cwRows } = await (supabase as any)
-      .from('submission_coworkers')
-      .select('status, profiles:user_id(id, username, full_name, avatar_url)')
-      .eq('submission_id', (existingSubmission as any).id)
-    existingCoworkers = ((cwRows ?? []) as Array<{ status: any; profiles: any }>)
-      .filter((r) => r.profiles)
-      .map((r) => ({ ...r.profiles, status: r.status }))
-  }
-
   return (
     <MultiStepSubmitForm
       challengeId={c.id}
@@ -63,7 +50,6 @@ export default async function ChallengeSubmitPage({ params }: Props) {
       participationId={participation.id}
       attemptsLeft={attemptsLeft}
       existing={existingSubmission as Submission | null}
-      existingCoworkers={existingCoworkers}
       t={dict.submitForm}
     />
   )

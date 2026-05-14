@@ -21,11 +21,6 @@ export type NotificationType =
   | 'submission_human_review_requested'
   | 'submission_human_review_approved'
   | 'submission_human_review_rejected'
-  | 'coworker_invitation_received'
-  | 'coworker_invitation_accepted'
-  | 'coworker_invitation_declined'
-  | 'coworker_removed'
-  | 'coworker_xp_awarded'
 
 export async function notify(
   userId: string,

@@ -40,7 +40,6 @@ interface AuthorLite {
 interface Props {
   submission: SubmissionLite
   author: AuthorLite | null
-  collaborators: AuthorLite[]
   currentUserId: string
   currentProfilePlan: string | null | undefined
   initialUserLiked: boolean
@@ -54,7 +53,6 @@ interface Props {
 export function SubmissionDetailContent({
   submission,
   author,
-  collaborators,
   currentUserId,
   currentProfilePlan,
   initialUserLiked,
@@ -232,15 +230,10 @@ export function SubmissionDetailContent({
   // Full gallery shared across the cover + extra image lightboxes — enables ←/→ navigation
   const galleryImages = [submission.cover_url, ...additionalImages].filter((u): u is string => !!u)
 
-  // Authors list: author + collaborators (max 2 avatars shown, rest counted)
-  const allAuthors: AuthorLite[] = author ? [author, ...collaborators] : [...collaborators]
-  const visibleAvatars = allAuthors.slice(0, 2)
-  const overflowCount = Math.max(0, allAuthors.length - 2)
-
   return (
     <div>
       {/* ── HEADER (sticky to top, shrinks title on scroll) ── */}
-      {(submission.title || allAuthors.length > 0) && (
+      {(submission.title || author) && (
         <div>
         <div ref={stickySentinelRef} aria-hidden className="h-px" />
         <div
@@ -262,51 +255,30 @@ export function SubmissionDetailContent({
               </h1>
             )}
 
-            {/* Authors row: avatar(s) + name(s) — hidden when sticky to keep bar compact */}
-            {allAuthors.length > 0 && !isStuck && (
+            {/* Author row: avatar + name — hidden when sticky to keep bar compact */}
+            {author && !isStuck && (
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex -space-x-2">
-                  {visibleAvatars.map((u) => (
-                    <Link
-                      key={u.id}
-                      href={`/u/${u.username}`}
-                      className="block size-7 rounded-full bg-muted ring-2 ring-background overflow-hidden hover:opacity-80 transition-opacity"
-                      aria-label={`@${u.username}`}
-                    >
-                      {u.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={u.avatar_url} alt={u.username} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-                          {u.username[0]?.toUpperCase()}
-                        </div>
-                      )}
-                    </Link>
-                  ))}
-                </div>
+                <Link
+                  href={`/u/${author.username}`}
+                  className="block size-7 rounded-full bg-muted ring-2 ring-background overflow-hidden hover:opacity-80 transition-opacity"
+                  aria-label={`@${author.username}`}
+                >
+                  {author.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={author.avatar_url} alt={author.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                      {author.username[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </Link>
                 <span className="text-sm">
-                  {author && (
-                    <Link
-                      href={`/u/${author.username}`}
-                      className="font-medium text-foreground hover:underline"
-                    >
-                      {author.full_name || author.username}
-                    </Link>
-                  )}
-                  {collaborators.length === 1 && (
-                    <>
-                      <span className="text-muted-foreground"> {t.coAuthorsAnd} </span>
-                      <Link
-                        href={`/u/${collaborators[0].username}`}
-                        className="font-medium text-foreground hover:underline"
-                      >
-                        {collaborators[0].full_name || collaborators[0].username}
-                      </Link>
-                    </>
-                  )}
-                  {overflowCount > 0 && (
-                    <span className="text-muted-foreground"> {tx(t.coAuthorsOthers, { n: overflowCount })}</span>
-                  )}
+                  <Link
+                    href={`/u/${author.username}`}
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {author.full_name || author.username}
+                  </Link>
                 </span>
               </div>
             )}

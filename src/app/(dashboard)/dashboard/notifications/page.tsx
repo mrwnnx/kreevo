@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang } from '@/lib/i18n/lang'
 
 import type { Profile } from '@/types/database.types'
-import { CoworkerInvitationCard } from '@/components/features/notifications/CoworkerInvitationCard'
 
 function timeAgo(date: string, lang: 'fr' | 'en'): string {
   const diff = Date.now() - new Date(date).getTime()
@@ -29,27 +28,6 @@ export default async function NotificationsPage() {
   void profile
   const notifications = notifRes.data ?? []
 
-  // Resolve coworker invitations (current status + author profile) for any notif of that type.
-  const inviteSubmissionIds = Array.from(
-    new Set(
-      notifications
-        .filter((n: any) => n.type === 'coworker_invitation_received' && typeof n.data?.submission_id === 'string')
-        .map((n: any) => n.data.submission_id as string),
-    ),
-  )
-  type InviteRow = { id: string; submission_id: string; status: 'pending' | 'accepted' | 'declined'; invited_by: string; profiles: any; submission: { id: string; title: string | null } | null }
-  let inviteByKey = new Map<string, InviteRow>()
-  if (inviteSubmissionIds.length > 0) {
-    const { data: inviteRows } = await (supabase as any)
-      .from('submission_coworkers')
-      .select('id, submission_id, status, invited_by, profiles:invited_by(id, username, full_name, avatar_url), submission:submission_id(id, title)')
-      .eq('user_id', user!.id)
-      .in('submission_id', inviteSubmissionIds)
-    inviteByKey = new Map(
-      ((inviteRows ?? []) as InviteRow[]).map((r) => [r.submission_id, r]),
-    )
-  }
-
   // Mark all as read
   await (supabase as any)
     .from('notifications')
@@ -58,7 +36,7 @@ export default async function NotificationsPage() {
     .eq('is_read', false)
 
   const [dict, lang] = await Promise.all([getDict(), getLang()])
-  const t = dict.notificationsPage as typeof dict.notificationsPage & { coworker: any }
+  const t = dict.notificationsPage
 
   return (
     <div className="pb-10">
@@ -75,38 +53,6 @@ export default async function NotificationsPage() {
           <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
             {notifications.map((n: any) => {
               const meta = t.types[n.type] ?? { emoji: '🔔', label: n.type }
-
-              if (n.type === 'coworker_invitation_received') {
-                const invite = inviteByKey.get(n.data?.submission_id)
-                if (!invite) {
-                  // Invitation row no longer exists (e.g. author removed the coworker before they responded).
-                  return (
-                    <div key={n.id} className={`flex gap-4 px-5 py-4 ${!n.is_read ? 'bg-primary/5' : 'bg-background'}`}>
-                      <span className="text-xl shrink-0 mt-0.5">{meta.emoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{meta.label}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{timeAgo(n.created_at, lang)}</p>
-                      </div>
-                    </div>
-                  )
-                }
-                return (
-                  <CoworkerInvitationCard
-                    key={n.id}
-                    invitationId={invite.id}
-                    status={invite.status}
-                    submissionId={invite.submission_id}
-                    author={invite.profiles ?? null}
-                    submissionTitle={invite.submission?.title ?? (n.data?.title ?? null)}
-                    createdAtLabel={timeAgo(n.created_at, lang)}
-                    unread={!n.is_read}
-                    t={t.coworker}
-                    emoji={meta.emoji}
-                    label={meta.label}
-                  />
-                )
-              }
-
               return (
                 <div key={n.id} className={`flex gap-4 px-5 py-4 ${!n.is_read ? 'bg-primary/5' : 'bg-background'}`}>
                   <span className="text-xl shrink-0 mt-0.5">{meta.emoji}</span>

@@ -55,15 +55,6 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   }
   const viewsCount = (submission.views_count ?? 0) + (isOwn ? 0 : 1)
 
-  // Resolve accepted coworkers from submission_coworkers table.
-  const { data: coworkerRows } = await (supabase as any)
-    .from('submission_coworkers')
-    .select('profiles:user_id(id, username, full_name, avatar_url)')
-    .eq('submission_id', id)
-    .eq('status', 'accepted')
-  const collaborators: Array<{ id: string; username: string; full_name: string | null; avatar_url: string | null }> =
-    ((coworkerRows ?? []) as Array<{ profiles: any }>).map((r) => r.profiles).filter(Boolean)
-
   const dict = await getDict()
   const lang = await getLang()
   const t = dict.submissionDetail
@@ -90,7 +81,6 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
       <SubmissionDetailContent
         submission={submission}
         author={author ? { id: author.id, username: author.username, full_name: author.full_name ?? null, avatar_url: author.avatar_url } : null}
-        collaborators={collaborators}
         currentUserId={user.id}
         currentProfilePlan={currentProfile?.plan ?? null}
         initialUserLiked={userLiked}

@@ -11,10 +11,6 @@
     {
       "path": "/api/cron/streak-reset",
       "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/coworker-invitations",
-      "schedule": "0 4 * * *"
     }
   ]
 }

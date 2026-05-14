@@ -1,34 +1,19 @@
 'use client'
 
-import { useState, useTransition, useEffect, useRef } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar'
 import { submitChallenge } from './actions'
 import type { Submission } from '@/types/database.types'
-import { CheckCircle, X, Plus, Loader2, ArrowLeft, ArrowRight, Sparkles, Search } from 'lucide-react'
+import { CheckCircle, X, Loader2, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type SubmitT = Dictionary['submitForm']
-
-interface Collaborator {
-  id: string
-  username: string
-  full_name: string | null
-  avatar_url: string | null
-  status?: 'pending' | 'accepted' | 'declined'
-}
-
-const MAX_COWORKERS = 3
 
 interface Props {
   challengeId: string
@@ -36,7 +21,6 @@ interface Props {
   participationId: string
   attemptsLeft: number
   existing: Submission | null
-  existingCoworkers?: Collaborator[]
   t: SubmitT
 }
 
@@ -46,7 +30,6 @@ export function MultiStepSubmitForm({
   participationId,
   attemptsLeft,
   existing,
-  existingCoworkers,
   t,
 }: Props) {
   const router = useRouter()
@@ -64,7 +47,6 @@ export function MultiStepSubmitForm({
   const [title, setTitle] = useState<string>((existing as any)?.title ?? '')
   const [description, setDescription] = useState<string>((existing as any)?.description ?? '')
   const [projectLink, setProjectLink] = useState<string>(existingFiles?.link ?? '')
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(existingCoworkers ?? [])
   const [showOnProfile, setShowOnProfile] = useState<boolean>(
     (existing as any)?.is_visible !== false
   )
@@ -91,45 +73,6 @@ export function MultiStepSubmitForm({
   const HUMAN_REVIEW_THRESHOLD = 3
   const aiRejectionCount: number = (existing as any)?.ai_rejection_count ?? 0
   const canRequestHumanReview = aiRejectionCount >= HUMAN_REVIEW_THRESHOLD
-
-  // Collaborator search
-  const [collabQuery, setCollabQuery] = useState('')
-  const [collabResults, setCollabResults] = useState<Collaborator[]>([])
-  const [collabOpen, setCollabOpen] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (collabQuery.trim().length < 2) {
-      setCollabResults([])
-      return
-    }
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/users/search?q=${encodeURIComponent(collabQuery.trim())}&sameLeague=1`)
-        const data = await res.json()
-        const filtered = (data.users ?? []).filter(
-          (u: Collaborator) => !collaborators.some(c => c.id === u.id)
-        )
-        setCollabResults(filtered)
-      } catch {
-        setCollabResults([])
-      }
-    }, 250)
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [collabQuery, collaborators])
-
-  function addCollaborator(c: Collaborator) {
-    setCollaborators(prev => prev.length >= MAX_COWORKERS ? prev : [...prev, { ...c, status: 'pending' }])
-    setCollabQuery('')
-    setCollabResults([])
-  }
-
-  function removeCollaborator(id: string) {
-    setCollaborators(prev => prev.filter(c => c.id !== id))
-  }
 
   function addAdditionalImage(url: string | null) {
     if (!url) return
@@ -296,7 +239,6 @@ export function MultiStepSubmitForm({
     fd.set('isDraft', asDraft ? 'true' : 'false')
     fd.set('isVisible', showOnProfile ? 'true' : 'false')
     fd.set('additionalImages', JSON.stringify(additionalImages))
-    fd.set('collaborators', JSON.stringify(collaborators.map(c => c.id)))
 
     if (!asDraft && aiVerdict) {
       fd.set('aiVerdict', aiVerdict)
@@ -419,14 +361,6 @@ export function MultiStepSubmitForm({
             setDescription={setDescription}
             projectLink={projectLink}
             setProjectLink={setProjectLink}
-            collabQuery={collabQuery}
-            setCollabQuery={setCollabQuery}
-            collabResults={collabResults}
-            collabOpen={collabOpen}
-            setCollabOpen={setCollabOpen}
-            collaborators={collaborators}
-            addCollaborator={addCollaborator}
-            removeCollaborator={removeCollaborator}
             showOnProfile={showOnProfile}
             setShowOnProfile={setShowOnProfile}
             t={t.step2}
@@ -781,14 +715,6 @@ function Step2({
   setDescription,
   projectLink,
   setProjectLink,
-  collabQuery,
-  setCollabQuery,
-  collabResults,
-  collabOpen,
-  setCollabOpen,
-  collaborators,
-  addCollaborator,
-  removeCollaborator,
   showOnProfile,
   setShowOnProfile,
   t,
@@ -799,14 +725,6 @@ function Step2({
   setDescription: (v: string) => void
   projectLink: string
   setProjectLink: (v: string) => void
-  collabQuery: string
-  setCollabQuery: (v: string) => void
-  collabResults: Collaborator[]
-  collabOpen: boolean
-  setCollabOpen: (v: boolean) => void
-  collaborators: Collaborator[]
-  addCollaborator: (c: Collaborator) => void
-  removeCollaborator: (id: string) => void
   showOnProfile: boolean
   setShowOnProfile: (v: boolean) => void
   t: SubmitT['step2']
@@ -861,99 +779,6 @@ function Step2({
           onChange={e => setProjectLink(e.target.value)}
           placeholder={t.linkPlaceholder}
         />
-      </div>
-
-      {/* Collaborators */}
-      <div className="space-y-2 relative">
-        <div className="flex items-baseline justify-between gap-3">
-          <Label className="text-sm">{t.collaboratorsLabel}</Label>
-          <span className="text-xs text-muted-foreground">{collaborators.length} / {MAX_COWORKERS}</span>
-        </div>
-        <p className="text-xs text-muted-foreground">{t.collaboratorsLeagueHint}</p>
-
-        {/* Selected */}
-        {collaborators.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {collaborators.map(c => {
-              const statusColor =
-                c.status === 'accepted' ? 'border-emerald-500/40 bg-emerald-500/10'
-                : c.status === 'declined' ? 'border-rose-500/40 bg-rose-500/10 opacity-70'
-                : 'border-border bg-muted/60'
-              const statusBadge =
-                c.status === 'accepted' ? '✓'
-                : c.status === 'declined' ? '✕'
-                : '…'
-              return (
-                <span
-                  key={c.id}
-                  className={cn('inline-flex items-center gap-2 rounded-full border pl-1 pr-2 py-1', statusColor)}
-                  title={c.status ?? 'pending'}
-                >
-                  <Avatar size="sm">
-                    {c.avatar_url && <AvatarImage src={c.avatar_url} alt={c.username} />}
-                    <AvatarFallback>{c.username?.[0]?.toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs font-medium">{c.username}</span>
-                  <span className="text-[10px] text-muted-foreground" aria-hidden>{statusBadge}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeCollaborator(c.id)}
-                    className="ml-0.5 size-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-                    aria-label={t.collaboratorsRemove}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </span>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Search input */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            value={collabQuery}
-            onChange={e => { setCollabQuery(e.target.value); setCollabOpen(true) }}
-            onFocus={() => setCollabOpen(true)}
-            onBlur={() => setTimeout(() => setCollabOpen(false), 150)}
-            placeholder={t.collaboratorsSearch}
-            className="pl-9"
-            disabled={collaborators.length >= MAX_COWORKERS}
-          />
-        </div>
-
-        {/* Results dropdown */}
-        {collabOpen && collabQuery.trim().length >= 2 && collabResults.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl border border-border bg-popover shadow-lg overflow-hidden">
-            {collabResults.map(u => (
-              <button
-                key={u.id}
-                type="button"
-                onMouseDown={e => e.preventDefault()}
-                onClick={() => addCollaborator(u)}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted text-left transition-colors"
-              >
-                <Avatar size="sm">
-                  {u.avatar_url && <AvatarImage src={u.avatar_url} alt={u.username} />}
-                  <AvatarFallback>{u.username?.[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{u.username}</p>
-                  {u.full_name && (
-                    <p className="text-xs text-muted-foreground truncate">{u.full_name}</p>
-                  )}
-                </div>
-                <Plus className="size-4 text-muted-foreground" />
-              </button>
-            ))}
-          </div>
-        )}
-        {collabOpen && collabQuery.trim().length >= 2 && collabResults.length === 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl border border-border bg-popover shadow-lg p-4 text-sm text-muted-foreground text-center">
-            {t.collaboratorsNone}
-          </div>
-        )}
       </div>
 
       {/* Profile toggle */}

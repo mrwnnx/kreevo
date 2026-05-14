@@ -20,7 +20,6 @@ export async function submitChallenge(formData: FormData) {
   const isDraft = formData.get('isDraft') === 'true'
   const isVisible = formData.get('isVisible') !== 'false'
   const additionalImagesRaw = formData.get('additionalImages') as string | null
-  const collaboratorsRaw = formData.get('collaborators') as string | null
   const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | 'human_review' | null
   const aiReason = formData.get('aiReason') as string | null
   const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
@@ -33,8 +32,6 @@ export async function submitChallenge(formData: FormData) {
 
   let additionalImages: string[] = []
   try { additionalImages = additionalImagesRaw ? JSON.parse(additionalImagesRaw) : [] } catch {}
-  let collaborators: string[] = []
-  try { collaborators = collaboratorsRaw ? JSON.parse(collaboratorsRaw) : [] } catch {}
 
   // Verify participation is still active (only for non-draft submissions)
   if (participationId) {
@@ -112,16 +109,6 @@ export async function submitChallenge(formData: FormData) {
   if (error) return { error: error.message }
 
   const submissionId = upsertResult?.id ?? existing?.id
-
-  // Sync coworker invitations (max 3, skip blocked users, notify newly invited).
-  if (submissionId && collaborators.length >= 0) {
-    try {
-      const { syncCoworkerInvitations } = await import('@/lib/utils/coworkers')
-      await syncCoworkerInvitations(submissionId, user.id, challengeId, title, collaborators)
-    } catch (e) {
-      console.error('[submitChallenge] coworker sync error', e)
-    }
-  }
 
   // For drafts: skip status updates and XP awards
   if (isDraft) {
