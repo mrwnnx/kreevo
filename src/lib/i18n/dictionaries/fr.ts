@@ -261,6 +261,10 @@ export const fr = {
       noPublic: 'Aucun travail public pour l\'instant.',
       noTrack: 'Aucun travail dans cette catégorie pour l\'instant.',
     },
+    navDashboard: 'Dashboard',
+    navMyProfile: 'Mon profil',
+    ownProfileBanner: 'Tu vois ton profil comme un visiteur.',
+    ownProfileManage: 'Gérer mon profil',
   },
   historyPage: {
     title: 'Historique',

@@ -264,6 +264,10 @@ export const en: Dictionary = {
       noPublic: 'No public work yet.',
       noTrack: 'No work in this track yet.',
     },
+    navDashboard: 'Dashboard',
+    navMyProfile: 'My profile',
+    ownProfileBanner: 'You\'re viewing your profile as a visitor.',
+    ownProfileManage: 'Manage my profile',
   },
   historyPage: {
     title: 'History',

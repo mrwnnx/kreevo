@@ -100,9 +100,11 @@ export default async function ProfilePage({
   const [
     { data: profile },
     { count: totalUsers },
+    { data: { user: viewer } },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('username', username).single(),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.auth.getUser(),
   ])
 
   if (!profile) notFound()
@@ -111,6 +113,23 @@ export default async function ProfilePage({
   const social = parseLinks(p.links)
   const league = getLeague(p.league ?? '7ajra')
   const isPro = p.plan === 'pro' || p.plan === 'studio'
+
+  // Resolve the viewer's own profile to render the logged-in nav (avatar) and the own-profile banner.
+  const isLoggedIn = !!viewer
+  const isOwnProfile = isLoggedIn && viewer.id === p.id
+  let viewerProfile: { username: string; avatar_url: string | null } | null = null
+  if (isLoggedIn) {
+    if (isOwnProfile) {
+      viewerProfile = { username: p.username, avatar_url: p.avatar_url ?? null }
+    } else {
+      const { data: vp } = await supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', viewer.id)
+        .single()
+      if (vp) viewerProfile = { username: (vp as any).username, avatar_url: (vp as any).avatar_url ?? null }
+    }
+  }
 
   const [
     { data: allSubmissions, count: submissionCount },
@@ -151,14 +170,51 @@ export default async function ProfilePage({
     <div className="min-h-screen bg-background">
       {/* ── Nav bar ────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
-        <a href="/" className="text-sm font-bold tracking-tight">kreevo</a>
+        <a href={isLoggedIn ? '/dashboard' : '/'} className="text-sm font-bold tracking-tight">kreevo</a>
         <div className="flex items-center gap-3">
-          <a href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Sign in</a>
-          <a href="/signup" className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity">
-            Join free
-          </a>
+          {isLoggedIn ? (
+            <>
+              <a href="/dashboard" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                {t.navDashboard}
+              </a>
+              <a
+                href={viewerProfile ? `/u/${viewerProfile.username}` : '/dashboard'}
+                className="block size-8 rounded-full bg-muted overflow-hidden ring-2 ring-background hover:opacity-80 transition-opacity"
+                aria-label={t.navMyProfile}
+                title={t.navMyProfile}
+              >
+                {viewerProfile?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={viewerProfile.avatar_url} alt={viewerProfile.username} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[11px] font-bold text-muted-foreground">
+                    {viewerProfile?.username?.[0]?.toUpperCase() ?? '?'}
+                  </div>
+                )}
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Sign in</a>
+              <a href="/signup" className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity">
+                Join free
+              </a>
+            </>
+          )}
         </div>
       </nav>
+
+      {/* Own-profile banner — visible only when the viewer is looking at their own /u page */}
+      {isOwnProfile && (
+        <div className="border-b border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-6 py-2.5">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3 text-xs">
+            <span className="text-amber-800 dark:text-amber-300">{t.ownProfileBanner}</span>
+            <a href="/dashboard/settings" className="font-semibold text-amber-900 dark:text-amber-200 hover:underline whitespace-nowrap">
+              {t.ownProfileManage} →
+            </a>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto px-6 py-12 space-y-12">
 
