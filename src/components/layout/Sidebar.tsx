@@ -95,7 +95,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
               </span>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-xl">
+          <DropdownMenuContent side="right" align="start" sideOffset={12} className="w-56 rounded-xl">
             <div className="px-3 py-2 border-b border-border mb-1">
               <p className="text-sm font-semibold inline-flex items-center gap-1.5">
                 @{profile.username}
