@@ -1,7 +1,7 @@
 /**
  * Help Center layout — wraps all /help pages.
  * - Reads `lang` cookie (fr default) via getHelpLang()
- * - Renders top header (logo + search + lang switcher)
+ * - Renders top header (logo + lang switcher)
  * - Renders bottom footer (contact CTA + back to home)
  *
  * Routes:
@@ -14,7 +14,6 @@
 
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { HelpSearchBar } from '@/components/help/HelpSearchBar'
 import { LanguageSwitcher } from '@/components/help/LanguageSwitcher'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
 
@@ -49,10 +48,6 @@ export default async function HelpLayout({
               help
             </span>
           </Link>
-
-          <div className="flex-1 max-w-[420px] mx-auto hidden md:block">
-            <HelpSearchBar placeholder={t.searchPlaceholder} size="md" />
-          </div>
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageSwitcher current={lang} />
