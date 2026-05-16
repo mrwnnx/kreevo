@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { House, Trophy, BarChart3, Zap } from 'lucide-react'
+import { House, Trophy, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -16,7 +16,6 @@ import { signOut } from '@/app/(auth)/actions'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import type { Profile } from '@/types/database.types'
-import { leagueLabel, leagueColor } from '@/lib/utils/xp'
 import type { Lang } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
@@ -44,8 +43,6 @@ export function FloatingNav({ profile, lang, t }: Props) {
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const league = profile.league ?? '7ajra'
-
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60)
     return () => clearTimeout(t)
@@ -61,7 +58,7 @@ export function FloatingNav({ profile, lang, t }: Props) {
     <>
     <div
       className={cn(
-        'sticky top-0 z-40 flex items-center px-3 sm:px-6 gap-2 sm:gap-4 h-14 transition-all duration-200',
+        'sm:hidden sticky top-0 z-40 flex items-center px-3 gap-2 h-14 transition-all duration-200',
         scrolled ? 'border-b' : 'border-b border-transparent'
       )}
       style={{
@@ -74,36 +71,7 @@ export function FloatingNav({ profile, lang, t }: Props) {
       {/* Logo — left */}
       <Link href="/dashboard" className="shrink-0 flex items-baseline gap-1">
         <span className="text-sm font-bold tracking-tight">kreevo</span>
-        <span className="hidden sm:inline text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
       </Link>
-
-      {/* Nav links — centered absolutely on the viewport (desktop only) */}
-      <div
-        className={cn(
-          'hidden sm:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 transition-opacity duration-300',
-          mounted ? 'opacity-100' : 'opacity-0'
-        )}
-      >
-        {NAV_BASE.map(({ href, key, match }) => {
-          const active = match(pathname)
-          const label = t.nav[key]
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-label={label}
-              className={cn(
-                'rounded-full px-3 py-1.5 transition-colors duration-150',
-                active
-                  ? 'text-foreground font-semibold'
-                  : 'text-zinc-500 hover:text-foreground dark:text-zinc-400 dark:hover:text-white'
-              )}
-            >
-              <span className="text-base leading-none">{label}</span>
-            </Link>
-          )
-        })}
-      </div>
 
       {/* Spacer to push right actions to the edge */}
       <div className="flex-1" />
@@ -112,22 +80,8 @@ export function FloatingNav({ profile, lang, t }: Props) {
       <div className="shrink-0 flex items-center gap-1">
         <NotificationBell userId={profile.id} />
 
-        {/* League chip — masqué sur mobile */}
-        <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-border mr-1">
-          <span
-            className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full leading-none"
-            style={{ background: leagueColor(league) + '18', color: leagueColor(league) }}
-          >
-            {leagueLabel(league)}
-          </span>
-        </div>
-
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-1.5 sm:pr-2.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
-              <Zap className="size-3 text-violet-500" />
-              {profile.xp.toLocaleString()} XP
-            </span>
+          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-1.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
             <Avatar className="size-7 rounded-full ring-[1.5px] ring-border">
               <AvatarImage src={profile.avatar_url ?? undefined} />
               <AvatarFallback className="rounded-full text-[11px] font-bold bg-primary/15 text-primary">
