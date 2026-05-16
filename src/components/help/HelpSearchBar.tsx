@@ -35,7 +35,7 @@ export function HelpSearchBar({
       onSubmit={onSubmit}
       role="search"
       className={cn(
-        'relative flex items-center w-full bg-card border border-border rounded-full transition-shadow focus-within:shadow-md focus-within:border-primary/40',
+        'relative flex items-center w-full bg-white border border-border rounded-full transition-shadow focus-within:shadow-md focus-within:border-primary/40',
         isLg ? 'h-14 pl-5 pr-1.5' : 'h-11 pl-4 pr-1',
         className,
       )}
