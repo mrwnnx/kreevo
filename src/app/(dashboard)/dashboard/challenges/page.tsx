@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, Users } from 'lucide-react'
+import { Lock, Zap, Trophy, Clock, Users, ChevronRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -10,12 +10,12 @@ import { getDict, tx } from '@/lib/i18n/lang'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── Specialty visual config ───────────────────────────────────────────────────
-const SPECIALTY_VISUAL: Record<string, { icon: string }> = {
-  'UX Designer':      { icon: '📱' },
-  'UI Designer':      { icon: '🎨' },
-  'Graphic Designer': { icon: '✏️' },
+const SPECIALTY_VISUAL: Record<string, { icon: string; bgClass: string }> = {
+  'UX Designer':      { icon: '📱', bgClass: 'bg-blue-50 dark:bg-blue-950/40' },
+  'UI Designer':      { icon: '🎨', bgClass: 'bg-violet-50 dark:bg-violet-950/40' },
+  'Graphic Designer': { icon: '✏️', bgClass: 'bg-amber-50 dark:bg-amber-950/40' },
 }
-const DEFAULT_VISUAL = { icon: '🎨' }
+const DEFAULT_VISUAL = { icon: '🎨', bgClass: 'bg-muted' }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
@@ -48,85 +48,78 @@ function ChallengeCard({
 
   const card = (
     <div className={cn(
-      'group relative flex flex-col bg-card border rounded-2xl overflow-hidden transition-all duration-200',
-      status === 'available'  && 'border-border hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
-      status === 'active'     && 'border-green-400 dark:border-green-600 shadow-sm shadow-green-500/10',
-      status === 'completed'  && 'border-border/40',
-      status === 'locked'     && 'opacity-50 cursor-default',
-      status === 'blocked'    && 'opacity-60 cursor-default',
+      'group relative block rounded-[24px] border bg-card p-5 transition-all duration-150',
+      status === 'available' && 'border-border hover:shadow-md hover:border-primary/30',
+      status === 'active'    && 'border-green-400 dark:border-green-600 shadow-sm shadow-green-500/10',
+      status === 'completed' && 'border-border/60',
+      status === 'locked'    && 'border-border opacity-50 cursor-default',
+      status === 'blocked'   && 'border-border opacity-60 cursor-default',
     )}>
 
-      {/* Cover image — 4:3 ratio */}
-      <div className="relative w-full aspect-[4/3] bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-        <span className="text-6xl opacity-70">{visual.icon}</span>
+      {status === 'blocked' && (
+        <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] z-10 p-4">
+          <p className="text-xs text-center text-muted-foreground font-medium leading-relaxed">
+            {t.blockedOverlay}
+          </p>
+        </div>
+      )}
 
+      <div className="flex items-center justify-between mb-4">
+        <div className={cn(
+          'size-11 rounded-2xl flex items-center justify-center text-2xl',
+          visual.bgClass,
+        )}>
+          {visual.icon}
+        </div>
         {challenge.industry && (
-          <span className="absolute top-3 right-3 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 backdrop-blur-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {challenge.industry}
           </span>
         )}
-
-        {status === 'active' && (
-          <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-green-600/85 rounded-full px-2 py-0.5 backdrop-blur-sm">
-            <span className="size-1.5 rounded-full bg-green-200 animate-pulse" />
-            <span className="text-[11px] font-medium text-white">{t.inProgress}</span>
-          </div>
-        )}
-
-        {status === 'completed' && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <span className="text-3xl">✅</span>
-          </div>
-        )}
-
-        {status === 'locked' && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <Lock className="size-7 text-white/85" />
-          </div>
-        )}
       </div>
 
-      {/* Body */}
-      <div className="p-4 space-y-3">
+      <h3 className={cn(
+        'text-base font-semibold text-foreground mb-1 leading-tight line-clamp-2',
+        isClickable && 'group-hover:text-primary transition-colors',
+      )}>
+        {challenge.title}
+      </h3>
 
-        {/* Blocked overlay */}
-        {status === 'blocked' && (
-          <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center rounded-b-2xl z-10 p-4">
-            <p className="text-xs text-center text-muted-foreground font-medium leading-relaxed">
-              {t.blockedOverlay}
-            </p>
-          </div>
-        )}
+      <p className="text-sm text-muted-foreground leading-snug mb-4 line-clamp-2">
+        {challenge.brief}
+      </p>
 
-        <h3 className={cn(
-          'text-base font-semibold leading-snug line-clamp-2',
-          isClickable && 'group-hover:text-primary transition-colors',
-        )}>
-          {challenge.title}
-        </h3>
-
-        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-          {challenge.brief}
-        </p>
-
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-3 text-muted-foreground">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
-            <span className="flex items-center gap-1.5">
-              <Zap className="size-4 text-amber-500" />
+            <span className="flex items-center gap-1">
+              <Zap className="size-3.5 text-amber-500" />
               <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> {t.xp}
             </span>
           )}
           {challenge.deadline_days != null && (
-            <span className="flex items-center gap-1.5">
-              <Clock className="size-4" />
+            <span className="flex items-center gap-1">
+              <Clock className="size-3.5" />
               <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>{t.daysSuffix}
             </span>
           )}
-          <span className="flex items-center gap-1.5">
-            <Users className="size-4" />
+          <span className="flex items-center gap-1">
+            <Users className="size-3.5" />
             <strong className="font-semibold text-foreground">{participantCount ?? 0}</strong>
           </span>
         </div>
+
+        {status === 'active' && (
+          <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="font-medium">{t.inProgress}</span>
+          </span>
+        )}
+        {status === 'completed' && <Check className="size-4 text-green-600 dark:text-green-400" />}
+        {status === 'locked' && <Lock className="size-4 text-muted-foreground" />}
+        {status === 'available' && (
+          <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        )}
       </div>
     </div>
   )

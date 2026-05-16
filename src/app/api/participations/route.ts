@@ -118,14 +118,6 @@ export async function POST(request: Request) {
     })
   } catch { /* ignore */ }
 
-  try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/xp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', cookie: request.headers.get('cookie') ?? '' },
-      body: JSON.stringify({ action: 'joined_challenge' }),
-    })
-  } catch { /* ignore */ }
-
   return NextResponse.json({ participation })
 }
 
@@ -172,12 +164,6 @@ export async function DELETE(request: Request) {
     .delete()
     .eq('id', participation.id)
   if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 })
-
-  // Refund the +50 XP joined_challenge bonus
-  const { data: profile } = await (supabaseAdmin as any)
-    .from('profiles').select('xp').eq('id', user.id).single()
-  const refunded = Math.max(0, (profile?.xp ?? 0) - 50)
-  await (supabaseAdmin as any).from('profiles').update({ xp: refunded }).eq('id', user.id)
 
   try {
     await (supabaseAdmin as any).from('notifications').insert({

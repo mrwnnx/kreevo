@@ -2,7 +2,6 @@
 // Plus de constantes rookie/rising/pro/elite/legend.
 
 export const XP_REWARDS = {
-  participation:    50,
   like_received:     2,
   comment_received:  5,
   comment_given:    10,
