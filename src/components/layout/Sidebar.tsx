@@ -6,6 +6,7 @@ import { House, Trophy, BarChart3, Bell, ScrollText, ChevronRight, Zap } from 'l
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { getLeagueStyle } from '@/lib/utils/league-style'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -21,11 +22,12 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 interface Props {
   profile: Profile
   unreadCount: number
+  leagueIcon: string | null
   lang: Lang
   t: Dictionary['header']
 }
 
-export function Sidebar({ profile, unreadCount, lang, t }: Props) {
+export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   const pathname = usePathname()
 
   const displayName =
@@ -79,7 +81,11 @@ export function Sidebar({ profile, unreadCount, lang, t }: Props) {
 
             {/* Row 2 — league icon + name + XP */}
             <div className="flex items-center gap-2 pl-0.5">
-              <span className="text-base leading-none">{leagueStyle.emoji}</span>
+              {leagueIcon ? (
+                <LeagueIcon icon={leagueIcon} size="md" />
+              ) : (
+                <span className="text-base leading-none">{leagueStyle.emoji}</span>
+              )}
               <span className={cn('text-xs font-semibold', leagueStyle.textPrimary)}>
                 {leagueStyle.name}
               </span>

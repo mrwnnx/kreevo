@@ -17,18 +17,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .from('profiles').select('*').eq('id', user.id).single()
   if (!profile) redirect('/login')
 
-  const { count: unreadCount } = await (supabaseAdmin as any)
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('is_read', false)
+  const [{ count: unreadCount }, { data: leagueRow }] = await Promise.all([
+    (supabaseAdmin as any)
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_read', false),
+    (supabaseAdmin as any)
+      .from('leagues')
+      .select('icon')
+      .ilike('name', (profile as any).league ?? 'Stone')
+      .maybeSingle(),
+  ])
 
   const [lang, dict] = await Promise.all([getLang(), getDict()])
 
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <Sidebar profile={profile as Profile} unreadCount={unreadCount ?? 0} lang={lang} t={dict.header} />
+        <Sidebar
+          profile={profile as Profile}
+          unreadCount={unreadCount ?? 0}
+          leagueIcon={leagueRow?.icon ?? null}
+          lang={lang}
+          t={dict.header}
+        />
         <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} />
         <main className="sm:pl-60 min-h-screen">{children}</main>
         <Toaster position="bottom-right" />
