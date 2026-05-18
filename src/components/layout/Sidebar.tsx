@@ -46,7 +46,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   ]
 
   return (
-    <aside className="hidden sm:flex fixed top-0 left-0 z-30 h-screen w-60 flex-col border-r border-border bg-zinc-50 dark:bg-zinc-900/40">
+    <aside className="hidden sm:flex fixed top-0 left-0 z-30 h-screen w-64 flex-col border-r border-border bg-zinc-50 dark:bg-zinc-900/40">
       {/* Logo */}
       <div className="px-5 h-14 flex items-baseline gap-1.5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-baseline gap-1.5">
