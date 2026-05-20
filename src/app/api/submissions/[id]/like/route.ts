@@ -14,7 +14,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   const { data: submission } = await (supabaseAdmin as any)
     .from('submissions')
-    .select('user_id, total_claps')
+    .select('user_id, total_likes')
     .eq('id', submissionId)
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
@@ -24,7 +24,7 @@ export async function POST(_req: Request, { params }: Params) {
   }
 
   const { data: existing } = await (supabaseAdmin as any)
-    .from('submission_claps')
+    .from('submission_likes')
     .select('id')
     .eq('submission_id', submissionId)
     .eq('user_id', user.id)
@@ -35,22 +35,22 @@ export async function POST(_req: Request, { params }: Params) {
   let xpDelta: number
 
   if (existing) {
-    await (supabaseAdmin as any).from('submission_claps').delete().eq('id', existing.id)
-    newTotal = Math.max(0, (submission.total_claps ?? 0) - 1)
+    await (supabaseAdmin as any).from('submission_likes').delete().eq('id', existing.id)
+    newTotal = Math.max(0, (submission.total_likes ?? 0) - 1)
     liked = false
     xpDelta = -2
   } else {
     await (supabaseAdmin as any)
-      .from('submission_claps')
-      .insert({ submission_id: submissionId, user_id: user.id, claps_count: 1 })
-    newTotal = (submission.total_claps ?? 0) + 1
+      .from('submission_likes')
+      .insert({ submission_id: submissionId, user_id: user.id, likes_count: 1 })
+    newTotal = (submission.total_likes ?? 0) + 1
     liked = true
     xpDelta = 2
   }
 
   await (supabaseAdmin as any)
     .from('submissions')
-    .update({ total_claps: newTotal })
+    .update({ total_likes: newTotal })
     .eq('id', submissionId)
 
   const { data: ownerProf } = await (supabaseAdmin as any)

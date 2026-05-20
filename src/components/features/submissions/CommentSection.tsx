@@ -125,7 +125,7 @@ export function CommentSection({
     setLiked(!prevLiked)
     setTotalLikes(prevLiked ? Math.max(0, prevTotal - 1) : prevTotal + 1)
     try {
-      const res = await fetch(`/api/submissions/${submissionId}/clap`, { method: 'POST' })
+      const res = await fetch(`/api/submissions/${submissionId}/like`, { method: 'POST' })
       if (!res.ok) throw new Error()
       const json = await res.json()
       setLiked(!!json.liked)

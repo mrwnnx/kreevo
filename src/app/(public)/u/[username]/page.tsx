@@ -159,7 +159,7 @@ export default async function ProfilePage({
   const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
   const submissions = (allSubmissions ?? []) as any[]
   const top3 = [...submissions]
-    .sort((a, b) => (b.total_claps ?? 0) - (a.total_claps ?? 0))
+    .sort((a, b) => (b.total_likes ?? 0) - (a.total_likes ?? 0))
     .slice(0, 3)
   const filteredSubmissions =
     activeTrack === 'All'
@@ -421,7 +421,7 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
           </span>
           <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-0.5">
-              <Heart className="size-3" /> {s.total_claps ?? 0}
+              <Heart className="size-3" /> {s.total_likes ?? 0}
             </span>
             <span className="flex items-center gap-0.5">
               <MessageCircle className="size-3" /> {s.comments_count ?? 0}

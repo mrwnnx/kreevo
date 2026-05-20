@@ -51,6 +51,7 @@ export const fr = {
     keepGoing: 'Continue, {name}. Demain est un autre jour XP. 🌟',
     profileHeader: {
       editProfile: 'Modifier le profil →',
+      welcome: 'Bon retour, {name}',
       jobTitles: {
         entry: 'Entry Level',
         junior: 'Junior',
@@ -91,6 +92,13 @@ export const fr = {
       min: 'MIN',
       sec: 'SEC',
       completeChallenge: '⚡ Compléter un défi',
+      deadlineLabel: '⏳ Deadline de soumission',
+      submitCta: 'Soumettre mon travail',
+      timeUp: 'Temps écoulé',
+      noChallengeLabel: '✨ Aucun défi en cours',
+      noChallengeTitle: 'Prêt à relever un défi ?',
+      noChallengeBody: 'Participe à un challenge pour gagner de l\'XP, débloquer des badges et grimper dans les ligues.',
+      browseCta: 'Découvrir les défis',
     },
     whatToDoNow: {
       title: '🎯 Que faire maintenant',

@@ -53,6 +53,7 @@ export const en: Dictionary = {
     keepGoing: 'Keep going, {name}. Tomorrow\'s another XP day. 🌟',
     profileHeader: {
       editProfile: 'Edit profile →',
+      welcome: 'Welcome back, {name}',
       jobTitles: {
         entry: 'Entry Level',
         junior: 'Junior',
@@ -93,6 +94,13 @@ export const en: Dictionary = {
       min: 'MIN',
       sec: 'SEC',
       completeChallenge: '⚡ Complete a Challenge',
+      deadlineLabel: '⏳ Submission deadline',
+      submitCta: 'Submit my work',
+      timeUp: 'Time\'s up',
+      noChallengeLabel: '✨ No active challenge',
+      noChallengeTitle: 'Ready for a challenge?',
+      noChallengeBody: 'Join a challenge to earn XP, unlock badges and climb the leagues.',
+      browseCta: 'Browse challenges',
     },
     whatToDoNow: {
       title: '🎯 What to do now',

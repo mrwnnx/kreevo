@@ -66,7 +66,7 @@ export function MySubmissionCard({
 
   // Drafts are not yet publicly viewable → keep them as static (no link).
   // Published submissions link to their detail page so the user can review,
-  // see comments/claps, share their work.
+  // see comments/likes, share their work.
   const detailHref = !isDraft ? `/dashboard/submissions/${submission.id}` : null
 
   const cover = submission.cover_url && (

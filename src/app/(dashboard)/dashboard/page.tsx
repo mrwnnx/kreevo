@@ -3,7 +3,6 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
-import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
 import { WhatToDoNow } from '@/components/dashboard/WhatToDoNow'
@@ -267,23 +266,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
 
-      <HeroBanner
-        profile={profile}
-        participation={participation}
-        streak={streak}
-        xpToday={xpToday}
-        xpPercent={xpPercent}
-        xpGap={xpGap}
-        nextLeague={nextLeague?.name || ''}
-        justSubmitted={justSubmitted}
-        lastSubmissionDate={lastSubmissionDate}
-        suggestedChallenge={suggestedChallenge}
-        completedTotal={totalCompleted}
-        completedToday={completedTodayCount || 0}
-        lang={lang}
-        t={dict.dashboard.heroBanner}
-      />
-
       <div className="grid lg:grid-cols-2 gap-4">
         <LeagueSection
           profile={profile}
@@ -313,10 +295,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </div>
 
       <LeagueCountdownCard
-        profile={profile}
-        nextLeague={nextLeague}
-        currentXP={currentXP}
-        threshold={threshold}
+        participation={participation}
         suggestedChallenge={suggestedChallenge}
         t={dict.dashboard.countdownCard}
       />
@@ -338,10 +317,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         />
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-4" id="invite">
+      <div id="invite">
         <InviteFriends profile={profile} referrals={referrals} t={dict.dashboard.inviteFriends} />
-        <CompleteProfile profile={profile} t={dict.dashboard.completeProfile} />
       </div>
+
+      <CompleteProfile profile={profile} t={dict.dashboard.completeProfile} />
 
       <Analytics
         profile={profile}

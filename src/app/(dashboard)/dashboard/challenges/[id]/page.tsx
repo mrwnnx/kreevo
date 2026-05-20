@@ -42,7 +42,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
     supabase.from('challenges').select('*').eq('id', id).single(),
     (supabase as any).from('participations').select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
-    (supabase.from('submissions') as any).select('*, profiles:user_id(username, avatar_url, league, plan)').eq('challenge_id', id).eq('is_draft', false).eq('validation_status', 'approved').neq('user_id', user.id).order('total_claps', { ascending: false }),
+    (supabase.from('submissions') as any).select('*, profiles:user_id(username, avatar_url, league, plan)').eq('challenge_id', id).eq('is_draft', false).eq('validation_status', 'approved').neq('user_id', user.id).order('total_likes', { ascending: false }),
     supabaseAdmin.from('participations' as any).select('*', { count: 'exact', head: true }).eq('challenge_id', id),
     supabaseAdmin.from('participations' as any).select('profiles(id, username, full_name, avatar_url, plan)').eq('challenge_id', id).limit(100),
     (supabase as any).from('participations').select('challenge_id').eq('user_id', user.id).eq('status', 'active').gt('personal_deadline', new Date().toISOString()).neq('challenge_id', id),

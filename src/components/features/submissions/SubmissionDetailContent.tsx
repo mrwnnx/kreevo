@@ -23,7 +23,7 @@ interface SubmissionLite {
   description?: string | null
   cover_url?: string | null
   files?: Record<string, unknown> | null
-  total_claps?: number | null
+  total_likes?: number | null
   comments_count?: number | null
   validation_status?: string | null
   created_at?: string | null
@@ -65,7 +65,7 @@ export function SubmissionDetailContent({
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [dailyCount, setDailyCount] = useState(0)
   const [liked, setLiked] = useState(initialUserLiked)
-  const [totalLikes, setTotalLikes] = useState(submission.total_claps ?? 0)
+  const [totalLikes, setTotalLikes] = useState(submission.total_likes ?? 0)
   const [likePending, setLikePending] = useState(false)
   // commentsCount is derived from comments.length once fetched (counts top-level + replies). Falls back to DB count during initial load.
   const [panelOpen, setPanelOpen] = useState(false)
@@ -121,7 +121,7 @@ export function SubmissionDetailContent({
     setLiked(!prevLiked)
     setTotalLikes(prevLiked ? Math.max(0, prevTotal - 1) : prevTotal + 1)
     try {
-      const res = await fetch(`/api/submissions/${submission.id}/clap`, { method: 'POST' })
+      const res = await fetch(`/api/submissions/${submission.id}/like`, { method: 'POST' })
       if (!res.ok) throw new Error()
       const json = await res.json()
       setLiked(!!json.liked)

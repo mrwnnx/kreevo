@@ -13,7 +13,7 @@ interface Submission {
   id: string
   cover_url: string
   is_visible: boolean
-  total_claps?: number | null
+  total_likes?: number | null
   comments_count: number
   user_id: string
   created_at?: string
@@ -83,7 +83,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = 
         {submissions.map(s => {
           const isOwn = s.user_id === currentUserId
           const blurred = !isRevealed && !isOwn
-          const claps = s.total_claps ?? 0
+          const likes = s.total_likes ?? 0
 
           return (
             <div key={s.id} className="group border border-border rounded-xl overflow-hidden hover:border-primary/20 transition-colors">
@@ -153,7 +153,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = 
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Heart className="size-3.5 fill-red-500 text-red-500" strokeWidth={1.5} />
-                      {claps}
+                      {likes}
                     </span>
                     <Link
                       href={`/dashboard/submissions/${s.id}`}

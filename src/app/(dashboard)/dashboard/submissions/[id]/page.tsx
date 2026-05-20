@@ -25,7 +25,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
       .eq('id', id)
       .single(),
     (supabase as any)
-      .from('submission_claps')
+      .from('submission_likes')
       .select('id')
       .eq('submission_id', id)
       .eq('user_id', user.id)

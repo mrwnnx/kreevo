@@ -102,23 +102,12 @@ export type Database = {
           is_visible: boolean
           is_reported: boolean
           xp_earned: number
-          likes_count: number
           comments_count: number
           created_at: string
           updated_at: string
         }
         Insert: Partial<Database['public']['Tables']['submissions']['Row']>
         Update: Partial<Database['public']['Tables']['submissions']['Row']>
-      }
-      likes: {
-        Row: {
-          id: string
-          submission_id: string
-          user_id: string
-          created_at: string
-        }
-        Insert: Partial<Database['public']['Tables']['likes']['Row']>
-        Update: Partial<Database['public']['Tables']['likes']['Row']>
       }
       comments: {
         Row: {
@@ -208,7 +197,6 @@ export type League = Database['public']['Tables']['leagues']['Row']
 export type Challenge = Database['public']['Tables']['challenges']['Row']
 export type Participation = Database['public']['Tables']['participations']['Row']
 export type Submission = Database['public']['Tables']['submissions']['Row']
-export type Like = Database['public']['Tables']['likes']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
 export type Feedback = Database['public']['Tables']['feedbacks']['Row']
 export type Subscription = Database['public']['Tables']['subscriptions']['Row']

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, ArrowRight, Clock, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -114,82 +114,134 @@ export function LeagueSection({
 }
 
 type CountdownProps = {
-  profile: any
-  nextLeague: any
-  currentXP: number
-  threshold: number
+  participation: any
   suggestedChallenge: any
   t: Dictionary['dashboard']['countdownCard']
 }
 
+type TimeLeft = { days: number; hours: number; min: number; sec: number }
+
 export function LeagueCountdownCard({
-  profile,
-  nextLeague,
-  currentXP,
-  threshold,
+  participation,
+  suggestedChallenge,
   t,
 }: CountdownProps) {
-  const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
-  const isCloseToPromotion = xpPercent >= 80
-  const leagueStyle = getLeagueStyle(profile?.league)
+  const deadline = participation?.personal_deadline
+    ? new Date(participation.personal_deadline).getTime()
+    : null
 
-  const [timeLeft, setTimeLeft] = useState({ days: 2, hours: 14, min: 11, sec: 32 })
+  // null jusqu'au mount → évite tout mismatch d'hydratation sur le compte à rebours
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        let { days, hours, min, sec } = prev
-        sec--
-        if (sec < 0) { sec = 59; min-- }
-        if (min < 0) { min = 59; hours-- }
-        if (hours < 0) { hours = 23; days-- }
-        if (days < 0) { days = 0; hours = 0; min = 0; sec = 0 }
-        return { days, hours, min, sec }
+    if (!deadline) return
+    const tick = () => {
+      const diff = Math.max(0, deadline - Date.now())
+      setTimeLeft({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor(diff / 3600000) % 24,
+        min: Math.floor(diff / 60000) % 60,
+        sec: Math.floor(diff / 1000) % 60,
       })
-    }, 1000)
+    }
+    tick()
+    const interval = setInterval(tick, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [deadline])
 
-  if (!isCloseToPromotion) return null
+  // ── Mode motivation (aucune participation active) ───────────────
+  if (!participation) {
+    const href = suggestedChallenge?.id
+      ? `/dashboard/challenges/${suggestedChallenge.id}`
+      : '/dashboard/challenges'
+    return (
+      <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-violet-50 via-violet-50/50 to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 ring-1 ring-violet-200/70 dark:ring-violet-900/40 shadow-sm">
+        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-violet-200/40 dark:bg-violet-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-indigo-200/40 dark:bg-indigo-500/10 blur-3xl" />
+
+        <div className="relative p-5 sm:p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+              <Sparkles className="size-3.5" /> {t.noChallengeLabel}
+            </span>
+            <h3 className="mt-2 text-2xl font-bold tracking-tight leading-tight text-foreground">
+              {t.noChallengeTitle}
+            </h3>
+            <p className="mt-1.5 text-sm text-muted-foreground max-w-prose">
+              {t.noChallengeBody}
+            </p>
+          </div>
+          <Link href={href} className="flex-shrink-0">
+            <Button className="group bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
+              {t.browseCta}
+              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Mode deadline (participation active) ────────────────────────
+  const challengeTitle = participation.challenges?.title ?? ''
+  const submitHref = `/dashboard/challenges/${participation.challenge_id}/submit`
+  const isUp =
+    timeLeft != null &&
+    timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.min === 0 && timeLeft.sec === 0
 
   return (
-    <div className="rounded-[24px] p-4 relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white">
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-          {t.leagueEndsSoon}
-        </span>
-        <span className="text-xs bg-red-400/40 px-2 py-1 rounded-full">
-          {t.highStakes}
-        </span>
+    <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-orange-50 via-orange-50/60 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-rose-950/20 ring-1 ring-orange-200/70 dark:ring-orange-900/40 shadow-sm">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-orange-200/40 dark:bg-orange-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-rose-200/40 dark:bg-rose-500/10 blur-3xl" />
+
+      <div className="relative p-5 sm:p-6">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="inline-flex size-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-orange-500/20">
+            <Clock className="size-4 text-orange-600 dark:text-orange-400" strokeWidth={2.2} />
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-orange-700 dark:text-orange-300">
+            {t.deadlineLabel}
+          </span>
+        </div>
+
+        {/* Titre du challenge */}
+        {challengeTitle && (
+          <h3 className="text-2xl font-bold tracking-tight leading-tight text-foreground truncate">
+            {challengeTitle}
+          </h3>
+        )}
+
+        {/* Countdown */}
+        <div className="mt-5 grid grid-cols-4 gap-2 sm:gap-3">
+          {[
+            { v: timeLeft?.days, l: t.days },
+            { v: timeLeft?.hours, l: t.hours },
+            { v: timeLeft?.min, l: t.min },
+            { v: timeLeft?.sec, l: t.sec },
+          ].map(unit => (
+            <div
+              key={unit.l}
+              className="rounded-2xl bg-white/70 dark:bg-white/5 ring-1 ring-orange-200/70 dark:ring-white/10 px-2 py-3 text-center"
+            >
+              <p className="text-2xl sm:text-3xl font-bold tabular-nums leading-none text-orange-700 dark:text-orange-300">
+                {unit.v == null ? '--' : String(unit.v).padStart(2, '0')}
+              </p>
+              <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                {unit.l}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <Link href={submitHref} className="mt-5 block">
+          <Button className="group w-full bg-orange-600 text-white hover:bg-orange-700 font-semibold shadow-sm">
+            {isUp ? t.timeUp : t.submitCta}
+            <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+          </Button>
+        </Link>
       </div>
-
-      <h3 className="font-bold text-lg mb-1">{t.dontLose}</h3>
-      <p className="text-white/80 text-sm mb-4">
-        {tx(t.stayActive, { league: leagueStyle.name, next: nextLeague?.name || 'Silver' })}
-      </p>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {[
-          { v: timeLeft.days, l: t.days },
-          { v: timeLeft.hours, l: t.hours },
-          { v: timeLeft.min, l: t.min },
-          { v: timeLeft.sec, l: t.sec },
-        ].map(unit => (
-          <div
-            key={unit.l}
-            className="bg-white/20 rounded-lg px-2.5 sm:px-3 py-2 text-center min-w-[48px] sm:min-w-[52px] flex-1 max-w-[80px]"
-          >
-            <p className="text-lg sm:text-xl font-bold">{String(unit.v).padStart(2, '0')}</p>
-            <p className="text-[10px] sm:text-xs text-white/60">{unit.l}</p>
-          </div>
-        ))}
-      </div>
-
-      <Link href="/dashboard/challenges">
-        <Button className="bg-white text-orange-600 hover:bg-white/90 w-full font-semibold">
-          {t.completeChallenge}
-        </Button>
-      </Link>
     </div>
   )
 }
