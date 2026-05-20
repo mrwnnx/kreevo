@@ -74,9 +74,9 @@ export function ReviewModal({ open, onOpenChange, onSubmit, t = FALLBACK_T }: Re
               maxLength={500}
               placeholder={t.placeholder}
               className={cn(
-                'w-full resize-none rounded-xl border border-border bg-transparent p-3 text-sm',
+                'w-full resize-none rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 p-3 text-base md:text-sm',
                 'placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors',
+                'outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors',
               )}
               autoFocus
             />

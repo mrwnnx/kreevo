@@ -78,7 +78,7 @@ export default function AdminEmails() {
                 value={specificUser}
                 onChange={e => setSpecificUser(e.target.value)}
                 placeholder="Email ou username du user…"
-                className="w-full pl-9 pr-4 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-10 pl-9 pr-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
               />
             </div>
           )}
@@ -91,7 +91,7 @@ export default function AdminEmails() {
             value={subject}
             onChange={e => { setSubject(e.target.value); setConfirmed(false) }}
             placeholder="Objet de l'email"
-            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
           />
         </div>
 
@@ -103,7 +103,7 @@ export default function AdminEmails() {
             onChange={e => { setContent(e.target.value); setConfirmed(false) }}
             placeholder="Corps de l'email…"
             rows={8}
-            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+            className="w-full rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none transition-colors"
           />
         </div>
 

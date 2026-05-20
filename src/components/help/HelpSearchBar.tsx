@@ -35,35 +35,22 @@ export function HelpSearchBar({
       onSubmit={onSubmit}
       role="search"
       className={cn(
-        'relative flex items-center w-full bg-white border border-border rounded-full transition-shadow focus-within:shadow-md focus-within:border-primary/40',
-        isLg ? 'h-14 pl-5 pr-1.5' : 'h-11 pl-4 pr-1',
+        'relative flex items-center w-full h-10 pl-3 pr-1 bg-transparent dark:bg-input/30 border border-input rounded-[var(--radius-input)] transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50',
         className,
       )}
     >
-      <Search
-        className={cn(
-          'shrink-0 text-muted-foreground',
-          isLg ? 'size-5 mr-3' : 'size-4 mr-2',
-        )}
-        aria-hidden
-      />
+      <Search className="shrink-0 size-4 mr-2 text-muted-foreground" aria-hidden />
       <input
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className={cn(
-          'flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
-          isLg ? 'text-base' : 'text-sm',
-        )}
+        className="flex-1 min-w-0 bg-transparent outline-none text-base md:text-sm placeholder:text-muted-foreground"
       />
       <button
         type="submit"
-        className={cn(
-          'shrink-0 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold transition-opacity hover:opacity-85',
-          isLg ? 'h-11 px-5 text-sm' : 'h-9 px-4 text-xs',
-        )}
+        className="shrink-0 inline-flex items-center justify-center h-8 px-4 rounded-[calc(var(--radius-input)-2px)] bg-primary text-primary-foreground text-sm font-semibold transition-opacity hover:opacity-85"
       >
         {isLg ? 'Rechercher' : 'Go'}
       </button>

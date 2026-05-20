@@ -30,6 +30,22 @@ const ICONS = {
   improving_skills: '📈',
 }
 
+const JOB_TITLES = [
+  'Product Designer',
+  'UX Designer',
+  'UI Designer',
+  'UX/UI Designer',
+  'UX Researcher',
+  'Graphic Designer',
+  'Brand Designer',
+  'Visual Designer',
+  'Motion Designer',
+  'Design Lead',
+  'Art Director',
+  'Design Student',
+  'Freelance Designer',
+] as const
+
 const isValidUrl = (v: string) => v.length === 0 || v.trim().toLowerCase().startsWith('https://')
 
 function detectSpecialty(raw: string | null | undefined): Specialty {
@@ -46,7 +62,7 @@ function detectExperience(raw: string | null | undefined): ExperienceLevel {
 }
 
 const inputClass =
-  'h-8 w-full min-w-0 rounded-[var(--radius-input)] border border-input bg-transparent px-2.5 py-1 text-base md:text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
+  'h-10 w-full min-w-0 rounded-[var(--radius-input)] border border-input bg-transparent px-3 py-1 text-base md:text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -82,6 +98,12 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
   const specialtyLocked = Boolean(detectSpecialty(profile.specialty))
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
+  const [jobTitle, setJobTitle] = useState(profile.job_title ?? '')
+  const [jobTitleOpen, setJobTitleOpen] = useState(false)
+  const [jobTitleCustom, setJobTitleCustom] = useState(
+    Boolean(profile.job_title) && !(JOB_TITLES as readonly string[]).includes(profile.job_title as string),
+  )
+  const jobTitleWrapRef = useRef<HTMLDivElement>(null)
   const [tools, setTools] = useState<string[]>((profile.tools as string[]) ?? [])
   const [objectives, setObjectives] = useState<Objective[]>(
     Array.isArray(profile.objectives)
@@ -112,6 +134,16 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
       if (toolsWrapRef.current && !toolsWrapRef.current.contains(e.target as Node)) {
         setToolsOpen(false)
         setToolsQuery('')
+      }
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [])
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (jobTitleWrapRef.current && !jobTitleWrapRef.current.contains(e.target as Node)) {
+        setJobTitleOpen(false)
       }
     }
     document.addEventListener('mousedown', onClick)
@@ -275,6 +307,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             last_name: lastName.trim() || null,
             specialty: specialty || null,
             experience_level: experienceLevel || null,
+            job_title: jobTitle.trim() || null,
             tools,
             objectives,
             links: cleanedLinks,
@@ -311,6 +344,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
     bio,
     specialty,
     experienceLevel,
+    jobTitle,
     tools,
     objectives,
     cleanedLinks,
@@ -545,6 +579,72 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               )
             })}
           </div>
+        </div>
+
+        <div className="pt-2">
+          <Label className="text-sm font-semibold mb-3 block">{t.sections.jobTitle}</Label>
+          {jobTitleCustom ? (
+            <div className="space-y-2">
+              <Input
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                maxLength={60}
+                placeholder={t.jobTitle.customPlaceholder}
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => { setJobTitleCustom(false); setJobTitle('') }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t.jobTitle.backToList}
+              </button>
+            </div>
+          ) : (
+            <div ref={jobTitleWrapRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setJobTitleOpen((v) => !v)}
+                className={cn(inputClass, 'flex items-center justify-between text-left')}
+              >
+                <span className={jobTitle ? 'text-foreground' : 'text-muted-foreground'}>
+                  {jobTitle || t.jobTitle.placeholder}
+                </span>
+                <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', jobTitleOpen && 'rotate-180')} />
+              </button>
+
+              {jobTitleOpen && (
+                <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+                  <div className="max-h-64 overflow-auto p-1">
+                    {JOB_TITLES.map((title) => {
+                      const active = jobTitle === title
+                      return (
+                        <button
+                          key={title}
+                          type="button"
+                          onClick={() => { setJobTitle(title); setJobTitleOpen(false) }}
+                          className={cn(
+                            'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                            active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
+                          )}
+                        >
+                          <span>{title}</span>
+                          {active && <Check className="size-4 text-primary" />}
+                        </button>
+                      )
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => { setJobTitleCustom(true); setJobTitle(''); setJobTitleOpen(false) }}
+                      className="w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] text-muted-foreground hover:bg-accent/40 hover:text-foreground transition-colors"
+                    >
+                      {t.jobTitle.other}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

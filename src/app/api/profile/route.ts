@@ -22,6 +22,7 @@ export async function PATCH(request: Request) {
     'first_name',
     'last_name',
     'experience_level',
+    'job_title',
     'behance_url',
     'linkedin_url',
     'onboarding_completed',

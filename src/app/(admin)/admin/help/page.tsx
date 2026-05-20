@@ -82,13 +82,13 @@ export default function AdminHelpPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher par titre ou slug…"
-            className="w-full bg-background border border-border rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full h-10 pl-9 pr-3 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
           />
         </div>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="bg-background border border-border rounded-lg px-3 py-2 text-sm"
+          className="h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
         >
           <option value="all">Toutes catégories</option>
           {HELP_CATEGORIES.map((c) => (

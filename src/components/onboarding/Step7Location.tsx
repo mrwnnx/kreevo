@@ -56,8 +56,8 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
       <div ref={wrapRef} className="relative">
         <div
           onClick={() => setOpen(true)}
-          className={`relative flex items-center h-12 rounded-[var(--radius-input)] border bg-background cursor-text transition-colors ${
-            open ? 'border-ring ring-3 ring-ring/30' : 'border-input hover:border-border-hover'
+          className={`relative flex items-center h-10 rounded-[var(--radius-input)] border bg-transparent dark:bg-input/30 cursor-text transition-colors ${
+            open ? 'border-ring ring-3 ring-ring/50' : 'border-input hover:border-border-hover'
           }`}
         >
           <Search className="absolute left-3 size-4 text-muted-foreground" />
@@ -68,13 +68,13 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full h-full bg-transparent pl-10 pr-4 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              className="w-full h-full bg-transparent pl-10 pr-4 text-base md:text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           ) : (
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="w-full h-full text-left pl-10 pr-4 text-sm"
+              className="w-full h-full text-left pl-10 pr-4 text-base md:text-sm"
             >
               {value ? (
                 <span className="text-foreground inline-flex items-center gap-2">

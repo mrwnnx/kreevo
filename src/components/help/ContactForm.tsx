@@ -56,7 +56,7 @@ export function ContactForm({ lang }: Props) {
   const [errorMsg, setErrorMsg] = useState('')
 
   const labelCls = 'block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5'
-  const inputCls = 'w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-shadow'
+  const inputCls = 'w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors'
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -188,7 +188,7 @@ export function ContactForm({ lang }: Props) {
           minLength={10}
           maxLength={5000}
           rows={6}
-          className={cn(inputCls, 'resize-y min-h-[140px]')}
+          className={cn(inputCls, 'h-auto py-2 resize-y min-h-[140px]')}
         />
         <p className="text-xs text-muted-foreground mt-1">{t.minMsg}</p>
       </div>

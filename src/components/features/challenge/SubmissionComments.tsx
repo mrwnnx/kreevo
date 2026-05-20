@@ -92,12 +92,12 @@ export function SubmissionComments({ submissionId, initialComments, currentUserI
             onChange={e => setText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
             placeholder="Ajouter un commentaire…"
-            className="flex-1 text-sm bg-background border border-border rounded-full px-4 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="flex-1 h-10 text-base md:text-sm bg-transparent dark:bg-input/30 border border-input rounded-[var(--radius-input)] px-3 py-1 placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
           />
           <button
             onClick={handleSubmit}
             disabled={submitting || !text.trim()}
-            className="flex items-center justify-center size-9 rounded-full bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-85 transition-opacity shrink-0"
+            className="flex items-center justify-center size-10 rounded-[var(--radius-input)] bg-primary text-primary-foreground disabled:opacity-40 hover:opacity-85 transition-opacity shrink-0"
           >
             <Send className="size-3.5" />
           </button>

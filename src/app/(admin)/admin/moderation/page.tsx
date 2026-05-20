@@ -263,7 +263,7 @@ function HumanReviewCard({
         onChange={(e) => setFeedback(e.target.value)}
         placeholder="Feedback (obligatoire si rejet)…"
         rows={2}
-        className="w-full text-sm rounded-lg border border-border bg-transparent p-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="w-full rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 p-2 text-base md:text-sm placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
       />
 
       <div className="flex items-center gap-2">

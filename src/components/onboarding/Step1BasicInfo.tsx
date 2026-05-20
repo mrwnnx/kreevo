@@ -49,10 +49,10 @@ export function Step1BasicInfo({ firstName, lastName, onNext, saving, t, tc }: S
   }
 
   const inputCls = (err: string | null) =>
-    `w-full h-12 px-4 text-sm rounded-[var(--radius-input)] border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 transition-colors ${
+    `w-full h-10 px-3 text-base md:text-sm rounded-[var(--radius-input)] border bg-transparent dark:bg-input/30 text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-3 transition-colors ${
       err
-        ? 'border-destructive focus:ring-destructive/20'
-        : 'border-input focus:ring-ring/30 focus:border-ring'
+        ? 'border-destructive focus-visible:ring-destructive/20'
+        : 'border-input focus-visible:ring-ring/50 focus-visible:border-ring'
     }`
 
   return (

@@ -669,6 +669,7 @@ export const fr = {
       basicInfo: 'Informations',
       specialty: 'Spécialité',
       experienceLevel: 'Niveau d\'expérience',
+      jobTitle: 'Intitulé de poste',
       tools: 'Outils',
       goals: 'Objectifs',
       socialLinks: 'Portfolio & réseaux',
@@ -700,6 +701,12 @@ export const fr = {
       entry: 'Entry Level',
       junior: 'Junior',
       senior: 'Senior',
+    },
+    jobTitle: {
+      placeholder: 'Choisis ton intitulé…',
+      other: 'Autre…',
+      customPlaceholder: 'Saisis ton intitulé',
+      backToList: 'Choisir dans la liste',
     },
     tools: {
       pickSpecialtyFirst: 'Choisis d\'abord une spécialité',

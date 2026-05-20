@@ -147,10 +147,10 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving, 
                     value={values[key] ?? ''}
                     onChange={(e) => updateUrl(key, e.target.value)}
                     placeholder={def.placeholder}
-                    className={`flex-1 h-12 px-3 text-sm rounded-[var(--radius-input)] border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 transition-colors ${
+                    className={`flex-1 h-10 px-3 text-base md:text-sm rounded-[var(--radius-input)] border bg-transparent dark:bg-input/30 text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-3 transition-colors ${
                       err
-                        ? 'border-destructive focus:ring-destructive/20'
-                        : 'border-input focus:ring-ring/30 focus:border-ring'
+                        ? 'border-destructive focus-visible:ring-destructive/20'
+                        : 'border-input focus-visible:ring-ring/50 focus-visible:border-ring'
                     }`}
                   />
                   <button
@@ -221,14 +221,14 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving, 
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t.customNamePlaceholder}
-                className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
+                className="h-10 px-3 text-base md:text-sm rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-ring transition-colors"
               />
               <input
                 type="url"
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
                 placeholder={t.customUrlPlaceholder}
-                className="h-10 px-3 text-sm rounded-[var(--radius-input)] border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring"
+                className="h-10 px-3 text-base md:text-sm rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:border-ring transition-colors"
               />
             </div>
             {customError && <p className="text-xs text-destructive">{customError}</p>}

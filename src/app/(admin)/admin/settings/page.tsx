@@ -88,7 +88,7 @@ export default function AdminSettings() {
                 type="number"
                 value={val}
                 onChange={e => set('xp_rewards')({ ...settings.xp_rewards, [key]: parseInt(e.target.value) })}
-                className="w-full text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
               />
             </div>
           ))}
@@ -109,7 +109,7 @@ export default function AdminSettings() {
                 type="number"
                 value={xp}
                 onChange={e => set('league_thresholds')({ ...settings.league_thresholds, [league]: parseInt(e.target.value) })}
-                className="w-full text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
               />
             </div>
           ))}
@@ -129,7 +129,7 @@ export default function AdminSettings() {
               <input
                 type="number" value={settings.submission_attempts[plan]}
                 onChange={e => set('submission_attempts')({ ...settings.submission_attempts, [plan]: parseInt(e.target.value) })}
-                className="w-full text-sm bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
               />
             </div>
           ))}

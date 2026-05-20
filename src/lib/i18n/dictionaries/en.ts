@@ -672,6 +672,7 @@ export const en: Dictionary = {
       basicInfo: 'Basic info',
       specialty: 'Specialty',
       experienceLevel: 'Experience level',
+      jobTitle: 'Job title',
       tools: 'Tools',
       goals: 'Goals',
       socialLinks: 'Portfolio & social links',
@@ -703,6 +704,12 @@ export const en: Dictionary = {
       entry: 'Entry Level',
       junior: 'Junior',
       senior: 'Senior',
+    },
+    jobTitle: {
+      placeholder: 'Pick your title…',
+      other: 'Other…',
+      customPlaceholder: 'Enter your title',
+      backToList: 'Choose from the list',
     },
     tools: {
       pickSpecialtyFirst: 'Pick a specialty first',

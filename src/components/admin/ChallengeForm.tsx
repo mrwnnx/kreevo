@@ -85,7 +85,7 @@ const EMPTY: FormData = {
 
 interface League { id: string; name: string; icon: string; order_index: number }
 
-const inputClass = 'w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring'
+const inputClass = 'w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors'
 const labelClass = 'text-xs font-mono text-muted-foreground uppercase tracking-widest'
 
 // ── Step indicator ─────────────────────────────────────────────────────────────
@@ -362,23 +362,23 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
         <div className="md:col-span-2 space-y-1.5">
           <label className={labelClass}>Brief principal</label>
-          <textarea value={form.brief} onChange={e => set('brief')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+          <textarea value={form.brief} onChange={e => set('brief')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
         </div>
         <div className="space-y-1.5">
           <label className={labelClass}>Contexte</label>
-          <textarea value={form.context} onChange={e => set('context')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+          <textarea value={form.context} onChange={e => set('context')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
         </div>
         <div className="space-y-1.5">
           <label className={labelClass}>Livrable</label>
-          <textarea value={form.deliverable} onChange={e => set('deliverable')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+          <textarea value={form.deliverable} onChange={e => set('deliverable')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
         </div>
         <div className="space-y-1.5">
           <label className={labelClass}>Contraintes</label>
-          <textarea value={form.constraints} onChange={e => set('constraints')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+          <textarea value={form.constraints} onChange={e => set('constraints')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
         </div>
         <div className="space-y-1.5">
           <label className={labelClass}>Critères d'évaluation</label>
-          <textarea value={form.criteria} onChange={e => set('criteria')(e.target.value)} rows={3} className={cn(inputClass, 'resize-none')} />
+          <textarea value={form.criteria} onChange={e => set('criteria')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
         </div>
       </div>
 

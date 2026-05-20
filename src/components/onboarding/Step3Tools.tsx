@@ -65,8 +65,8 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: 
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className={`w-full flex items-center justify-between h-12 px-4 rounded-[var(--radius-input)] border bg-background text-sm transition-colors ${
-              open ? 'border-ring ring-3 ring-ring/30' : 'border-input hover:border-border-hover'
+            className={`w-full flex items-center justify-between h-10 px-3 rounded-[var(--radius-input)] border bg-transparent dark:bg-input/30 text-base md:text-sm transition-colors ${
+              open ? 'border-ring ring-3 ring-ring/50' : 'border-input hover:border-border-hover'
             }`}
           >
             <span className={selTools.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>

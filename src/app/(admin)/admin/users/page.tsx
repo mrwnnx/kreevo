@@ -118,7 +118,7 @@ export default function AdminUsers() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Rechercher par nom, username…"
-          className="w-full pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring" />
+          className="w-full h-10 pl-9 pr-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors" />
       </div>
 
       {/* Table */}
@@ -239,7 +239,7 @@ export default function AdminUsers() {
         <Modal title="Ajouter XP" onClose={() => setXpModal(null)}>
           <input type="number" value={xpAmount} onChange={e => setXpAmount(e.target.value)}
             placeholder="Montant XP à ajouter"
-            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring" />
+            className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors" />
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setXpModal(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
             <button onClick={() => { action(xpModal, { xp_add: parseInt(xpAmount) }); setXpModal(null) }}
@@ -254,7 +254,7 @@ export default function AdminUsers() {
       {leagueModal && (
         <Modal title="Changer ligue" onClose={() => setLeagueModal(null)}>
           <select value={leagueVal} onChange={e => setLeagueVal(e.target.value)}
-            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring">
+            className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors">
             {leagues.map(l => <option key={l.id} value={l.name}>{getLeagueLabel(l.name)}</option>)}
           </select>
           <div className="flex justify-end gap-2 mt-4">
@@ -271,7 +271,7 @@ export default function AdminUsers() {
       {specialtyModal && (
         <Modal title="Changer spécialité" onClose={() => setSpecialtyModal(null)}>
           <select value={specialtyVal} onChange={e => setSpecialtyVal(e.target.value as 'ux_ui' | 'graphic')}
-            className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring">
+            className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors">
             <option value="ux_ui">UX / UI Designer</option>
             <option value="graphic">Graphic Designer</option>
           </select>

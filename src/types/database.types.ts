@@ -26,6 +26,7 @@ export type Database = {
           first_name: string | null
           last_name: string | null
           experience_level: string | null
+          job_title: string | null
           behance_url: string | null
           linkedin_url: string | null
           onboarding_completed: boolean

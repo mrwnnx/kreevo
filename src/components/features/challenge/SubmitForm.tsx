@@ -87,7 +87,7 @@ export function SubmitForm({ challengeId, existing, isClosed, participationId, a
           rows={4}
           defaultValue={(existing as any)?.description ?? ''}
           placeholder="Explique tes choix de design, ton process, les outils utilisés…"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          className="w-full rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none transition-colors"
         />
       </div>
 

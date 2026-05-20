@@ -49,7 +49,7 @@ function FeedbackCard({ fb, onSave, onPublish }: {
         onChange={e => set(key)(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full text-sm bg-background border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+        className="w-full rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none transition-colors"
       />
     </div>
   )

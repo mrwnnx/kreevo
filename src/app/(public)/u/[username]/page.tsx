@@ -253,6 +253,9 @@ export default async function ProfilePage({
                 @{p.username}
                 <ProBadge plan={p.plan} />
               </p>
+              {p.job_title && (
+                <p className="text-sm font-medium text-foreground mt-1">{p.job_title}</p>
+              )}
             </div>
 
             {/* Specialty + location */}
