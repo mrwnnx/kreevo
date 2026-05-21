@@ -131,3 +131,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ deadlineMissed, warned, penalized, demoted, windowFailed })
 }
+
+// Vercel Cron triggers a GET request — alias it to the same handler.
+export const GET = POST
