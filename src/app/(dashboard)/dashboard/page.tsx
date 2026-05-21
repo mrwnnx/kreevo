@@ -266,6 +266,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
 
+      <StatCards
+        profile={profile}
+        streak={streak}
+        completedTotal={totalCompleted}
+        completedThisWeek={completedThisWeek}
+        xpToday={xpToday}
+        leagueIndex={leagueIndex}
+        userLeague={userLeague}
+        t={dict.dashboard.statCards}
+      />
+
       <div className="grid lg:grid-cols-2 gap-4">
         <LeagueSection
           profile={profile}
@@ -282,23 +293,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           t={dict.dashboard.leagueSection}
         />
 
-        <StatCards
-          profile={profile}
-          streak={streak}
-          completedTotal={totalCompleted}
-          completedThisWeek={completedThisWeek}
-          xpToday={xpToday}
-          leagueIndex={leagueIndex}
-          userLeague={userLeague}
-          t={dict.dashboard.statCards}
+        <LeagueCountdownCard
+          participation={participation}
+          suggestedChallenge={suggestedChallenge}
+          t={dict.dashboard.countdownCard}
         />
       </div>
-
-      <LeagueCountdownCard
-        participation={participation}
-        suggestedChallenge={suggestedChallenge}
-        t={dict.dashboard.countdownCard}
-      />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <WhatToDoNow
