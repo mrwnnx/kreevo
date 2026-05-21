@@ -21,7 +21,6 @@ export type NotificationType =
   | 'submission_human_review_requested'
   | 'submission_human_review_approved'
   | 'submission_human_review_rejected'
-  | 'ai_mentor_comment'
 
 export async function notify(
   userId: string,

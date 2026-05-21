@@ -571,12 +571,6 @@ export const en: Dictionary = {
         days: '{n}d ago',
       },
     },
-    aiMentor: {
-      badge: 'AI Mentor',
-      sectionTitle: 'Your mentors',
-      highlight: 'Highlight',
-      focus: 'Focus',
-    },
   },
   submitForm: {
     cancel: 'Cancel',

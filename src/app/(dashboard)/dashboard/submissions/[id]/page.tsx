@@ -55,18 +55,6 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   }
   const viewsCount = (submission.views_count ?? 0) + (isOwn ? 0 : 1)
 
-  // Private AI mentor comments — only the owner sees them (RLS also enforces this)
-  let aiMentorComments: any[] = []
-  if (isOwn) {
-    const { data: mc } = await (supabase as any)
-      .from('ai_mentor_comments')
-      .select('*, mentor:mentor_id(id, name, title, avatar_url, bio_short)')
-      .eq('submission_id', submission.id)
-      .eq('is_visible', true)
-      .order('created_at', { ascending: true })
-    aiMentorComments = mc ?? []
-  }
-
   const dict = await getDict()
   const lang = await getLang()
   const t = dict.submissionDetail
@@ -97,7 +85,6 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
         currentProfilePlan={currentProfile?.plan ?? null}
         initialUserLiked={userLiked}
         isOwn={isOwn}
-        aiMentorComments={aiMentorComments}
         t={t}
         dateLocale={dateLocale}
         sidebar={

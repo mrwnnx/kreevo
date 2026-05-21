@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Heart, MessageSquare, MessageCircle, ExternalLink, Sparkles } from 'lucide-react'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentsPanel } from './CommentsPanel'
-import type { AiMentorComment as AiMentorCommentType } from '@/lib/ai-mentors/types'
 import { ProUpsellModal } from './ProUpsellModal'
 import { type ReviewComment } from './CommentCard'
 import { useRouter } from 'next/navigation'
@@ -45,7 +44,6 @@ interface Props {
   currentProfilePlan: string | null | undefined
   initialUserLiked: boolean
   isOwn: boolean
-  aiMentorComments?: AiMentorCommentType[]
   t: DetailT
   dateLocale: string
   /** Right column (e.g. ProfilePanel) — rendered alongside the secondary content below the cover. */
@@ -59,7 +57,6 @@ export function SubmissionDetailContent({
   currentProfilePlan,
   initialUserLiked,
   isOwn,
-  aiMentorComments = [],
   t,
   dateLocale,
   sidebar,
@@ -419,7 +416,6 @@ export function SubmissionDetailContent({
             created_at: submission.created_at ?? null,
           }}
           comments={comments}
-          aiMentorComments={aiMentorComments}
           isLoadingComments={isLoadingComments}
           commentsCount={commentsCount}
           currentUserId={currentUserId}
