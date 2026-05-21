@@ -216,7 +216,7 @@ export function LeagueCountdownCard({
           ].map(unit => (
             <div
               key={unit.l}
-              className="rounded-xl bg-muted/50 ring-1 ring-border px-2 py-2 text-center"
+              className="w-16 shrink-0 rounded-xl bg-muted/50 ring-1 ring-border px-2 py-2 text-center"
             >
               <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-foreground">
                 {unit.v == null ? '--' : String(unit.v).padStart(2, '0')}
