@@ -349,6 +349,14 @@ export async function approveSubmission(
     xp: xpReward,
   })
 
+  // Fire-and-forget: schedule AI mentor comments (Pro/Studio only). Never block approval.
+  try {
+    const { scheduleMentorAssignments } = await import('@/lib/ai-mentors/schedule')
+    await scheduleMentorAssignments(submissionId)
+  } catch (e) {
+    console.error('scheduleMentorAssignments failed', e)
+  }
+
   return { xpAwarded: wasAttributed ? 0 : xpReward, bonusApplied, bonusXp }
 }
 
