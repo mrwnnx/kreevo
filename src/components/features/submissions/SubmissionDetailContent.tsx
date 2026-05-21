@@ -389,7 +389,7 @@ export function SubmissionDetailContent({
         <div className="flex-1 min-w-0 space-y-4">
           {/* Description */}
           {(submission.description || figmaUrl || projectLink) && (
-            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+            <div className="space-y-3">
               <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
                 {t.descriptionLabel}
               </p>
@@ -442,7 +442,7 @@ export function SubmissionDetailContent({
             />
           </div>
           {photo.caption && (
-            <p className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">{photo.caption}</p>
+            <p className="px-4 py-3 text-base text-foreground leading-relaxed">{photo.caption}</p>
           )}
         </div>
       ))}

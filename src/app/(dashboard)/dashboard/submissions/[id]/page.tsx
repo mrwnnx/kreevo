@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { ProfilePanel } from '@/components/features/challenge/ProfilePanel'
 import { SubmissionDetailContent } from '@/components/features/submissions/SubmissionDetailContent'
 import { getDict, getLang } from '@/lib/i18n/lang'
 
@@ -87,22 +86,6 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
         isOwn={isOwn}
         t={t}
         dateLocale={dateLocale}
-        sidebar={
-          <ProfilePanel
-            author={author}
-            isOwn={isOwn}
-            challenge={challenge}
-            projectLink={projectLink}
-            viewsCount={viewsCount}
-            t={{
-              you: t.you,
-              challengeLabel: t.challengeLabel,
-              seeChallenge: t.seeChallenge,
-              linksLabel: t.linksLabel,
-              seeProject: t.seeProject,
-            }}
-          />
-        }
       />
     </div>
   )
