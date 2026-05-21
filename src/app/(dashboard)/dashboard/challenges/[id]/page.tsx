@@ -137,7 +137,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {c.brief && (
             <section className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 p-6 space-y-2">
               <h2 className="text-xl font-semibold">{t.sections.brief}</h2>
-              <p className="text-base text-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
             </section>
           )}
 
@@ -276,7 +276,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <h1 className="text-3xl font-bold leading-tight">{c.title}</h1>
 
             {c.brief && (
-              <p className="text-base text-foreground leading-relaxed">{c.brief}</p>
+              <p className="text-base text-muted-foreground leading-relaxed">{c.brief}</p>
             )}
           </div>
 
@@ -284,7 +284,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {c.context && (
             <section className="space-y-3">
               <h2 className="text-xl font-semibold">{t.sections.scenario}</h2>
-              <p className="text-base text-foreground leading-relaxed whitespace-pre-line">{c.context}</p>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.context}</p>
             </section>
           )}
 
@@ -295,7 +295,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 <Package className="size-4 text-muted-foreground" />
                 {t.sections.deliverable}
               </h2>
-              <p className="text-base text-foreground leading-relaxed whitespace-pre-line">{c.deliverable}</p>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.deliverable}</p>
             </section>
           )}
 
@@ -306,7 +306,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                 <AlertCircle className="size-4 text-muted-foreground" />
                 {t.sections.constraints}
               </h2>
-              <p className="text-base text-foreground leading-relaxed whitespace-pre-line">{c.constraints}</p>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.constraints}</p>
             </section>
           )}
 
