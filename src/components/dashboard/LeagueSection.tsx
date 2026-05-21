@@ -7,7 +7,6 @@ import {
   AvatarImage,
   AvatarFallback,
   AvatarGroup,
-  AvatarGroupCount,
 } from '@/components/ui/avatar'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -167,7 +166,7 @@ export function LeagueCountdownCard({
       : '/dashboard/challenges'
     return (
       <div className="relative overflow-hidden rounded-[28px] bg-card border border-border shadow-sm h-full">
-        <div className="relative p-5 sm:p-6 flex flex-col gap-4 h-full">
+        <div className="relative p-4 flex flex-col gap-4 h-full">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
               <Sparkles className="size-3.5" /> {t.noChallengeLabel}
@@ -200,7 +199,7 @@ export function LeagueCountdownCard({
 
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-card border border-border shadow-sm h-full flex flex-col">
-      <div className="relative p-5 sm:p-6 flex flex-col flex-1">
+      <div className="relative p-4 flex flex-col flex-1">
         {/* Header */}
         <p className="text-xs font-bold uppercase tracking-widest mb-3 text-muted-foreground">
           {t.deadlineLabel}
@@ -252,15 +251,21 @@ export function LeagueCountdownCard({
             </Button>
           </Link>
           {participantAvatars.length > 0 && (
-            <AvatarGroup data-size="sm" aria-label={t.participants} className="ml-auto">
-              {participantAvatars.slice(0, 4).map((p) => (
-                <Avatar key={p.id} size="sm">
-                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
-                  <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-                </Avatar>
-              ))}
-              {participantsCount > 4 && <AvatarGroupCount>+{participantsCount - 4}</AvatarGroupCount>}
-            </AvatarGroup>
+            <div className="ml-auto flex items-center gap-2">
+              <AvatarGroup aria-label={t.participants}>
+                {participantAvatars.slice(0, 4).map((p) => (
+                  <Avatar key={p.id} className="size-9">
+                    {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
+                    <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+              {participantsCount > 4 && (
+                <span className="text-sm font-medium text-muted-foreground">
+                  +{participantsCount - 4} {t.participants}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>
