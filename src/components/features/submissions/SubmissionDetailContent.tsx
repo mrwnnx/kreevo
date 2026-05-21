@@ -430,7 +430,7 @@ export function SubmissionDetailContent({
 
       {/* Additional photos — full-width stacked (56px gap between each), optional caption below */}
       {additionalImages.length > 0 && (
-        <div className="space-y-14">
+        <div className="space-y-14 mt-14!">
           {additionalImages.map((photo, i) => (
             <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
               <div className="relative aspect-video bg-muted">
