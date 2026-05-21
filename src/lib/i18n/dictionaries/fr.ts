@@ -642,7 +642,7 @@ export const fr = {
       title: 'Tes photos',
       subtitle: 'Ajoute jusqu\'à 7 photos. Chaque photo peut avoir une légende affichée en dessous.',
       addPhotoLabel: 'Ajouter une photo',
-      captionPlaceholder: 'Légende de cette photo (optionnel)',
+      captionPlaceholder: 'Décris ton travail sur cette photo (optionnel)',
       removeAlt: 'Retirer',
       countLabel: '{n}/7',
     },

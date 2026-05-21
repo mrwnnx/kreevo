@@ -645,7 +645,7 @@ export const en: Dictionary = {
       title: 'Your photos',
       subtitle: 'Add up to 7 photos. Each photo can have a caption shown below it.',
       addPhotoLabel: 'Add a photo',
-      captionPlaceholder: 'Caption for this photo (optional)',
+      captionPlaceholder: 'Describe your work on this photo (optional)',
       removeAlt: 'Remove',
       countLabel: '{n}/7',
     },
