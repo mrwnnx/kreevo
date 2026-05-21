@@ -103,7 +103,7 @@ export const fr = {
       browseCta: 'Découvrir les défis',
     },
     whatToDoNow: {
-      title: '🎯 Que faire maintenant',
+      title: 'Que faire maintenant',
       subtitle: 'Actions classées par XP à gagner',
       complete: 'Compléter « {title} »',
       completeAny: 'Compléter un défi',

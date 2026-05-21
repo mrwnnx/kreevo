@@ -105,7 +105,7 @@ export const en: Dictionary = {
       browseCta: 'Browse challenges',
     },
     whatToDoNow: {
-      title: '🎯 What to do now',
+      title: 'What to do now',
       subtitle: 'Actions ranked by XP to gain',
       complete: 'Complete "{title}"',
       completeAny: 'Complete a challenge',

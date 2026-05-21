@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
@@ -36,8 +35,7 @@ export function ContextualLeaderboard({
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <div>
-          <h3 className="font-bold text-xl flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-violet-500" />
+          <h3 className="font-bold text-xl">
             {tx(t.yourRank, { league })}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
