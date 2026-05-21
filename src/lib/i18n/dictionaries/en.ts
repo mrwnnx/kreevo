@@ -94,7 +94,7 @@ export const en: Dictionary = {
       min: 'MIN',
       sec: 'SEC',
       completeChallenge: '⚡ Complete a Challenge',
-      deadlineLabel: '⏳ Submission deadline',
+      deadlineLabel: 'Submission deadline',
       xpReward: 'XP to earn',
       participants: 'participants',
       submitCta: 'Submit my work',

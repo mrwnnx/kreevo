@@ -92,7 +92,7 @@ export const fr = {
       min: 'MIN',
       sec: 'SEC',
       completeChallenge: '⚡ Compléter un défi',
-      deadlineLabel: '⏳ Deadline de soumission',
+      deadlineLabel: 'Deadline de soumission',
       xpReward: 'XP à gagner',
       participants: 'participants',
       submitCta: 'Soumettre mon travail',

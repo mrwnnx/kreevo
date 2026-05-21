@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, ArrowRight, Clock, Sparkles, Zap } from 'lucide-react'
+import { TrendingUp, ArrowRight, Sparkles, Zap } from 'lucide-react'
 import {
   Avatar,
   AvatarImage,
@@ -202,14 +202,9 @@ export function LeagueCountdownCard({
     <div className="relative overflow-hidden rounded-[28px] bg-card border border-border shadow-sm h-full flex flex-col">
       <div className="relative p-5 sm:p-6 flex flex-col flex-1">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex size-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-orange-500/20">
-            <Clock className="size-4 text-orange-600 dark:text-orange-400" strokeWidth={2.2} />
-          </span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-orange-700 dark:text-orange-300">
-            {t.deadlineLabel}
-          </span>
-        </div>
+        <p className="text-xs font-bold uppercase tracking-widest mb-3 text-muted-foreground">
+          {t.deadlineLabel}
+        </p>
 
         {/* Titre du challenge */}
         {challengeTitle && (
