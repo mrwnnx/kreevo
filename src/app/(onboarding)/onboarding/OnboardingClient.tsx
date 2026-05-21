@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ProgressBar } from '@/components/onboarding/ProgressBar'
 import { Step1BasicInfo } from '@/components/onboarding/Step1BasicInfo'
-import { Step2Specialty } from '@/components/onboarding/Step2Specialty'
+import { Step2JobTitle } from '@/components/onboarding/Step2JobTitle'
+import { StepSpecialty } from '@/components/onboarding/StepSpecialty'
 import { Step3Tools } from '@/components/onboarding/Step3Tools'
 import { Step4Objectives } from '@/components/onboarding/Step4Objectives'
 import { Step5Social } from '@/components/onboarding/Step5Social'
@@ -27,6 +28,7 @@ type Direction = 'forward' | 'back'
 const initialData: OnboardingData = {
   firstName: '',
   lastName: '',
+  jobTitle: '',
   specialty: '',
   tools: [],
   experienceLevel: '',
@@ -69,6 +71,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
             ...prev,
             firstName: p.first_name ?? '',
             lastName: p.last_name ?? '',
+            jobTitle: p.job_title ?? '',
             specialty: (p.specialty as Specialty) ?? '',
             tools: p.tools ?? [],
             experienceLevel: (p.experience_level as ExperienceLevel) ?? '',
@@ -122,18 +125,26 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleStep2 = async (v: { specialty: Specialty; experienceLevel: ExperienceLevel }) => {
+  const handleStep2 = async (v: { jobTitle: string; experienceLevel: ExperienceLevel }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({
-        specialty: v.specialty,
+        job_title: v.jobTitle || null,
         experience_level: v.experienceLevel || null,
       })
       goNext()
     } catch {}
   }
 
-  const handleStep3 = async (v: { tools: string[] }) => {
+  const handleSpecialty = async (v: { specialty: Specialty }) => {
+    setData((d) => ({ ...d, ...v }))
+    try {
+      await persist({ specialty: v.specialty })
+      goNext()
+    } catch {}
+  }
+
+  const handleTools = async (v: { tools: string[] }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({ tools: v.tools })
@@ -141,7 +152,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleStep4 = async (v: { objectives: Objective[] }) => {
+  const handleObjectives = async (v: { objectives: Objective[] }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({ objectives: v.objectives })
@@ -149,7 +160,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleStep5 = async (v: { links: Record<string, string> }) => {
+  const handleSocial = async (v: { links: Record<string, string> }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({
@@ -161,7 +172,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleStep6 = async (v: { avatarUrl: string }) => {
+  const handlePhoto = async (v: { avatarUrl: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       if (v.avatarUrl) await persist({ avatar_url: v.avatarUrl })
@@ -169,7 +180,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleStep7 = async (v: { country: string }) => {
+  const handleLocation = async (v: { country: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
       await persist({
@@ -232,8 +243,8 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
             />
           )}
           {step === 2 && (
-            <Step2Specialty
-              specialty={data.specialty}
+            <Step2JobTitle
+              jobTitle={data.jobTitle}
               experienceLevel={data.experienceLevel}
               onNext={handleStep2}
               onBack={goBack}
@@ -243,31 +254,41 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
             />
           )}
           {step === 3 && (
+            <StepSpecialty
+              specialty={data.specialty}
+              onNext={handleSpecialty}
+              onBack={goBack}
+              saving={saving}
+              t={t.specialty}
+              tc={t.common}
+            />
+          )}
+          {step === 4 && (
             <Step3Tools
               specialty={data.specialty}
               tools={data.tools}
-              onNext={handleStep3}
+              onNext={handleTools}
               onBack={goBack}
               saving={saving}
               t={t.step3}
               tc={t.common}
             />
           )}
-          {step === 4 && (
+          {step === 5 && (
             <Step4Objectives
               objectives={data.objectives}
-              onNext={handleStep4}
+              onNext={handleObjectives}
               onBack={goBack}
               saving={saving}
               t={t.step4}
               tc={t.common}
             />
           )}
-          {step === 5 && (
+          {step === 6 && (
             <Step5Social
               specialty={data.specialty}
               links={data.links}
-              onNext={handleStep5}
+              onNext={handleSocial}
               onBack={goBack}
               onSkip={skipForward}
               saving={saving}
@@ -275,10 +296,10 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 6 && (
+          {step === 7 && (
             <Step6Photo
               avatarUrl={data.avatarUrl}
-              onNext={handleStep6}
+              onNext={handlePhoto}
               onBack={goBack}
               onSkip={skipForward}
               saving={saving}
@@ -286,10 +307,10 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 7 && (
+          {step === 8 && (
             <Step7Location
               country={data.country}
-              onNext={handleStep7}
+              onNext={handleLocation}
               onBack={goBack}
               saving={saving}
               t={t.step7}

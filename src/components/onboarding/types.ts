@@ -5,6 +5,7 @@ export type Objective = 'getting_hired' | 'improving_skills'
 export interface OnboardingData {
   firstName: string
   lastName: string
+  jobTitle: string
   specialty: Specialty
   tools: string[]
   experienceLevel: ExperienceLevel
@@ -14,7 +15,24 @@ export interface OnboardingData {
   country: string
 }
 
-export const TOTAL_STEPS = 7
+export const TOTAL_STEPS = 8
+
+// Predefined job titles shared by onboarding and the profile form.
+export const JOB_TITLES = [
+  'Product Designer',
+  'UX Designer',
+  'UI Designer',
+  'UX/UI Designer',
+  'UX Researcher',
+  'Graphic Designer',
+  'Brand Designer',
+  'Visual Designer',
+  'Motion Designer',
+  'Design Lead',
+  'Art Director',
+  'Design Student',
+  'Freelance Designer',
+] as const
 
 export const TOOLS_BY_SPECIALTY: Record<'ux_ui' | 'graphic', string[]> = {
   ux_ui: [
