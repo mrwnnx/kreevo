@@ -129,7 +129,7 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? tc.saving : t.completeCta}
+          {saving ? tc.saving : tc.continue}
         </Button>
       </div>
     </div>

@@ -826,13 +826,14 @@ export const fr = {
       levelSenior: 'Senior',
     },
     specialty: {
-      title: 'Choisis ta spécialité 🎯',
-      subtitle: 'Dans quelle ligue veux-tu participer ? Tu pourras en changer tant que tu es en Stone ou Bronze.',
+      title: 'Dans quelle ligue veux-tu participer ? 🎯',
+      subtitle: 'Choisis ta spécialité. Tu pourras en changer tant que tu es en Stone ou Bronze.',
       specialtyLabel: 'Ta spécialité',
       uxuiLabel: 'UX/UI Designer',
       uxuiDescription: 'Conçois des expériences et interfaces digitales',
       graphicLabel: 'Graphic Designer',
       graphicDescription: 'Crée des identités visuelles et des assets de marque',
+      completeCta: 'Compléter mon profil →',
     },
     step3: {
       title: 'Quels outils utilises-tu ? 🧰',

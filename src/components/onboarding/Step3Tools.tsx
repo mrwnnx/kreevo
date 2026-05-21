@@ -22,7 +22,10 @@ interface Step3Props {
 
 export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: Step3Props) {
   const available = useMemo(
-    () => (specialty ? TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic'] : []),
+    () =>
+      specialty
+        ? TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']
+        : Array.from(new Set([...TOOLS_BY_SPECIALTY.ux_ui, ...TOOLS_BY_SPECIALTY.graphic])),
     [specialty]
   )
   const [selTools, setSelTools] = useState<string[]>(() =>

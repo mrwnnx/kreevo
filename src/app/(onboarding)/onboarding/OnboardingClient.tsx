@@ -139,8 +139,8 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
   const handleSpecialty = async (v: { specialty: Specialty }) => {
     setData((d) => ({ ...d, ...v }))
     try {
-      await persist({ specialty: v.specialty })
-      goNext()
+      await persist({ specialty: v.specialty, onboarding_completed: true })
+      setDone(true)
     } catch {}
   }
 
@@ -183,11 +183,8 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
   const handleLocation = async (v: { country: string }) => {
     setData((d) => ({ ...d, ...v }))
     try {
-      await persist({
-        country: v.country || null,
-        onboarding_completed: true,
-      })
-      setDone(true)
+      await persist({ country: v.country || null })
+      goNext()
     } catch {}
   }
 
@@ -254,16 +251,6 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
             />
           )}
           {step === 3 && (
-            <StepSpecialty
-              specialty={data.specialty}
-              onNext={handleSpecialty}
-              onBack={goBack}
-              saving={saving}
-              t={t.specialty}
-              tc={t.common}
-            />
-          )}
-          {step === 4 && (
             <Step3Tools
               specialty={data.specialty}
               tools={data.tools}
@@ -274,7 +261,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 5 && (
+          {step === 4 && (
             <Step4Objectives
               objectives={data.objectives}
               onNext={handleObjectives}
@@ -284,7 +271,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 6 && (
+          {step === 5 && (
             <Step5Social
               specialty={data.specialty}
               links={data.links}
@@ -296,7 +283,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 7 && (
+          {step === 6 && (
             <Step6Photo
               avatarUrl={data.avatarUrl}
               onNext={handlePhoto}
@@ -307,13 +294,23 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
               tc={t.common}
             />
           )}
-          {step === 8 && (
+          {step === 7 && (
             <Step7Location
               country={data.country}
               onNext={handleLocation}
               onBack={goBack}
               saving={saving}
               t={t.step7}
+              tc={t.common}
+            />
+          )}
+          {step === 8 && (
+            <StepSpecialty
+              specialty={data.specialty}
+              onNext={handleSpecialty}
+              onBack={goBack}
+              saving={saving}
+              t={t.specialty}
               tc={t.common}
             />
           )}

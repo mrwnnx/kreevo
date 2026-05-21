@@ -829,13 +829,14 @@ export const en: Dictionary = {
       levelSenior: 'Senior',
     },
     specialty: {
-      title: 'Pick your specialty 🎯',
-      subtitle: 'Which league do you want to compete in? You can still switch while in Stone or Bronze.',
+      title: 'Which league do you want to compete in? 🎯',
+      subtitle: 'Pick your specialty. You can still switch while in Stone or Bronze.',
       specialtyLabel: 'Your specialty',
       uxuiLabel: 'UX/UI Designer',
       uxuiDescription: 'Design digital experiences and interfaces',
       graphicLabel: 'Graphic Designer',
       graphicDescription: 'Create visual identities and brand assets',
+      completeCta: 'Complete my profile →',
     },
     step3: {
       title: 'Which tools do you use? 🧰',

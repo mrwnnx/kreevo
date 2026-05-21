@@ -82,7 +82,7 @@ export function StepSpecialty({ specialty, onNext, onBack, saving, t, tc }: Step
           size="lg"
           className="flex-1 h-12"
         >
-          {saving ? tc.saving : tc.continue}
+          {saving ? tc.saving : t.completeCta}
         </Button>
       </div>
     </div>
