@@ -6,7 +6,7 @@ import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ImageUploadProps {
-  bucket: 'avatars' | 'submissions'
+  bucket: 'avatars' | 'submissions' | 'mentors'
   value?: string | null
   onChange: (url: string | null) => void
   maxSizeMB?: number
