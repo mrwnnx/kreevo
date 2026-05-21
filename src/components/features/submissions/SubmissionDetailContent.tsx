@@ -394,7 +394,7 @@ export function SubmissionDetailContent({
                 {t.descriptionLabel}
               </p>
               {submission.description && (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap">
                   {submission.description}
                 </p>
               )}
