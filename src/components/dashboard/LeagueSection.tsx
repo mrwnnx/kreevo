@@ -207,7 +207,7 @@ export function LeagueCountdownCard({
 
         {/* Titre du challenge */}
         {challengeTitle && (
-          <h3 className="text-2xl font-bold tracking-tight leading-tight text-foreground truncate">
+          <h3 className="text-xl font-bold tracking-tight leading-tight text-foreground truncate">
             {challengeTitle}
           </h3>
         )}
