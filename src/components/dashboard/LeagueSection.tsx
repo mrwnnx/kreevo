@@ -248,10 +248,16 @@ export function LeagueCountdownCard({
           ))}
         </div>
 
-        {/* Participants + CTA */}
+        {/* CTA + participants */}
         <div className="mt-auto pt-5 flex items-center gap-3">
+          <Link href={submitHref}>
+            <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
+              {isUp ? t.timeUp : t.submitCta}
+              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
           {participantAvatars.length > 0 && (
-            <AvatarGroup data-size="sm" aria-label={t.participants}>
+            <AvatarGroup data-size="sm" aria-label={t.participants} className="ml-auto">
               {participantAvatars.slice(0, 4).map((p) => (
                 <Avatar key={p.id} size="sm">
                   {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
@@ -261,12 +267,6 @@ export function LeagueCountdownCard({
               {participantsCount > 4 && <AvatarGroupCount>+{participantsCount - 4}</AvatarGroupCount>}
             </AvatarGroup>
           )}
-          <Link href={submitHref} className="ml-auto">
-            <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
-              {isUp ? t.timeUp : t.submitCta}
-              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
