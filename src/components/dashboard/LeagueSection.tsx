@@ -168,8 +168,8 @@ export function LeagueCountdownCard({
               {t.noChallengeBody}
             </p>
           </div>
-          <Link href={href} className="mt-auto block">
-            <Button className="group w-full bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
+          <Link href={href} className="mt-auto">
+            <Button className="group bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
               {t.browseCta}
               <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
@@ -229,8 +229,8 @@ export function LeagueCountdownCard({
         </div>
 
         {/* CTA */}
-        <Link href={submitHref} className="mt-auto pt-5 block">
-          <Button className="group w-full bg-orange-600 text-white hover:bg-orange-700 font-semibold shadow-sm">
+        <Link href={submitHref} className="mt-auto pt-5">
+          <Button className="group bg-orange-600 text-white hover:bg-orange-700 font-semibold shadow-sm">
             {isUp ? t.timeUp : t.submitCta}
             <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
           </Button>
