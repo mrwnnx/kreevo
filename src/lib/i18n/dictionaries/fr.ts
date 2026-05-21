@@ -93,6 +93,8 @@ export const fr = {
       sec: 'SEC',
       completeChallenge: '⚡ Compléter un défi',
       deadlineLabel: '⏳ Deadline de soumission',
+      xpReward: 'XP à gagner',
+      participants: 'participants',
       submitCta: 'Soumettre mon travail',
       timeUp: 'Temps écoulé',
       noChallengeLabel: '✨ Aucun défi en cours',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, ArrowRight, Clock, Sparkles } from 'lucide-react'
+import { TrendingUp, ArrowRight, Clock, Sparkles, Zap, Users } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -116,6 +116,7 @@ export function LeagueSection({
 type CountdownProps = {
   participation: any
   suggestedChallenge: any
+  participantsCount?: number
   t: Dictionary['dashboard']['countdownCard']
 }
 
@@ -124,6 +125,7 @@ type TimeLeft = { days: number; hours: number; min: number; sec: number }
 export function LeagueCountdownCard({
   participation,
   suggestedChallenge,
+  participantsCount = 0,
   t,
 }: CountdownProps) {
   const deadline = participation?.personal_deadline
@@ -181,6 +183,7 @@ export function LeagueCountdownCard({
 
   // ── Mode deadline (participation active) ────────────────────────
   const challengeTitle = participation.challenges?.title ?? ''
+  const xpReward = participation.challenges?.xp_reward ?? 0
   const submitHref = `/dashboard/challenges/${participation.challenge_id}/submit`
   const isUp =
     timeLeft != null &&
@@ -205,6 +208,18 @@ export function LeagueCountdownCard({
             {challengeTitle}
           </h3>
         )}
+
+        {/* Meta : XP à gagner + participants */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5" title={t.xpReward}>
+            <Zap className="size-4 text-violet-500" />
+            <strong className="font-semibold text-foreground">{xpReward}</strong> XP
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Users className="size-4" />
+            <strong className="font-semibold text-foreground">{participantsCount}</strong> {t.participants}
+          </span>
+        </div>
 
         {/* Countdown */}
         <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">

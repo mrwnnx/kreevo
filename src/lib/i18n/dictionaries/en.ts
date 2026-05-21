@@ -95,6 +95,8 @@ export const en: Dictionary = {
       sec: 'SEC',
       completeChallenge: '⚡ Complete a Challenge',
       deadlineLabel: '⏳ Submission deadline',
+      xpReward: 'XP to earn',
+      participants: 'participants',
       submitCta: 'Submit my work',
       timeUp: 'Time\'s up',
       noChallengeLabel: '✨ No active challenge',

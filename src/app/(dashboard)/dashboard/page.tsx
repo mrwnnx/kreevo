@@ -80,6 +80,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   if (!profile) redirect('/login')
 
   const participation = participationResult.data
+
+  // Participant count for the active challenge (RLS-restricted → admin client)
+  let participantsCount = 0
+  if (participation?.challenge_id) {
+    const { count } = await (supabaseAdmin as any)
+      .from('participations')
+      .select('id', { count: 'exact', head: true })
+      .eq('challenge_id', participation.challenge_id)
+    participantsCount = count ?? 0
+  }
+
   const streak = streakResult.data
   const referrals: any[] = referralsResult.data ?? []
   const allLeagues: any[] = leagueResult.data ?? []
@@ -296,6 +307,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <LeagueCountdownCard
           participation={participation}
           suggestedChallenge={suggestedChallenge}
+          participantsCount={participantsCount}
           t={dict.dashboard.countdownCard}
         />
       </div>
