@@ -70,15 +70,22 @@ export function ContextualLeaderboard({
           >
             <span
               className={cn(
-                'w-6 text-center text-sm font-bold flex-shrink-0',
+                'w-6 text-center flex-shrink-0',
                 user.rank <= 3
-                  ? 'text-amber-500'
-                  : user.isCurrentUser
-                    ? 'text-violet-600'
-                    : 'text-muted-foreground',
+                  ? 'text-base'
+                  : cn(
+                      'text-sm font-bold',
+                      user.isCurrentUser ? 'text-violet-600' : 'text-muted-foreground',
+                    ),
               )}
             >
-              #{user.rank}
+              {user.rank === 1
+                ? '🥇'
+                : user.rank === 2
+                  ? '🥈'
+                  : user.rank === 3
+                    ? '🥉'
+                    : `#${user.rank}`}
             </span>
 
             <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex-shrink-0 flex items-center justify-center text-xs font-medium text-zinc-500">
