@@ -13,6 +13,8 @@ interface Props {
   isOwn?: boolean
   /** Heart size class, e.g. "size-4" or "size-5". */
   heartClassName?: string
+  /** Extra classes merged onto the button (e.g. a bordered pill). */
+  className?: string
 }
 
 /** Like button with a heart that floats up and fades out on each like. */
@@ -24,6 +26,7 @@ export function LikeButton({
   disabled,
   isOwn,
   heartClassName = 'size-4',
+  className,
 }: Props) {
   const [bursts, setBursts] = useState<number[]>([])
 
@@ -47,6 +50,7 @@ export function LikeButton({
         'relative inline-flex items-center gap-1 text-sm font-semibold transition-colors',
         isOwn ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
         liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
+        className,
       )}
     >
       <Heart

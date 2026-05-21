@@ -305,6 +305,7 @@ export function SubmissionDetailContent({
                 disabled={isOwn || likePending}
                 isOwn={isOwn}
                 heartClassName="size-4"
+                className="h-9 px-3 rounded-full border border-border"
               />
 
               {/* Comments count (icon + count) — opens panel */}
@@ -312,7 +313,7 @@ export function SubmissionDetailContent({
                 type="button"
                 onClick={() => setPanelOpen(true)}
                 aria-label={tc.sectionTitle}
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 h-9 px-3 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
                 <MessageCircle className="size-4" strokeWidth={1.8} />
                 <span>{commentsCount}</span>
@@ -490,6 +491,7 @@ export function SubmissionDetailContent({
             disabled={isOwn || likePending}
             isOwn={isOwn}
             heartClassName="size-5"
+            className="h-10 px-3 rounded-full border border-border"
           />
 
           {/* Comments count — opens panel */}
@@ -497,7 +499,7 @@ export function SubmissionDetailContent({
             type="button"
             onClick={() => setPanelOpen(true)}
             aria-label={tc.sectionTitle}
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 h-10 px-3 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             <MessageCircle className="size-5" strokeWidth={1.8} />
             <span>{commentsCount}</span>
