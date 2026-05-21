@@ -386,7 +386,7 @@ export function SubmissionDetailContent({
 
       {/* ── 2-col: description (left) + sidebar (right) ── */}
       <div className="flex flex-col md:flex-row gap-4 items-start">
-        <div className="w-full min-w-0 space-y-4 md:max-w-[70%] md:mx-auto">
+        <div className="w-full min-w-0 space-y-4">
           {/* Description */}
           {(submission.description || figmaUrl || projectLink) && (
             <div className="space-y-3">
