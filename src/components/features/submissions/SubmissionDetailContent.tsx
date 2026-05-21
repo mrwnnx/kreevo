@@ -242,11 +242,11 @@ export function SubmissionDetailContent({
     <div>
       {/* ── HEADER (sticky to top, shrinks title on scroll) ── */}
       {(submission.title || author) && (
-        <div>
+        <>
         <div ref={stickySentinelRef} aria-hidden className="h-px" />
         <div
           className={cn(
-            'sticky top-14 z-20 -mx-6 px-6 bg-background/95 supports-[backdrop-filter]:backdrop-blur transition-all duration-200',
+            'sticky top-14 sm:top-0 z-20 -mx-6 px-6 bg-background/95 supports-[backdrop-filter]:backdrop-blur transition-all duration-200',
             isStuck ? 'py-2' : 'py-3',
           )}
         >
@@ -338,7 +338,7 @@ export function SubmissionDetailContent({
           )}
         </div>
         </div>
-        </div>
+        </>
       )}
 
       {/* Body content under sticky header */}
