@@ -216,9 +216,9 @@ export function LeagueCountdownCard({
           ].map(unit => (
             <div
               key={unit.l}
-              className="rounded-2xl bg-white/70 dark:bg-white/5 ring-1 ring-orange-200/70 dark:ring-white/10 px-2 py-3 text-center"
+              className="rounded-xl bg-muted/50 ring-1 ring-border px-2 py-2 text-center"
             >
-              <p className="text-2xl sm:text-3xl font-bold tabular-nums leading-none text-orange-700 dark:text-orange-300">
+              <p className="text-lg sm:text-xl font-bold tabular-nums leading-none text-foreground">
                 {unit.v == null ? '--' : String(unit.v).padStart(2, '0')}
               </p>
               <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
@@ -230,7 +230,7 @@ export function LeagueCountdownCard({
 
         {/* CTA */}
         <Link href={submitHref} className="mt-auto pt-5">
-          <Button className="group bg-orange-600 text-white hover:bg-orange-700 font-semibold shadow-sm">
+          <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
             {isUp ? t.timeUp : t.submitCta}
             <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
           </Button>
