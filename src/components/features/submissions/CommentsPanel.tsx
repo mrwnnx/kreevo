@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Calendar, X } from 'lucide-react'
 import { CommentCard, type ReviewComment } from './CommentCard'
+import { AiMentorComment } from './AiMentorComment'
+import type { AiMentorComment as AiMentorCommentType } from '@/lib/ai-mentors/types'
 import { MentionTextarea } from './MentionTextarea'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -25,6 +27,7 @@ interface CommentsPanelProps {
     created_at?: string | null
   }
   comments: ReviewComment[]
+  aiMentorComments?: AiMentorCommentType[]
   isLoadingComments: boolean
   commentsCount: number
   currentUserId: string
@@ -46,6 +49,7 @@ export function CommentsPanel({
   onClose,
   submission,
   comments,
+  aiMentorComments = [],
   isLoadingComments,
   commentsCount,
   currentUserId,
@@ -208,6 +212,14 @@ export function CommentsPanel({
 
         {/* Scrollable comments list */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+          {aiMentorComments.length > 0 && (
+            <div className="space-y-3">
+              {aiMentorComments.map((c) => (
+                <AiMentorComment key={c.id} comment={c} t={t.aiMentor} />
+              ))}
+              <div className="border-t border-border/60 !mt-6" />
+            </div>
+          )}
           {isLoadingComments ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex gap-3 animate-pulse">

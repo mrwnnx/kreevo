@@ -568,6 +568,12 @@ export const fr = {
         days: 'il y a {n}j',
       },
     },
+    aiMentor: {
+      badge: 'AI Mentor',
+      sectionTitle: 'Tes mentors',
+      highlight: 'Point fort',
+      focus: 'À travailler',
+    },
   },
   submitForm: {
     cancel: 'Annuler',
