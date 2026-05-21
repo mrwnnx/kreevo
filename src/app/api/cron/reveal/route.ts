@@ -32,6 +32,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ revealed: data?.length ?? 0, challengeIds })
 }
-
-// Vercel Cron triggers a GET request — alias it to the same handler.
-export const GET = POST
