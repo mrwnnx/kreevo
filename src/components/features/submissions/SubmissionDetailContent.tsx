@@ -428,24 +428,28 @@ export function SubmissionDetailContent({
         {sidebar}
       </div>
 
-      {/* Additional photos — full-width stacked, each with its optional caption below */}
-      {additionalImages.map((photo, i) => (
-        <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
-          <div className="relative aspect-video bg-muted">
-            <ImageLightbox
-              src={photo.url}
-              alt={photo.caption || tx(t.additionalAlt, { n: i + 1 })}
-              openLabel={t.lightbox.open}
-              closeLabel={t.lightbox.close}
-              images={galleryImages}
-              index={(submission.cover_url ? 1 : 0) + i}
-            />
-          </div>
-          {photo.caption && (
-            <p className="px-4 py-3 text-base text-foreground leading-relaxed">{photo.caption}</p>
-          )}
+      {/* Additional photos — full-width stacked (56px gap between each), optional caption below */}
+      {additionalImages.length > 0 && (
+        <div className="space-y-14">
+          {additionalImages.map((photo, i) => (
+            <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
+              <div className="relative aspect-video bg-muted">
+                <ImageLightbox
+                  src={photo.url}
+                  alt={photo.caption || tx(t.additionalAlt, { n: i + 1 })}
+                  openLabel={t.lightbox.open}
+                  closeLabel={t.lightbox.close}
+                  images={galleryImages}
+                  index={(submission.cover_url ? 1 : 0) + i}
+                />
+              </div>
+              {photo.caption && (
+                <p className="px-4 py-3 text-base text-foreground leading-relaxed">{photo.caption}</p>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
       </div>
 
       {/* Slide-in comments panel */}
