@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
@@ -74,6 +75,11 @@ export function DashboardProfileHeader({
             {initials}
           </div>
         )}
+        <ProBadge
+          plan={profile.plan}
+          size={28}
+          className="absolute top-0 right-0 rounded-full ring-2 ring-white dark:ring-card shadow-sm"
+        />
       </div>
 
       {/* Welcome */}
@@ -86,7 +92,6 @@ export function DashboardProfileHeader({
           >
             👋
           </span>
-          <ProBadge plan={profile.plan} size={22} />
         </h1>
         {jobTitle && (
           <p className="text-sm sm:text-base text-muted-foreground mt-1.5">{jobTitle}</p>
@@ -94,13 +99,11 @@ export function DashboardProfileHeader({
       </div>
 
       {/* Edit profile */}
-      <Link
-        href="/dashboard/profile"
-        aria-label="Edit profile"
-        className="flex-shrink-0 inline-flex items-center justify-center text-xs font-medium bg-white/70 hover:bg-white text-zinc-700 hover:text-zinc-900 px-3 py-2 sm:px-4 rounded-full transition-colors duration-150 whitespace-nowrap dark:bg-white/10 dark:hover:bg-white/20 dark:text-zinc-200 dark:hover:text-white"
-      >
-        <span className="hidden sm:inline">{t.editProfile}</span>
-        <span className="sm:hidden text-base leading-none">✏️</span>
+      <Link href="/dashboard/profile" aria-label="Edit profile" className="flex-shrink-0">
+        <Button size="sm">
+          <span className="hidden sm:inline">{t.editProfile}</span>
+          <span className="sm:hidden text-base leading-none">✏️</span>
+        </Button>
       </Link>
     </div>
   )

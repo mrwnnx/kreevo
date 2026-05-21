@@ -36,8 +36,8 @@ export function ContextualLeaderboard({
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-sm flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-violet-500" />
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-violet-500" />
             {tx(t.yourRank, { league })}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">

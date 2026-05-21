@@ -77,7 +77,7 @@ export function StatCards({
       {stats.map(stat => (
         <div
           key={stat.label}
-          className="flex flex-col gap-4 bg-card border border-border rounded-[24px] p-4 hover:shadow-sm transition-shadow duration-200"
+          className="h-full flex flex-col justify-between gap-4 bg-card border border-border rounded-[24px] p-4 hover:shadow-sm transition-shadow duration-200"
         >
           <div className="flex items-center justify-between h-5">
             <span className="text-xs font-bold text-foreground tracking-widest leading-none">

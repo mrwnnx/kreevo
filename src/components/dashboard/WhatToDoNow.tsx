@@ -51,7 +51,7 @@ export function WhatToDoNow({
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-semibold text-sm">{t.title}</h3>
+        <h3 className="font-semibold text-lg">{t.title}</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
           {t.subtitle}
         </p>
