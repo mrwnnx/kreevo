@@ -269,7 +269,7 @@ export default async function ChallengesPage({
   const t = dict.challengesPage
 
   return (
-    <div className="p-6 max-w-[960px] mx-auto pb-16 space-y-8">
+    <div className="p-6 max-w-[1200px] mx-auto pb-16 space-y-8">
 
       {/* ── Header ── */}
       <div className="space-y-4">
