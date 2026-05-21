@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Heart, MessageSquare, MessageCircle, ExternalLink, Sparkles } from 'lucide-react'
+import { MessageSquare, MessageCircle, ExternalLink, Sparkles } from 'lucide-react'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentsPanel } from './CommentsPanel'
+import { LikeButton } from './LikeButton'
 import { ProUpsellModal } from './ProUpsellModal'
 import { type ReviewComment } from './CommentCard'
 import { useRouter } from 'next/navigation'
@@ -296,22 +297,15 @@ export function SubmissionDetailContent({
           {isApproved && (
             <div className="hidden sm:flex items-center gap-3 shrink-0">
               {/* Like (icon + count) */}
-              <button
-                onClick={handleLike}
+              <LikeButton
+                liked={liked}
+                count={totalLikes}
+                onToggle={handleLike}
+                ariaLabel={liked ? tc.unlikeAria : tc.likeAria}
                 disabled={isOwn || likePending}
-                aria-label={liked ? tc.unlikeAria : tc.likeAria}
-                className={cn(
-                  'inline-flex items-center gap-1 text-sm font-semibold transition-colors',
-                  isOwn ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
-                  liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
-                )}
-              >
-                <Heart
-                  className={cn('size-4 transition-all', liked && 'fill-red-500')}
-                  strokeWidth={1.8}
-                />
-                <span>{totalLikes}</span>
-              </button>
+                isOwn={isOwn}
+                heartClassName="size-4"
+              />
 
               {/* Comments count (icon + count) — opens panel */}
               <button
@@ -488,19 +482,15 @@ export function SubmissionDetailContent({
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
           {/* Like */}
-          <button
-            onClick={handleLike}
+          <LikeButton
+            liked={liked}
+            count={totalLikes}
+            onToggle={handleLike}
+            ariaLabel={liked ? tc.unlikeAria : tc.likeAria}
             disabled={isOwn || likePending}
-            aria-label={liked ? tc.unlikeAria : tc.likeAria}
-            className={cn(
-              'inline-flex items-center gap-1 text-sm font-semibold transition-colors',
-              isOwn ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
-              liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500',
-            )}
-          >
-            <Heart className={cn('size-5 transition-all', liked && 'fill-red-500')} strokeWidth={1.8} />
-            <span>{totalLikes}</span>
-          </button>
+            isOwn={isOwn}
+            heartClassName="size-5"
+          />
 
           {/* Comments count — opens panel */}
           <button
