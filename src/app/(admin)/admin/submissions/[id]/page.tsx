@@ -61,9 +61,17 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
 
           {(s.files?.images ?? []).length > 0 && (
             <div className="grid grid-cols-3 gap-3">
-              {(s.files.images as string[]).map((url, i) => (
-                <img key={i} src={url} alt="" className="aspect-square rounded-xl object-cover border border-border" />
-              ))}
+              {(s.files.images as any[]).map((img, i) => {
+                const url = typeof img === 'string' ? img : img?.url
+                const caption = typeof img === 'string' ? '' : (img?.caption ?? '')
+                if (!url) return null
+                return (
+                  <div key={i} className="space-y-1">
+                    <img src={url} alt="" className="aspect-square rounded-xl object-cover border border-border w-full" />
+                    {caption && <p className="text-[11px] text-muted-foreground leading-snug">{caption}</p>}
+                  </div>
+                )
+              })}
             </div>
           )}
 

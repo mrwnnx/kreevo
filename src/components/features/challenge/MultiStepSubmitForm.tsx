@@ -36,19 +36,26 @@ export function MultiStepSubmitForm({
   const [step, setStep] = useState<1 | 2>(1)
   const existingFiles = (existing as any)?.files ?? {}
 
-  // Step 1
+  // Step 1 — project details
   const [coverUrl, setCoverUrl] = useState<string | null>((existing as any)?.cover_url ?? null)
-  const [additionalImages, setAdditionalImages] = useState<string[]>(
-    Array.isArray(existingFiles?.images) ? existingFiles.images : []
-  )
-  const [showMotivation, setShowMotivation] = useState(true)
-
-  // Step 2
   const [title, setTitle] = useState<string>((existing as any)?.title ?? '')
   const [description, setDescription] = useState<string>((existing as any)?.description ?? '')
   const [projectLink, setProjectLink] = useState<string>(existingFiles?.link ?? '')
   const [showOnProfile, setShowOnProfile] = useState<boolean>(
     (existing as any)?.is_visible !== false
+  )
+  const [showMotivation, setShowMotivation] = useState(true)
+
+  // Step 2 — photos (each with an optional caption).
+  // Backward-compat: legacy files.images was string[] → normalize to { url, caption }.
+  const [photos, setPhotos] = useState<{ url: string; caption: string }[]>(
+    (Array.isArray(existingFiles?.images) ? existingFiles.images : [])
+      .map((img: any) =>
+        typeof img === 'string'
+          ? { url: img, caption: '' }
+          : { url: img?.url ?? '', caption: img?.caption ?? '' },
+      )
+      .filter((p: { url: string }) => p.url),
   )
 
   const [isPending, startTransition] = useTransition()
@@ -76,13 +83,16 @@ export function MultiStepSubmitForm({
   const [aiRejectionCount, setAiRejectionCount] = useState<number>((existing as any)?.ai_rejection_count ?? 0)
   const canRequestHumanReview = aiRejectionCount >= HUMAN_REVIEW_THRESHOLD
 
-  function addAdditionalImage(url: string | null) {
+  const MAX_PHOTOS = 7
+  function addPhoto(url: string | null) {
     if (!url) return
-    setAdditionalImages(prev => [...prev, url])
+    setPhotos(prev => (prev.length >= MAX_PHOTOS ? prev : [...prev, { url, caption: '' }]))
   }
-
-  function removeAdditionalImage(idx: number) {
-    setAdditionalImages(prev => prev.filter((_, i) => i !== idx))
+  function removePhoto(idx: number) {
+    setPhotos(prev => prev.filter((_, i) => i !== idx))
+  }
+  function updateCaption(idx: number, caption: string) {
+    setPhotos(prev => prev.map((p, i) => (i === idx ? { ...p, caption } : p)))
   }
 
   function canGoToStep2() {
@@ -103,7 +113,7 @@ export function MultiStepSubmitForm({
     try {
       const images = [
         { url: coverUrl, is_cover: true },
-        ...additionalImages.map((url) => ({ url, is_cover: false })),
+        ...photos.map((p) => ({ url: p.url, is_cover: false })),
       ]
       const res = await fetch('/api/submissions/analyze', {
         method: 'POST',
@@ -139,7 +149,7 @@ export function MultiStepSubmitForm({
   /** Click "Publier" — sync analyze (or human review request after threshold) → branch on cases A/B/C/D */
   async function handlePublishClick() {
     if (!coverUrl) { setError('Image de couverture requise'); setStep(1); return }
-    if (!title.trim()) { setError('Un titre est requis pour publier'); return }
+    if (!title.trim()) { setError('Un titre est requis pour publier'); setStep(1); return }
     setError(null)
 
     if (canRequestHumanReview) {
@@ -210,6 +220,7 @@ export function MultiStepSubmitForm({
     }
     if (!asDraft && !title.trim()) {
       setError('Un titre est requis pour publier')
+      setStep(1)
       return
     }
     setError(null)
@@ -233,7 +244,7 @@ export function MultiStepSubmitForm({
     fd.set('participationId', participationId)
     fd.set('isDraft', asDraft ? 'true' : 'false')
     fd.set('isVisible', showOnProfile ? 'true' : 'false')
-    fd.set('additionalImages', JSON.stringify(additionalImages))
+    fd.set('photos', JSON.stringify(photos))
 
     if (!asDraft && aiVerdict) {
       fd.set('aiVerdict', aiVerdict)
@@ -337,15 +348,6 @@ export function MultiStepSubmitForm({
           <Step1
             coverUrl={coverUrl}
             setCoverUrl={setCoverUrl}
-            additionalImages={additionalImages}
-            addAdditionalImage={addAdditionalImage}
-            removeAdditionalImage={removeAdditionalImage}
-            showMotivation={showMotivation}
-            dismissMotivation={() => setShowMotivation(false)}
-            tStep1={t.step1}
-          />
-        ) : (
-          <Step2
             title={title}
             setTitle={setTitle}
             description={description}
@@ -354,6 +356,17 @@ export function MultiStepSubmitForm({
             setProjectLink={setProjectLink}
             showOnProfile={showOnProfile}
             setShowOnProfile={setShowOnProfile}
+            showMotivation={showMotivation}
+            dismissMotivation={() => setShowMotivation(false)}
+            tStep1={t.step1}
+          />
+        ) : (
+          <Step2
+            photos={photos}
+            addPhoto={addPhoto}
+            removePhoto={removePhoto}
+            updateCaption={updateCaption}
+            maxPhotos={MAX_PHOTOS}
             t={t.step2}
           />
         )}
@@ -592,114 +605,10 @@ export function AnalysisResultModal({
   )
 }
 
-// ── Step 1 ───────────────────────────────────────────────────────────────────
+// ── Step 1 — Project ─────────────────────────────────────────────────────────
 function Step1({
   coverUrl,
   setCoverUrl,
-  additionalImages,
-  addAdditionalImage,
-  removeAdditionalImage,
-  showMotivation,
-  dismissMotivation,
-  tStep1,
-}: {
-  coverUrl: string | null
-  setCoverUrl: (url: string | null) => void
-  additionalImages: string[]
-  addAdditionalImage: (url: string | null) => void
-  removeAdditionalImage: (idx: number) => void
-  showMotivation: boolean
-  dismissMotivation: () => void
-  tStep1: SubmitT['step1']
-}) {
-  const [tempUploadKey, setTempUploadKey] = useState(0)
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">{tStep1.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {tStep1.subtitle}
-        </p>
-      </div>
-
-      {/* Cover */}
-      <div className="space-y-2">
-        <Label className="text-sm">{tStep1.coverLabel}</Label>
-        <ImageUpload
-          bucket="submissions"
-          value={coverUrl}
-          onChange={setCoverUrl}
-          className="aspect-[16/10]"
-        />
-        <p className="text-xs text-muted-foreground">
-          {tStep1.coverHint}
-        </p>
-      </div>
-
-      {/* Additional images */}
-      <div className="space-y-2">
-        <Label className="text-sm">
-          {tStep1.additionalLabel}{' '}
-          <span className="text-muted-foreground font-normal">
-            ({additionalImages.length}/3)
-          </span>
-        </Label>
-        <div className="grid grid-cols-3 gap-3">
-          {additionalImages.map((url, i) => (
-            <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
-              <img src={url} alt="" className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => removeAdditionalImage(i)}
-                className="absolute top-2 right-2 size-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label={tStep1.removeAlt}
-              >
-                <X className="size-3.5" />
-              </button>
-            </div>
-          ))}
-          {additionalImages.length < 3 && (
-            <ImageUpload
-              key={tempUploadKey}
-              bucket="submissions"
-              value={null}
-              onChange={(url) => {
-                addAdditionalImage(url)
-                setTempUploadKey(k => k + 1)
-              }}
-              className="aspect-square"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Floating motivation */}
-      {showMotivation && (
-        <div className="fixed bottom-24 right-6 z-20 max-w-xs rounded-2xl bg-violet-600 text-white p-4 shadow-lg flex items-start gap-3 animate-in slide-in-from-bottom-4 fade-in">
-          <Sparkles className="size-5 shrink-0 mt-0.5" />
-          <div className="flex-1 text-sm">
-            <p className="font-semibold">{tStep1.motivationTitle}</p>
-            <p className="text-white/85 text-xs mt-1 leading-relaxed">
-              {tStep1.motivationBody}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={dismissMotivation}
-            className="size-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center shrink-0"
-            aria-label={tStep1.motivationDismiss}
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Step 2 ───────────────────────────────────────────────────────────────────
-function Step2({
   title,
   setTitle,
   description,
@@ -708,8 +617,12 @@ function Step2({
   setProjectLink,
   showOnProfile,
   setShowOnProfile,
-  t,
+  showMotivation,
+  dismissMotivation,
+  tStep1,
 }: {
+  coverUrl: string | null
+  setCoverUrl: (url: string | null) => void
   title: string
   setTitle: (v: string) => void
   description: string
@@ -718,67 +631,72 @@ function Step2({
   setProjectLink: (v: string) => void
   showOnProfile: boolean
   setShowOnProfile: (v: boolean) => void
-  t: SubmitT['step2']
+  showMotivation: boolean
+  dismissMotivation: () => void
+  tStep1: SubmitT['step1']
 }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">{t.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t.subtitle}
-        </p>
+        <h1 className="text-2xl font-bold">{tStep1.title}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{tStep1.subtitle}</p>
+      </div>
+
+      {/* Cover */}
+      <div className="space-y-2">
+        <Label className="text-sm">{tStep1.coverLabel}</Label>
+        <ImageUpload bucket="submissions" value={coverUrl} onChange={setCoverUrl} className="aspect-[16/10]" />
+        <p className="text-xs text-muted-foreground">{tStep1.coverHint}</p>
       </div>
 
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="title" className="text-sm">{t.titleLabel}</Label>
+        <Label htmlFor="title" className="text-sm">{tStep1.titleLabel}</Label>
         <Input
           id="title"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          placeholder={t.titlePlaceholder}
+          placeholder={tStep1.titlePlaceholder}
           maxLength={120}
         />
       </div>
 
-      {/* Description */}
+      {/* General description */}
       <div className="space-y-2">
-        <Label htmlFor="description" className="text-sm">{t.descriptionLabel}</Label>
+        <Label htmlFor="description" className="text-sm">{tStep1.descriptionLabel}</Label>
         <textarea
           id="description"
           value={description}
           onChange={e => setDescription(e.target.value)}
           rows={5}
-          placeholder={t.descriptionPlaceholder}
+          placeholder={tStep1.descriptionPlaceholder}
           className="w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
         <div className="flex items-start gap-2 rounded-lg border border-violet-200 dark:border-violet-900/50 bg-violet-50/60 dark:bg-violet-950/20 px-3 py-2">
           <Sparkles className="size-3.5 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
           <p className="text-[11px] leading-snug text-violet-700/90 dark:text-violet-300/90">
-            {t.descriptionBonusHint}
+            {tStep1.descriptionBonusHint}
           </p>
         </div>
       </div>
 
       {/* Project link */}
       <div className="space-y-2">
-        <Label htmlFor="projectLink" className="text-sm">{t.linkLabel}</Label>
+        <Label htmlFor="projectLink" className="text-sm">{tStep1.linkLabel}</Label>
         <Input
           id="projectLink"
           type="url"
           value={projectLink}
           onChange={e => setProjectLink(e.target.value)}
-          placeholder={t.linkPlaceholder}
+          placeholder={tStep1.linkPlaceholder}
         />
       </div>
 
       {/* Profile toggle */}
       <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
         <div>
-          <p className="text-sm font-medium">{t.profileToggleLabel}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t.profileToggleBody}
-          </p>
+          <p className="text-sm font-medium">{tStep1.profileToggleLabel}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{tStep1.profileToggleBody}</p>
         </div>
         <button
           type="button"
@@ -797,6 +715,94 @@ function Step2({
             )}
           />
         </button>
+      </div>
+
+      {/* Floating motivation */}
+      {showMotivation && (
+        <div className="fixed bottom-24 right-6 z-20 max-w-xs rounded-2xl bg-violet-600 text-white p-4 shadow-lg flex items-start gap-3 animate-in slide-in-from-bottom-4 fade-in">
+          <Sparkles className="size-5 shrink-0 mt-0.5" />
+          <div className="flex-1 text-sm">
+            <p className="font-semibold">{tStep1.motivationTitle}</p>
+            <p className="text-white/85 text-xs mt-1 leading-relaxed">{tStep1.motivationBody}</p>
+          </div>
+          <button
+            type="button"
+            onClick={dismissMotivation}
+            className="size-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center shrink-0"
+            aria-label={tStep1.motivationDismiss}
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Step 2 — Photos ────────────────────────────────────────────────────────────
+function Step2({
+  photos,
+  addPhoto,
+  removePhoto,
+  updateCaption,
+  maxPhotos,
+  t,
+}: {
+  photos: { url: string; caption: string }[]
+  addPhoto: (url: string | null) => void
+  removePhoto: (idx: number) => void
+  updateCaption: (idx: number, caption: string) => void
+  maxPhotos: number
+  t: SubmitT['step2']
+}) {
+  const [tempUploadKey, setTempUploadKey] = useState(0)
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">{t.title}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t.subtitle}</p>
+      </div>
+
+      <div className="space-y-5">
+        {photos.map((photo, i) => (
+          <div key={i} className="rounded-2xl border border-border p-3 space-y-3">
+            <div className="relative rounded-xl overflow-hidden border border-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.url} alt="" className="w-full max-h-[420px] object-contain bg-muted" />
+              <button
+                type="button"
+                onClick={() => removePhoto(i)}
+                className="absolute top-2 right-2 size-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                aria-label={t.removeAlt}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <Input
+              value={photo.caption}
+              onChange={(e) => updateCaption(i, e.target.value)}
+              placeholder={t.captionPlaceholder}
+              maxLength={200}
+            />
+          </div>
+        ))}
+
+        {photos.length < maxPhotos && (
+          <div className="space-y-2">
+            <Label className="text-sm">
+              {t.addPhotoLabel}{' '}
+              <span className="text-muted-foreground font-normal">({tx(t.countLabel, { n: photos.length })})</span>
+            </Label>
+            <ImageUpload
+              key={tempUploadKey}
+              bucket="submissions"
+              value={null}
+              onChange={(url) => { addPhoto(url); setTempUploadKey(k => k + 1) }}
+              className="aspect-[16/10]"
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -19,7 +19,7 @@ export async function submitChallenge(formData: FormData) {
   const participationId = formData.get('participationId') as string | null
   const isDraft = formData.get('isDraft') === 'true'
   const isVisible = formData.get('isVisible') !== 'false'
-  const additionalImagesRaw = formData.get('additionalImages') as string | null
+  const photosRaw = formData.get('photos') as string | null
   const aiVerdict = formData.get('aiVerdict') as 'approved' | 'skipped' | 'human_review' | null
   const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
   const aiBypassed = formData.get('aiAnalysisBypassed') === 'true'
@@ -29,8 +29,21 @@ export async function submitChallenge(formData: FormData) {
 
   if (!coverUrl) return { error: 'Image de couverture requise' }
 
-  let additionalImages: string[] = []
-  try { additionalImages = additionalImagesRaw ? JSON.parse(additionalImagesRaw) : [] } catch {}
+  // Photos: array of { url, caption } (caption optional). Normalize + drop empties.
+  let photos: { url: string; caption: string }[] = []
+  try {
+    const parsed = photosRaw ? JSON.parse(photosRaw) : []
+    if (Array.isArray(parsed)) {
+      photos = parsed
+        .map((p: any) =>
+          typeof p === 'string'
+            ? { url: p, caption: '' }
+            : { url: String(p?.url ?? ''), caption: String(p?.caption ?? '') },
+        )
+        .filter((p) => p.url)
+        .slice(0, 7)
+    }
+  } catch {}
 
   // Verify participation is still active (only for non-draft submissions)
   if (participationId) {
@@ -49,7 +62,7 @@ export async function submitChallenge(formData: FormData) {
   const files: Record<string, unknown> = {}
   if (figmaUrl) files.figma = figmaUrl
   if (projectLink) files.link = projectLink
-  if (additionalImages.length) files.images = additionalImages
+  if (photos.length) files.images = photos
 
   // Check existing submission
   const { data: existing } = await (supabase.from('submissions') as any)

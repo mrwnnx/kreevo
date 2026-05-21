@@ -226,9 +226,16 @@ export function SubmissionDetailContent({
   const projectLink = typeof files.link === 'string' ? files.link : null
   // Total = top-level + replies. Use derived once API has fetched, else fall back to (incomplete) DB column.
   const commentsCount = isLoadingComments ? (submission.comments_count ?? 0) : comments.length
-  const additionalImages = Array.isArray(files.images) ? (files.images as string[]) : []
+  // Additional photos: { url, caption }[]. Backward-compat: legacy string[] → { url, caption: '' }.
+  const additionalImages = (Array.isArray(files.images) ? files.images : [])
+    .map((img: any) =>
+      typeof img === 'string'
+        ? { url: img, caption: '' }
+        : { url: String(img?.url ?? ''), caption: String(img?.caption ?? '') },
+    )
+    .filter((p: { url: string }) => p.url) as { url: string; caption: string }[]
   // Full gallery shared across the cover + extra image lightboxes — enables ←/→ navigation
-  const galleryImages = [submission.cover_url, ...additionalImages].filter((u): u is string => !!u)
+  const galleryImages = [submission.cover_url, ...additionalImages.map((p) => p.url)].filter((u): u is string => !!u)
 
   return (
     <div>
@@ -387,19 +394,22 @@ export function SubmissionDetailContent({
         {sidebar}
       </div>
 
-      {/* Additional photos — full-width stacked, displayed like cover */}
-      {additionalImages.map((url, i) => (
+      {/* Additional photos — full-width stacked, each with its optional caption below */}
+      {additionalImages.map((photo, i) => (
         <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
           <div className="relative aspect-video bg-muted">
             <ImageLightbox
-              src={url}
-              alt={tx(t.additionalAlt, { n: i + 1 })}
+              src={photo.url}
+              alt={photo.caption || tx(t.additionalAlt, { n: i + 1 })}
               openLabel={t.lightbox.open}
               closeLabel={t.lightbox.close}
               images={galleryImages}
               index={(submission.cover_url ? 1 : 0) + i}
             />
           </div>
+          {photo.caption && (
+            <p className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">{photo.caption}</p>
+          )}
         </div>
       ))}
       </div>
