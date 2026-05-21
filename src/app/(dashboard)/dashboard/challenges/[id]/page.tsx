@@ -190,7 +190,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
   // ── State 2+: ACTIVE / SUBMITTED / EXPIRED — full brief + sidebar ───────────
   return (
-    <div className="p-6 max-w-[960px] mx-auto pb-16 bg-white dark:bg-background">
+    <div className="p-6 max-w-[1200px] mx-auto pb-16 bg-white dark:bg-background">
 
       <div className="mb-6">
         <Link href="/dashboard/challenges" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
