@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Clock, ArrowRight, ExternalLink, Eye } from 'lucide-react'
+import { ExternalLink, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type ProfilePanelT = {
@@ -54,7 +53,7 @@ interface Props {
   t?: ProfilePanelT
 }
 
-export function ProfilePanel({ author, challenge, projectLink, viewsCount = 0, t = FALLBACK_T }: Props) {
+export function ProfilePanel({ author, projectLink, viewsCount = 0, t = FALLBACK_T }: Props) {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60)
@@ -86,33 +85,6 @@ export function ProfilePanel({ author, challenge, projectLink, viewsCount = 0, t
             {viewsCount.toLocaleString()}
           </span>
         </a>
-      )}
-
-      {/* Challenge */}
-      {challenge && (
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-          <p className="text-sm font-semibold leading-snug">{challenge.title}</p>
-          <div className="space-y-1.5">
-            {(challenge.specialty || challenge.challenge_type) && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="size-3 text-center">🎨</span>
-                <span>{[challenge.specialty, challenge.challenge_type].filter(Boolean).join(' · ')}</span>
-              </div>
-            )}
-            {challenge.industry && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="size-3" />
-                <span>{challenge.industry}</span>
-              </div>
-            )}
-          </div>
-          <Link
-            href={`/dashboard/challenges/${challenge.id}`}
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
-            {t.seeChallenge} <ArrowRight className="size-3" />
-          </Link>
-        </div>
       )}
 
     </aside>

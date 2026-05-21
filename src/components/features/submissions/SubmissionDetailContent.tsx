@@ -388,7 +388,7 @@ export function SubmissionDetailContent({
       <div className="flex flex-col md:flex-row gap-4 items-start">
         <div className="flex-1 min-w-0 space-y-4">
           {/* Description */}
-          {(submission.description || figmaUrl) && (
+          {(submission.description || figmaUrl || projectLink) && (
             <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
               <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">
                 {t.descriptionLabel}
@@ -398,16 +398,28 @@ export function SubmissionDetailContent({
                   {submission.description}
                 </p>
               )}
-              {figmaUrl && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <a
-                    href={figmaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
-                  >
-                    <ExternalLink className="size-3" /> {t.seeFigma}
-                  </a>
+              {(figmaUrl || projectLink) && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {projectLink && (
+                    <a
+                      href={projectLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <ExternalLink className="size-3" /> {t.seeProject}
+                    </a>
+                  )}
+                  {figmaUrl && (
+                    <a
+                      href={figmaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium border border-border px-3 py-1.5 rounded-full hover:bg-muted transition-colors"
+                    >
+                      <ExternalLink className="size-3" /> {t.seeFigma}
+                    </a>
+                  )}
                 </div>
               )}
             </div>
