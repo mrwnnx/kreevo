@@ -81,14 +81,30 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const participation = participationResult.data
 
-  // Participant count for the active challenge (RLS-restricted → admin client)
+  // Participants for the active challenge (RLS-restricted → admin client)
   let participantsCount = 0
+  let participantAvatars: { id: string; username: string; avatar_url: string | null }[] = []
   if (participation?.challenge_id) {
-    const { count } = await (supabaseAdmin as any)
-      .from('participations')
-      .select('id', { count: 'exact', head: true })
-      .eq('challenge_id', participation.challenge_id)
+    const [{ count }, { data: parts }] = await Promise.all([
+      (supabaseAdmin as any)
+        .from('participations')
+        .select('id', { count: 'exact', head: true })
+        .eq('challenge_id', participation.challenge_id),
+      (supabaseAdmin as any)
+        .from('participations')
+        .select('user_id')
+        .eq('challenge_id', participation.challenge_id)
+        .limit(5),
+    ])
     participantsCount = count ?? 0
+    const ids = (parts ?? []).map((p: any) => p.user_id)
+    if (ids.length) {
+      const { data: profs } = await (supabaseAdmin as any)
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', ids)
+      participantAvatars = profs ?? []
+    }
   }
 
   const streak = streakResult.data
@@ -308,6 +324,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           participation={participation}
           suggestedChallenge={suggestedChallenge}
           participantsCount={participantsCount}
+          participantAvatars={participantAvatars}
           t={dict.dashboard.countdownCard}
         />
       </div>

@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, ArrowRight, Clock, Sparkles, Zap, Users } from 'lucide-react'
+import { TrendingUp, ArrowRight, Clock, Sparkles, Zap } from 'lucide-react'
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+} from '@/components/ui/avatar'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -117,6 +124,7 @@ type CountdownProps = {
   participation: any
   suggestedChallenge: any
   participantsCount?: number
+  participantAvatars?: { id: string; username: string; avatar_url: string | null }[]
   t: Dictionary['dashboard']['countdownCard']
 }
 
@@ -126,6 +134,7 @@ export function LeagueCountdownCard({
   participation,
   suggestedChallenge,
   participantsCount = 0,
+  participantAvatars = [],
   t,
 }: CountdownProps) {
   const deadline = participation?.personal_deadline
@@ -209,15 +218,11 @@ export function LeagueCountdownCard({
           </h3>
         )}
 
-        {/* Meta : XP à gagner + participants */}
+        {/* Meta : XP à gagner */}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5" title={t.xpReward}>
             <Zap className="size-4 text-violet-500" />
-            <strong className="font-semibold text-foreground">{xpReward}</strong> XP
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Users className="size-4" />
-            <strong className="font-semibold text-foreground">{participantsCount}</strong> {t.participants}
+            earn <strong className="font-semibold text-foreground">{xpReward}</strong> XP
           </span>
         </div>
 
@@ -243,13 +248,26 @@ export function LeagueCountdownCard({
           ))}
         </div>
 
-        {/* CTA */}
-        <Link href={submitHref} className="mt-auto pt-5">
-          <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
-            {isUp ? t.timeUp : t.submitCta}
-            <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
-          </Button>
-        </Link>
+        {/* Participants + CTA */}
+        <div className="mt-auto pt-5 flex items-center gap-3">
+          {participantAvatars.length > 0 && (
+            <AvatarGroup data-size="sm" aria-label={t.participants}>
+              {participantAvatars.slice(0, 4).map((p) => (
+                <Avatar key={p.id} size="sm">
+                  {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
+                  <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+                </Avatar>
+              ))}
+              {participantsCount > 4 && <AvatarGroupCount>+{participantsCount - 4}</AvatarGroupCount>}
+            </AvatarGroup>
+          )}
+          <Link href={submitHref} className="ml-auto">
+            <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
+              {isUp ? t.timeUp : t.submitCta}
+              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   )
