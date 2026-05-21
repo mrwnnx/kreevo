@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
-import { Clock, ChevronLeft, Users, CheckCircle2, Package, AlertCircle, Zap, Play } from 'lucide-react'
+import { Clock, ChevronLeft, Users, CheckCircle2, Zap, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
@@ -136,7 +136,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Brief (only) */}
           {c.brief && (
             <section className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 p-6 space-y-2">
-              <h2 className="text-xl font-semibold">{t.sections.brief}</h2>
+              <h2 className="text-xl font-semibold">📋 {t.sections.brief}</h2>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
             </section>
           )}
@@ -173,7 +173,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {allSubmissions && allSubmissions.length > 0 && (
             <section className="space-y-4 pt-6">
               <div className="h-px bg-border" />
-              <h2 className="text-xl font-semibold">{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
+              <h2 className="text-xl font-semibold">🖼️ {tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
@@ -283,7 +283,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Context */}
           {c.context && (
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold">{t.sections.scenario}</h2>
+              <h2 className="text-xl font-semibold">🎬 {t.sections.scenario}</h2>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.context}</p>
             </section>
           )}
@@ -291,10 +291,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Deliverable */}
           {c.deliverable && (
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Package className="size-4 text-muted-foreground" />
-                {t.sections.deliverable}
-              </h2>
+              <h2 className="text-xl font-semibold">📦 {t.sections.deliverable}</h2>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.deliverable}</p>
             </section>
           )}
@@ -302,10 +299,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Constraints */}
           {c.constraints && (
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <AlertCircle className="size-4 text-muted-foreground" />
-                {t.sections.constraints}
-              </h2>
+              <h2 className="text-xl font-semibold">🚧 {t.sections.constraints}</h2>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.constraints}</p>
             </section>
           )}
@@ -314,7 +308,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {c.criteria && (
             <section className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold">{t.sections.criteria}</h2>
+                <h2 className="text-xl font-semibold">🎯 {t.sections.criteria}</h2>
                 <p className="text-sm text-muted-foreground mt-1">{t.sections.criteriaIntro}</p>
               </div>
               <div className="space-y-3">
@@ -332,7 +326,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {allSubmissions && allSubmissions.length > 0 && (
             <section className="space-y-4 pt-2">
               <div className="h-px bg-border" />
-              <h2 className="text-xl font-semibold">{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
+              <h2 className="text-xl font-semibold">🖼️ {tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
