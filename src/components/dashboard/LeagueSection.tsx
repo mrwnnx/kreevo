@@ -207,7 +207,7 @@ export function LeagueCountdownCard({
         )}
 
         {/* Countdown */}
-        <div className="mt-5 grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
           {[
             { v: timeLeft?.days, l: t.days },
             { v: timeLeft?.hours, l: t.hours },
