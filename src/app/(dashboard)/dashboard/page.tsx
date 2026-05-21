@@ -12,15 +12,12 @@ import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
 import { Analytics } from '@/components/dashboard/Analytics'
 
 interface PageProps {
-  searchParams: Promise<{ submitted?: string; mock?: string }>
+  searchParams: Promise<{ submitted?: string }>
 }
 
 export default async function DashboardPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const justSubmitted = sp?.submitted === 'true'
-  // Dev-only preview: ?mock=N pads participants to preview the avatar group
-  const mockParticipants =
-    process.env.NODE_ENV === 'development' && sp?.mock ? parseInt(sp.mock, 10) || 0 : 0
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -108,16 +105,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         .in('id', ids)
       participantAvatars = profs ?? []
     }
-  }
-
-  // Dev preview override (?mock=N) — fake a crowd of participants
-  if (mockParticipants > 0 && participation) {
-    participantsCount = mockParticipants
-    participantAvatars = Array.from({ length: Math.min(mockParticipants, 5) }, (_, i) => ({
-      id: `mock-${i}`,
-      username: `designer${i + 1}`,
-      avatar_url: `https://i.pravatar.cc/80?img=${(i % 70) + 1}`,
-    }))
   }
 
   const streak = streakResult.data
