@@ -155,11 +155,8 @@ export function LeagueCountdownCard({
       ? `/dashboard/challenges/${suggestedChallenge.id}`
       : '/dashboard/challenges'
     return (
-      <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-violet-50 via-violet-50/50 to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 ring-1 ring-violet-200/70 dark:ring-violet-900/40 shadow-sm">
-        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-violet-200/40 dark:bg-violet-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-indigo-200/40 dark:bg-indigo-500/10 blur-3xl" />
-
-        <div className="relative p-5 sm:p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative overflow-hidden rounded-[28px] bg-card border border-border shadow-sm h-full">
+        <div className="relative p-5 sm:p-6 flex flex-col gap-4 h-full">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
               <Sparkles className="size-3.5" /> {t.noChallengeLabel}
@@ -171,8 +168,8 @@ export function LeagueCountdownCard({
               {t.noChallengeBody}
             </p>
           </div>
-          <Link href={href} className="flex-shrink-0">
-            <Button className="group bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
+          <Link href={href} className="mt-auto block">
+            <Button className="group w-full bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
               {t.browseCta}
               <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
@@ -190,11 +187,8 @@ export function LeagueCountdownCard({
     timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.min === 0 && timeLeft.sec === 0
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-orange-50 via-orange-50/60 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-rose-950/20 ring-1 ring-orange-200/70 dark:ring-orange-900/40 shadow-sm">
-      <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-orange-200/40 dark:bg-orange-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-rose-200/40 dark:bg-rose-500/10 blur-3xl" />
-
-      <div className="relative p-5 sm:p-6">
+    <div className="relative overflow-hidden rounded-[28px] bg-card border border-border shadow-sm h-full flex flex-col">
+      <div className="relative p-5 sm:p-6 flex flex-col flex-1">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <span className="inline-flex size-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-orange-500/20">
@@ -235,7 +229,7 @@ export function LeagueCountdownCard({
         </div>
 
         {/* CTA */}
-        <Link href={submitHref} className="mt-5 block">
+        <Link href={submitHref} className="mt-auto pt-5 block">
           <Button className="group w-full bg-orange-600 text-white hover:bg-orange-700 font-semibold shadow-sm">
             {isUp ? t.timeUp : t.submitCta}
             <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
