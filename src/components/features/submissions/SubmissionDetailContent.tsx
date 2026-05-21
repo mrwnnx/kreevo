@@ -322,8 +322,8 @@ export function SubmissionDetailContent({
               <Button
                 onClick={handlePrimaryClick}
                 disabled={!isOwn && !canComment}
-                size="sm"
-                className="gap-1.5 h-8 px-3 text-xs"
+                size="lg"
+                className="gap-1.5"
               >
                 {isOwn ? <Sparkles className="size-3.5" /> : <MessageSquare className="size-3.5" />}
                 {isOwn ? t.askFeedback : tc.commentCta}
@@ -507,8 +507,8 @@ export function SubmissionDetailContent({
           <Button
             onClick={handlePrimaryClick}
             disabled={!isOwn && !canComment}
-            size="sm"
-            className="ml-auto gap-1.5 h-10 px-4 text-sm flex-1 max-w-[60%] justify-center"
+            size="lg"
+            className="ml-auto gap-1.5 flex-1 max-w-[60%] justify-center"
           >
             {isOwn ? <Sparkles className="size-4" /> : <MessageSquare className="size-4" />}
             {isOwn ? t.askFeedback : tc.commentCta}
