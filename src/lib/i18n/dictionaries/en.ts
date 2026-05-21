@@ -493,6 +493,10 @@ export const en: Dictionary = {
     },
     backFallback: 'Back',
     backToHistory: 'Back to history',
+    briefVerdict: {
+      matches: '✅ This work matches the brief',
+      noMatch: '⚠️ This work does not match the brief',
+    },
     noPreview: 'No preview',
     descriptionLabel: 'Description',
     seeFigma: 'See on Figma →',

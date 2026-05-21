@@ -74,14 +74,7 @@ export function MultiStepSubmitForm({
   }
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
-  const [analyzeModal, setAnalyzeModal] = useState<'success' | 'warning' | 'blocking' | null>(null)
-  const [bypassed, setBypassed] = useState(false)
   const [analyzeProgress, setAnalyzeProgress] = useState(0)
-  const HUMAN_REVIEW_THRESHOLD = 3
-  // Session-only counter: a blocked attempt persists nothing in DB, so the
-  // "3 strikes → human review" guard lives in client state (resets on reload/cancel).
-  const [aiRejectionCount, setAiRejectionCount] = useState<number>((existing as any)?.ai_rejection_count ?? 0)
-  const canRequestHumanReview = aiRejectionCount >= HUMAN_REVIEW_THRESHOLD
 
   const MAX_PHOTOS = 7
   function addPhoto(url: string | null) {
@@ -146,69 +139,37 @@ export function MultiStepSubmitForm({
     }
   }
 
-  /** Click "Publier" — sync analyze (or human review request after threshold) → branch on cases A/B/C/D */
+  /** Click "Publier" — AI no longer gates: always publish, verdict drives XP only. */
   async function handlePublishClick() {
     if (!coverUrl) { setError('Image de couverture requise'); setStep(1); return }
     if (!title.trim()) { setError('Un titre est requis pour publier'); setStep(1); return }
     setError(null)
-
-    if (canRequestHumanReview) {
-      // Case D — user has 3+ rejections, requests human review
-      return submitForm({ asDraft: false, aiVerdict: 'human_review', bypass: false, bonusEligible: false })
-    }
 
     const result = await runAnalyze()
     if (!result) {
       setError('Analyse IA indisponible — réessaye dans un instant.')
       return
     }
-    if (result.skipped) {
-      // Higher league → no AI gate, server-side flow takes over
-      return submitForm({ asDraft: false, aiVerdict: 'skipped', bypass: false, bonusEligible: false })
-    }
     if (result.global_valid) {
-      // Case A — show success modal first; user clicks "Publier" to actually submit
-      setBypassed(false)
-      setAnalyzeModal('success')
-      return
+      // Matches the brief → approved + XP (+ optional description bonus)
+      return submitForm({
+        asDraft: false,
+        aiVerdict: 'approved',
+        bonusEligible: result.description_bonus_eligible,
+        analysis: result,
+      })
     }
-    // Case C — blocking modal: no valid image at all (incl. the single-photo case)
-    // OR 2+ rejected. No bypass, and NOTHING is persisted — the user must replace
-    // the image(s) and retry. The rejection counter is client-side only.
-    if (result.rejected_count === result.images.length || result.rejected_count >= 2) {
-      setAiRejectionCount((c) => c + 1)
-      setAnalyzeModal('blocking')
-      return
-    }
-    // Case B — exactly 1 rejected but at least one valid image → warning modal with bypass
-    setBypassed(false)
-    setAnalyzeModal('warning')
-    return
-  }
-
-  /** Used by case B modal "Soumettre quand même" */
-  function handleBypassSubmit() {
-    setBypassed(true)
-    setAnalyzeModal(null)
-    submitForm({
+    // Doesn't match the brief → still published, but no XP. User can resubmit / fix.
+    const reason = result.images
+      .filter((i) => !i.valid && i.reason)
+      .map((i) => i.reason)
+      .join(' · ')
+    return submitForm({
       asDraft: false,
-      aiVerdict: 'approved',
-      bypass: true,
-      bonusEligible: false,                // bypass disqualifies bonus
-      analysis: analysisResult ?? undefined,
-    })
-  }
-
-  /** Used by case A modal "Publier" — confirm the AI-validated submission */
-  function handleConfirmedSubmit() {
-    if (!analysisResult) return
-    setAnalyzeModal(null)
-    submitForm({
-      asDraft: false,
-      aiVerdict: 'approved',
-      bypass: false,
-      bonusEligible: analysisResult.description_bonus_eligible,
-      analysis: analysisResult,
+      aiVerdict: 'rejected',
+      bonusEligible: false,
+      analysis: result,
+      rejectionReason: reason || null,
     })
   }
 
@@ -224,17 +185,17 @@ export function MultiStepSubmitForm({
       return
     }
     setError(null)
-    return submitForm({ asDraft, aiVerdict: null, bypass: false, bonusEligible: false })
+    return submitForm({ asDraft, aiVerdict: null, bonusEligible: false })
   }
 
   function submitForm(opts: {
     asDraft: boolean
-    aiVerdict: 'approved' | 'skipped' | 'human_review' | null
-    bypass: boolean
+    aiVerdict: 'approved' | 'rejected' | 'skipped' | 'human_review' | null
     bonusEligible: boolean
     analysis?: AnalysisResult
+    rejectionReason?: string | null
   }) {
-    const { asDraft, aiVerdict, bypass, bonusEligible, analysis } = opts
+    const { asDraft, aiVerdict, bonusEligible, analysis, rejectionReason } = opts
     const fd = new FormData()
     fd.set('challengeId', challengeId)
     fd.set('coverUrl', coverUrl!)
@@ -248,9 +209,10 @@ export function MultiStepSubmitForm({
 
     if (!asDraft && aiVerdict) {
       fd.set('aiVerdict', aiVerdict)
-      fd.set('aiAnalysisBypassed', bypass ? 'true' : 'false')
+      fd.set('aiAnalysisBypassed', 'false')
       fd.set('descriptionBonusEligible', bonusEligible ? 'true' : 'false')
       if (analysis) fd.set('aiAnalysis', JSON.stringify(analysis))
+      if (rejectionReason) fd.set('rejectionReason', rejectionReason)
     }
 
     startTransition(async () => {
@@ -421,11 +383,7 @@ export function MultiStepSubmitForm({
                   className="gap-2"
                 >
                   {(isPending || analyzing) ? <Loader2 className="size-4 animate-spin" /> : null}
-                  {analyzing
-                    ? t.aiVerdict.analyzeRunning
-                    : canRequestHumanReview
-                      ? t.aiVerdict.requestHumanReview
-                      : t.publish}
+                  {analyzing ? t.aiVerdict.analyzeRunning : t.publish}
                 </Button>
               </div>
             </>
@@ -460,20 +418,6 @@ export function MultiStepSubmitForm({
         </div>
       )}
 
-      {/* Result modal — case A (success), B (warning, 1 rejected), C (blocking, 2+ rejected) */}
-      {analyzeModal && analysisResult && (
-        <AnalysisResultModal
-          mode={analyzeModal}
-          result={analysisResult}
-          rejectionCount={aiRejectionCount}
-          humanReviewThreshold={HUMAN_REVIEW_THRESHOLD}
-          onEditImages={() => { setAnalyzeModal(null); setStep(1) }}
-          onSubmitAnyway={handleBypassSubmit}
-          onConfirmSubmit={handleConfirmedSubmit}
-          t={t.aiVerdict.modal}
-          publishLabel={t.publish}
-        />
-      )}
     </div>
   )
 }

@@ -26,6 +26,7 @@ interface SubmissionLite {
   total_likes?: number | null
   comments_count?: number | null
   validation_status?: string | null
+  rejection_reason?: string | null
   created_at?: string | null
   user_id: string
 }
@@ -342,6 +343,27 @@ export function SubmissionDetailContent({
 
       {/* Body content under sticky header */}
       <div className="space-y-4 mt-4 sm:pb-0 pb-24">
+      {/* AI brief verdict — public (match → XP, no-match → published without XP) */}
+      {(submission.validation_status === 'approved' || submission.validation_status === 'rejected') && (
+        <div className={cn(
+          'rounded-2xl border p-4',
+          submission.validation_status === 'approved'
+            ? 'border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/60 dark:bg-emerald-950/20'
+            : 'border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20',
+        )}>
+          <p className={cn(
+            'text-sm font-semibold',
+            submission.validation_status === 'approved'
+              ? 'text-emerald-700 dark:text-emerald-400'
+              : 'text-amber-700 dark:text-amber-400',
+          )}>
+            {submission.validation_status === 'approved' ? t.briefVerdict.matches : t.briefVerdict.noMatch}
+          </p>
+          {submission.validation_status === 'rejected' && submission.rejection_reason && (
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{submission.rejection_reason}</p>
+          )}
+        </div>
+      )}
       {/* Cover (full container width) */}
       <div className="rounded-2xl border border-border overflow-hidden bg-card">
         <div className="relative aspect-video bg-muted">

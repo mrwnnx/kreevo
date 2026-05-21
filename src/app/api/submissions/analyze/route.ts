@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import {
   analyzeSubmissionForPublish,
-  shouldAutoValidate,
   MAX_PUBLISH_IMAGES,
   type ImageInput,
 } from '@/lib/utils/submissions'
@@ -40,15 +39,8 @@ export async function POST(req: Request) {
   if (!challenge) return NextResponse.json({ error: 'Challenge introuvable' }, { status: 404 })
 
   const leagueName = challenge.leagues?.name ?? null
-  // Higher leagues → admin review only, AI gate skipped
-  if (!shouldAutoValidate(leagueName)) {
-    return NextResponse.json({
-      skipped: true,
-      reason: 'Validation manuelle par un admin requise pour cette ligue.',
-      league: leagueName,
-    })
-  }
-
+  // AI no longer gates publishing — it analyzes every submission (all leagues) to
+  // produce an informational verdict (match / no-match) that drives XP only.
   const result = await analyzeSubmissionForPublish(challenge, images, title, description)
 
   // Audit log (fire-and-forget)

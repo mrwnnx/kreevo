@@ -20,7 +20,8 @@ export async function submitChallenge(formData: FormData) {
   const isDraft = formData.get('isDraft') === 'true'
   const isVisible = formData.get('isVisible') !== 'false'
   const photosRaw = formData.get('photos') as string | null
-  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'skipped' | 'human_review' | null
+  const aiVerdict = formData.get('aiVerdict') as 'approved' | 'rejected' | 'skipped' | 'human_review' | null
+  const rejectionReason = (formData.get('rejectionReason') as string | null) ?? null
   const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
   const aiBypassed = formData.get('aiAnalysisBypassed') === 'true'
   const descriptionBonusEligible = formData.get('descriptionBonusEligible') === 'true'
@@ -147,6 +148,14 @@ export async function submitChallenge(formData: FormData) {
       const applyBonus = !aiBypassed && descriptionBonusEligible
       const result = await approveSubmission(submissionId, null, { applyDescriptionBonus: applyBonus })
       bonusXp = result.bonusXp ?? 0
+    } else if (aiVerdict === 'rejected') {
+      // AI says the work doesn't match the brief → published but no XP. User can resubmit.
+      const { rejectSubmission } = await import('@/lib/utils/submissions')
+      await rejectSubmission(
+        submissionId,
+        rejectionReason || 'Ce travail ne semble pas correspondre au brief.',
+        null,
+      )
     } else if (aiVerdict === 'human_review') {
       // Case D: 3+ rejections accumulated → user requested human review
       await (supabaseAdmin as any)

@@ -490,6 +490,10 @@ export const fr = {
     },
     backFallback: 'Retour',
     backToHistory: 'Retour à l\'historique',
+    briefVerdict: {
+      matches: '✅ Ce travail correspond au brief',
+      noMatch: '⚠️ Ce travail ne correspond pas au brief',
+    },
     noPreview: 'Pas de preview',
     descriptionLabel: 'Description',
     seeFigma: 'Voir sur Figma →',
