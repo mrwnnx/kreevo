@@ -77,7 +77,7 @@ export function DashboardProfileHeader({
         )}
         <ProBadge
           plan={profile.plan}
-          size={28}
+          size={36}
           className="absolute top-0 right-0"
         />
       </div>
