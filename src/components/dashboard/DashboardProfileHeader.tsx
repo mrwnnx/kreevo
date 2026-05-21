@@ -76,7 +76,7 @@ export function DashboardProfileHeader({
           </div>
         )}
         {(profile.plan === 'pro' || profile.plan === 'studio') && (
-          <span className="absolute top-0 right-0 rounded-full overflow-hidden shadow-[0_0_0_3px_#fff]">
+          <span className="absolute -top-1 right-0 rounded-full overflow-hidden shadow-[0_0_0_3px_#fff]">
             <ProBadge plan={profile.plan} size={36} className="block scale-[1.32]" />
           </span>
         )}
