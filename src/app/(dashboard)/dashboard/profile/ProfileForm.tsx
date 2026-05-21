@@ -1,17 +1,26 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, Plus, Search, X, CheckCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { AvatarUpload } from '@/components/features/dashboard/AvatarUpload'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types/database.types'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-import { TOOLS_BY_SPECIALTY, type Specialty, type ExperienceLevel, type Objective } from '@/components/onboarding/types'
+import { TOOLS_BY_SPECIALTY, JOB_TITLES, type Specialty, type ExperienceLevel, type Objective } from '@/components/onboarding/types'
 import {
   SOCIAL_DEFS,
   SUGGESTED_BY_SPECIALTY,
@@ -29,22 +38,6 @@ const ICONS = {
   getting_hired: '💼',
   improving_skills: '📈',
 }
-
-const JOB_TITLES = [
-  'Product Designer',
-  'UX Designer',
-  'UI Designer',
-  'UX/UI Designer',
-  'UX Researcher',
-  'Graphic Designer',
-  'Brand Designer',
-  'Visual Designer',
-  'Motion Designer',
-  'Design Lead',
-  'Art Director',
-  'Design Student',
-  'Freelance Designer',
-] as const
 
 const isValidUrl = (v: string) => v.length === 0 || v.trim().toLowerCase().startsWith('https://')
 
@@ -95,8 +88,12 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   const [username, setUsername] = useState(profile.username ?? '')
   const [country, setCountry] = useState(profile.country ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
+  const router = useRouter()
   const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
-  const specialtyLocked = Boolean(detectSpecialty(profile.specialty))
+  // A discipline switch is only allowed while in Stone/Bronze; locked from Silver up.
+  const UNLOCKED_LEAGUES = ['stone', '7ajra', 'bronze']
+  const specialtyLocked = !UNLOCKED_LEAGUES.includes((profile.league ?? 'stone').toLowerCase())
+  const [pendingSpecialty, setPendingSpecialty] = useState<'ux_ui' | 'graphic' | null>(null)
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
   const [jobTitle, setJobTitle] = useState(profile.job_title ?? '')
   const [jobTitleOpen, setJobTitleOpen] = useState(false)
@@ -325,6 +322,8 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
         setStatus('saved')
         if (savedTimer.current) clearTimeout(savedTimer.current)
         savedTimer.current = setTimeout(() => setStatus('idle'), 2000)
+        // Specialty switch reset XP/league server-side → refresh to reflect it.
+        if (data?.specialtyReset) router.refresh()
       } catch {
         setStatus('error')
         setErrorMsg(t.networkError)
@@ -528,7 +527,10 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               <button
                 key={s.value}
                 type="button"
-                onClick={() => !specialtyLocked && setSpecialty(s.value)}
+                onClick={() => {
+                  if (specialtyLocked || s.value === specialty) return
+                  setPendingSpecialty(s.value)
+                }}
                 disabled={disabled}
                 aria-disabled={disabled}
                 className={cn(
@@ -556,6 +558,32 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             )
           })}
         </div>
+
+        <Dialog
+          open={pendingSpecialty !== null}
+          onOpenChange={(open) => { if (!open) setPendingSpecialty(null) }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t.specialty.changeTitle}</DialogTitle>
+              <DialogDescription>{t.specialty.changeBody}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPendingSpecialty(null)}>
+                {t.specialty.changeCancel}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (pendingSpecialty) setSpecialty(pendingSpecialty)
+                  setPendingSpecialty(null)
+                }}
+              >
+                {t.specialty.changeConfirm}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="pt-2">
           <Label className="text-sm font-semibold mb-3 block">{t.sections.experienceLevel}</Label>

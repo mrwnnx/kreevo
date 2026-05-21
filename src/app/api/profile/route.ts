@@ -42,21 +42,34 @@ export async function PATCH(request: Request) {
     if (existing) return NextResponse.json({ error: 'Username already taken' }, { status: 409 })
   }
 
+  // Specialty change: allowed only while in Stone/Bronze (forfeits progression
+  // and restarts from zero), locked from Silver and above.
+  let specialtyReset = false
   if ('specialty' in update && update.specialty) {
     const { data: current } = await (supabase as any)
       .from('profiles')
-      .select('specialty, onboarding_completed')
+      .select('specialty, onboarding_completed, league')
       .eq('id', user.id)
       .single()
-    if (
+    const changing =
       current?.onboarding_completed &&
       current?.specialty &&
       current.specialty !== update.specialty
-    ) {
-      return NextResponse.json(
-        { error: 'Specialty cannot be changed once selected' },
-        { status: 403 },
-      )
+    if (changing) {
+      // Tiers that still allow a free discipline switch.
+      const UNLOCKED = ['stone', '7ajra', 'bronze']
+      const currentLeague = (current.league ?? 'Stone').toLowerCase()
+      if (!UNLOCKED.includes(currentLeague)) {
+        return NextResponse.json(
+          { error: 'Specialty cannot be changed from Silver onward', code: 'SPECIALTY_LOCKED' },
+          { status: 403 },
+        )
+      }
+      // Allowed: forfeit progression and restart in the new discipline.
+      update.xp = 0
+      update.league = 'Stone'
+      update.league_entered_at = new Date().toISOString()
+      specialtyReset = true
     }
   }
 
@@ -79,5 +92,5 @@ export async function PATCH(request: Request) {
     .eq('id', user.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, specialtyReset })
 }
