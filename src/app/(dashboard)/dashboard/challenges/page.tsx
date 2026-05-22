@@ -340,14 +340,14 @@ export default async function ChallengesPage({
             <p className="text-base text-muted-foreground">{t.motivation}</p>
           </div>
           {userLeagueRow && (
-            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/50 dark:border-white/15 bg-gradient-to-b from-white/55 to-white/20 dark:from-white/15 dark:to-white/5 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5 ring-1 ring-inset ring-white/30 px-2 py-2">
-              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-foreground">
+            <div className="inline-flex items-center gap-3 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 px-2 py-2">
+              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-zinc-900">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/xp-flash.svg" alt="" className="size-4" />
                 {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()} {t.xp}
               </span>
-              <span className="h-4 w-px bg-foreground/15" />
-              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-foreground">
+              <span className="h-4 w-px bg-zinc-200" />
+              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-zinc-900">
                 <Trophy className="size-4 text-violet-500" />
                 {leagueChallengesCompleted} / {minCh} {t.challengesCompleted}
               </span>
