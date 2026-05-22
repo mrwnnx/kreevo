@@ -89,3 +89,20 @@ export async function resetPassword(formData: FormData) {
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
   return { success: dict.auth.common.resetSent }
 }
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const dict = await getDict()
+  const password = formData.get('password') as string
+
+  if (!password || password.length < 8) {
+    return { error: dict.auth.errors.weakPassword }
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: dict.auth.errors.sessionExpired }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
+  return { success: dict.auth.updatePassword.success }
+}

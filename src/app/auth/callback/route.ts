@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
   const origin = requestUrl.origin
+  // Honor ?next= (e.g. password recovery → /update-password). Same-site paths only.
+  const nextParam = requestUrl.searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') ? nextParam : '/dashboard'
 
   if (error) {
     console.error('OAuth error:', error, errorDescription)
@@ -124,5 +127,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`)
+  return NextResponse.redirect(`${origin}${next}`)
 }
