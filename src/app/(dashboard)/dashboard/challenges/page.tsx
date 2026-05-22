@@ -2,20 +2,26 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, Users, ChevronRight, Check } from 'lucide-react'
+import { Lock, Zap, Trophy, Clock, Users, ArrowRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
 import { getDict, tx } from '@/lib/i18n/lang'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-// ── Specialty visual config ───────────────────────────────────────────────────
-const SPECIALTY_VISUAL: Record<string, { icon: string; bgClass: string }> = {
-  'UX Designer':      { icon: '📱', bgClass: 'bg-blue-50 dark:bg-blue-950/40' },
-  'UI Designer':      { icon: '🎨', bgClass: 'bg-violet-50 dark:bg-violet-950/40' },
-  'Graphic Designer': { icon: '✏️', bgClass: 'bg-amber-50 dark:bg-amber-950/40' },
-}
-const DEFAULT_VISUAL = { icon: '🎨', bgClass: 'bg-muted' }
+// ── Pastel palette — each card a different hue, all at a uniform 95% lightness ──
+// Top block: hsl(H, S%, 95%) in light / hsl(H, 40%, 13%) in dark. Pills slightly darker.
+const PASTELS: { top: string; pill: string }[] = [
+  { top: 'bg-[hsl(217,91%,95%)] dark:bg-[hsl(217,40%,13%)]', pill: 'bg-[hsl(217,75%,86%)] text-[hsl(217,55%,30%)] dark:bg-[hsl(217,40%,24%)] dark:text-[hsl(217,70%,82%)]' },
+  { top: 'bg-[hsl(25,95%,95%)] dark:bg-[hsl(25,40%,13%)]',   pill: 'bg-[hsl(25,80%,86%)] text-[hsl(25,60%,32%)] dark:bg-[hsl(25,40%,24%)] dark:text-[hsl(25,75%,82%)]' },
+  { top: 'bg-[hsl(263,85%,95%)] dark:bg-[hsl(263,40%,13%)]', pill: 'bg-[hsl(263,70%,86%)] text-[hsl(263,50%,32%)] dark:bg-[hsl(263,40%,24%)] dark:text-[hsl(263,65%,82%)]' },
+  { top: 'bg-[hsl(152,60%,95%)] dark:bg-[hsl(152,35%,13%)]', pill: 'bg-[hsl(152,50%,84%)] text-[hsl(152,45%,28%)] dark:bg-[hsl(152,35%,24%)] dark:text-[hsl(152,55%,80%)]' },
+  { top: 'bg-[hsl(350,89%,95%)] dark:bg-[hsl(350,40%,13%)]', pill: 'bg-[hsl(350,75%,86%)] text-[hsl(350,55%,34%)] dark:bg-[hsl(350,40%,24%)] dark:text-[hsl(350,70%,82%)]' },
+  { top: 'bg-[hsl(190,80%,95%)] dark:bg-[hsl(190,40%,13%)]', pill: 'bg-[hsl(190,65%,84%)] text-[hsl(190,55%,28%)] dark:bg-[hsl(190,40%,24%)] dark:text-[hsl(190,65%,80%)]' },
+  { top: 'bg-[hsl(43,96%,95%)] dark:bg-[hsl(43,40%,13%)]',   pill: 'bg-[hsl(43,85%,84%)] text-[hsl(43,70%,30%)] dark:bg-[hsl(43,40%,24%)] dark:text-[hsl(43,80%,80%)]' },
+  { top: 'bg-[hsl(290,80%,95%)] dark:bg-[hsl(290,40%,13%)]', pill: 'bg-[hsl(290,65%,86%)] text-[hsl(290,50%,34%)] dark:bg-[hsl(290,40%,24%)] dark:text-[hsl(290,65%,82%)]' },
+]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LeagueRow {
@@ -35,21 +41,23 @@ type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocke
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, participantCount, t,
+  challenge, status, participantCount, participants, colorIndex = 0, t,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
   participantCount?: number
   participants?: Array<{ username: string; avatar_url: string | null }>
+  colorIndex?: number
   t: Dictionary['challengesPage']
 }) {
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
-  const visual = SPECIALTY_VISUAL[challenge.specialty ?? ''] ?? DEFAULT_VISUAL
+  const style = PASTELS[colorIndex % PASTELS.length]
+  const tags = [challenge.specialty, challenge.challenge_type, challenge.industry].filter(Boolean) as string[]
 
   const card = (
     <div className={cn(
-      'group relative block rounded-[24px] border bg-card p-5 transition-all duration-150',
-      status === 'available' && 'border-border hover:shadow-md hover:border-primary/30',
+      'group relative block rounded-[28px] border bg-card overflow-hidden p-2 transition-all duration-150',
+      status === 'available' && 'border-border hover:shadow-lg',
       status === 'active'    && 'border-green-400 dark:border-green-600 shadow-sm shadow-green-500/10',
       status === 'completed' && 'border-border/60',
       status === 'locked'    && 'border-border opacity-50 cursor-default',
@@ -57,43 +65,39 @@ function ChallengeCard({
     )}>
 
       {status === 'blocked' && (
-        <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] z-10 p-4">
+        <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center z-10 p-4">
           <p className="text-xs text-center text-muted-foreground font-medium leading-relaxed">
             {t.blockedOverlay}
           </p>
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <div className={cn(
-          'size-11 rounded-2xl flex items-center justify-center text-2xl',
-          visual.bgClass,
-        )}>
-          {visual.icon}
+      {/* Pastel inner frame */}
+      <div className={cn('rounded-[20px] p-4', style.top)}>
+        {/* Title + description grouped (same auto-layout) */}
+        <div>
+          <h3 className="text-xl font-bold text-foreground leading-tight line-clamp-1">
+            {challenge.title}
+          </h3>
+          <p className="mt-1 text-sm text-foreground/70 leading-snug line-clamp-2 min-h-[2.5rem]">
+            {challenge.brief}
+          </p>
         </div>
-        {challenge.industry && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {challenge.industry}
-          </span>
+        {tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span key={tag} className={cn('rounded-lg px-3 py-1 text-sm font-medium', style.pill)}>
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
-      </div>
 
-      <h3 className={cn(
-        'text-base font-semibold text-foreground mb-1 leading-tight line-clamp-2',
-        isClickable && 'group-hover:text-primary transition-colors',
-      )}>
-        {challenge.title}
-      </h3>
-
-      <p className="text-sm text-muted-foreground leading-snug mb-4 line-clamp-2">
-        {challenge.brief}
-      </p>
-
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-3 text-muted-foreground">
+        {/* XP + deadline (inside the colored frame) */}
+        <div className="mt-3 flex items-center gap-3 text-xs text-foreground/80">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
             <span className="flex items-center gap-1">
-              <Zap className="size-3.5 text-amber-500" />
+              <Zap className="size-3.5" />
               <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> {t.xp}
             </span>
           )}
@@ -103,23 +107,47 @@ function ChallengeCard({
               <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>{t.daysSuffix}
             </span>
           )}
-          <span className="flex items-center gap-1">
-            <Users className="size-3.5" />
-            <strong className="font-semibold text-foreground">{participantCount ?? 0}</strong>
-          </span>
+        </div>
+      </div>
+
+      {/* White footer: meta + round arrow button */}
+      <div className="flex items-center justify-between px-2 py-3">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          {status === 'active' && (
+            <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+              <span className="size-1.5 rounded-full bg-green-500 animate-pulse" /> {t.inProgress}
+            </span>
+          )}
+          {participants && participants.length > 0 ? (
+            <div className="flex items-center gap-2">
+              <AvatarGroup data-size="sm">
+                {participants.slice(0, 3).map((p) => (
+                  <Avatar key={p.username} size="sm">
+                    {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
+                    <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+              <strong className="font-semibold text-foreground">{participantCount ?? participants.length}</strong>
+            </div>
+          ) : (
+            <span className="flex items-center gap-1">
+              <Users className="size-3.5" />
+              <strong className="font-semibold text-foreground">{participantCount ?? 0}</strong>
+            </span>
+          )}
         </div>
 
-        {status === 'active' && (
-          <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="font-medium">{t.inProgress}</span>
-          </span>
-        )}
-        {status === 'completed' && <Check className="size-4 text-green-600 dark:text-green-400" />}
-        {status === 'locked' && <Lock className="size-4 text-muted-foreground" />}
-        {status === 'available' && (
-          <ChevronRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-        )}
+        <span className={cn(
+          'size-9 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+          status === 'completed' && 'border-green-400 text-green-600 dark:text-green-400',
+          status === 'locked'    && 'border-border text-muted-foreground',
+          (status === 'available' || status === 'active') && 'border-border text-foreground group-hover:bg-foreground group-hover:text-background',
+        )}>
+          {status === 'completed' ? <Check className="size-4" />
+            : status === 'locked' ? <Lock className="size-4" />
+            : <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />}
+        </span>
       </div>
     </div>
   )
@@ -412,8 +440,8 @@ export default async function ChallengesPage({
           }
 
           return (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visible.map(c => {
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {visible.map((c, i) => {
                 let status: ChallengeStatus = 'available'
                 if (submittedIds.has(c.id))            status = 'completed'
                 else if (activeChallId === c.id)        status = 'active'
@@ -427,6 +455,7 @@ export default async function ChallengesPage({
                     status={status}
                     participantCount={partCounts[c.id]}
                     participants={participantsByChallenge[c.id]}
+                    colorIndex={i}
                     t={t}
                   />
                 )
