@@ -7,6 +7,7 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 type Props = {
   profile: any
   userRank: number
+  totalInLeague: number
   completedTotal: number
   completedThisWeek: number
   xpToday: number
@@ -18,6 +19,7 @@ type Props = {
 export function StatCards({
   profile,
   userRank,
+  totalInLeague,
   completedTotal,
   completedThisWeek,
   xpToday,
@@ -27,6 +29,7 @@ export function StatCards({
 }: Props) {
   const leagueName = userLeague?.name || (profile?.league === '7ajra' ? 'Stone' : profile?.league) || 'Stone'
   const leagueIcon = userLeague?.icon || '🪨'
+  const topPercent = Math.min(100, Math.max(1, Math.ceil((userRank / Math.max(totalInLeague, 1)) * 100)))
   const stats: Array<{
     label: string
     icon: ReactNode
@@ -63,7 +66,7 @@ export function StatCards({
     {
       label: t.rank,
       icon: <Medal className="w-4 h-4 text-sky-500" />,
-      value: `#${userRank}`,
+      value: `Top ${topPercent}%`,
       subtext: t.rankSubtext,
       valueClass: 'text-xl font-bold text-sky-600',
     },
