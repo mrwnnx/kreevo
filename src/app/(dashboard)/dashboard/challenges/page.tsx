@@ -84,10 +84,10 @@ function ChallengeCard({
         {/* Title + description grouped (same auto-layout) */}
         <div>
           <div className="text-3xl mb-6 leading-none">{emoji}</div>
-          <h3 className="text-xl font-bold text-foreground leading-tight line-clamp-2">
+          <h3 className="text-xl font-bold text-foreground leading-tight line-clamp-1">
             {challenge.title}
           </h3>
-          <p className="mt-1 text-sm text-foreground/70 leading-snug">
+          <p className="mt-1 text-sm text-foreground/70 leading-snug line-clamp-2 min-h-[2.5rem]">
             {challenge.brief}
           </p>
         </div>
@@ -442,7 +442,7 @@ export default async function ChallengesPage({
           }
 
           return (
-            <div className="columns-1 sm:columns-2 lg:columns-4 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {visible.map((c, i) => {
                 let status: ChallengeStatus = 'available'
                 if (submittedIds.has(c.id))            status = 'completed'
@@ -451,16 +451,15 @@ export default async function ChallengesPage({
                 else if (isProGated)                    status = 'locked'
 
                 return (
-                  <div key={c.id} className="break-inside-avoid mb-4">
-                    <ChallengeCard
-                      challenge={c}
-                      status={status}
-                      participantCount={partCounts[c.id]}
-                      participants={participantsByChallenge[c.id]}
-                      colorIndex={i}
-                      t={t}
-                    />
-                  </div>
+                  <ChallengeCard
+                    key={c.id}
+                    challenge={c}
+                    status={status}
+                    participantCount={partCounts[c.id]}
+                    participants={participantsByChallenge[c.id]}
+                    colorIndex={i}
+                    t={t}
+                  />
                 )
               })}
             </div>
