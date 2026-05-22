@@ -60,7 +60,7 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
   // Banner (optional) — full-width image at the top of the card.
   const banner = tpl.banner_url
     ? `<tr><td style="padding:0;font-size:0;line-height:0;">
-        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;max-height:150px;object-fit:cover;border:0;">
+        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;max-height:100px;object-fit:cover;border:0;">
       </td></tr>`
     : ''
 
@@ -90,7 +90,7 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
   <p style="text-align:center;font-family:${FONT};font-weight:800;font-size:19px;letter-spacing:-.02em;color:#9ca3af;margin:0 0 18px;">kreevo</p>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
     ${banner}
-    <tr><td style="padding:36px;">
+    <tr><td style="padding:18px 36px 36px;">
       <h1 style="margin:0 0 18px;font-family:${FONT};font-size:21px;font-weight:600;color:#111111;letter-spacing:-.01em;">${prepare(tpl.title, vars)}</h1>
       ${paragraphs(tpl.body, vars)}
       ${button ? `<div style="margin-top:26px;">${button}</div>` : ''}
