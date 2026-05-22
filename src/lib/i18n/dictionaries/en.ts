@@ -67,6 +67,8 @@ export const en: Dictionary = {
       league: 'LEAGUE',
       totalXp: 'TOTAL XP',
       streak: 'STREAK',
+      rank: 'RANK',
+      rankSubtext: 'In your league',
       challenges: 'CHALLENGES',
       tierOf: 'Tier {n} of 8',
       xpToday: '+{n} XP today',

@@ -295,7 +295,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <StatCards
         profile={profile}
-        streak={streak}
+        userRank={userRank}
         completedTotal={totalCompleted}
         completedThisWeek={completedThisWeek}
         xpToday={xpToday}

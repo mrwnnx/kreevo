@@ -1,4 +1,4 @@
-import { Trophy, Zap, Target } from 'lucide-react'
+import { Trophy, Zap, Target, Medal } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { tx } from '@/lib/i18n/tx'
@@ -6,7 +6,7 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type Props = {
   profile: any
-  streak: any
+  userRank: number
   completedTotal: number
   completedThisWeek: number
   xpToday: number
@@ -17,7 +17,7 @@ type Props = {
 
 export function StatCards({
   profile,
-  streak,
+  userRank,
   completedTotal,
   completedThisWeek,
   xpToday,
@@ -61,14 +61,11 @@ export function StatCards({
       valueClass: 'text-xl font-bold text-green-500',
     },
     {
-      label: t.streak,
-      icon: <span className="text-base leading-none">🔥</span>,
-      value: `${streak?.current_streak || 0}d`,
-      subtext:
-        streak?.current_streak === streak?.longest_streak && streak?.current_streak > 0
-          ? t.personalBest
-          : tx(t.best, { n: streak?.longest_streak || 0 }),
-      valueClass: 'text-xl font-bold text-orange-500',
+      label: t.rank,
+      icon: <Medal className="w-4 h-4 text-sky-500" />,
+      value: `#${userRank}`,
+      subtext: t.rankSubtext,
+      valueClass: 'text-xl font-bold text-sky-600',
     },
   ]
 
