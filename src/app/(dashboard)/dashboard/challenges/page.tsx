@@ -12,15 +12,15 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── Pastel palette — each card a different hue, all at a uniform 95% lightness ──
 // Top block: hsl(H, S%, 95%) in light / hsl(H, 40%, 13%) in dark. Pills slightly darker.
-const PASTELS: { top: string; pill: string }[] = [
-  { top: 'bg-[hsl(217,91%,95%)] dark:bg-[hsl(217,40%,13%)]', pill: 'bg-[hsl(217,75%,86%)] text-[hsl(217,55%,30%)] dark:bg-[hsl(217,40%,24%)] dark:text-[hsl(217,70%,82%)]' },
-  { top: 'bg-[hsl(25,95%,95%)] dark:bg-[hsl(25,40%,13%)]',   pill: 'bg-[hsl(25,80%,86%)] text-[hsl(25,60%,32%)] dark:bg-[hsl(25,40%,24%)] dark:text-[hsl(25,75%,82%)]' },
-  { top: 'bg-[hsl(263,85%,95%)] dark:bg-[hsl(263,40%,13%)]', pill: 'bg-[hsl(263,70%,86%)] text-[hsl(263,50%,32%)] dark:bg-[hsl(263,40%,24%)] dark:text-[hsl(263,65%,82%)]' },
-  { top: 'bg-[hsl(152,60%,95%)] dark:bg-[hsl(152,35%,13%)]', pill: 'bg-[hsl(152,50%,84%)] text-[hsl(152,45%,28%)] dark:bg-[hsl(152,35%,24%)] dark:text-[hsl(152,55%,80%)]' },
-  { top: 'bg-[hsl(350,89%,95%)] dark:bg-[hsl(350,40%,13%)]', pill: 'bg-[hsl(350,75%,86%)] text-[hsl(350,55%,34%)] dark:bg-[hsl(350,40%,24%)] dark:text-[hsl(350,70%,82%)]' },
-  { top: 'bg-[hsl(190,80%,95%)] dark:bg-[hsl(190,40%,13%)]', pill: 'bg-[hsl(190,65%,84%)] text-[hsl(190,55%,28%)] dark:bg-[hsl(190,40%,24%)] dark:text-[hsl(190,65%,80%)]' },
-  { top: 'bg-[hsl(43,96%,95%)] dark:bg-[hsl(43,40%,13%)]',   pill: 'bg-[hsl(43,85%,84%)] text-[hsl(43,70%,30%)] dark:bg-[hsl(43,40%,24%)] dark:text-[hsl(43,80%,80%)]' },
-  { top: 'bg-[hsl(290,80%,95%)] dark:bg-[hsl(290,40%,13%)]', pill: 'bg-[hsl(290,65%,86%)] text-[hsl(290,50%,34%)] dark:bg-[hsl(290,40%,24%)] dark:text-[hsl(290,65%,82%)]' },
+const PASTELS: { top: string; pill: string; xp: string }[] = [
+  { top: 'bg-[hsl(217,91%,95%)] dark:bg-[hsl(217,40%,13%)]', pill: 'bg-[hsl(217,75%,86%)] text-[hsl(217,55%,30%)] dark:bg-[hsl(217,40%,24%)] dark:text-[hsl(217,70%,82%)]', xp: 'bg-gradient-to-r from-[hsl(217,85%,52%)] to-[hsl(250,80%,58%)] text-white' },
+  { top: 'bg-[hsl(25,95%,95%)] dark:bg-[hsl(25,40%,13%)]',   pill: 'bg-[hsl(25,80%,86%)] text-[hsl(25,60%,32%)] dark:bg-[hsl(25,40%,24%)] dark:text-[hsl(25,75%,82%)]',   xp: 'bg-gradient-to-r from-[hsl(25,90%,54%)] to-[hsl(350,82%,58%)] text-white' },
+  { top: 'bg-[hsl(263,85%,95%)] dark:bg-[hsl(263,40%,13%)]', pill: 'bg-[hsl(263,70%,86%)] text-[hsl(263,50%,32%)] dark:bg-[hsl(263,40%,24%)] dark:text-[hsl(263,65%,82%)]', xp: 'bg-gradient-to-r from-[hsl(263,75%,58%)] to-[hsl(300,70%,58%)] text-white' },
+  { top: 'bg-[hsl(152,60%,95%)] dark:bg-[hsl(152,35%,13%)]', pill: 'bg-[hsl(152,50%,84%)] text-[hsl(152,45%,28%)] dark:bg-[hsl(152,35%,24%)] dark:text-[hsl(152,55%,80%)]', xp: 'bg-gradient-to-r from-[hsl(152,55%,40%)] to-[hsl(180,62%,42%)] text-white' },
+  { top: 'bg-[hsl(350,89%,95%)] dark:bg-[hsl(350,40%,13%)]', pill: 'bg-[hsl(350,75%,86%)] text-[hsl(350,55%,34%)] dark:bg-[hsl(350,40%,24%)] dark:text-[hsl(350,70%,82%)]', xp: 'bg-gradient-to-r from-[hsl(350,80%,58%)] to-[hsl(20,85%,58%)] text-white' },
+  { top: 'bg-[hsl(190,80%,95%)] dark:bg-[hsl(190,40%,13%)]', pill: 'bg-[hsl(190,65%,84%)] text-[hsl(190,55%,28%)] dark:bg-[hsl(190,40%,24%)] dark:text-[hsl(190,65%,80%)]', xp: 'bg-gradient-to-r from-[hsl(190,80%,42%)] to-[hsl(217,82%,52%)] text-white' },
+  { top: 'bg-[hsl(43,96%,95%)] dark:bg-[hsl(43,40%,13%)]',   pill: 'bg-[hsl(43,85%,84%)] text-[hsl(43,70%,30%)] dark:bg-[hsl(43,40%,24%)] dark:text-[hsl(43,80%,80%)]',   xp: 'bg-gradient-to-r from-[hsl(43,92%,52%)] to-[hsl(25,90%,54%)] text-[hsl(30,80%,18%)]' },
+  { top: 'bg-[hsl(290,80%,95%)] dark:bg-[hsl(290,40%,13%)]', pill: 'bg-[hsl(290,65%,86%)] text-[hsl(290,50%,34%)] dark:bg-[hsl(290,40%,24%)] dark:text-[hsl(290,65%,82%)]', xp: 'bg-gradient-to-r from-[hsl(290,65%,55%)] to-[hsl(330,72%,56%)] text-white' },
 ]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -84,10 +84,10 @@ function ChallengeCard({
         {/* Title + description grouped (same auto-layout) */}
         <div>
           <div className="text-3xl mb-6 leading-none">{emoji}</div>
-          <h3 className="text-xl font-bold text-foreground leading-tight">
+          <h3 className="text-2xl font-semibold text-foreground leading-tight">
             {challenge.title}
           </h3>
-          <p className="mt-1 text-sm text-foreground/70 leading-snug line-clamp-2 min-h-[2.5rem]">
+          <p className="mt-1 text-sm text-foreground/70 leading-snug">
             {challenge.brief}
           </p>
         </div>
@@ -101,17 +101,17 @@ function ChallengeCard({
           </div>
         )}
 
-        {/* XP + deadline (inside the colored frame) */}
-        <div className="flex items-center gap-3 text-xs text-foreground/80">
+        {/* XP + deadline — XP emphasized pill, deadline muted */}
+        <div className="flex flex-wrap items-center gap-3 text-sm">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
-            <span className="flex items-center gap-1">
-              <Zap className="size-3.5" />
-              <strong className="font-semibold text-foreground">{challenge.xp_reward}</strong> {t.xp}
+            <span className={cn('inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold', style.xp)}>
+              <Zap className="size-4" />
+              {challenge.xp_reward} {t.xp}
             </span>
           )}
           {challenge.deadline_days != null && (
-            <span className="flex items-center gap-1">
-              <Clock className="size-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="size-4" />
               <strong className="font-semibold text-foreground">{challenge.deadline_days}</strong>{t.daysSuffix}
             </span>
           )}
