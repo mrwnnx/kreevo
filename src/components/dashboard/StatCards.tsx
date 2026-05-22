@@ -54,6 +54,13 @@ export function StatCards({
       valueClass: 'text-xl font-bold text-violet-600',
     },
     {
+      label: t.challenges,
+      icon: <Target className="w-4 h-4 text-green-500" />,
+      value: (completedTotal || 0).toString(),
+      subtext: completedThisWeek > 0 ? tx(t.thisWeek, { n: completedThisWeek }) : t.completeFirst,
+      valueClass: 'text-xl font-bold text-green-500',
+    },
+    {
       label: t.streak,
       icon: <span className="text-base leading-none">🔥</span>,
       value: `${streak?.current_streak || 0}d`,
@@ -62,13 +69,6 @@ export function StatCards({
           ? t.personalBest
           : tx(t.best, { n: streak?.longest_streak || 0 }),
       valueClass: 'text-xl font-bold text-orange-500',
-    },
-    {
-      label: t.challenges,
-      icon: <Target className="w-4 h-4 text-green-500" />,
-      value: (completedTotal || 0).toString(),
-      subtext: completedThisWeek > 0 ? tx(t.thisWeek, { n: completedThisWeek }) : t.completeFirst,
-      valueClass: 'text-xl font-bold text-green-500',
     },
   ]
 
