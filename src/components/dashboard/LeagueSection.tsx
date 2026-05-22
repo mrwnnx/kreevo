@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, ArrowRight, Sparkles, Zap } from 'lucide-react'
+import { TrendingUp, ArrowRight, Sparkles } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import {
   Avatar,
   AvatarImage,
@@ -215,7 +216,7 @@ export function LeagueCountdownCard({
         {/* Meta : XP à gagner */}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5" title={t.xpReward}>
-            <Zap className="size-4 text-violet-500" />
+            <XpIcon className="size-4" />
             earn <strong className="font-semibold text-foreground">{xpReward}</strong> XP
           </span>
         </div>

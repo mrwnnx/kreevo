@@ -4,7 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
-import { Clock, ChevronLeft, Users, CheckCircle2, Zap, Play } from 'lucide-react'
+import { Clock, ChevronLeft, Users, CheckCircle2, Play } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import Link from 'next/link'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
@@ -117,7 +118,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {c.xp_reward != null && c.xp_reward > 0 && (
                 <span className="flex items-center gap-1.5">
-                  <Zap className="size-4 text-amber-500" />
+                  <XpIcon className="size-4" />
                   <strong className="text-foreground">{c.xp_reward}</strong> XP
                 </span>
               )}

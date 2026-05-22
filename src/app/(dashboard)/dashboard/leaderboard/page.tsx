@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Zap } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -200,7 +201,7 @@ export default async function LeaderboardPage({
             {/* XP */}
             <div className="text-right shrink-0">
               <div className="flex items-center gap-1 justify-end">
-                <Zap className="size-3 text-amber-500" />
+                <XpIcon className="size-3" />
                 <span className="text-sm font-bold font-mono">
                   {(myRankedUser?.leagueXp ?? 0).toLocaleString()}
                 </span>
@@ -326,7 +327,7 @@ export default async function LeaderboardPage({
 
                   {/* XP */}
                   <div className="flex items-center gap-1 shrink-0">
-                    <Zap className="size-3 text-amber-500" />
+                    <XpIcon className="size-3" />
                     <span className="text-sm font-bold font-mono">
                       {u.leagueXp.toLocaleString()}
                     </span>

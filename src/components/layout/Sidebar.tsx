@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { House, Trophy, BarChart3, Bell, ScrollText, ChevronRight, Zap } from 'lucide-react'
+import { House, Trophy, BarChart3, Bell, ScrollText, ChevronRight } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
@@ -90,7 +91,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
                 {leagueStyle.name}
               </span>
               <span className="ml-auto inline-flex items-center gap-0.5 text-xs font-mono text-muted-foreground">
-                <Zap className="size-3 text-violet-500" />
+                <XpIcon className="size-3" />
                 {profile.xp.toLocaleString()} XP
               </span>
             </div>

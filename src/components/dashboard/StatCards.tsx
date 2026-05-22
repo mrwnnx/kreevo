@@ -1,4 +1,5 @@
-import { Trophy, Zap, Target, Medal } from 'lucide-react'
+import { Trophy, Target, Medal } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import type { ReactNode } from 'react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { tx } from '@/lib/i18n/tx'
@@ -51,7 +52,7 @@ export function StatCards({
     },
     {
       label: t.totalXp,
-      icon: <Zap className="w-4 h-4 text-violet-500" />,
+      icon: <XpIcon className="w-4 h-4" />,
       value: (profile?.xp || 0).toLocaleString(),
       subtext: xpToday > 0 ? tx(t.xpToday, { n: xpToday }) : t.keepGoing,
       valueClass: 'text-xl font-bold text-violet-600',
