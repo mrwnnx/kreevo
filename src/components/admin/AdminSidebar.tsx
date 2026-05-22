@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
-  Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen,
+  Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen, LayoutTemplate,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,7 @@ const NAV = [
   { href: '/admin/moderation',   label: 'Modération',     icon: ShieldAlert, badge: true },
   { href: '/admin/feedbacks',    label: 'Feedbacks Pro',  icon: MessageSquare },
   { href: '/admin/emails',       label: 'Emails',         icon: Mail },
+  { href: '/admin/emails/templates', label: 'Templates email', icon: LayoutTemplate },
   { href: '/admin/help',         label: 'Help Center',    icon: BookOpen },
   { href: '/admin/design',       label: 'Design System',  icon: Palette },
   { href: '/admin/settings',     label: 'Paramètres',     icon: Settings },
@@ -37,8 +38,14 @@ export function AdminSidebar({ pendingMod = 0 }: { pendingMod?: number }) {
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
-        {NAV.map(({ href, label, icon: Icon, badge }) => {
-          const active = pathname.startsWith(href)
+        {(() => {
+          // Active = the longest NAV href that prefixes the current path (so /admin/emails/templates
+          // highlights "Templates email", not also "Emails").
+          const activeHref = NAV
+            .filter(n => pathname === n.href || pathname.startsWith(n.href + '/'))
+            .sort((a, b) => b.href.length - a.href.length)[0]?.href
+          return NAV.map(({ href, label, icon: Icon, badge }) => {
+          const active = href === activeHref
           return (
             <Link
               key={href}
@@ -59,7 +66,8 @@ export function AdminSidebar({ pendingMod = 0 }: { pendingMod?: number }) {
               )}
             </Link>
           )
-        })}
+          })
+        })()}
       </nav>
 
       <div className="border-t border-border px-3 py-3">
