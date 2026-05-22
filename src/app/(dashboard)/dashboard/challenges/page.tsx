@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, ArrowRight, Check } from 'lucide-react'
+import { Lock, Clock, ArrowRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -21,6 +21,16 @@ const PASTELS: { top: string; pill: string; xp: string }[] = [
   { top: 'bg-[hsl(190,80%,95%)] dark:bg-[hsl(190,40%,13%)]', pill: 'bg-[hsl(190,65%,84%)] text-[hsl(190,55%,28%)] dark:bg-[hsl(190,40%,24%)] dark:text-[hsl(190,65%,80%)]', xp: 'bg-gradient-to-br from-[hsl(185,92%,42%)] to-[hsl(232,90%,52%)] text-white' },
   { top: 'bg-[hsl(43,96%,95%)] dark:bg-[hsl(43,40%,13%)]',   pill: 'bg-[hsl(43,85%,84%)] text-[hsl(43,70%,30%)] dark:bg-[hsl(43,40%,24%)] dark:text-[hsl(43,80%,80%)]',   xp: 'bg-gradient-to-br from-[hsl(52,98%,54%)] to-[hsl(18,95%,52%)] text-[hsl(28,90%,13%)]' },
   { top: 'bg-[hsl(290,80%,95%)] dark:bg-[hsl(290,40%,13%)]', pill: 'bg-[hsl(290,65%,86%)] text-[hsl(290,50%,34%)] dark:bg-[hsl(290,40%,24%)] dark:text-[hsl(290,65%,82%)]', xp: 'bg-gradient-to-br from-[hsl(278,82%,54%)] to-[hsl(335,85%,54%)] text-white' },
+]
+
+// ── Floating avatar slots (right side of header card) — varied size/position/timing ──
+const AVATAR_SLOTS = [
+  { size: 66, top: '6%',  right: '5%',  dur: 4.6, delay: 0 },
+  { size: 44, top: '54%', right: '1%',  dur: 5.3, delay: 0.7 },
+  { size: 54, top: '28%', right: '20%', dur: 4.1, delay: 0.3 },
+  { size: 36, top: '72%', right: '26%', dur: 5.9, delay: 1.0 },
+  { size: 50, top: '4%',  right: '33%', dur: 4.9, delay: 0.2 },
+  { size: 40, top: '48%', right: '42%', dur: 5.6, delay: 1.2 },
 ]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -242,6 +252,21 @@ export default async function ChallengesPage({
   const userLeagueRow = leagues.find(l => l.name.toLowerCase() === userLeagueName.toLowerCase()) ?? null
   const userLeagueIndex = userLeagueRow?.order_index ?? 0
 
+  // Avatars of people who participated in this league's challenges (floating header)
+  const leagueChallengeIdSet = new Set(
+    challenges.filter(c => c.league_id === userLeagueRow?.id).map(c => c.id)
+  )
+  const leagueParticipantIds = [...new Set(
+    ((allPartRows ?? []) as any[])
+      .filter(p => leagueChallengeIdSet.has(p.challenge_id))
+      .map(p => p.user_id)
+  )]
+  const leagueAvatars = leagueParticipantIds
+    .map(id => profileById.get(id))
+    .filter((p): p is { username: string; avatar_url: string | null } => !!p)
+    .sort((a, b) => (b.avatar_url ? 1 : 0) - (a.avatar_url ? 1 : 0)) // avatars first
+    .slice(0, AVATAR_SLOTS.length)
+
   // XP threshold + completed count for current league
   let leagueXpThreshold = 0
   let leagueChallengesCompleted = 0
@@ -293,8 +318,6 @@ export default async function ChallengesPage({
   // Progress percentages
   const minCh = userLeagueRow?.min_challenges ?? 3
   const userXp = (profile?.xp ?? 0) as number
-  const xpPercent = leagueXpThreshold > 0 ? Math.min(100, Math.round((userXp / leagueXpThreshold) * 100)) : 0
-  const challengesPercent = Math.min(100, Math.round((leagueChallengesCompleted / minCh) * 100))
 
   const dict = await getDict()
   const t = dict.challengesPage
@@ -302,60 +325,36 @@ export default async function ChallengesPage({
   return (
     <div className="p-6 max-w-[960px] mx-auto pb-16 space-y-8">
 
-      {/* ── Header ── */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold">{t.title}</h2>
-          {userLeagueRow ? (
-            <p className="text-sm text-muted-foreground mt-1">
-              {t.currentLeague}{' '}
-              <span className="inline-flex items-center gap-1 font-semibold" style={{ color: userLeagueRow.color }}>
-                <LeagueIcon icon={userLeagueRow.icon} size="sm" />{userLeagueRow.name}
-              </span>
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground mt-1">
-              {t.joinFirst}
-            </p>
-          )}
+      {/* ── Header card (profile-card style) with floating league avatars ── */}
+      <div className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-violet-50 via-card to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 px-5 py-6 sm:px-8 sm:py-7">
+        <style>{`@keyframes kreevoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}`}</style>
+
+        <div className="relative z-10 space-y-2 max-w-[62%]">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">{t.title}</h1>
+          <p className="text-base text-muted-foreground">{t.motivation}</p>
         </div>
 
-        {/* Progress card */}
-        {userLeagueRow && leagueXpThreshold > 0 && (
-          <div className="rounded-2xl border border-border bg-card p-4 grid sm:grid-cols-2 gap-4">
-            {/* XP bar */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Zap className="size-3 text-amber-500" /> {t.xp}
-                </span>
-                <span className="font-mono font-semibold">
-                  {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
+        {leagueAvatars.length > 0 && (
+          <div className="absolute inset-y-0 right-0 w-1/2 hidden sm:block pointer-events-none">
+            {leagueAvatars.map((a, i) => {
+              const s = AVATAR_SLOTS[i]
+              return (
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
-                  style={{ width: `${xpPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Challenges bar */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Trophy className="size-3 text-violet-500" /> {t.challengesCompleted}
-                </span>
-                <span className="font-mono font-semibold">{leagueChallengesCompleted} / {minCh} {t.minSuffix}</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${challengesPercent}%` }}
-                />
-              </div>
-            </div>
+                  key={i}
+                  className="absolute rounded-full overflow-hidden ring-2 ring-white/80 dark:ring-white/15 shadow-lg"
+                  style={{ width: s.size, height: s.size, top: s.top, right: s.right, animation: `kreevoFloat ${s.dur}s ease-in-out ${s.delay}s infinite` }}
+                >
+                  {a.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={a.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center font-bold" style={{ fontSize: s.size * 0.4 }}>
+                      {a.username?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

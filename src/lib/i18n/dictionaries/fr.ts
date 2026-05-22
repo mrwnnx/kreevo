@@ -655,6 +655,7 @@ export const fr = {
   },
   challengesPage: {
     title: 'Challenges',
+    motivation: 'Relève un défi, progresse et fais grimper ton XP 🚀',
     currentLeague: 'Ligue actuelle :',
     joinFirst: 'Rejoins un challenge pour commencer ta progression.',
     xp: 'XP',

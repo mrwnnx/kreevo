@@ -658,6 +658,7 @@ export const en: Dictionary = {
   },
   challengesPage: {
     title: 'Challenges',
+    motivation: 'Take on a challenge, level up and grow your XP 🚀',
     currentLeague: 'Current league:',
     joinFirst: 'Join a challenge to start your progression.',
     xp: 'XP',
