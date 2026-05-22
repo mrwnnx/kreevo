@@ -26,6 +26,7 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.specialty !== undefined && { specialty: body.specialty }),
       ...(body.challenge_type !== undefined && { challenge_type: body.challenge_type }),
       ...(body.industry !== undefined && { industry: body.industry }),
+      ...(body.emoji !== undefined && { emoji: body.emoji || null }),
     })
     .eq('id', id)
     .select()

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Zap, Trophy, Clock, Users, ArrowRight, Check } from 'lucide-react'
+import { Lock, Zap, Trophy, Clock, ArrowRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -32,6 +32,7 @@ interface LeagueRow {
 interface ChallengeRow {
   id: string; title: string; brief: string
   specialty: string | null; challenge_type: string | null; industry: string | null
+  emoji: string | null
   xp_reward: number | null; deadline_days: number | null
   league_id: string | null; is_published: boolean
   leagues: LeagueRow | null
@@ -52,6 +53,12 @@ function ChallengeCard({
 }) {
   const isClickable = status === 'available' || status === 'active' || status === 'completed'
   const style = PASTELS[colorIndex % PASTELS.length]
+  const emoji =
+    challenge.emoji ||
+    (challenge.specialty === 'UX Designer' ? '📱'
+    : challenge.specialty === 'UI Designer' ? '🎨'
+    : challenge.specialty === 'Graphic Designer' ? '✏️'
+    : '🎯')
   const tags = [challenge.specialty, challenge.challenge_type, challenge.industry].filter(Boolean) as string[]
 
   const card = (
@@ -72,10 +79,11 @@ function ChallengeCard({
         </div>
       )}
 
-      {/* Pastel inner frame */}
-      <div className={cn('rounded-[20px] p-4', style.top)}>
+      {/* Pastel inner frame — 24px gap between title+desc / tags / xp+deadline */}
+      <div className={cn('rounded-[20px] p-4 flex flex-col gap-6', style.top)}>
         {/* Title + description grouped (same auto-layout) */}
         <div>
+          <div className="text-3xl mb-6 leading-none">{emoji}</div>
           <h3 className="text-xl font-bold text-foreground leading-tight line-clamp-1">
             {challenge.title}
           </h3>
@@ -84,7 +92,7 @@ function ChallengeCard({
           </p>
         </div>
         {tags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
               <span key={tag} className={cn('rounded-lg px-3 py-1 text-sm font-medium', style.pill)}>
                 {tag}
@@ -94,7 +102,7 @@ function ChallengeCard({
         )}
 
         {/* XP + deadline (inside the colored frame) */}
-        <div className="mt-3 flex items-center gap-3 text-xs text-foreground/80">
+        <div className="flex items-center gap-3 text-xs text-foreground/80">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
             <span className="flex items-center gap-1">
               <Zap className="size-3.5" />
@@ -111,15 +119,15 @@ function ChallengeCard({
       </div>
 
       {/* White footer: meta + round arrow button */}
-      <div className="flex items-center justify-between px-2 py-3">
+      <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {status === 'active' && (
             <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
               <span className="size-1.5 rounded-full bg-green-500 animate-pulse" /> {t.inProgress}
             </span>
           )}
-          {participants && participants.length > 0 ? (
-            <div className="flex items-center gap-2">
+          {participants && participants.length > 0 && (
+            <div className="flex items-center gap-2 pl-1">
               <AvatarGroup data-size="sm">
                 {participants.slice(0, 3).map((p) => (
                   <Avatar key={p.username} size="sm">
@@ -130,11 +138,6 @@ function ChallengeCard({
               </AvatarGroup>
               <strong className="font-semibold text-foreground">{participantCount ?? participants.length}</strong>
             </div>
-          ) : (
-            <span className="flex items-center gap-1">
-              <Users className="size-3.5" />
-              <strong className="font-semibold text-foreground">{participantCount ?? 0}</strong>
-            </span>
           )}
         </div>
 
@@ -187,7 +190,7 @@ export default async function ChallengesPage({
       .order('order_index', { ascending: true }),
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, specialty, challenge_type, industry, xp_reward, deadline_days, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
+      .select('id, title, brief, specialty, challenge_type, industry, emoji, xp_reward, deadline_days, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
       .eq('is_published', true)
       .order('created_at', { ascending: false }),
     (supabase as any)

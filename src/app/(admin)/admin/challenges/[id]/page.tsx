@@ -68,6 +68,7 @@ export default async function EditChallenge({ params }: Props) {
           specialty: data.specialty ?? '',
           challenge_type: data.challenge_type ?? '',
           industry: data.industry ?? '',
+          emoji: data.emoji ?? '',
         }}
       />
 

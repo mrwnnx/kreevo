@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       specialty: body.specialty || null,
       challenge_type: body.challenge_type || null,
       industry: body.industry || null,
+      emoji: body.emoji || null,
     })
     .select()
     .single()

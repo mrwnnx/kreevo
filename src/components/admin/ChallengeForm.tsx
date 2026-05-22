@@ -59,6 +59,7 @@ interface FormData {
   specialty: string
   challenge_type: string
   industry: string
+  emoji: string
   title: string
   brief: string
   context: string
@@ -75,6 +76,7 @@ const EMPTY: FormData = {
   specialty: '',
   challenge_type: '',
   industry: '',
+  emoji: '',
   title: '', brief: '', context: '', deliverable: '',
   constraints: '', criteria: '',
   league_id: '',
@@ -82,6 +84,8 @@ const EMPTY: FormData = {
   deadline_days: '7',
   is_published: false,
 }
+
+const EMOJI_SUGGESTIONS = ['🎯', '📱', '🎨', '✏️', '💡', '🖌️', '📐', '🧩', '🚀', '🔥', '✨', '🏆', '🎬', '📦', '🛍️', '💳', '🎵', '🏠']
 
 interface League { id: string; name: string; icon: string; order_index: number }
 
@@ -328,6 +332,35 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         <div className="md:col-span-2 space-y-1.5">
           <label className={labelClass}>Titre</label>
           <input value={form.title} onChange={e => set('title')(e.target.value)} className={inputClass} placeholder="Titre du challenge" />
+        </div>
+
+        <div className="md:col-span-2 space-y-1.5">
+          <label className={labelClass}>Emoji de la carte</label>
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              value={form.emoji}
+              onChange={e => set('emoji')(e.target.value)}
+              className={cn(inputClass, 'w-16 text-center text-xl')}
+              placeholder="🎯"
+              maxLength={8}
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {EMOJI_SUGGESTIONS.map(em => (
+                <button
+                  key={em}
+                  type="button"
+                  onClick={() => set('emoji')(em)}
+                  className={cn(
+                    'size-9 rounded-lg text-lg flex items-center justify-center transition-colors',
+                    form.emoji === em ? 'bg-primary/15 ring-1 ring-primary' : 'hover:bg-muted',
+                  )}
+                >
+                  {em}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Laisse vide pour utiliser l&apos;emoji par défaut de la spécialité.</p>
         </div>
 
         <div className="space-y-1.5">
