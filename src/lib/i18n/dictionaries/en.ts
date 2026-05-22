@@ -795,7 +795,7 @@ export const en: Dictionary = {
       deleteAccount: 'Delete account',
       deleteAccountBody: 'Permanently delete your account and all data',
       confirmDelete: 'Are you sure? This action cannot be undone.',
-      contactSupport: 'Contact support@kreevo.io to delete your account.',
+      contactSupport: 'Contact support@kreevo.online to delete your account.',
     },
   },
   onboarding: {

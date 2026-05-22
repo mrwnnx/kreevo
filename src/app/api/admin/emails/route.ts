@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const batch = emails.slice(i, i + 50)
     await Promise.all(batch.map(email =>
       resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.io',
+        from: process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.online',
         to: email,
         subject,
         text: content,

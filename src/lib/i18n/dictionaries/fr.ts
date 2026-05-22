@@ -792,7 +792,7 @@ export const fr = {
       deleteAccount: 'Supprimer le compte',
       deleteAccountBody: 'Suppression définitive de ton compte et de toutes tes données',
       confirmDelete: 'Tu es sûr ? Cette action est irréversible.',
-      contactSupport: 'Contacte support@kreevo.io pour supprimer ton compte.',
+      contactSupport: 'Contacte support@kreevo.online pour supprimer ton compte.',
     },
   },
   onboarding: {

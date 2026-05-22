@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const SUPPORT_EMAIL = 'kreevodesign@gmail.com'
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.io'
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.online'
 
 const VALID_SUBJECTS = ['bug', 'billing', 'suggestion', 'other'] as const
 type Subject = (typeof VALID_SUBJECTS)[number]
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
   <div style="white-space:pre-wrap;padding:16px;background:#f8fafc;border-left:4px solid #6366f1;font-size:14px;line-height:1.6">${escapeHtml(message)}</div>
   <p style="margin-top:24px;font-size:14px"><b>Subject:</b> ${subjectLabel}</p>
   <p style="margin-top:24px;font-size:13px;color:#64748b">Need to add something? Just reply to this email.</p>
-  <p style="margin-top:24px;font-size:12px;color:#64748b">— The Kreevo team · <a href="https://kreevo-tau.vercel.app/help">help.kreevo.io</a></p>
+  <p style="margin-top:24px;font-size:12px;color:#64748b">— The Kreevo team · <a href="https://www.kreevo.online/help">kreevo.online/help</a></p>
 </div>`
       : `
 <div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#0f172a">
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
   <div style="white-space:pre-wrap;padding:16px;background:#f8fafc;border-left:4px solid #6366f1;font-size:14px;line-height:1.6">${escapeHtml(message)}</div>
   <p style="margin-top:24px;font-size:14px"><b>Sujet :</b> ${subjectLabel}</p>
   <p style="margin-top:24px;font-size:13px;color:#64748b">Besoin d'ajouter quelque chose ? Réponds simplement à cet email.</p>
-  <p style="margin-top:24px;font-size:12px;color:#64748b">— L'équipe Kreevo · <a href="https://kreevo-tau.vercel.app/help">help.kreevo.io</a></p>
+  <p style="margin-top:24px;font-size:12px;color:#64748b">— L'équipe Kreevo · <a href="https://www.kreevo.online/help">kreevo.online/help</a></p>
 </div>`
 
   try {

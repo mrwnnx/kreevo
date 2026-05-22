@@ -4,7 +4,7 @@
  */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://kreevo-tau.vercel.app')
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.kreevo.online')
 
 export function siteUrl(path: string = ''): string {
   if (!path || path === '/') return SITE_URL

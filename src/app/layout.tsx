@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kreevo-tau.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kreevo.online'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
