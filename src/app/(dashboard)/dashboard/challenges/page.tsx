@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Clock, ArrowRight, Check } from 'lucide-react'
+import { Lock, Clock, ArrowRight, Check, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
@@ -326,12 +326,33 @@ export default async function ChallengesPage({
     <div className="p-6 max-w-[960px] mx-auto pb-16 space-y-8">
 
       {/* ── Header card (profile-card style) with floating league avatars ── */}
-      <div className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-violet-50 via-card to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 px-5 py-6 sm:px-8 sm:py-7">
+      <div
+        className="relative overflow-hidden rounded-[24px] border border-border bg-card px-5 py-6 sm:px-8 sm:py-7"
+        style={userLeagueRow?.color
+          ? { backgroundImage: `linear-gradient(135deg, ${userLeagueRow.color}29, transparent 55%, ${userLeagueRow.color}14)` }
+          : undefined}
+      >
         <style>{`@keyframes kreevoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}`}</style>
 
-        <div className="relative z-10 space-y-2 max-w-[62%]">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">{t.title}</h1>
-          <p className="text-base text-muted-foreground">{t.motivation}</p>
+        <div className="relative z-10 space-y-3 max-w-[62%]">
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">{t.title}</h1>
+            <p className="text-base text-muted-foreground">{t.motivation}</p>
+          </div>
+          {userLeagueRow && (
+            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/50 dark:border-white/15 bg-gradient-to-b from-white/55 to-white/20 dark:from-white/15 dark:to-white/5 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5 ring-1 ring-inset ring-white/30 px-2 py-2">
+              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-foreground">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/xp-flash.svg" alt="" className="size-4" />
+                {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()} {t.xp}
+              </span>
+              <span className="h-4 w-px bg-foreground/15" />
+              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-foreground">
+                <Trophy className="size-4 text-violet-500" />
+                {leagueChallengesCompleted} / {minCh} {t.challengesCompleted}
+              </span>
+            </div>
+          )}
         </div>
 
         {leagueAvatars.length > 0 && (
