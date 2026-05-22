@@ -60,7 +60,7 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
   // Banner (optional) — full-width image at the top of the card.
   const banner = tpl.banner_url
     ? `<tr><td style="padding:0;font-size:0;line-height:0;">
-        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;border:0;">
+        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;max-height:200px;object-fit:cover;border:0;">
       </td></tr>`
     : ''
 

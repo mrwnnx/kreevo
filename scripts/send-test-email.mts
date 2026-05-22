@@ -10,7 +10,7 @@ for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
 
 const tpl = {
   ...DEFAULT_TEMPLATES.confirmation,
-  banner_url: 'https://picsum.photos/seed/kreevo/1120/340', // placeholder image
+  banner_url: 'https://picsum.photos/seed/kreevo/1120/700', // tall image — proves the 200px cap
 }
 
 const html = renderEmail(tpl, { actionUrl: 'https://www.kreevo.online/dashboard' })
