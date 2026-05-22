@@ -8,6 +8,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     type: 'confirmation',
     label: "Confirmation d'inscription",
     banner_url: null,
+    banner_position: 'center',
     title: 'Confirme ton inscription',
     body:
       "Bienvenue sur Kreevo 👋\n\n" +
@@ -24,6 +25,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     type: 'recovery',
     label: 'Réinitialisation du mot de passe',
     banner_url: null,
+    banner_position: 'center',
     title: 'Réinitialise ton mot de passe',
     body:
       'Tu as demandé à réinitialiser ton mot de passe.\n\n' +
@@ -40,6 +42,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     type: 'email_change',
     label: "Changement d'adresse email",
     banner_url: null,
+    banner_position: 'center',
     title: 'Confirme ta nouvelle adresse',
     body:
       'Tu as demandé à changer l’adresse email de ton compte Kreevo.\n\n' +
@@ -54,6 +57,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     type: 'contact_confirmation',
     label: 'Accusé de réception (formulaire de contact)',
     banner_url: null,
+    banner_position: 'center',
     title: 'Ton message est bien reçu',
     body:
       'Salut {{ prénom }},\n\n' +
@@ -70,6 +74,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     type: 'broadcast',
     label: 'Message admin (broadcast)',
     banner_url: null,
+    banner_position: 'center',
     title: '{{ titre }}',
     body: '{{ message }}',
     button_enabled: false,

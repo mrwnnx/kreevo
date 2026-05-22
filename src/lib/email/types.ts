@@ -12,6 +12,7 @@ export interface EmailTemplate {
   type: EmailTemplateType
   label: string
   banner_url: string | null
+  banner_position: 'top' | 'center' | 'bottom' // crop focal point (object-position) when capped to 100px
   title: string
   body: string // plain text; blank line = new paragraph. Supports {{ variables }}.
   button_enabled: boolean

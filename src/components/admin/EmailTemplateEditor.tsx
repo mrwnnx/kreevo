@@ -115,7 +115,27 @@ export function EmailTemplateEditor({
               maxSizeMB={5}
               className="aspect-[1120/200] w-full"
             />
-            <p className="text-xs text-muted-foreground">Reco ~1120×200 px. Affichée sur toute la largeur, hauteur plafonnée à 100px (recadrage centré). Laisser vide = pas de bannière.</p>
+            <p className="text-xs text-muted-foreground">Reco ~1120×200 px. Affichée sur toute la largeur, hauteur plafonnée à 100px. Laisser vide = pas de bannière.</p>
+            {tpl.banner_url && (
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-xs text-muted-foreground">Cadrage :</span>
+                {([['top', 'Haut'], ['center', 'Centre'], ['bottom', 'Bas']] as const).map(([pos, label]) => (
+                  <button
+                    key={pos}
+                    type="button"
+                    onClick={() => patch({ banner_position: pos })}
+                    className={
+                      'px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ' +
+                      ((tpl.banner_position ?? 'center') === pos
+                        ? 'bg-primary/10 text-primary border-primary/20'
+                        : 'text-muted-foreground border-border hover:bg-muted/60')
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Title */}
