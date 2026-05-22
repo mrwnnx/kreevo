@@ -113,9 +113,9 @@ export function EmailTemplateEditor({
               value={tpl.banner_url}
               onChange={url => patch({ banner_url: url })}
               maxSizeMB={5}
-              className="aspect-[1120/400] w-full"
+              className="aspect-[1120/300] w-full"
             />
-            <p className="text-xs text-muted-foreground">Reco ~1120×400 px. Affichée sur toute la largeur, hauteur plafonnée à 200px (recadrage centré). Laisser vide = pas de bannière.</p>
+            <p className="text-xs text-muted-foreground">Reco ~1120×300 px. Affichée sur toute la largeur, hauteur plafonnée à 150px (recadrage centré). Laisser vide = pas de bannière.</p>
           </div>
 
           {/* Title */}

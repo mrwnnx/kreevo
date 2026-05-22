@@ -60,7 +60,7 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
   // Banner (optional) — full-width image at the top of the card.
   const banner = tpl.banner_url
     ? `<tr><td style="padding:0;font-size:0;line-height:0;">
-        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;max-height:200px;object-fit:cover;border:0;">
+        <img src="${escapeHtml(tpl.banner_url)}" width="100%" alt="" style="display:block;width:100%;max-width:100%;height:auto;max-height:150px;object-fit:cover;border:0;">
       </td></tr>`
     : ''
 
@@ -84,11 +84,11 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background:#eef0f2;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef0f2;"><tr><td align="center" style="padding:40px 16px;">
+<body style="margin:0;padding:0;background:#ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;"><tr><td align="center" style="padding:40px 16px;">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:${FONT};"><tr><td>
   <p style="text-align:center;font-family:${FONT};font-weight:800;font-size:19px;letter-spacing:-.02em;color:#9ca3af;margin:0 0 18px;">kreevo</p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ececec;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
     ${banner}
     <tr><td style="padding:36px;">
       <h1 style="margin:0 0 18px;font-family:${FONT};font-size:21px;font-weight:600;color:#111111;letter-spacing:-.01em;">${prepare(tpl.title, vars)}</h1>
