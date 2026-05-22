@@ -15,7 +15,10 @@ export const TEMPLATE_VARIABLES: Record<EmailTemplateType, TemplateVar[]> = {
     { key: '.Email', desc: 'Ancienne adresse', sample: 'ancien@exemple.com' },
     { key: '.NewEmail', desc: 'Nouvelle adresse', sample: 'nouveau@exemple.com' },
   ],
-  contact_confirmation: [{ key: 'prénom', desc: "Prénom de l'utilisateur", sample: 'Marwen' }],
+  contact_confirmation: [
+    { key: 'prénom', desc: "Prénom de l'utilisateur", sample: 'Marwen' },
+    { key: 'message', desc: 'Message envoyé par l’utilisateur', sample: 'Bonjour, j’ai une question sur…' },
+  ],
   broadcast: [
     { key: 'prénom', desc: 'Prénom du destinataire', sample: 'Marwen' },
     { key: 'titre', desc: 'Titre du message', sample: 'Une grande nouvelle' },

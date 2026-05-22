@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { getTemplate } from '@/lib/email/store'
+import { renderEmail } from '@/lib/email/render'
+import { DEFAULT_TEMPLATES } from '@/lib/email/defaults'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const SUPPORT_EMAIL = 'kreevodesign@gmail.com'
@@ -83,33 +86,15 @@ export async function POST(request: Request) {
   <p style="margin-top:24px;font-size:12px;color:#64748b">Réponds directement à <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a> pour répondre à l'utilisateur.</p>
 </div>`.trim()
 
-  // Confirmation to the user
+  // Confirmation to the user — rendered from the editable "contact_confirmation" template.
   const userSubject =
     lang === 'en'
       ? `We received your message — Kreevo Help`
       : `Ton message est bien reçu — Aide Kreevo`
-  const userHtml =
-    lang === 'en'
-      ? `
-<div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#0f172a">
-  <h2 style="font-size:20px;margin:0 0 16px">Hi ${escapeHtml(name.split(' ')[0])} 👋</h2>
-  <p style="font-size:15px;line-height:1.6">Thanks for reaching out — we received your message and our team will reply within <b>24 hours</b>.</p>
-  <h3 style="font-size:14px;margin:24px 0 8px">Your message</h3>
-  <div style="white-space:pre-wrap;padding:16px;background:#f8fafc;border-left:4px solid #6366f1;font-size:14px;line-height:1.6">${escapeHtml(message)}</div>
-  <p style="margin-top:24px;font-size:14px"><b>Subject:</b> ${subjectLabel}</p>
-  <p style="margin-top:24px;font-size:13px;color:#64748b">Need to add something? Just reply to this email.</p>
-  <p style="margin-top:24px;font-size:12px;color:#64748b">— The Kreevo team · <a href="https://www.kreevo.online/help">kreevo.online/help</a></p>
-</div>`
-      : `
-<div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#0f172a">
-  <h2 style="font-size:20px;margin:0 0 16px">Salut ${escapeHtml(name.split(' ')[0])} 👋</h2>
-  <p style="font-size:15px;line-height:1.6">Merci pour ton message — on l'a bien reçu et l'équipe te répondra sous <b>24 heures</b>.</p>
-  <h3 style="font-size:14px;margin:24px 0 8px">Ton message</h3>
-  <div style="white-space:pre-wrap;padding:16px;background:#f8fafc;border-left:4px solid #6366f1;font-size:14px;line-height:1.6">${escapeHtml(message)}</div>
-  <p style="margin-top:24px;font-size:14px"><b>Sujet :</b> ${subjectLabel}</p>
-  <p style="margin-top:24px;font-size:13px;color:#64748b">Besoin d'ajouter quelque chose ? Réponds simplement à cet email.</p>
-  <p style="margin-top:24px;font-size:12px;color:#64748b">— L'équipe Kreevo · <a href="https://www.kreevo.online/help">kreevo.online/help</a></p>
-</div>`
+  const userTpl = (await getTemplate('contact_confirmation')) ?? DEFAULT_TEMPLATES.contact_confirmation
+  const userHtml = renderEmail(userTpl, {
+    vars: { 'prénom': name.split(' ')[0], message },
+  })
 
   try {
     await Promise.all([

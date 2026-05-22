@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { requireAdmin } from '@/lib/admin'
+import { getTemplate } from '@/lib/email/store'
+import { renderEmail } from '@/lib/email/render'
+import { DEFAULT_TEMPLATES } from '@/lib/email/defaults'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -42,6 +45,10 @@ export async function POST(request: Request) {
 
   if (!emails.length) return NextResponse.json({ error: 'Aucun destinataire trouvé' }, { status: 400 })
 
+  // Render with the editable "broadcast" template (subject → {{ titre }}, content → {{ message }}).
+  const tpl = (await getTemplate('broadcast')) ?? DEFAULT_TEMPLATES.broadcast
+  const html = renderEmail(tpl, { vars: { titre: subject, message: content } })
+
   // Send in batches of 50
   let sent = 0
   for (let i = 0; i < emails.length; i += 50) {
@@ -52,7 +59,7 @@ export async function POST(request: Request) {
         to: email,
         subject,
         text: content,
-        html: `<div style="font-family:sans-serif;max-width:600px;margin:auto">${content.replace(/\n/g, '<br>')}</div>`,
+        html,
       })
     ))
     sent += batch.length

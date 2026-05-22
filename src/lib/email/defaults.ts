@@ -58,6 +58,7 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateType, EmailTemplate> = {
     body:
       'Salut {{ prénom }},\n\n' +
       "Merci pour ton message — on l'a bien reçu et l'équipe te répondra sous 24 heures.\n\n" +
+      'Ton message :\n{{ message }}\n\n' +
       'Besoin d’ajouter quelque chose ? Réponds simplement à cet email.',
     button_enabled: false,
     button_label: '',

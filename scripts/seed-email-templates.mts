@@ -31,8 +31,13 @@ for (const tpl of Object.values(DEFAULT_TEMPLATES)) {
   console.log(error ? `  ✗ ${tpl.type}: ${error.message}` : `  ✓ seeded ${tpl.type}`)
 }
 
-// 2. Prove pipeline: render the confirmation template and push it to Supabase Auth.
-const html = renderEmail(DEFAULT_TEMPLATES.confirmation)
-console.log(`\nRendered confirmation HTML: ${html.length} chars`)
-await pushAuthTemplate('confirmation', html, PAT)
-console.log('✓ Pushed confirmation template to Supabase GoTrue (mailer_templates_confirmation_content)')
+// 2. Push every Auth template (current DB content) to Supabase GoTrue.
+import { AUTH_TYPES } from '../src/lib/email/types'
+console.log('')
+for (const type of AUTH_TYPES) {
+  const { data } = await supabase.from('email_templates').select('*').eq('type', type).maybeSingle()
+  const tpl = data ?? DEFAULT_TEMPLATES[type]
+  const html = renderEmail(tpl as any)
+  await pushAuthTemplate(type, html, PAT)
+  console.log(`✓ Pushed ${type} (${html.length} chars) to Supabase GoTrue`)
+}
