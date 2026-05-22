@@ -121,12 +121,11 @@ function ChallengeCard({
       {/* White footer: meta + round arrow button */}
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          {status === 'active' && (
+          {status === 'active' ? (
             <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
               <span className="size-1.5 rounded-full bg-green-500 animate-pulse" /> {t.inProgress}
             </span>
-          )}
-          {participants && participants.length > 0 && (
+          ) : participants && participants.length > 0 && (
             <div className="flex items-center gap-2 pl-1">
               <AvatarGroup data-size="sm">
                 {participants.slice(0, 3).map((p) => (
