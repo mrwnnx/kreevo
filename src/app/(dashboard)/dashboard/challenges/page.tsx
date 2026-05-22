@@ -104,7 +104,7 @@ function ChallengeCard({
         {/* XP + deadline — XP emphasized pill, deadline muted */}
         <div className="flex flex-wrap items-center gap-3 text-sm">
           {challenge.xp_reward != null && challenge.xp_reward > 0 && (
-            <span className={cn('inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold', style.xp)}>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 font-bold text-zinc-900 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/xp-flash.svg" alt="" className="size-4" />
               {challenge.xp_reward} {t.xp}
@@ -443,7 +443,7 @@ export default async function ChallengesPage({
           }
 
           return (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {visible.map((c, i) => {
                 let status: ChallengeStatus = 'available'
                 if (submittedIds.has(c.id))            status = 'completed'
@@ -452,16 +452,15 @@ export default async function ChallengesPage({
                 else if (isProGated)                    status = 'locked'
 
                 return (
-                  <div key={c.id} className="break-inside-avoid mb-4">
-                    <ChallengeCard
-                      challenge={c}
-                      status={status}
-                      participantCount={partCounts[c.id]}
-                      participants={participantsByChallenge[c.id]}
-                      colorIndex={i}
-                      t={t}
-                    />
-                  </div>
+                  <ChallengeCard
+                    key={c.id}
+                    challenge={c}
+                    status={status}
+                    participantCount={partCounts[c.id]}
+                    participants={participantsByChallenge[c.id]}
+                    colorIndex={i}
+                    t={t}
+                  />
                 )
               })}
             </div>
