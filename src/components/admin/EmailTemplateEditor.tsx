@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +23,63 @@ function previewHtml(tpl: EmailTemplate): string {
   let html = renderEmail(tpl, { vars })
   html = html.replace(/\{\{\s*(\.[^}]+?)\s*\}\}/g, (m, k: string) => PREVIEW_GOTRUE[k.trim()] ?? m)
   return html
+}
+
+// Parse a stored banner_position into a vertical % (handles legacy keywords).
+function posToPct(v: string): number {
+  if (v.endsWith('%')) return Math.min(100, Math.max(0, parseFloat(v) || 0))
+  if (v === 'top') return 0
+  if (v === 'bottom') return 100
+  return 50
+}
+
+// Drag-to-reposition the banner crop (vertical focal point), like a cover-photo repositioner.
+function BannerCropper({ url, value, onChange }: { url: string; value: string; onChange: (v: string) => void }) {
+  const yRef = useRef(posToPct(value))
+  const dragging = useRef(false)
+  const [, force] = useState(0)
+  useEffect(() => { yRef.current = posToPct(value); force(n => n + 1) }, [value])
+
+  function onMove(e: React.PointerEvent) {
+    if (!dragging.current) return
+    yRef.current = Math.min(100, Math.max(0, yRef.current - e.movementY * 0.6))
+    onChange(`${Math.round(yRef.current)}%`)
+  }
+  const y = posToPct(value)
+  return (
+    <div className="space-y-1">
+      <div
+        className="relative h-[100px] w-full overflow-hidden rounded-md border border-border cursor-grab active:cursor-grabbing select-none touch-none"
+        onPointerDown={e => { dragging.current = true; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) }}
+        onPointerMove={onMove}
+        onPointerUp={() => { dragging.current = false }}
+        onPointerCancel={() => { dragging.current = false }}
+      >
+        <img src={url} alt="" draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `center ${y}%` }} />
+        <div className="absolute inset-x-0 bottom-0 py-0.5 text-center text-[10px] font-medium text-white bg-black/40">
+          Glisse pour cadrer · {Math.round(y)}%
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">Rapide :</span>
+        {([['0%', 'Haut'], ['50%', 'Centre'], ['100%', 'Bas']] as const).map(([v, label]) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => onChange(v)}
+            className={
+              'px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ' +
+              (`${y}%` === v
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'text-muted-foreground border-border hover:bg-muted/60')
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function EmailTemplateEditor({
@@ -117,24 +174,11 @@ export function EmailTemplateEditor({
             />
             <p className="text-xs text-muted-foreground">Reco ~1120×200 px. Affichée sur toute la largeur, hauteur plafonnée à 100px. Laisser vide = pas de bannière.</p>
             {tpl.banner_url && (
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs text-muted-foreground">Cadrage :</span>
-                {([['top', 'Haut'], ['center', 'Centre'], ['bottom', 'Bas']] as const).map(([pos, label]) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => patch({ banner_position: pos })}
-                    className={
-                      'px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ' +
-                      ((tpl.banner_position ?? 'center') === pos
-                        ? 'bg-primary/10 text-primary border-primary/20'
-                        : 'text-muted-foreground border-border hover:bg-muted/60')
-                    }
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+              <BannerCropper
+                url={tpl.banner_url}
+                value={tpl.banner_position ?? 'center'}
+                onChange={v => patch({ banner_position: v })}
+              />
             )}
           </div>
 
