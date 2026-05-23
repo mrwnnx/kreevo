@@ -323,20 +323,6 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {/* Gallery */}
-          {allSubmissions && allSubmissions.length > 0 && (
-            <section className="space-y-4 pt-2">
-              <div className="h-px bg-border" />
-              <h2 className="text-xl font-semibold"><span className="mr-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
-              <SubmissionGallery
-                submissions={allSubmissions}
-                currentUserId={user.id}
-                isRevealed={true}
-                challengeTitle={c.title}
-                t={t.gallery}
-              />
-            </section>
-          )}
         </div>
 
         {/* ── SIDEBAR ── */}
@@ -433,6 +419,20 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
         </div>
       </div>
+
+      {/* Gallery — full-page width, below the 2-col layout */}
+      {allSubmissions && allSubmissions.length > 0 && (
+        <section className="space-y-4 pt-8 mt-8 border-t border-border">
+          <h2 className="text-xl font-semibold"><span className="mr-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
+          <SubmissionGallery
+            submissions={allSubmissions}
+            currentUserId={user.id}
+            isRevealed={true}
+            challengeTitle={c.title}
+            t={t.gallery}
+          />
+        </section>
+      )}
     </div>
   )
 }

@@ -79,7 +79,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = 
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {submissions.map(s => {
           const isOwn = s.user_id === currentUserId
           const blurred = !isRevealed && !isOwn
