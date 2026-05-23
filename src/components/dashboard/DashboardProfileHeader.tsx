@@ -60,7 +60,7 @@ export function DashboardProfileHeader({
     'U'
 
   return (
-    <div className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-violet-50 via-card to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 px-5 py-6 sm:px-8 sm:py-7 flex items-center gap-4 sm:gap-6">
+    <div className="relative overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-violet-50 via-card to-indigo-50 dark:from-violet-950/30 dark:via-card dark:to-indigo-950/20 px-5 py-6 sm:px-8 sm:py-7 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
       {/* Large user image */}
       <div className="relative flex-shrink-0">
         {profile.avatar_url ? (
@@ -99,10 +99,9 @@ export function DashboardProfileHeader({
       </div>
 
       {/* Edit profile */}
-      <Link href="/dashboard/profile" aria-label="Edit profile" className="flex-shrink-0">
-        <Button size="sm">
-          <span className="hidden sm:inline">{t.editProfile}</span>
-          <span className="sm:hidden text-base leading-none">✏️</span>
+      <Link href="/dashboard/profile" aria-label="Edit profile" className="w-full sm:w-auto sm:flex-shrink-0">
+        <Button size="lg" className="w-full sm:w-auto">
+          {t.editProfile}
         </Button>
       </Link>
     </div>

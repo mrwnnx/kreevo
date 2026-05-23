@@ -48,28 +48,28 @@ export function StatCards({
         </span>
       ),
       subtext: tx(t.tierOf, { n: leagueIndex }),
-      valueClass: 'text-xl font-bold',
+      valueClass: 'text-2xl sm:text-xl font-bold',
     },
     {
       label: t.totalXp,
       icon: <XpIcon className="w-4 h-4" />,
       value: (profile?.xp || 0).toLocaleString(),
       subtext: xpToday > 0 ? tx(t.xpToday, { n: xpToday }) : t.keepGoing,
-      valueClass: 'text-xl font-bold text-violet-600',
+      valueClass: 'text-2xl sm:text-xl font-bold text-violet-600',
     },
     {
       label: t.challenges,
       icon: <Target className="w-4 h-4 text-green-500" />,
       value: (completedTotal || 0).toString(),
       subtext: completedThisWeek > 0 ? tx(t.thisWeek, { n: completedThisWeek }) : t.completeFirst,
-      valueClass: 'text-xl font-bold text-green-500',
+      valueClass: 'text-2xl sm:text-xl font-bold text-green-500',
     },
     {
       label: t.rank,
       icon: <Medal className="w-4 h-4 text-sky-500" />,
       value: `Top ${topPercent}%`,
       subtext: t.rankSubtext,
-      valueClass: 'text-xl font-bold text-sky-600',
+      valueClass: 'text-2xl sm:text-xl font-bold text-sky-600',
     },
   ]
 
