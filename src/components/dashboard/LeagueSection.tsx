@@ -213,14 +213,6 @@ export function LeagueCountdownCard({
           </h3>
         )}
 
-        {/* Meta : XP à gagner */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5" title={t.xpReward}>
-            <XpIcon className="size-4" />
-            earn <strong className="font-semibold text-foreground">{xpReward}</strong> XP
-          </span>
-        </div>
-
         {/* Countdown */}
         <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
           {[
@@ -243,14 +235,18 @@ export function LeagueCountdownCard({
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="mt-auto pt-5">
+        {/* CTA + earn XP */}
+        <div className="mt-auto pt-5 flex items-center justify-between gap-3">
           <Link href={submitHref}>
             <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
               {isUp ? t.timeUp : t.submitCta}
               <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground" title={t.xpReward}>
+            <XpIcon className="size-4" />
+            earn <strong className="font-semibold text-foreground">{xpReward}</strong> XP
+          </span>
         </div>
       </div>
     </div>
