@@ -243,31 +243,14 @@ export function LeagueCountdownCard({
           ))}
         </div>
 
-        {/* CTA + participants */}
-        <div className="mt-auto pt-5 flex items-center gap-3">
+        {/* CTA */}
+        <div className="mt-auto pt-5">
           <Link href={submitHref}>
             <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
               {isUp ? t.timeUp : t.submitCta}
               <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
-          {participantAvatars.length > 0 && (
-            <div className="ml-auto flex items-center gap-2">
-              <AvatarGroup aria-label={t.participants}>
-                {participantAvatars.slice(0, 4).map((p) => (
-                  <Avatar key={p.id} className="size-9">
-                    {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.username} />}
-                    <AvatarFallback>{p.username?.[0]?.toUpperCase() ?? '?'}</AvatarFallback>
-                  </Avatar>
-                ))}
-              </AvatarGroup>
-              {participantsCount > 4 && (
-                <span className="text-sm font-medium text-muted-foreground">
-                  +{participantsCount - 4} {t.participants}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>
