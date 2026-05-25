@@ -449,6 +449,8 @@ export const en: Dictionary = {
         title: 'AI feedback',
         strengths: 'Strengths',
         improvements: 'To improve',
+        notApprovedTitle: 'AI feedback unavailable',
+        notApprovedBody: 'Your work wasn\'t validated by the AI, so detailed feedback isn\'t available. Submit a new version that matches the brief to unlock it.',
       },
       contest: {
         cta: 'Contest this decision · {hours}h left',

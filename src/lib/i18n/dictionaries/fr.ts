@@ -446,6 +446,8 @@ export const fr = {
         title: 'Feedback IA',
         strengths: 'Points forts',
         improvements: 'À améliorer',
+        notApprovedTitle: 'Feedback IA non disponible',
+        notApprovedBody: 'Ton travail n\'a pas été validé par l\'IA, donc tu ne peux pas demander de feedback détaillé. Resoumets une version qui colle au brief pour débloquer cette option.',
       },
       contest: {
         cta: 'Contester cette décision · {hours}h restantes',

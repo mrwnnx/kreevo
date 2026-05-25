@@ -123,11 +123,12 @@ export function MySubmissionCard({
           </Link>
         )}
 
-        {status === 'approved' && (
+        {!isDraft && (
           <FeedbackPanel
             submissionId={submission.id}
             initialFeedback={submission.ai_feedback ?? null}
             userPlan={userPlan}
+            isApproved={status === 'approved'}
             t={t}
           />
         )}
@@ -140,17 +141,47 @@ function FeedbackPanel({
   submissionId,
   initialFeedback,
   userPlan,
+  isApproved,
   t,
 }: {
   submissionId: string
   initialFeedback: AIFeedback | null
   userPlan?: string
+  isApproved: boolean
   t: MySubT
 }) {
   const [feedback, setFeedback] = useState<AIFeedback | null>(initialFeedback)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [showNotApproved, setShowNotApproved] = useState(false)
   const isPro = userPlan === 'pro' || userPlan === 'studio'
+
+  // Soumission non validée par l'IA → bouton visible, le clic révèle l'explication.
+  if (!isApproved && !feedback) {
+    return (
+      <div className="space-y-2">
+        <Button
+          type="button"
+          onClick={() => setShowNotApproved(true)}
+          variant="outline"
+          className="w-full h-8 gap-1.5 text-xs"
+        >
+          <Sparkles className="size-3.5" />
+          {t.feedback.request}
+        </Button>
+        {showNotApproved && (
+          <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-900/10 p-3 space-y-1">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+              {t.feedback.notApprovedTitle}
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              {t.feedback.notApprovedBody}
+            </p>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   function fetchFeedback() {
     setError(null)
