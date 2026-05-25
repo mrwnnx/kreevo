@@ -19,7 +19,7 @@ export default async function FeedbackPage({ params }: Props) {
   const [{ data: submission }, { data: profile }] = await Promise.all([
     (supabase as any)
       .from('submissions')
-      .select('id, user_id, title, cover_url')
+      .select('id, user_id, title, cover_url, validation_status')
       .eq('id', id)
       .single(),
     (supabase as any)
@@ -31,6 +31,8 @@ export default async function FeedbackPage({ params }: Props) {
 
   if (!submission) notFound()
   if (submission.user_id !== user.id) redirect(`/dashboard/submissions/${id}`)
+  // Feedback IA réservé aux soumissions validées par l'IA (l'API le bloque aussi).
+  if (submission.validation_status !== 'approved') redirect(`/dashboard/submissions/${id}`)
   if (!PRO_PLANS.has(String(profile?.plan ?? ''))) redirect(`/dashboard/submissions/${id}`)
 
   // Pre-fetch any existing feedback (server-side, bypasses RLS via admin)
