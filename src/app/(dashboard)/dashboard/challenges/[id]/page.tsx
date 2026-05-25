@@ -178,7 +178,6 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               <SubmissionGallery
                 submissions={allSubmissions}
                 currentUserId={user.id}
-                isRevealed={true}
                 challengeTitle={c.title}
                 t={t.gallery}
               />
@@ -427,7 +426,6 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           <SubmissionGallery
             submissions={allSubmissions}
             currentUserId={user.id}
-            isRevealed={true}
             challengeTitle={c.title}
             t={t.gallery}
           />

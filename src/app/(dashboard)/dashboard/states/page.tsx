@@ -303,8 +303,6 @@ function StateUrgent() {
 
 // ── State 4 — Soumis ─────────────────────────────────────────────────────────
 
-const REVEAL_AT = new Date(now + 12 * 24 * 3600 * 1000 + 4 * 3600 * 1000)
-
 function StateSoumis() {
   return (
     <div className="space-y-8">
@@ -317,14 +315,9 @@ function StateSoumis() {
         <p className="text-5xl md:text-6xl font-black bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent mb-2">
           +{mockChallenge.xp_reward} XP
         </p>
-        <p className="text-lg font-semibold mb-1 flex items-center gap-2">
+        <p className="text-lg font-semibold mb-6 flex items-center gap-2">
           <CheckCircle2 className="size-5 text-green-600" /> Ton travail est soumis
         </p>
-        <p className="text-sm text-muted-foreground mb-6">Le reveal collectif aura lieu dans :</p>
-
-        <div className="mb-6 opacity-70">
-          <CountdownTimer deadline={REVEAL_AT.toISOString()} />
-        </div>
 
         <XPBar value={520} total={720} animated />
       </HeroFrame>
