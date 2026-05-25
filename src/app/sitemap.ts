@@ -5,6 +5,9 @@ import { siteUrl } from '@/lib/site'
 
 export const dynamic = 'force-dynamic'
 
+type ApprovedSubmissionRow = { user_id: string }
+type EligibleProfileRow = { username: string; updated_at: string }
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
 
@@ -68,5 +71,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   )
 
-  return [...staticRoutes, ...categoryRoutes, ...articleRoutes]
+  // Public designer profiles — eligibility:
+  //   1) at least one approved submission
+  //   2) onboarding_completed = true
+  //   3) is_suspended = false
+  const { data: approvedData } = await (supabaseAdmin as any)
+    .from('submissions')
+    .select('user_id')
+    .eq('validation_status', 'approved')
+
+  const approvedRows = (approvedData ?? []) as ApprovedSubmissionRow[]
+  const approvedUserIds = Array.from(new Set(approvedRows.map((r) => r.user_id)))
+
+  let profileRoutes: MetadataRoute.Sitemap = []
+  if (approvedUserIds.length > 0) {
+    const { data: profileData } = await (supabaseAdmin as any)
+      .from('profiles')
+      .select('username, updated_at')
+      .in('id', approvedUserIds)
+      .eq('onboarding_completed', true)
+      .eq('is_suspended', false)
+
+    const profileRows = (profileData ?? []) as EligibleProfileRow[]
+    profileRoutes = profileRows.map((p) => ({
+      url: siteUrl(`/u/${p.username}`),
+      lastModified: new Date(p.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }))
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...profileRoutes]
 }

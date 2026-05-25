@@ -1,7 +1,16 @@
+import type { Metadata } from 'next'
 import { Separator } from '@/components/ui/separator'
 import { LoginForm } from '@/components/features/auth/LoginForm'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { getDict } from '@/lib/i18n/lang'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDict()
+  return {
+    title: `${dict.auth.login.title} — Kreevo`,
+    robots: { index: false, follow: true },
+  }
+}
 
 export default async function LoginPage() {
   const dict = await getDict()

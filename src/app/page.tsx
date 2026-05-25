@@ -1,6 +1,39 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { ArrowRight, Trophy, Sparkles, TrendingUp } from 'lucide-react'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, getLang } from '@/lib/i18n/lang'
+import { organizationSchema, websiteSchema } from '@/lib/seo/jsonld'
+
+const LANDING_META = {
+  fr: {
+    title: 'Kreevo — Challenges design hebdomadaires & système de ligues',
+    description:
+      "Des challenges design hebdomadaires inspirés du monde réel, du feedback IA sur chaque soumission, et un système de ligues qui classe ta progression de Stone à Legend.",
+  },
+  en: {
+    title: 'Kreevo — Weekly design challenges & league system',
+    description:
+      'Weekly real-world design challenges, AI feedback on every submission, and a league system that ranks your progress from Stone to Legend.',
+  },
+} as const
+
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang()
+  const m = LANDING_META[lang] ?? LANDING_META.fr
+  return {
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: '/' },
+    openGraph: {
+      title: m.title,
+      description: m.description,
+      url: '/',
+      siteName: 'Kreevo',
+      type: 'website',
+      locale: lang === 'en' ? 'en_US' : 'fr_FR',
+    },
+  }
+}
 
 const LEAGUES = [
   { name: 'Stone',    cls: 'league-stone',    bg: 'league-bg-stone',    icon: '○' },
@@ -23,8 +56,19 @@ export default async function Home() {
     { icon: TrendingUp, accent: 'text-league-platinum', ...t.features.progress },
   ]
 
+  const orgLd = organizationSchema()
+  const siteLd = websiteSchema()
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }}
+      />
 
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-border/50">

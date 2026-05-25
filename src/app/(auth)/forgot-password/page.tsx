@@ -1,5 +1,14 @@
+import type { Metadata } from 'next'
 import { ForgotPasswordForm } from '@/components/features/auth/ForgotPasswordForm'
 import { getDict } from '@/lib/i18n/lang'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDict()
+  return {
+    title: `${dict.auth.forgotPassword.title} — Kreevo`,
+    robots: { index: false, follow: true },
+  }
+}
 
 export default async function ForgotPasswordPage() {
   const dict = await getDict()

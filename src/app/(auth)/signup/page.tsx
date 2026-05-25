@@ -1,9 +1,18 @@
+import type { Metadata } from 'next'
 import { Separator } from '@/components/ui/separator'
 import { SignupForm } from '@/components/features/auth/SignupForm'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { getDict } from '@/lib/i18n/lang'
 
 const REF_CODE_PATTERN = /^[a-z0-9]{4,16}$/i
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDict()
+  return {
+    title: `${dict.auth.signup.title} — Kreevo`,
+    robots: { index: false, follow: true },
+  }
+}
 
 export default async function SignupPage({
   searchParams,

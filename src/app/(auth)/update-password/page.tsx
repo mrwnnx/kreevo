@@ -1,5 +1,14 @@
+import type { Metadata } from 'next'
 import { UpdatePasswordForm } from '@/components/features/auth/UpdatePasswordForm'
 import { getDict } from '@/lib/i18n/lang'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDict()
+  return {
+    title: `${dict.auth.updatePassword.title} — Kreevo`,
+    robots: { index: false, follow: true },
+  }
+}
 
 export default async function UpdatePasswordPage() {
   const dict = await getDict()

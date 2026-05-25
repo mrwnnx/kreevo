@@ -5,6 +5,7 @@ import { Plus_Jakarta_Sans } from "next/font/google"
 import Script from "next/script"
 import { buildDesignCSS, FONT_OPTIONS } from "@/lib/design-tokens"
 import { getDesignTokens } from "@/lib/design-tokens.server"
+import { getLang } from "@/lib/i18n/lang"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -22,13 +23,13 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const tokens = await getDesignTokens()
+  const [tokens, lang] = await Promise.all([getDesignTokens(), getLang()])
   const designCSS = buildDesignCSS(tokens)
   const fontOption = FONT_OPTIONS.find(f => f.value === tokens.font)
   const isCustomFont = tokens.font !== 'Plus Jakarta Sans' && fontOption
 
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} h-full antialiased`}>
+    <html lang={lang} className={`${plusJakartaSans.variable} h-full antialiased`}>
       <head>
         {isCustomFont && (
           <link rel="stylesheet" href={fontOption.url} />

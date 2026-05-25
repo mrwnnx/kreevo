@@ -16,6 +16,7 @@ import { getDict } from '@/lib/i18n/lang'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
+import { profilePageSchema } from '@/lib/seo/jsonld'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -77,6 +78,9 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     description: profile.bio
       ? `${profile.bio} | League ${league.label} | Kreevo designer`
       : `${name} — Designer on Kreevo. League ${league.label}.`,
+    alternates: {
+      canonical: `/u/${username}`,
+    },
     openGraph: {
       title: `${name} | Kreevo`,
       description: profile.bio ?? `${name} is a designer on Kreevo.`,
@@ -156,6 +160,20 @@ export default async function ProfilePage({
   const rank = (rankData?.length ?? 0) + 1
   const dict = await getDict()
   const t = dict.publicProfile
+
+  // Build Person/ProfilePage JSON-LD — fields with no real value are omitted by the helper.
+  const badgeAwards = ((badges ?? []) as Array<{ badge_type: string }>)
+    .map((b) => b.badge_type.replace(/_/g, ' '))
+  const profileLd = profilePageSchema({
+    username: p.username,
+    name: p.full_name ?? p.username,
+    avatarUrl: p.avatar_url,
+    jobTitle: p.job_title,
+    city: p.city,
+    country: p.country,
+    sameAs: Object.values(social),
+    awards: badgeAwards,
+  })
   const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
   const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
   const submissions = (allSubmissions ?? []) as any[]
@@ -169,6 +187,10 @@ export default async function ProfilePage({
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }}
+      />
       {/* ── Nav bar ────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
         <a href={isLoggedIn ? '/dashboard' : '/'} className="text-sm font-bold tracking-tight">kreevo</a>
