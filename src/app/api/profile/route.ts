@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isValidUsername } from '@/lib/username'
 
 export async function PATCH(request: Request) {
   const supabase = await createClient()
@@ -32,14 +33,29 @@ export async function PATCH(request: Request) {
     if (key in body) update[key] = body[key]
   }
 
-  if (update.username) {
+  if (update.username !== undefined) {
+    const candidate =
+      typeof update.username === 'string' ? update.username.trim() : ''
+    if (!isValidUsername(candidate)) {
+      return NextResponse.json(
+        { error: 'Invalid username format', code: 'INVALID_USERNAME' },
+        { status: 400 },
+      )
+    }
+    update.username = candidate
+
     const { data: existing } = await (supabase as any)
       .from('profiles')
       .select('id')
-      .eq('username', update.username)
+      .eq('username', candidate)
       .neq('id', user.id)
-      .single()
-    if (existing) return NextResponse.json({ error: 'Username already taken' }, { status: 409 })
+      .maybeSingle()
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Username already taken', code: 'USERNAME_TAKEN' },
+        { status: 409 },
+      )
+    }
   }
 
   // Specialty change: allowed only while in Stone/Bronze (forfeits progression

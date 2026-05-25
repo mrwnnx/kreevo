@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { translateAuthError } from '@/lib/auth-errors'
+import { isValidUsername } from '@/lib/username'
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -12,7 +13,12 @@ export async function signUpWithEmail(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const username = formData.get('username') as string
+  const rawUsername = (formData.get('username') as string | null) ?? ''
+  const username = rawUsername.trim()
+
+  if (!isValidUsername(username)) {
+    return { error: dict.auth.errors.validationFailed }
+  }
 
   const { error } = await supabase.auth.signUp({
     email,

@@ -6,6 +6,7 @@ import { Check, ChevronDown, Plus, Search, X, CheckCircle, Loader2 } from 'lucid
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { isValidUsername, normalizeUsername } from '@/lib/username'
 import {
   Dialog,
   DialogContent,
@@ -86,6 +87,11 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   const [firstName, setFirstName] = useState(profile.first_name ?? profile.full_name?.split(' ')[0] ?? '')
   const [lastName, setLastName] = useState(profile.last_name ?? profile.full_name?.split(' ').slice(1).join(' ') ?? '')
   const [username, setUsername] = useState(profile.username ?? '')
+  const [usernameAvailability, setUsernameAvailability] = useState<
+    'idle' | 'checking' | 'available' | 'taken'
+  >('idle')
+  const usernameValid = isValidUsername(username)
+  const usernameUnchanged = username === (profile.username ?? '')
   const [country, setCountry] = useState(profile.country ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const router = useRouter()
@@ -273,6 +279,39 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   }, [activeKeys, linkValues])
 
   useEffect(() => {
+    if (usernameUnchanged) {
+      setUsernameAvailability('idle')
+      return
+    }
+    if (!usernameValid) {
+      setUsernameAvailability('idle')
+      return
+    }
+    setUsernameAvailability('checking')
+    const controller = new AbortController()
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/username/availability?u=${encodeURIComponent(username)}&self=${encodeURIComponent(profile.id)}`,
+          { signal: controller.signal },
+        )
+        const data = (await res.json()) as { valid: boolean; available: boolean }
+        if (!data.valid) {
+          setUsernameAvailability('idle')
+        } else {
+          setUsernameAvailability(data.available ? 'available' : 'taken')
+        }
+      } catch {
+        // ignore (abort or network)
+      }
+    }, 350)
+    return () => {
+      controller.abort()
+      clearTimeout(timer)
+    }
+  }, [username, usernameValid, usernameUnchanged, profile.id])
+
+  useEffect(() => {
     // Skip the initial run (don't auto-save mounted defaults)
     if (isFirstRender.current) {
       isFirstRender.current = false
@@ -287,6 +326,11 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
     }
     if (Object.keys(newLinkErrors).length > 0) {
       setLinkErrors(newLinkErrors)
+      return
+    }
+
+    // Username gate: don't push an invalid or known-taken username to the server.
+    if (!usernameUnchanged && (!usernameValid || usernameAvailability === 'taken')) {
       return
     }
 
@@ -309,7 +353,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             objectives,
             links: cleanedLinks,
             country: country || null,
-            username: username.trim(),
+            username: username,
             bio: bio.trim() || null,
           }),
         })
@@ -400,7 +444,35 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="username">{t.fields.username}</Label>
-          <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t.fields.usernamePlaceholder} />
+          <Input
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(normalizeUsername(e.target.value))}
+            placeholder={t.fields.usernamePlaceholder}
+            autoComplete="username"
+          />
+          <div className="flex items-center justify-between gap-2 text-[11px] font-mono min-h-4">
+            <span className="text-muted-foreground truncate">
+              {username ? `${t.fields.usernamePreviewLabel}: kreevo.online/u/${username}` : t.fields.usernameHint}
+            </span>
+            {!usernameUnchanged && usernameValid && (
+              <span className="shrink-0 inline-flex items-center gap-1">
+                {usernameAvailability === 'checking' && (
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                )}
+                {usernameAvailability === 'available' && (
+                  <span className="inline-flex items-center gap-1 text-green-600">
+                    <CheckCircle className="size-3" /> {t.fields.usernameAvailable}
+                  </span>
+                )}
+                {usernameAvailability === 'taken' && (
+                  <span className="inline-flex items-center gap-1 text-destructive">
+                    <X className="size-3" /> {t.fields.usernameTaken}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
