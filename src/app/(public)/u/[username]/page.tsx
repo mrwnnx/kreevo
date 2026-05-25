@@ -73,6 +73,9 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   const specialty = profile.specialty ? ` · ${profile.specialty}` : ''
   const league = getLeague(profile.league ?? '7ajra')
 
+  const ogTitle = `${name} | Kreevo`
+  const ogDescription = profile.bio ?? `${name} is a designer on Kreevo.`
+
   return {
     title: `${name}${specialty} | Kreevo`,
     description: profile.bio
@@ -81,10 +84,20 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     alternates: {
       canonical: `/u/${username}`,
     },
+    // `images` intentionally omitted — Next resolves the colocated
+    // opengraph-image.tsx file automatically and produces a richer card
+    // (avatar + name + league color) than the bare avatar URL would.
     openGraph: {
-      title: `${name} | Kreevo`,
-      description: profile.bio ?? `${name} is a designer on Kreevo.`,
-      images: profile.avatar_url ? [{ url: profile.avatar_url }] : [],
+      title: ogTitle,
+      description: ogDescription,
+      url: `/u/${username}`,
+      siteName: 'Kreevo',
+      type: 'profile',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description: ogDescription,
     },
   }
 }

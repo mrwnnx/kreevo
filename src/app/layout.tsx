@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Kreevo — Design Challenges & Leagues",
   description: "Weekly design challenges, AI feedback, and a league system that rewards your progress.",
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kreevo — Design Challenges & Leagues',
+    description: 'Weekly design challenges, AI feedback, and a league system that rewards your progress.',
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

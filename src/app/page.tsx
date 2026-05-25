@@ -32,6 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: lang === 'en' ? 'en_US' : 'fr_FR',
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: m.title,
+      description: m.description,
+    },
   }
 }
 
