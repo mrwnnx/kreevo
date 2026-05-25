@@ -30,7 +30,6 @@ const LAYOUT = {
 type LeagueMeta = { color: string; label: string; emoji: string }
 const LEAGUE_HEX: Record<string, LeagueMeta> = {
   Stone:    { color: '#f59e0b', label: 'Stone',    emoji: '🪨' },
-  '7ajra':  { color: '#f59e0b', label: 'Stone',    emoji: '🪨' },
   Bronze:   { color: '#f97316', label: 'Bronze',   emoji: '🟤' },
   Silver:   { color: '#94a3b8', label: 'Silver',   emoji: '⚪' },
   Gold:     { color: '#eab308', label: 'Gold',     emoji: '🟡' },

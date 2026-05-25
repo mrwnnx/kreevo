@@ -28,7 +28,7 @@ export function StatCards({
   userLeague,
   t,
 }: Props) {
-  const leagueName = userLeague?.name || (profile?.league === '7ajra' ? 'Stone' : profile?.league) || 'Stone'
+  const leagueName = userLeague?.name || profile?.league || 'Stone'
   const leagueIcon = userLeague?.icon || '🪨'
   const topPercent = Math.min(100, Math.max(1, Math.ceil((userRank / Math.max(totalInLeague, 1)) * 100)))
   const stats: Array<{

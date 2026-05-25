@@ -96,6 +96,5 @@ export const ALL_LEAGUE_STYLES: LeagueStyle[] = [
 
 export function getLeagueStyle(rawName: string | null | undefined): LeagueStyle {
   if (!rawName) return LEAGUE_STYLES.Stone
-  if (rawName === '7ajra') return LEAGUE_STYLES.Stone
   return LEAGUE_STYLES[rawName] ?? LEAGUE_STYLES.Stone
 }

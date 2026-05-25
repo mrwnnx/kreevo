@@ -789,8 +789,8 @@ export default function DesignSystemPage() {
 
             <CodeSnip code={`import { getLeagueLabel, getLeagueColor, getLeagueIcon } from '@/lib/utils/xp'
 
-// La DB stocke '7ajra' pour Stone — on l'affiche via getLeagueLabel
-const dbName = '7ajra'                    // ou 'Bronze', 'Silver', 'Gold', etc.
+// 8 noms canoniques : Stone, Bronze, Silver, Gold, Platinum, Diamond, Master, Legend
+const dbName = 'Stone'                    // ou 'Bronze', 'Silver', 'Gold', etc.
 const label  = getLeagueLabel(dbName)     // "Stone"
 const color  = getLeagueColor(dbName)     // "#8B8B8B"
 const icon   = getLeagueIcon(dbName)      // "🪨"

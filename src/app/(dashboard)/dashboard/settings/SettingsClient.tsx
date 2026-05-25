@@ -33,7 +33,7 @@ export function SettingsClient({
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  const league = profile.league ?? '7ajra'
+  const league = profile.league ?? 'Stone'
   const leagueColor = getLeagueColor(league)
 
   async function handlePasswordChange() {

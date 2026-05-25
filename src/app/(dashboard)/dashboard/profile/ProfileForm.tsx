@@ -97,7 +97,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   const router = useRouter()
   const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
   // A discipline switch is only allowed while in Stone/Bronze; locked from Silver up.
-  const UNLOCKED_LEAGUES = ['stone', '7ajra', 'bronze']
+  const UNLOCKED_LEAGUES = ['stone', 'bronze']
   const specialtyLocked = !UNLOCKED_LEAGUES.includes((profile.league ?? 'stone').toLowerCase())
   const [pendingSpecialty, setPendingSpecialty] = useState<'ux_ui' | 'graphic' | null>(null)
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
@@ -422,7 +422,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             userId={profile.id}
             value={avatar}
             name={`${firstName} ${lastName}`.trim() || username}
-            league={profile.league ?? '7ajra'}
+            league={profile.league ?? 'Stone'}
             onChange={(url) => setAvatar(url)}
           />
         </div>

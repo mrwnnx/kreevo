@@ -2,7 +2,7 @@ import { anthropic } from '@/lib/anthropic/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify, notifyAllAdmins } from './notifications'
 
-const AUTO_VALIDATE_LEAGUES = ['Stone', '7ajra', 'Bronze', 'Silver']
+const AUTO_VALIDATE_LEAGUES = ['Stone', 'Bronze', 'Silver']
 const ANALYZE_MODEL = 'claude-sonnet-4-6'
 const MAX_IMAGES = 4
 const HUMAN_REVIEW_THRESHOLD = 3       // ai_rejection_count ≥ this → user can request human review

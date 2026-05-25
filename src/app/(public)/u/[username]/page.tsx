@@ -20,7 +20,6 @@ import { profilePageSchema } from '@/lib/seo/jsonld'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  '7ajra':  { label: 'Stone',    color: '#475569', bg: '#F1F5F9', border: '#94A3B8' },
   Stone:    { label: 'Stone',    color: '#475569', bg: '#F1F5F9', border: '#94A3B8' },
   Bronze:   { label: 'Bronze',   color: '#92400E', bg: '#FEF3C7', border: '#B45309' },
   Silver:   { label: 'Silver',   color: '#374151', bg: '#F3F4F6', border: '#9CA3AF' },
@@ -32,7 +31,7 @@ const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; 
 }
 
 function getLeague(league: string) {
-  return LEAGUE_CONFIG[league] ?? LEAGUE_CONFIG['7ajra']
+  return LEAGUE_CONFIG[league] ?? LEAGUE_CONFIG.Stone
 }
 
 // ── Links parser ───────────────────────────────────────────────
@@ -71,7 +70,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
   const name = profile.full_name ?? username
   const specialty = profile.specialty ? ` · ${profile.specialty}` : ''
-  const league = getLeague(profile.league ?? '7ajra')
+  const league = getLeague(profile.league ?? 'Stone')
 
   const ogTitle = `${name} | Kreevo`
   const ogDescription = profile.bio ?? `${name} is a designer on Kreevo.`
@@ -129,7 +128,7 @@ export default async function ProfilePage({
 
   const p = profile as Profile
   const social = parseLinks(p.links)
-  const league = getLeague(p.league ?? '7ajra')
+  const league = getLeague(p.league ?? 'Stone')
   const isPro = p.plan === 'pro' || p.plan === 'studio'
 
   // Resolve the viewer's own profile to render the logged-in nav (avatar) and the own-profile banner.

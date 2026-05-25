@@ -1,5 +1,5 @@
-// Ligues dynamiques depuis la table `leagues` (Supabase)
-// Plus de constantes rookie/rising/pro/elite/legend.
+// Ligues dynamiques depuis la table `leagues` (Supabase).
+// La DB enforce les 8 noms canoniques via le CHECK `profiles_league_valid`.
 
 export const XP_REWARDS = {
   like_received:     2,
@@ -13,10 +13,7 @@ export const XP_PENALTIES = {
 
 export type XPAction = keyof typeof XP_REWARDS
 
-// Couleurs / icônes par nom DB.
-// `7ajra` est l'identifiant DB de la ligue Stone.
 export const LEAGUE_COLORS: Record<string, string> = {
-  '7ajra':    '#8B8B8B',
   'Stone':    '#8B8B8B',
   'Bronze':   '#CD7F32',
   'Silver':   '#C0C0C0',
@@ -28,7 +25,6 @@ export const LEAGUE_COLORS: Record<string, string> = {
 }
 
 export const LEAGUE_ICONS: Record<string, string> = {
-  '7ajra':    '🪨',
   'Stone':    '🪨',
   'Bronze':   '🟤',
   'Silver':   '⚪',
@@ -47,11 +43,8 @@ export function getLeagueIcon(name: string | null | undefined): string {
   return LEAGUE_ICONS[name ?? ''] ?? '🪨'
 }
 
-// Display label : la DB stocke `7ajra` mais on affiche `Stone`
 export function getLeagueLabel(name: string | null | undefined): string {
-  if (!name) return 'Stone'
-  if (name === '7ajra') return 'Stone'
-  return name
+  return name ?? 'Stone'
 }
 
 // Backwards-compat aliases (anciens noms d'API)

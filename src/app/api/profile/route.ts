@@ -73,7 +73,7 @@ export async function PATCH(request: Request) {
       current.specialty !== update.specialty
     if (changing) {
       // Tiers that still allow a free discipline switch.
-      const UNLOCKED = ['stone', '7ajra', 'bronze']
+      const UNLOCKED = ['stone', 'bronze']
       const currentLeague = (current.league ?? 'Stone').toLowerCase()
       if (!UNLOCKED.includes(currentLeague)) {
         return NextResponse.json(

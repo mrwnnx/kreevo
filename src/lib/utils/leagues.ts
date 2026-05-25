@@ -48,7 +48,7 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
     .single()
   if (!profile) return
 
-  const currentLeagueName = profile.league || '7ajra'
+  const currentLeagueName = profile.league || 'Stone'
   const currentXP = profile.xp || 0
 
   const { data: currentLeague } = await (supabaseAdmin as any)
@@ -127,7 +127,7 @@ export async function demoteLeague(
   const { data: currentLeague } = await (supabaseAdmin as any)
     .from('leagues')
     .select('*')
-    .eq('name', profile.league || '7ajra')
+    .eq('name', profile.league || 'Stone')
     .single()
   if (!currentLeague || currentLeague.order_index <= 1) return
 

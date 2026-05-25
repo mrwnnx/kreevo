@@ -38,9 +38,8 @@ const FALLBACK_T: Dictionary['challengeDetail']['gallery'] = {
   submissionAlt: 'Soumission',
 }
 
-// Keys = noms DB de la table `leagues` (7ajra = Stone)
+// Keys = noms DB de la table `leagues` (8 noms canoniques)
 const LEAGUE_COLOR: Record<string, string> = {
-  '7ajra':    'bg-stone-100   text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
   Stone:      'bg-stone-100   text-stone-600  dark:bg-stone-900/40  dark:text-stone-400',
   Bronze:     'bg-orange-100  text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   Silver:     'bg-slate-100   text-slate-600  dark:bg-slate-900/40  dark:text-slate-400',
@@ -50,8 +49,6 @@ const LEAGUE_COLOR: Record<string, string> = {
   Master:     'bg-violet-100  text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
   Legend:     'bg-red-100     text-red-600    dark:bg-red-900/30    dark:text-red-400',
 }
-
-const LEAGUE_LABEL: Record<string, string> = { '7ajra': 'Stone' }
 
 export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = FALLBACK_T }: GalleryProps) {
   if (submissions.length === 0) {
@@ -143,7 +140,7 @@ export function SubmissionGallery({ submissions, currentUserId, isRevealed, t = 
                           'text-[9px] font-mono px-1.5 py-0.5 rounded-full ml-auto',
                           LEAGUE_COLOR[s.profiles.league] ?? LEAGUE_COLOR.Stone
                         )}>
-                          {LEAGUE_LABEL[s.profiles.league] ?? s.profiles.league}
+                          {s.profiles.league}
                         </span>
                       )}
                     </div>
