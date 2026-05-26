@@ -7,6 +7,7 @@ import {
   Minus, SlidersHorizontal, CreditCard, MessageSquare,
 } from 'lucide-react'
 
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -211,12 +212,12 @@ export default function DesignSystemPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 mt-2">
-              <a href="/dashboard/design-system/colors">
+              <Link href="/dashboard/design-system/colors">
                 <Button variant="outline" size="sm">
                   <Palette />
                   Voir toutes les couleurs →
                 </Button>
-              </a>
+              </Link>
             </div>
           </Section>
 

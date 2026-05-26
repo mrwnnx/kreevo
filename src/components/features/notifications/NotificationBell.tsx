@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Bell } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 function timeAgo(date: string): string {
   const diff = Date.now() - new Date(date).getTime()
@@ -133,9 +134,9 @@ export function NotificationBell({ userId }: { userId: string }) {
 
             {notifs.length > 10 && (
               <div className="px-4 py-2.5 border-t border-border">
-                <a href="/dashboard/notifications" className="text-xs text-primary hover:underline" onClick={() => setOpen(false)}>
+                <Link href="/dashboard/notifications" className="text-xs text-primary hover:underline" onClick={() => setOpen(false)}>
                   View all notifications →
-                </a>
+                </Link>
               </div>
             )}
           </div>
