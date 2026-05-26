@@ -1037,5 +1037,21 @@ export const en: Dictionary = {
   },
   publicChallenges: {
     title: 'Challenges',
+    subtitle: 'A library of real-world design briefs. Pick one, submit your work, earn XP, climb the leagues.',
+    heroCta: 'Join Kreevo',
+    heroCtaHint: 'Free · no card required',
+    countLabel: 'briefs available',
+    empty: 'No briefs published yet.',
+    cardXp: 'XP',
+    cardDays: 'days',
+    detail: {
+      backToList: 'All challenges',
+      participantsCount: '{n} participants',
+      ctaParticipateLoggedOut: 'Take this challenge',
+      ctaParticipateLoggedIn: 'Open in my dashboard',
+      ctaHint: 'Create your account and start designing in seconds.',
+      submissionsHeading: 'Community submissions',
+      submissionsEmpty: 'No submissions yet. Be the first.',
+    },
   },
 }

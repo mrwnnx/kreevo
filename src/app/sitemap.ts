@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 
 type ApprovedSubmissionRow = { user_id: string }
 type EligibleProfileRow = { username: string; updated_at: string }
+type PublishedChallengeRow = { id: string; updated_at: string }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
@@ -18,6 +19,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1.0,
+    },
+    {
+      url: siteUrl('/challenges'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: siteUrl('/help'),
@@ -101,5 +108,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...profileRoutes]
+  // Published challenges
+  const { data: challengeData } = await (supabaseAdmin as any)
+    .from('challenges')
+    .select('id, updated_at')
+    .eq('is_published', true)
+
+  const challengeRows = (challengeData ?? []) as PublishedChallengeRow[]
+  const challengeRoutes: MetadataRoute.Sitemap = challengeRows.map((c) => ({
+    url: siteUrl(`/challenges/${c.id}`),
+    lastModified: new Date(c.updated_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...profileRoutes, ...challengeRoutes]
 }

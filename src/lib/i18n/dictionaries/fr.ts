@@ -1034,6 +1034,22 @@ export const fr = {
   },
   publicChallenges: {
     title: 'Challenges',
+    subtitle: 'Une bibliothèque de défis design réels. Choisis ton brief, soumets ton travail, gagne de l\'XP et grimpe les ligues.',
+    heroCta: 'Rejoindre Kreevo',
+    heroCtaHint: 'Gratuit · pas de carte requise',
+    countLabel: 'défis disponibles',
+    empty: 'Aucun défi publié pour le moment.',
+    cardXp: 'XP',
+    cardDays: 'jours',
+    detail: {
+      backToList: 'Tous les challenges',
+      participantsCount: '{n} participants',
+      ctaParticipateLoggedOut: 'Participer à ce challenge',
+      ctaParticipateLoggedIn: 'Voir dans mon dashboard',
+      ctaHint: 'Crée ton compte pour rejoindre ce défi en quelques secondes.',
+      submissionsHeading: 'Soumissions de la communauté',
+      submissionsEmpty: 'Aucune soumission publiée pour le moment. Sois le premier.',
+    },
   },
 } as const
 
