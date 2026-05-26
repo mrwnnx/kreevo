@@ -18,7 +18,6 @@ export async function POST(request: Request) {
   if (error) return error
 
   const body = await request.json()
-  const tierEnabled = body.tier_window_enabled ?? false
   const { data, error: dbErr } = await (admin!.supabase as any)
     .from('leagues')
     .insert({
@@ -29,10 +28,6 @@ export async function POST(request: Request) {
       min_challenges: body.min_challenges ?? 3,
       min_challenges_enabled: body.min_challenges_enabled ?? true,
       xp_threshold_percent: body.xp_threshold_percent ?? 60,
-      tier_window_enabled: tierEnabled,
-      tier_window_days: body.tier_window_days ?? 30,
-      tier_window_xp_penalty: body.tier_window_xp_penalty ?? 0,
-      tier_window_set_at: tierEnabled ? new Date().toISOString() : null,
       access: body.access ?? 'all',
       is_active: body.is_active ?? true,
     })

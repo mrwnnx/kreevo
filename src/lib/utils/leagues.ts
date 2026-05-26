@@ -9,10 +9,6 @@ export type LeagueRow = {
   min_challenges: number
   min_challenges_enabled: boolean
   xp_threshold_percent: number
-  tier_window_enabled: boolean
-  tier_window_days: number
-  tier_window_xp_penalty: number
-  tier_window_set_at: string | null
   access: 'all' | 'pro_only'
   is_active: boolean
   specialty?: string | null
@@ -108,58 +104,5 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
   } catch { /* ignore */ }
 }
 
-// Sanction : descend d'une ligue (sauf si déjà à la première).
-// Reason 'inactivity' (90j sans soumission) ou 'tier_window_failed' (seuil non atteint dans la fenêtre).
-// xpPenalty optionnel : retire X XP au passage (cap à 0).
-export async function demoteLeague(
-  userId: string,
-  options: { reason?: 'inactivity' | 'tier_window_failed'; xpPenalty?: number } = {},
-): Promise<void> {
-  const { reason = 'inactivity', xpPenalty = 0 } = options
-
-  const { data: profile } = await (supabaseAdmin as any)
-    .from('profiles')
-    .select('league, xp')
-    .eq('id', userId)
-    .single()
-  if (!profile) return
-
-  const { data: currentLeague } = await (supabaseAdmin as any)
-    .from('leagues')
-    .select('*')
-    .eq('name', profile.league || 'Stone')
-    .single()
-  if (!currentLeague || currentLeague.order_index <= 1) return
-
-  const { data: prevLeague } = await (supabaseAdmin as any)
-    .from('leagues')
-    .select('*')
-    .eq('order_index', currentLeague.order_index - 1)
-    .eq('is_active', true)
-    .maybeSingle()
-  if (!prevLeague) return
-
-  const newXP = Math.max(0, (profile.xp ?? 0) - Math.max(0, xpPenalty))
-
-  await (supabaseAdmin as any)
-    .from('profiles')
-    .update({
-      league: prevLeague.name,
-      xp: newXP,
-      league_entered_at: new Date().toISOString(),
-    })
-    .eq('id', userId)
-
-  try {
-    await (supabaseAdmin as any).from('notifications').insert({
-      user_id: userId,
-      type: reason === 'tier_window_failed' ? 'league_window_failed' : 'league_down',
-      data: {
-        old_league: profile.league,
-        new_league: prevLeague.name,
-        xp_penalty: xpPenalty,
-        reason,
-      },
-    })
-  } catch { /* ignore */ }
-}
+// Demotion / relegation removed 2026-05-26 — leagues are permanent achievements.
+// Only promotion (checkAndUpdateLeague) remains.

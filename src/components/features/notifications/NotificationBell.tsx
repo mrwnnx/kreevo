@@ -24,13 +24,10 @@ interface Notification {
 const TYPE_LABELS: Record<string, { label: string; emoji: string }> = {
   feedback_ready:    { emoji: '💬', label: 'Feedback publié sur ta soumission' },
   league_up:         { emoji: '🚀', label: 'Promotion de league !' },
-  league_down:       { emoji: '📉', label: 'Rétrogradation de league' },
   badge_earned:      { emoji: '🏅', label: 'Nouveau badge obtenu' },
-  warning_inactivity:{ emoji: '⚠️', label: 'Avertissement d\'inactivité' },
   xp_deducted:       { emoji: '⬇️', label: 'XP déduit' },
-  xp_penalty:        { emoji: '⬇️', label: 'Pénalité XP — inactivité' },
   joined_challenge:  { emoji: '🎯', label: 'Tu as rejoint un challenge — 3 jours pour soumettre !' },
-  deadline_missed:   { emoji: '❌', label: 'Deadline manquée — -50 XP' },
+  deadline_missed:   { emoji: '❌', label: 'Deadline dépassée — participation close' },
   referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
 }
 
