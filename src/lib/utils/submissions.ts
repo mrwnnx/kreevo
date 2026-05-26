@@ -285,19 +285,41 @@ export async function approveSubmission(
   const xpReward = baseXp + bonusXp
   const wasAttributed = !!sub.xp_attributed
 
+  // Anti-farm: a user can earn the XP of a given challenge only ONCE, even across
+  // reparticipations / multiple submission rows. If any *other* submission for
+  // this (user, challenge) already holds the xp_attributed=true flag, we
+  // approve this one visually but don't credit profile XP again. We also
+  // leave its xp_attributed=false so a later rejectSubmission on this row
+  // doesn't refund XP it never granted.
+  let otherHoldsXp = false
+  if (!wasAttributed) {
+    const { data: priorCredit } = await (supabaseAdmin as any)
+      .from('submissions')
+      .select('id')
+      .eq('user_id', sub.user_id)
+      .eq('challenge_id', sub.challenge_id)
+      .eq('xp_attributed', true)
+      .neq('id', submissionId)
+      .limit(1)
+      .maybeSingle()
+    otherHoldsXp = !!priorCredit
+  }
+
+  const shouldCredit = !wasAttributed && !otherHoldsXp
+
   await (supabaseAdmin as any)
     .from('submissions')
     .update({
       validation_status: 'approved',
       validated_at: new Date().toISOString(),
       validated_by: validatedBy,
-      xp_attributed: true,
+      xp_attributed: shouldCredit || wasAttributed,
       rejection_reason: null,
       description_bonus_applied: bonusApplied,
     })
     .eq('id', submissionId)
 
-  if (!wasAttributed) {
+  if (shouldCredit) {
     const { data: prof } = await (supabaseAdmin as any)
       .from('profiles')
       .select('xp, referred_by')
@@ -346,10 +368,10 @@ export async function approveSubmission(
   await notify(sub.user_id, 'submission_approved', {
     submission_id: submissionId,
     challenge_id: sub.challenge_id,
-    xp: xpReward,
+    xp: shouldCredit ? xpReward : 0,
   })
 
-  return { xpAwarded: wasAttributed ? 0 : xpReward, bonusApplied, bonusXp }
+  return { xpAwarded: shouldCredit ? xpReward : 0, bonusApplied: shouldCredit && bonusApplied, bonusXp: shouldCredit ? bonusXp : 0 }
 }
 
 export async function rejectSubmission(

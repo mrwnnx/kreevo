@@ -15,6 +15,8 @@ import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import { CancelParticipationButton } from '@/components/features/challenge/CancelParticipationButton'
 import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
+import { CooldownCountdown } from '@/components/features/challenge/CooldownCountdown'
+import { cooldownEnd, isInCooldown } from '@/lib/utils/participation-cooldown'
 import type { Profile } from '@/types/database.types'
 import { getDict, tx } from '@/lib/i18n/lang'
 
@@ -64,6 +66,18 @@ export default async function ChallengePage({ params, searchParams }: Props) {
     : participation.status === 'submitted' ? 'submitted'
     : deadlinePassed || participation.status === 'expired' ? 'expired'
     : 'active'
+
+  // Reparticipation cooldown — only meaningful when participationStatus === 'expired'.
+  // During cooldown the challenge is closed for this user; afterwards they can reset
+  // the participation row via POST /api/participations.
+  const inCooldown =
+    participationStatus === 'expired' &&
+    !!participation?.personal_deadline &&
+    isInCooldown(participation.personal_deadline)
+  const cooldownReopensAt =
+    participationStatus === 'expired' && participation?.personal_deadline
+      ? cooldownEnd(participation.personal_deadline).toISOString()
+      : null
 
   const hasOtherActive = ((otherActiveParticipations ?? []) as any[]).length > 0
 
@@ -311,21 +325,41 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </div>
           )}
 
-          {participationStatus === 'expired' && (
-            <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-4 space-y-3">
+          {participationStatus === 'expired' && inCooldown && cooldownReopensAt && (
+            <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/10 p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <span className="size-2 rounded-full bg-red-500" />
-                <span className="text-sm font-semibold text-red-700 dark:text-red-400">{t.sidebar.expiredStatus}</span>
+                <span className="size-2 rounded-full bg-amber-500" />
+                <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">{t.sidebar.cooldownStatus}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {tx(t.sidebar.expiredBody, { days: c.deadline_days ?? 3 })}
               </p>
-              <Link
-                href="/dashboard/challenges"
-                className="inline-flex items-center gap-1 text-xs font-medium text-red-700 dark:text-red-400 hover:underline"
-              >
-                {t.sidebar.seeAvailable}
-              </Link>
+              <div className="text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                <p>{t.sidebar.cooldownBody}</p>
+                <CooldownCountdown reopensAt={cooldownReopensAt} template={t.sidebar.cooldownRemainingTpl} />
+              </div>
+            </div>
+          )}
+
+          {participationStatus === 'expired' && !inCooldown && (
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/10 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-emerald-500" />
+                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{t.sidebar.reopenedStatus}</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t.sidebar.reopenedBody}
+              </p>
+              {hasOtherActive ? (
+                <p className="text-xs text-muted-foreground">{t.blockedActive}</p>
+              ) : (
+                <ParticipateButton
+                  challengeId={c.id}
+                  deadlineDays={c.deadline_days ?? 3}
+                  t={t.participate}
+                  ctaLabel={t.sidebar.reparticipateCta}
+                />
+              )}
             </div>
           )}
 

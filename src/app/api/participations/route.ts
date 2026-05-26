@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { updateStreak } from '@/lib/utils/streaks'
+import {
+  cooldownEnd,
+  cooldownRemainingMs,
+  isInCooldown,
+} from '@/lib/utils/participation-cooldown'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -78,15 +83,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Tu as déjà une participation active en cours' }, { status: 409 })
   }
 
-  // Check already participated in this specific challenge
+  // Check already participated in this specific challenge.
+  // - active   → 409 (in progress)
+  // - submitted → 409 (final, can't restart)
+  // - expired   → cooldown 24h, then reset same row (UNIQUE (challenge_id, user_id) blocks INSERT)
   const { data: existing } = await (supabaseAdmin as any)
     .from('participations')
-    .select('id')
+    .select('id, status, personal_deadline')
     .eq('challenge_id', challenge_id)
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (existing) {
+  if (existing && existing.status !== 'expired') {
     return NextResponse.json({ error: 'Already participating' }, { status: 409 })
   }
 
@@ -94,17 +102,58 @@ export async function POST(request: Request) {
   const now = new Date()
   const personal_deadline = new Date(now.getTime() + deadlineDays * 24 * 60 * 60 * 1000)
 
-  const { data: participation, error } = await (supabaseAdmin as any)
-    .from('participations')
-    .insert({
-      challenge_id,
-      user_id: user.id,
-      joined_at: now.toISOString(),
-      personal_deadline: personal_deadline.toISOString(),
-      status: 'active',
-    })
-    .select()
-    .single()
+  // Cooldown gate: expired participations must wait 24h after their missed deadline.
+  if (existing && existing.status === 'expired') {
+    if (!existing.personal_deadline || isInCooldown(existing.personal_deadline, now)) {
+      const reopensAt = existing.personal_deadline
+        ? cooldownEnd(existing.personal_deadline).toISOString()
+        : null
+      const remainingMs = existing.personal_deadline
+        ? cooldownRemainingMs(existing.personal_deadline, now)
+        : null
+      return NextResponse.json(
+        { error: 'In cooldown', reopens_at: reopensAt, remaining_ms: remainingMs },
+        { status: 423 },
+      )
+    }
+  }
+
+  // Reparticipation: wipe any leftover draft submission tied to the prior attempt.
+  // Approved/rejected/pending submissions can't co-exist with status='expired'
+  // (publish flips participation to 'submitted'), so this only nukes drafts.
+  if (existing && existing.status === 'expired') {
+    const { data: draftSub } = await (supabaseAdmin as any)
+      .from('submissions')
+      .select('id')
+      .eq('challenge_id', challenge_id)
+      .eq('user_id', user.id)
+      .eq('is_draft', true)
+      .maybeSingle()
+    if (draftSub) {
+      await (supabaseAdmin as any).from('submissions').delete().eq('id', draftSub.id)
+    }
+  }
+
+  const upsertPayload = {
+    challenge_id,
+    user_id: user.id,
+    joined_at: now.toISOString(),
+    personal_deadline: personal_deadline.toISOString(),
+    status: 'active',
+  }
+
+  const { data: participation, error } = existing
+    ? await (supabaseAdmin as any)
+        .from('participations')
+        .update(upsertPayload)
+        .eq('id', existing.id)
+        .select()
+        .single()
+    : await (supabaseAdmin as any)
+        .from('participations')
+        .insert(upsertPayload)
+        .select()
+        .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

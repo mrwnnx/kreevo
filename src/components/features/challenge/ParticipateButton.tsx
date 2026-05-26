@@ -19,10 +19,13 @@ export function ParticipateButton({
   challengeId,
   deadlineDays,
   t,
+  ctaLabel,
 }: {
   challengeId: string
   deadlineDays: number
   t: Dictionary['challengeDetail']['participate']
+  /** Optional override for the trigger button label (e.g. "Reparticiper" instead of "Je participe"). */
+  ctaLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -59,7 +62,7 @@ export function ParticipateButton({
         onClick={() => setOpen(true)}
         className="w-full text-base h-12 gap-2"
       >
-        {t.cta} <ArrowRight className="size-4" />
+        {ctaLabel ?? t.cta} <ArrowRight className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
