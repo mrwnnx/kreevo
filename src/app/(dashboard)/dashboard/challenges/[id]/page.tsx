@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
-import { Clock, ChevronLeft, Users, CheckCircle2, Play } from 'lucide-react'
+import { Clock, ChevronLeft, Users, Play } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
 import Link from 'next/link'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
@@ -14,6 +14,7 @@ import { ParticipantsDialog } from '@/components/features/challenge/Participants
 import { RulesDialog } from '@/components/features/challenge/RulesDialog'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import { CancelParticipationButton } from '@/components/features/challenge/CancelParticipationButton'
+import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
 import type { Profile } from '@/types/database.types'
 import { getDict, tx } from '@/lib/i18n/lang'
 
@@ -280,47 +281,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             )}
           </div>
 
-          {/* Context */}
-          {c.context && (
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold"><span className="mr-1">🎬</span>{t.sections.scenario}</h2>
-              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.context}</p>
-            </section>
-          )}
-
-          {/* Deliverable */}
-          {c.deliverable && (
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold"><span className="mr-1">📦</span>{t.sections.deliverable}</h2>
-              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.deliverable}</p>
-            </section>
-          )}
-
-          {/* Constraints */}
-          {c.constraints && (
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold"><span className="mr-1">🚧</span>{t.sections.constraints}</h2>
-              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.constraints}</p>
-            </section>
-          )}
-
-          {/* Evaluation criteria */}
-          {c.criteria && (
-            <section className="space-y-4">
-              <div>
-                <h2 className="text-xl font-semibold"><span className="mr-1">🎯</span>{t.sections.criteria}</h2>
-                <p className="text-sm text-muted-foreground mt-1">{t.sections.criteriaIntro}</p>
-              </div>
-              <div className="space-y-3">
-                {c.criteria.split(/[.•\n]/).filter((s: string) => s.trim().length > 10).map((criterion: string, i: number) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
-                    <p className="text-base text-foreground leading-relaxed">{criterion.trim()}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          <ChallengeBriefSections challenge={c} t={t.sections} />
 
         </div>
 
