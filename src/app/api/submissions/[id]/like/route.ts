@@ -5,6 +5,20 @@ import { notify } from '@/lib/utils/notifications'
 
 interface Params { params: Promise<{ id: string }> }
 
+type LikeRow = { id: string; likes_count: number | null }
+
+/**
+ * Toggle like on a submission.
+ *
+ * XP rules (2026-05-26):
+ *  - +2 XP to the owner ONCE per (liker, submission), credited the very
+ *    first time the liker likes this submission.
+ *  - Unliking does NOT debit XP, re-liking does NOT re-credit. The row in
+ *    `submission_likes` persists across toggles (likes_count 0/1) so the
+ *    historical credit is preserved and farming via toggle is blocked.
+ *  - Auto-like (owner liking their own work) is allowed cosmetically but
+ *    never credits XP nor emits a notification.
+ */
 export async function POST(_req: Request, { params }: Params) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,47 +33,56 @@ export async function POST(_req: Request, { params }: Params) {
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
 
-  if (submission.user_id === user.id) {
-    return NextResponse.json({ error: 'Tu ne peux pas liker ton propre travail' }, { status: 403 })
-  }
+  const isAutoLike = submission.user_id === user.id
 
-  const { data: existing } = await (supabaseAdmin as any)
+  const { data: existingRow } = await (supabaseAdmin as any)
     .from('submission_likes')
-    .select('id')
+    .select('id, likes_count')
     .eq('submission_id', submissionId)
     .eq('user_id', user.id)
     .maybeSingle()
 
-  let liked: boolean
-  let newTotal: number
-  let xpDelta: number
+  const existing = existingRow as LikeRow | null
 
-  if (existing) {
-    await (supabaseAdmin as any).from('submission_likes').delete().eq('id', existing.id)
-    newTotal = Math.max(0, (submission.total_likes ?? 0) - 1)
-    liked = false
-    xpDelta = -2
-  } else {
+  let liked: boolean
+  let totalDelta: number
+  let creditXp = false
+
+  if (!existing) {
+    // First-ever interaction with this submission by this liker.
     await (supabaseAdmin as any)
       .from('submission_likes')
       .insert({ submission_id: submissionId, user_id: user.id, likes_count: 1 })
-    newTotal = (submission.total_likes ?? 0) + 1
     liked = true
-    xpDelta = 2
+    totalDelta = 1
+    // Credit XP only on this first INSERT and only when not auto-liking.
+    creditXp = !isAutoLike
+  } else {
+    const wasActive = (existing.likes_count ?? 0) > 0
+    const nextActive = !wasActive
+    await (supabaseAdmin as any)
+      .from('submission_likes')
+      .update({ likes_count: nextActive ? 1 : 0 })
+      .eq('id', existing.id)
+    liked = nextActive
+    totalDelta = nextActive ? 1 : -1
+    // No XP delta on subsequent toggles — historical credit already happened
+    // (or didn't, in the auto-like case) at the first INSERT above.
   }
 
+  // Maintain the denormalized counter on the submission.
+  const newTotal = Math.max(0, (submission.total_likes ?? 0) + totalDelta)
   await (supabaseAdmin as any)
     .from('submissions')
     .update({ total_likes: newTotal })
     .eq('id', submissionId)
 
-  const { data: ownerProf } = await (supabaseAdmin as any)
-    .from('profiles').select('xp').eq('id', submission.user_id).single()
-  const newXP = Math.max(0, (ownerProf?.xp ?? 0) + xpDelta)
-  await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
+  if (creditXp) {
+    const { data: ownerProf } = await (supabaseAdmin as any)
+      .from('profiles').select('xp').eq('id', submission.user_id).single()
+    const newXP = Math.max(0, (ownerProf?.xp ?? 0) + 2)
+    await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
 
-  // Notify owner only on like add (not on unlike)
-  if (liked) {
     try {
       await notify(submission.user_id, 'submission_liked', {
         submission_id: submissionId,
