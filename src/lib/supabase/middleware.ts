@@ -3,6 +3,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database.types'
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // /signup is only matched here to capture the referral cookie (handled in
+  // proxy.ts). No session check, no DB query needed — return immediately.
+  if (pathname === '/signup') {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
@@ -25,37 +33,33 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const pathname = request.nextUrl.pathname
 
-  const protectedRoutes = ['/dashboard', '/onboarding']
-  const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
-
-  if (isProtected && !user) {
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && (pathname.startsWith('/dashboard') || pathname === '/onboarding')) {
-    const { data: profile } = await (supabase as any)
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', user.id)
-      .single()
+  // onboarding_completed gate — only meaningful for /dashboard/* and /onboarding,
+  // which are the only paths this middleware now runs on besides /signup.
+  const { data: profile } = await (supabase as any)
+    .from('profiles')
+    .select('onboarding_completed')
+    .eq('id', user.id)
+    .single()
 
-    const completed = !!profile?.onboarding_completed
+  const completed = !!profile?.onboarding_completed
 
-    if (!completed && pathname.startsWith('/dashboard')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/onboarding'
-      return NextResponse.redirect(url)
-    }
+  if (!completed && pathname.startsWith('/dashboard')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/onboarding'
+    return NextResponse.redirect(url)
+  }
 
-    if (completed && pathname === '/onboarding') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
+  if (completed && pathname === '/onboarding') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
   }
 
   return supabaseResponse

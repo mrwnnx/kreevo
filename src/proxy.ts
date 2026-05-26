@@ -22,8 +22,14 @@ export async function proxy(request: NextRequest) {
   return response
 }
 
+// Positive matcher — only run middleware on routes that actually need session
+// validation or cookie capture. Everything else (landing, /help/*, /u/*,
+// /challenges/*, /login, /auth/*, /api/*) bypasses the middleware entirely,
+// saving 1-2 Supabase round trips per navigation on public pages.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/dashboard/:path*',
+    '/onboarding',
+    '/signup',
   ],
 }
