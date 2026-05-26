@@ -834,7 +834,7 @@ export const fr = {
       levelSenior: 'Senior',
     },
     specialty: {
-      title: 'Dans quelle ligue veux-tu participer ? 🎯',
+      title: 'Dans quelle discipline veux-tu progresser ? 🎯',
       subtitle: 'Choisis ta spécialité. Tu pourras en changer tant que tu es en Stone ou Bronze.',
       specialtyLabel: 'Ta spécialité',
       uxuiLabel: 'UX/UI Designer',

@@ -837,7 +837,7 @@ export const en: Dictionary = {
       levelSenior: 'Senior',
     },
     specialty: {
-      title: 'Which league do you want to compete in? 🎯',
+      title: 'Which discipline do you want to grow in? 🎯',
       subtitle: 'Pick your specialty. You can still switch while in Stone or Bronze.',
       specialtyLabel: 'Your specialty',
       uxuiLabel: 'UX/UI Designer',
