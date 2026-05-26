@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { submitChallenge } from './actions'
 import type { Submission } from '@/types/database.types'
-import { CheckCircle, X, Loader2, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { CheckCircle, X, Loader2, ArrowLeft, ArrowRight, Sparkles, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
+import { HUMAN_REVIEW_THRESHOLD } from '@/lib/utils/submissions'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type SubmitT = Dictionary['submitForm']
@@ -75,6 +76,12 @@ export function MultiStepSubmitForm({
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [analyzeProgress, setAnalyzeProgress] = useState(0)
+
+  // Source of truth lives in DB (submissions.ai_rejection_count). We snapshot
+  // it once at mount; the publish action triggers a server-side increment +
+  // router refresh, so the prop is refreshed on next render.
+  const aiRejectionCount: number = ((existing as any)?.ai_rejection_count as number | null) ?? 0
+  const canRequestHumanReview = aiRejectionCount >= HUMAN_REVIEW_THRESHOLD
 
   const MAX_PHOTOS = 7
   function addPhoto(url: string | null) {
@@ -144,6 +151,16 @@ export function MultiStepSubmitForm({
     if (!coverUrl) { setError('Image de couverture requise'); setStep(1); return }
     if (!title.trim()) { setError('Un titre est requis pour publier'); setStep(1); return }
     setError(null)
+
+    // After N AI rejections on this same submission, the user can request a
+    // human review instead of being analyzed yet again.
+    if (canRequestHumanReview) {
+      return submitForm({
+        asDraft: false,
+        aiVerdict: 'human_review',
+        bonusEligible: false,
+      })
+    }
 
     const result = await runAnalyze()
     if (!result) {
@@ -382,13 +399,28 @@ export function MultiStepSubmitForm({
                   disabled={isPending || analyzing}
                   className="gap-2"
                 >
-                  {(isPending || analyzing) ? <Loader2 className="size-4 animate-spin" /> : null}
-                  {analyzing ? t.aiVerdict.analyzeRunning : t.publish}
+                  {(isPending || analyzing)
+                    ? <Loader2 className="size-4 animate-spin" />
+                    : canRequestHumanReview
+                      ? <Users className="size-4" />
+                      : null}
+                  {analyzing
+                    ? t.aiVerdict.analyzeRunning
+                    : canRequestHumanReview
+                      ? t.aiVerdict.requestHumanReview
+                      : t.publish}
                 </Button>
               </div>
             </>
           )}
         </div>
+        {step === 2 && !canRequestHumanReview && aiRejectionCount > 0 && (
+          <p className="text-[11px] text-center text-muted-foreground pb-2">
+            {tx(t.aiVerdict.modal.attemptsBeforeHumanReview, {
+              n: Math.max(0, HUMAN_REVIEW_THRESHOLD - aiRejectionCount),
+            })}
+          </p>
+        )}
         {step === 2 && attemptsLeft < 2 && (
           <p className="text-[11px] text-center text-muted-foreground pb-2">
             {tx(attemptsLeft > 1 ? t.attemptsLeftPlural : t.attemptsLeft, { n: attemptsLeft })}

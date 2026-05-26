@@ -156,6 +156,18 @@ export async function submitChallenge(formData: FormData) {
         rejectionReason || 'Ce travail ne semble pas correspondre au brief.',
         null,
       )
+      // Bump the AI rejection counter. Only AI rejections count — admin rejections
+      // and community reports don't unlock the "request human review" path.
+      const { data: cur } = await (supabaseAdmin as any)
+        .from('submissions')
+        .select('ai_rejection_count')
+        .eq('id', submissionId)
+        .single()
+      const nextCount = ((cur?.ai_rejection_count as number | null) ?? 0) + 1
+      await (supabaseAdmin as any)
+        .from('submissions')
+        .update({ ai_rejection_count: nextCount })
+        .eq('id', submissionId)
     } else if (aiVerdict === 'human_review') {
       // Case D: 3+ rejections accumulated → user requested human review
       await (supabaseAdmin as any)
