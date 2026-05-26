@@ -1050,4 +1050,14 @@ export const en: Dictionary = {
       submissionsEmpty: 'No submissions yet. Be the first.',
     },
   },
+  publicDesigners: {
+    title: 'Kreevo designers',
+    subtitle: 'The community of designers tackling real briefs every week. Explore their profiles, leagues, and work.',
+    heroCta: 'Join Kreevo',
+    heroCtaHint: 'Free · no card required',
+    countLabel: 'active designers',
+    empty: 'No designers to show yet.',
+    cardWork: 'project',
+    cardWorks: 'projects',
+  },
 }

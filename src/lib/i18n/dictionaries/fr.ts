@@ -1047,6 +1047,16 @@ export const fr = {
       submissionsEmpty: 'Aucune soumission publiée pour le moment. Sois le premier.',
     },
   },
+  publicDesigners: {
+    title: 'Designers Kreevo',
+    subtitle: 'La communauté de designers qui relèvent des challenges réels chaque semaine. Découvre leurs profils, leurs ligues et leurs travaux.',
+    heroCta: 'Rejoindre Kreevo',
+    heroCtaHint: 'Gratuit · pas de carte requise',
+    countLabel: 'designers actifs',
+    empty: 'Aucun designer à afficher pour le moment.',
+    cardWork: 'projet',
+    cardWorks: 'projets',
+  },
 } as const
 
 type DeepStringify<T> = {

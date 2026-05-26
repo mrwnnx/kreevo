@@ -82,6 +82,9 @@ export default async function PublicChallengesPage() {
       <nav className="flex items-center justify-between px-6 py-4 border-b border-border/50">
         <Link href="/" className="text-base font-bold tracking-tight">kreevo</Link>
         <div className="flex items-center gap-4">
+          <Link href="/designers" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            {dict.publicDesigners.title}
+          </Link>
           <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             {dict.landing.nav.signIn}
           </Link>

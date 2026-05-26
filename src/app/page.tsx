@@ -82,6 +82,9 @@ export default async function Home() {
           <Link href="/dashboard/challenges" className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono uppercase tracking-wider">
             {t.nav.challenges}
           </Link>
+          <Link href="/designers" className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono uppercase tracking-wider">
+            {dict.publicDesigners.title}
+          </Link>
           <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             {t.nav.signIn}
           </Link>
