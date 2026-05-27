@@ -39,16 +39,16 @@ export default async function AdminDashboard() {
     { data: recentUsers },
     { data: topDesigners },
   ] = await Promise.all([
-    (supabase as any).from('profiles').select('id', { count: 'exact', head: true }),
-    (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'pro'),
-    (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'free'),
-    (supabase as any).from('challenges').select('id', { count: 'exact', head: true }).eq('is_published', true),
-    (supabase as any).from('submissions').select('id', { count: 'exact', head: true }).gte('created_at', startOfMonth),
-    (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfWeek),
-    (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfLastWeek).lt('created_at', startOfWeek),
-    (supabase as any).from('feedbacks').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    (supabase as any).from('profiles').select('id, username, full_name, avatar_url, plan, league, created_at').order('created_at', { ascending: false }).limit(10),
-    (supabase as any).from('profiles').select('id, username, full_name, avatar_url, league, xp').order('xp', { ascending: false }).limit(5),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'pro'),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'free'),
+    supabase.from('challenges').select('id', { count: 'exact', head: true }).eq('is_published', true),
+    supabase.from('submissions').select('id', { count: 'exact', head: true }).gte('created_at', startOfMonth),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfWeek),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfLastWeek).lt('created_at', startOfWeek),
+    supabase.from('feedbacks').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('profiles').select('id, username, full_name, avatar_url, plan, league, created_at').order('created_at', { ascending: false }).limit(10),
+    supabase.from('profiles').select('id, username, full_name, avatar_url, league, xp').order('xp', { ascending: false }).limit(5),
   ])
 
   const revenue = (proUsers ?? 0) * 9
@@ -111,10 +111,10 @@ export default async function AdminDashboard() {
             <h2 className="text-sm font-semibold">Derniers inscrits</h2>
           </div>
           <div className="divide-y divide-border">
-            {(recentUsers ?? []).map((u: any) => (
+            {(recentUsers ?? []).map((u) => (
               <div key={u.id} className="flex items-center gap-3 px-5 py-3">
                 <Avatar className="size-7 rounded-md">
-                  <AvatarImage src={u.avatar_url} />
+                  <AvatarImage src={u.avatar_url ?? undefined} />
                   <AvatarFallback className="rounded-md text-[10px]">{u.username?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
@@ -125,7 +125,7 @@ export default async function AdminDashboard() {
                   {u.plan}
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono">
-                  {new Date(u.created_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
+                  {u.created_at && new Date(u.created_at).toLocaleDateString('fr', { day: 'numeric', month: 'short' })}
                 </span>
               </div>
             ))}
@@ -138,18 +138,18 @@ export default async function AdminDashboard() {
             <h2 className="text-sm font-semibold">Top designers ce mois</h2>
           </div>
           <div className="divide-y divide-border">
-            {(topDesigners ?? []).map((u: any, i: number) => (
+            {(topDesigners ?? []).map((u, i) => (
               <div key={u.id} className="flex items-center gap-3 px-5 py-3">
                 <span className="text-sm font-mono text-muted-foreground w-5">#{i + 1}</span>
                 <Avatar className="size-7 rounded-md">
-                  <AvatarImage src={u.avatar_url} />
+                  <AvatarImage src={u.avatar_url ?? undefined} />
                   <AvatarFallback className="rounded-md text-[10px]">{u.username?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{u.full_name ?? u.username}</p>
                   <p className="text-[11px] font-mono text-muted-foreground">{leagueLabel(u.league)}</p>
                 </div>
-                <span className="text-sm font-mono font-semibold text-primary">{u.xp.toLocaleString()} XP</span>
+                <span className="text-sm font-mono font-semibold text-primary">{(u.xp ?? 0).toLocaleString()} XP</span>
               </div>
             ))}
           </div>
