@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import { XpIcon } from '@/components/ui/XpIcon'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
@@ -17,7 +18,6 @@ export function WhatToDoNow({
 }: WhatToDoNowProps) {
   const actions = [
     {
-      rank: '🥇',
       label: suggestedChallenge
         ? tx(t.complete, { title: suggestedChallenge.title })
         : t.completeAny,
@@ -31,7 +31,6 @@ export function WhatToDoNow({
       xpColor: 'text-violet-600',
     },
     {
-      rank: '🥈',
       label: t.commentSubmissions,
       xp: tx(t.xp, { n: 30 }),
       detail: t.commentDetail,
@@ -39,7 +38,6 @@ export function WhatToDoNow({
       xpColor: 'text-blue-600',
     },
     {
-      rank: '🥉',
       label: referralsCount < 5 ? t.inviteFriend : t.shareProfile,
       xp: tx(t.xp, { n: 50 }),
       detail: t.shareDetail,
@@ -64,7 +62,7 @@ export function WhatToDoNow({
             href={action.href}
             className="flex items-center gap-3 px-5 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors duration-150 group"
           >
-            <span className="text-xl flex-shrink-0">{action.rank}</span>
+            <XpIcon className="size-5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate group-hover:text-violet-600 transition-colors">
                 {action.label}

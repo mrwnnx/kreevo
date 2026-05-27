@@ -289,7 +289,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const [dict, lang] = await Promise.all([getDict(), getLang()])
 
   return (
-    <div className="max-w-[960px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4">
+    <div className="max-w-[1140px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4">
 
       <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
 
