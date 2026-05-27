@@ -19,7 +19,7 @@ export type LeagueRow = {
 // des xp_reward des challenges publiés dans la ligue.
 export async function getLeagueThreshold(leagueId: string): Promise<number> {
   const [{ data: league }, { data: challenges }] = await Promise.all([
-    (supabaseAdmin as any)
+    supabaseAdmin
       .from('leagues')
       .select('xp_threshold_percent')
       .eq('id', leagueId)
@@ -30,14 +30,14 @@ export async function getLeagueThreshold(leagueId: string): Promise<number> {
       .eq('league_id', leagueId)
       .eq('is_published', true),
   ])
-  const total = (challenges ?? []).reduce((s: number, c: any) => s + (c.xp_reward || 0), 0)
+  const total = (challenges ?? []).reduce((s, c) => s + (c.xp_reward || 0), 0)
   const percent = league?.xp_threshold_percent ?? 60
   return Math.floor(total * percent / 100)
 }
 
 // Promotion auto si seuil XP + min_challenges atteints.
 export async function checkAndUpdateLeague(userId: string): Promise<void> {
-  const { data: profile } = await (supabaseAdmin as any)
+  const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('xp, league')
     .eq('id', userId)
@@ -47,7 +47,7 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
   const currentLeagueName = profile.league || 'Stone'
   const currentXP = profile.xp || 0
 
-  const { data: currentLeague } = await (supabaseAdmin as any)
+  const { data: currentLeague } = await supabaseAdmin
     .from('leagues')
     .select('*')
     .eq('name', currentLeagueName)
@@ -56,16 +56,16 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   const threshold = await getLeagueThreshold(currentLeague.id)
 
-  const { data: leagueChallenges } = await (supabaseAdmin as any)
+  const { data: leagueChallenges } = await supabaseAdmin
     .from('challenges')
     .select('id')
     .eq('league_id', currentLeague.id)
     .eq('is_published', true)
 
-  const challengeIds = (leagueChallenges ?? []).map((c: any) => c.id)
+  const challengeIds = (leagueChallenges ?? []).map((c) => c.id)
   let completedCount = 0
   if (challengeIds.length > 0) {
-    const { count } = await (supabaseAdmin as any)
+    const { count } = await supabaseAdmin
       .from('participations')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
@@ -81,7 +81,7 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   if (!meetsXP || !meetsChallenges) return
 
-  const { data: nextLeague } = await (supabaseAdmin as any)
+  const { data: nextLeague } = await supabaseAdmin
     .from('leagues')
     .select('*')
     .eq('order_index', currentLeague.order_index + 1)
@@ -90,13 +90,13 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   if (!nextLeague) return
 
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('profiles')
     .update({ league: nextLeague.name, league_entered_at: new Date().toISOString() })
     .eq('id', userId)
 
   try {
-    await (supabaseAdmin as any).from('notifications').insert({
+    await supabaseAdmin.from('notifications').insert({
       user_id: userId,
       type: 'league_up',
       data: { old_league: currentLeagueName, new_league: nextLeague.name },
