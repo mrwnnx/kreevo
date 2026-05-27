@@ -61,14 +61,32 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center space-y-4">
-        <div className="size-12 mx-auto rounded-full bg-violet-100 dark:bg-violet-900/30 inline-flex items-center justify-center animate-pulse">
-          <Sparkles className="size-6 text-violet-600 dark:text-violet-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
+        {/* Hero skeleton — score + summary placeholder */}
+        <div
+          className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
+          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+        >
+          <div className="shrink-0 flex flex-col items-center gap-3">
+            <div className="size-16 rounded-2xl bg-violet-200/40 dark:bg-violet-800/30 inline-flex items-center justify-center">
+              <Sparkles className="size-7 text-violet-500 animate-pulse" />
+            </div>
+            <SkeletonLine widthPct={50} delayMs={0} />
+          </div>
+          <div className="flex-1 min-w-0 space-y-3 pt-1">
+            <SkeletonLine widthPct={28} delayMs={0} />
+            <div className="space-y-2 pt-2">
+              <SkeletonLine widthPct={96} delayMs={150} />
+              <SkeletonLine widthPct={88} delayMs={300} />
+              <SkeletonLine widthPct={72} delayMs={450} />
+            </div>
+            <p className="text-xs text-muted-foreground pt-2">{t.generating}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-base font-semibold">{t.generating}</p>
-          <p className="text-sm text-muted-foreground mt-1">{t.generatingHint}</p>
-        </div>
+
+        <SkeletonSection accent="emerald" className="lg:col-span-7" delayBase={600} />
+        <SkeletonSection accent="amber" className="lg:col-span-5" delayBase={900} />
+        <SkeletonSection accent="violet" className="lg:col-span-12" delayBase={1200} lines={4} />
       </div>
     )
   }
@@ -178,6 +196,78 @@ function Section({
           <li key={i} className="flex items-start gap-2.5 text-base leading-relaxed">
             <span className={cn('size-1.5 rounded-full mt-2 shrink-0', palette.dot)} />
             <span>{it}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// ── Skeletons ────────────────────────────────────────────────────────────
+// Mimics the bento layout while the AI generates the real feedback. A
+// gradient sweep ("feedbackShimmer") passes left-to-right on each bar with
+// staggered delays so the panel looks like it's being written line by line.
+
+function SkeletonLine({
+  widthPct = 100,
+  delayMs = 0,
+  className,
+}: {
+  widthPct?: number
+  delayMs?: number
+  className?: string
+}) {
+  return (
+    <div
+      className={cn('h-3 rounded-full bg-muted relative overflow-hidden', className)}
+      style={{ width: `${widthPct}%` }}
+    >
+      <div
+        className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/55 to-transparent dark:via-white/12"
+        style={{ animation: `feedbackShimmer 1.8s ease-in-out ${delayMs}ms infinite` }}
+      />
+    </div>
+  )
+}
+
+function SkeletonSection({
+  accent,
+  className,
+  delayBase = 0,
+  lines = 3,
+}: {
+  accent: 'emerald' | 'amber' | 'violet'
+  className?: string
+  delayBase?: number
+  lines?: number
+}) {
+  const palette = {
+    emerald: {
+      dot: 'bg-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      bg: 'bg-emerald-50/60 dark:bg-emerald-950/20',
+    },
+    amber: {
+      dot: 'bg-amber-500',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      bg: 'bg-amber-50/60 dark:bg-amber-950/20',
+    },
+    violet: {
+      dot: 'bg-violet-500',
+      border: 'border-violet-200/70 dark:border-violet-900/40',
+      bg: 'bg-violet-50/60 dark:bg-violet-950/20',
+    },
+  }[accent]
+  // Vary the widths so each "line" feels like real prose, not identical bars.
+  const widths = [95, 78, 88, 70, 84]
+  return (
+    <div className={cn('rounded-3xl border p-6 space-y-4', palette.border, palette.bg, className)}>
+      <SkeletonLine widthPct={28} delayMs={delayBase} />
+      <ul className="space-y-3 pt-1">
+        {Array.from({ length: lines }).map((_, i) => (
+          <li key={i} className="flex items-start gap-2.5">
+            <span className={cn('size-1.5 rounded-full mt-2 shrink-0', palette.dot)} />
+            <SkeletonLine widthPct={widths[i % widths.length]} delayMs={delayBase + 200 + i * 180} className="flex-1" />
           </li>
         ))}
       </ul>
