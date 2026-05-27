@@ -7,12 +7,25 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
  * also happens in the participations API and SSR pages; this cron is the
  * safety net.
  *
+ * Vercel Cron sends GET (always), so this MUST be a GET handler — used to
+ * be POST which silently 405'd on every fire (see streak-reset for the
+ * working reference pattern).
+ *
  * NB: league demotion / tier-window / XP penalties were removed 2026-05-26 —
  * leagues are permanent achievements and a missed deadline no longer costs XP.
  */
-export async function POST(request: Request) {
-  const secret = request.headers.get('authorization')?.replace('Bearer ', '')
-  if (secret !== process.env.CRON_SECRET) {
+export async function GET(req: Request) {
+  // Refuse to run if no CRON_SECRET is configured — prevents silent open
+  // access in environments where the env var was forgotten.
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
+  }
+
+  const auth = req.headers.get('authorization')
+  if (
+    auth !== `Bearer ${process.env.CRON_SECRET}` &&
+    auth !== process.env.CRON_SECRET
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
