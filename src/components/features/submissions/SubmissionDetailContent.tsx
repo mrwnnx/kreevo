@@ -256,7 +256,7 @@ export function SubmissionDetailContent({
             {submission.title && (
               <h1
                 className={cn(
-                  'font-bold tracking-tight leading-tight transition-all duration-200',
+                  'font-semibold tracking-tight leading-tight transition-all duration-200',
                   isStuck ? 'text-base sm:text-lg truncate' : 'text-3xl sm:text-4xl',
                 )}
               >
@@ -360,7 +360,7 @@ export function SubmissionDetailContent({
         </div>
       )}
       {/* Cover (full container width) */}
-      <div className="rounded-2xl border border-border overflow-hidden bg-card">
+      <div className="rounded-2xl overflow-hidden bg-card">
         <div className="relative aspect-video bg-muted">
           {submission.cover_url ? (
             <ImageLightbox
@@ -427,7 +427,7 @@ export function SubmissionDetailContent({
       {additionalImages.length > 0 && (
         <div className="space-y-14 mt-14!">
           {additionalImages.map((photo, i) => (
-            <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
+            <div key={i} className="rounded-2xl overflow-hidden bg-card">
               <div className="relative aspect-video bg-muted">
                 <ImageLightbox
                   src={photo.url}

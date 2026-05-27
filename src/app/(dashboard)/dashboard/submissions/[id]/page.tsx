@@ -60,7 +60,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   const dateLocale = lang === 'en' ? 'en-US' : 'fr-FR'
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-8 pb-16">
+    <div className="max-w-[1140px] mx-auto px-6 py-8 pb-16">
 
       {/* Back — context-aware: if user came from /history, return there; else default to challenge page */}
       <Link
