@@ -680,6 +680,8 @@ export const en: Dictionary = {
     },
     blockedOverlay: 'Finish your active challenge first',
     inProgress: 'In progress',
+    cooldownBadge: 'Cooldown · {h}h',
+    reopenedBadge: 'Retry',
     daysSuffix: 'd',
   },
   profileForm: {

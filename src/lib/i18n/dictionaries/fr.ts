@@ -677,6 +677,8 @@ export const fr = {
     },
     blockedOverlay: 'Termine ton challenge en cours d\'abord',
     inProgress: 'En cours',
+    cooldownBadge: 'Cooldown · {h}h',
+    reopenedBadge: 'Reparticiper',
     daysSuffix: 'j',
   },
   profileForm: {

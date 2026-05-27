@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Lock, Clock, ArrowRight, Check, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold } from '@/lib/utils/leagues'
+import { cooldownRemainingMs, isInCooldown } from '@/lib/utils/participation-cooldown'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
 import { getDict, tx } from '@/lib/i18n/lang'
@@ -48,20 +49,26 @@ interface ChallengeRow {
   leagues: LeagueRow | null
 }
 
-type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocked'
+type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocked' | 'cooldown' | 'reopened'
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, participantCount, participants, colorIndex = 0, t,
+  challenge, status, cooldownHoursLeft, participantCount, participants, colorIndex = 0, t,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
+  cooldownHoursLeft?: number
   participantCount?: number
   participants?: Array<{ username: string; avatar_url: string | null }>
   colorIndex?: number
   t: Dictionary['challengesPage']
 }) {
-  const isClickable = status === 'available' || status === 'active' || status === 'completed'
+  const isClickable =
+    status === 'available' ||
+    status === 'active' ||
+    status === 'completed' ||
+    status === 'cooldown' ||
+    status === 'reopened'
   const style = PASTELS[colorIndex % PASTELS.length]
   const emoji =
     challenge.emoji ||
@@ -79,6 +86,8 @@ function ChallengeCard({
       status === 'completed' && 'border-border/60',
       status === 'locked'    && 'border-border opacity-50 cursor-default',
       status === 'blocked'   && 'border-border opacity-60 cursor-default',
+      status === 'cooldown'  && 'border-amber-300 dark:border-amber-700 shadow-sm shadow-amber-500/10',
+      status === 'reopened'  && 'border-emerald-400 dark:border-emerald-600 shadow-sm shadow-emerald-500/10 hover:shadow-lg',
     )}>
 
       {status === 'blocked' && (
@@ -136,6 +145,15 @@ function ChallengeCard({
             <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
               <span className="size-1.5 rounded-full bg-green-500 animate-pulse" /> {t.inProgress}
             </span>
+          ) : status === 'cooldown' ? (
+            <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 font-medium">
+              <Clock className="size-3" />
+              {tx(t.cooldownBadge, { h: cooldownHoursLeft ?? 0 })}
+            </span>
+          ) : status === 'reopened' ? (
+            <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
+              <span className="size-1.5 rounded-full bg-emerald-500" /> {t.reopenedBadge}
+            </span>
           ) : participants && participants.length > 0 && (
             <div className="flex items-center gap-2 pl-1">
               <AvatarGroup data-size="sm">
@@ -155,10 +173,13 @@ function ChallengeCard({
           'size-9 rounded-full border flex items-center justify-center shrink-0 transition-colors',
           status === 'completed' && 'border-green-400 text-green-600 dark:text-green-400',
           status === 'locked'    && 'border-border text-muted-foreground',
+          status === 'cooldown'  && 'border-amber-300 text-amber-600 dark:text-amber-400',
+          status === 'reopened'  && 'border-emerald-400 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500',
           (status === 'available' || status === 'active') && 'border-border text-foreground group-hover:bg-foreground group-hover:text-background',
         )}>
           {status === 'completed' ? <Check className="size-4" />
             : status === 'locked' ? <Lock className="size-4" />
+            : status === 'cooldown' ? <Clock className="size-4" />
             : <ArrowRight className="size-4" />}
         </span>
       </div>
@@ -189,6 +210,7 @@ export default async function ChallengesPage({
     { data: allLeagues },
     { data: allChallenges },
     { data: activePartRows },
+    { data: expiredPartRows },
     { data: userSubmissions },
     { data: allPartRows },
   ] = await Promise.all([
@@ -210,6 +232,12 @@ export default async function ChallengesPage({
       .eq('status', 'active')
       .gt('personal_deadline', new Date().toISOString())
       .limit(1),
+    // Expired participations — surface cooldown / "can reparticipate" state on the list.
+    (supabase as any)
+      .from('participations')
+      .select('challenge_id, personal_deadline')
+      .eq('user_id', user.id)
+      .eq('status', 'expired'),
     supabase.from('submissions').select('challenge_id').eq('user_id', user.id),
     (supabaseAdmin as any)
       .from('participations')
@@ -221,6 +249,15 @@ export default async function ChallengesPage({
   const challenges: ChallengeRow[] = allChallenges ?? []
   const activeParticipation = ((activePartRows as any[]) ?? [])[0] ?? null
   const submittedIds = new Set((userSubmissions ?? []).map((s: any) => s.challenge_id))
+
+  // Map challenge_id → personal_deadline (ISO) for expired participations.
+  // UNIQUE(challenge_id, user_id) guarantees at most one row per challenge.
+  const expiredDeadlineByChallenge = new Map<string, string>()
+  for (const p of ((expiredPartRows as any[]) ?? [])) {
+    if (p.challenge_id && p.personal_deadline) {
+      expiredDeadlineByChallenge.set(p.challenge_id, p.personal_deadline)
+    }
+  }
 
   // Participation counts per challenge
   const partCounts: Record<string, number> = {}
@@ -466,9 +503,19 @@ export default async function ChallengesPage({
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {visible.map((c, i) => {
                 let status: ChallengeStatus = 'available'
+                let cooldownHoursLeft: number | undefined
+                const expiredAt = expiredDeadlineByChallenge.get(c.id)
                 if (submittedIds.has(c.id))            status = 'completed'
                 else if (activeChallId === c.id)        status = 'active'
                 else if (activeParticipation)           status = 'blocked'
+                else if (expiredAt) {
+                  if (isInCooldown(expiredAt)) {
+                    status = 'cooldown'
+                    cooldownHoursLeft = Math.ceil(cooldownRemainingMs(expiredAt) / 3600000)
+                  } else {
+                    status = 'reopened'
+                  }
+                }
                 else if (isProGated)                    status = 'locked'
 
                 return (
@@ -476,6 +523,7 @@ export default async function ChallengesPage({
                     key={c.id}
                     challenge={c}
                     status={status}
+                    cooldownHoursLeft={cooldownHoursLeft}
                     participantCount={partCounts[c.id]}
                     participants={participantsByChallenge[c.id]}
                     colorIndex={i}
