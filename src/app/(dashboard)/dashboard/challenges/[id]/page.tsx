@@ -185,19 +185,8 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </div>
           )}
 
-          {/* Gallery — autres soumissions visibles avant de participer */}
-          {allSubmissions && allSubmissions.length > 0 && (
-            <section className="space-y-4 pt-6">
-              <div className="h-px bg-border" />
-              <h2 className="text-xl font-semibold"><span className="mr-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
-              <SubmissionGallery
-                submissions={allSubmissions}
-                currentUserId={user.id}
-                challengeTitle={c.title}
-                t={t.gallery}
-              />
-            </section>
-          )}
+          {/* Gallery hidden in preview state — only revealed once the user joins,
+              keeps the pre-participation page focused on the brief + CTA. */}
         </div>
       </div>
     )
