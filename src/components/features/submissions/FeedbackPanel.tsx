@@ -89,12 +89,15 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
     : 'text-red-600 dark:text-red-400'
 
   return (
-    <div className="space-y-6">
-      {/* Score + summary */}
-      <div className="rounded-2xl border border-border bg-card p-5 flex items-start gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
+      {/* Hero — score + summary (full width) */}
+      <div
+        className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
+        style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+      >
         <div className="shrink-0 text-center">
-          <div className={cn('text-5xl font-bold leading-none', scoreColor)}>{feedback.score}</div>
-          <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
+          <div className={cn('text-5xl sm:text-6xl font-bold leading-none', scoreColor)}>{feedback.score}</div>
+          <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">
             {t.scoreLabel}
           </div>
         </div>
@@ -102,15 +105,17 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
           <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
             {t.summaryLabel}
           </p>
-          <p className="text-sm leading-relaxed">{feedback.summary}</p>
+          <p className="text-base sm:text-lg leading-relaxed">{feedback.summary}</p>
         </div>
       </div>
 
+      {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
       <Section
         icon={<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />}
         label={t.strengthsLabel}
         items={feedback.strengths}
         accent="emerald"
+        className="lg:col-span-7"
       />
 
       <Section
@@ -118,44 +123,60 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
         label={t.weaknessesLabel}
         items={feedback.weaknesses}
         accent="amber"
+        className="lg:col-span-5"
       />
 
+      {/* Row 3 — suggestions (full width, the "act on it" call) */}
       <Section
         icon={<Lightbulb className="size-4 text-violet-600 dark:text-violet-400" />}
         label={t.suggestionsLabel}
         items={feedback.suggestions}
         accent="violet"
+        className="lg:col-span-12"
       />
     </div>
   )
 }
 
 function Section({
-  icon, label, items, accent,
+  icon, label, items, accent, className,
 }: {
   icon: React.ReactNode
   label: string
   items: string[]
   accent: 'emerald' | 'amber' | 'violet'
+  className?: string
 }) {
   if (items.length === 0) return null
-  const dot = {
-    emerald: 'bg-emerald-500',
-    amber: 'bg-amber-500',
-    violet: 'bg-violet-500',
+  const palette = {
+    emerald: {
+      dot: 'bg-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      bg: 'bg-emerald-50/60 dark:bg-emerald-950/20',
+    },
+    amber: {
+      dot: 'bg-amber-500',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      bg: 'bg-amber-50/60 dark:bg-amber-950/20',
+    },
+    violet: {
+      dot: 'bg-violet-500',
+      border: 'border-violet-200/70 dark:border-violet-900/40',
+      bg: 'bg-violet-50/60 dark:bg-violet-950/20',
+    },
   }[accent]
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+    <div className={cn('rounded-3xl border p-6 space-y-3', palette.border, palette.bg, className)}>
       <div className="flex items-center gap-2">
         {icon}
         <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
           {label}
         </p>
       </div>
-      <ul className="space-y-2">
+      <ul className="space-y-2.5">
         {items.map((it, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed">
-            <span className={cn('size-1.5 rounded-full mt-2 shrink-0', dot)} />
+          <li key={i} className="flex items-start gap-2.5 text-base leading-relaxed">
+            <span className={cn('size-1.5 rounded-full mt-2 shrink-0', palette.dot)} />
             <span>{it}</span>
           </li>
         ))}
