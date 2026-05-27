@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: Params) {
 
   const { id: submissionId } = await params
 
-  const { data: comments } = await (supabaseAdmin as any)
+  const { data: comments } = await supabaseAdmin
     .from('comments')
     .select(`
       id, content, parent_id, likes_count, is_reported, created_at, edited_at,
@@ -26,21 +26,21 @@ export async function GET(_req: Request, { params }: Params) {
     .eq('is_reported', false)
     .order('created_at', { ascending: false })
 
-  const commentIds = (comments ?? []).map((c: any) => c.id)
+  const commentIds = (comments ?? []).map((c) => c.id)
   let likedSet = new Set<string>()
   if (commentIds.length > 0) {
-    const { data: likes } = await (supabaseAdmin as any)
+    const { data: likes } = await supabaseAdmin
       .from('comment_likes')
       .select('comment_id')
       .eq('user_id', user.id)
       .in('comment_id', commentIds)
-    likedSet = new Set((likes ?? []).map((l: any) => l.comment_id))
+    likedSet = new Set((likes ?? []).map((l) => l.comment_id).filter((id): id is string => !!id))
   }
-  const enriched = (comments ?? []).map((c: any) => ({ ...c, liked_by_me: likedSet.has(c.id) }))
+  const enriched = (comments ?? []).map((c) => ({ ...c, liked_by_me: likedSet.has(c.id) }))
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const { count: dailyCount } = await (supabaseAdmin as any)
+  const { count: dailyCount } = await supabaseAdmin
     .from('comments')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
@@ -62,7 +62,7 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: `Min ${MIN_CONTENT} caractères` }, { status: 400 })
   }
 
-  const { data: submission } = await (supabaseAdmin as any)
+  const { data: submission } = await supabaseAdmin
     .from('submissions')
     .select('id, user_id, validation_status')
     .eq('id', submissionId)
@@ -72,13 +72,13 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Soumission non publiée' }, { status: 403 })
   }
 
-  const { data: profile } = await (supabaseAdmin as any)
+  const { data: profile } = await supabaseAdmin
     .from('profiles').select('plan').eq('id', user.id).single()
   const isPro = profile?.plan === 'pro' || profile?.plan === 'studio'
   if (!isPro) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const { count } = await (supabaseAdmin as any)
+    const { count } = await supabaseAdmin
       .from('comments')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -88,7 +88,7 @@ export async function POST(req: Request, { params }: Params) {
     }
   }
 
-  const { data: comment, error } = await (supabaseAdmin as any)
+  const { data: comment, error } = await supabaseAdmin
     .from('comments')
     .insert({
       submission_id: submissionId,
@@ -105,21 +105,22 @@ export async function POST(req: Request, { params }: Params) {
 
   try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
-  const { data: sub } = await (supabaseAdmin as any)
+  const { data: sub } = await supabaseAdmin
     .from('submissions').select('comments_count').eq('id', submissionId).single()
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('submissions')
     .update({ comments_count: (sub?.comments_count ?? 0) + 1 })
     .eq('id', submissionId)
 
-  if (submission.user_id !== user.id) {
-    const { data: ownerProf } = await (supabaseAdmin as any)
-      .from('profiles').select('xp').eq('id', submission.user_id).single()
+  if (submission.user_id && submission.user_id !== user.id) {
+    const ownerId = submission.user_id
+    const { data: ownerProf } = await supabaseAdmin
+      .from('profiles').select('xp').eq('id', ownerId).single()
     const newXP = (ownerProf?.xp ?? 0) + 5
-    await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
+    await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
 
     try {
-      await notify(submission.user_id, 'submission_commented', {
+      await notify(ownerId, 'submission_commented', {
         submission_id: submissionId,
         comment_id: comment?.id,
         commenter_id: user.id,
