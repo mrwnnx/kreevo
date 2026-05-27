@@ -47,7 +47,7 @@ export default async function FeedbackPage({ params }: Props) {
   const t = dict.submissionDetail.feedbackPage
 
   return (
-    <div className="max-w-[720px] mx-auto px-6 py-8 pb-16">
+    <div className="max-w-[1140px] mx-auto px-6 py-8 pb-16">
       <Link
         href={`/dashboard/submissions/${id}`}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
