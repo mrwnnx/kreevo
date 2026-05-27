@@ -33,9 +33,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     thisWeekResult,
     lastSubResult,
   ] = await Promise.all([
-    (supabase as any).from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
 
-    (supabase as any)
+    supabase
       .from('participations')
       .select('*, challenges(id, title, xp_reward, deadline_days, specialty, challenge_type)')
       .eq('user_id', user.id)
@@ -45,29 +45,29 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       .limit(1)
       .maybeSingle(),
 
-    (supabase as any).from('streaks').select('*').eq('user_id', user.id).maybeSingle(),
+    supabase.from('streaks').select('*').eq('user_id', user.id).maybeSingle(),
 
-    (supabase as any)
+    supabase
       .from('referrals')
       .select('*, referred:profiles!referred_id(username, avatar_url)')
       .eq('referrer_id', user.id),
 
-    (supabaseAdmin as any).from('leagues').select('*').order('order_index'),
+    supabaseAdmin.from('leagues').select('*').order('order_index'),
 
-    (supabase as any)
+    supabase
       .from('participations')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('status', 'submitted'),
 
-    (supabase as any)
+    supabase
       .from('participations')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('status', 'submitted')
       .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
 
-    (supabase as any)
+    supabase
       .from('submissions')
       .select('created_at')
       .eq('user_id', user.id)
@@ -86,20 +86,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   let participantAvatars: { id: string; username: string; avatar_url: string | null }[] = []
   if (participation?.challenge_id) {
     const [{ count }, { data: parts }] = await Promise.all([
-      (supabaseAdmin as any)
+      supabaseAdmin
         .from('participations')
         .select('id', { count: 'exact', head: true })
         .eq('challenge_id', participation.challenge_id),
-      (supabaseAdmin as any)
+      supabaseAdmin
         .from('participations')
         .select('user_id')
         .eq('challenge_id', participation.challenge_id)
         .limit(5),
     ])
     participantsCount = count ?? 0
-    const ids = (parts ?? []).map((p: any) => p.user_id)
+    const ids = (parts ?? []).map((p) => p.user_id).filter((id): id is string => !!id)
     if (ids.length) {
-      const { data: profs } = await (supabaseAdmin as any)
+      const { data: profs } = await supabaseAdmin
         .from('profiles')
         .select('id, username, avatar_url')
         .in('id', ids)
@@ -108,8 +108,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   }
 
   const streak = streakResult.data
-  const referrals: any[] = referralsResult.data ?? []
-  const allLeagues: any[] = leagueResult.data ?? []
+  const referrals = referralsResult.data ?? []
+  const allLeagues = leagueResult.data ?? []
   const totalCompleted = completedResult.count ?? 0
   const completedThisWeek = thisWeekResult.count ?? 0
   const lastSubmissionDate = lastSubResult.data?.created_at
@@ -118,23 +118,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const userLeagueName = profile?.league || 'Stone'
   const userLeague = allLeagues.find(
-    (l: any) => l.name.toLowerCase() === userLeagueName.toLowerCase(),
-  ) || allLeagues.find((l: any) => l.name === 'Stone') || allLeagues[0]
+    (l) => l.name.toLowerCase() === userLeagueName.toLowerCase(),
+  ) || allLeagues.find((l) => l.name === 'Stone') || allLeagues[0]
   const leagueIndex = userLeague?.order_index || 1
-  const nextLeague = allLeagues.find((l: any) => l.order_index === leagueIndex + 1)
+  const nextLeague = allLeagues.find((l) => l.order_index === leagueIndex + 1)
 
   // XP threshold for current league
-  const { data: leagueChallenges } = await (supabaseAdmin as any)
+  const { data: leagueChallenges } = await supabaseAdmin
     .from('challenges')
     .select('xp_reward')
     .eq('league_id', userLeague?.id)
     .eq('is_published', true)
 
   const totalLeagueXP =
-    (leagueChallenges as any[] | null)?.reduce(
-      (s: number, c: any) => s + (c.xp_reward || 0),
-      0,
-    ) || 1000
+    leagueChallenges?.reduce((s, c) => s + (c.xp_reward || 0), 0) || 1000
   const thresholdPercent = userLeague?.xp_threshold_percent ?? 60
   const threshold = Math.floor((totalLeagueXP * thresholdPercent) / 100)
   const currentXP = profile?.xp || 0
@@ -142,20 +139,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const xpGap = Math.max(0, threshold - currentXP)
 
   // User rank in league
-  const { count: rankCount } = await (supabaseAdmin as any)
+  const { count: rankCount } = await supabaseAdmin
     .from('profiles')
     .select('id', { count: 'exact', head: true })
     .eq('league', userLeagueName)
     .gt('xp', currentXP)
   const userRank = (rankCount || 0) + 1
 
-  const { count: totalInLeague } = await (supabaseAdmin as any)
+  const { count: totalInLeague } = await supabaseAdmin
     .from('profiles')
     .select('id', { count: 'exact', head: true })
     .eq('league', userLeagueName)
 
   // Suggested challenge
-  const { data: suggestedChallenge } = await (supabaseAdmin as any)
+  const { data: suggestedChallenge } = await supabaseAdmin
     .from('challenges')
     .select('*')
     .eq('league_id', userLeague?.id)
@@ -165,15 +162,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .maybeSingle()
 
   // Completed challenges in current league (for 2nd progress bar)
-  const { data: leagueChallengeIds } = await (supabaseAdmin as any)
+  const { data: leagueChallengeIds } = await supabaseAdmin
     .from('challenges')
     .select('id')
     .eq('league_id', userLeague?.id)
     .eq('is_published', true)
-  const challengeIdList = (leagueChallengeIds ?? []).map((c: any) => c.id)
+  const challengeIdList = (leagueChallengeIds ?? []).map((c) => c.id)
   let completedInLeague = 0
   if (challengeIdList.length > 0) {
-    const { count } = await (supabase as any)
+    const { count } = await supabase
       .from('participations')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -187,20 +184,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   // XP earned today
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const { data: todaySubmissions } = await (supabase as any)
+  const { data: todaySubmissions } = await supabase
     .from('submissions')
     .select('xp_earned')
     .eq('user_id', user.id)
     .gte('created_at', today.toISOString())
 
   const xpToday =
-    (todaySubmissions as any[] | null)?.reduce(
-      (s: number, sub: any) => s + (sub.xp_earned || 0),
-      0,
-    ) || 0
+    todaySubmissions?.reduce((s, sub) => s + (sub.xp_earned || 0), 0) || 0
 
   // Completed today (submitted participations updated today)
-  const { count: completedTodayCount } = await (supabase as any)
+  const { count: completedTodayCount } = await supabase
     .from('participations')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
@@ -210,14 +204,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   // Contextual leaderboard — neighbors around current user
   const startRange = Math.max(0, userRank - 3)
   const endRange = userRank + 1
-  const { data: leaderboardNeighbors } = await (supabaseAdmin as any)
+  const { data: leaderboardNeighbors } = await supabaseAdmin
     .from('profiles')
     .select('id, username, full_name, avatar_url, xp')
     .eq('league', userLeagueName)
     .order('xp', { ascending: false })
     .range(startRange, endRange)
 
-  const neighborUsers = (leaderboardNeighbors ?? []).map((u: any, i: number) => ({
+  const neighborUsers = (leaderboardNeighbors ?? []).map((u, i) => ({
     rank: startRange + 1 + i,
     username: u.username,
     full_name: u.full_name,
@@ -227,7 +221,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   }))
 
   // XP gap to top 10
-  const { data: top10User } = await (supabaseAdmin as any)
+  const { data: top10User } = await supabaseAdmin
     .from('profiles')
     .select('xp')
     .eq('league', userLeagueName)
@@ -241,12 +235,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   since.setHours(0, 0, 0, 0)
 
   const [{ data: subsLast7 }, { data: partsLast7 }] = await Promise.all([
-    (supabase as any)
+    supabase
       .from('submissions')
       .select('xp_earned, created_at')
       .eq('user_id', user.id)
       .gte('created_at', since.toISOString()),
-    (supabase as any)
+    supabase
       .from('participations')
       .select('created_at')
       .eq('user_id', user.id)
@@ -258,9 +252,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     const d = new Date(since)
     d.setDate(since.getDate() + i)
     const dayKey = d.toISOString().split('T')[0]
-    const xp = ((subsLast7 as any[]) || [])
-      .filter((s: any) => (s.created_at || '').startsWith(dayKey))
-      .reduce((acc: number, s: any) => acc + (s.xp_earned || 0), 0)
+    const xp = (subsLast7 ?? [])
+      .filter((s) => (s.created_at || '').startsWith(dayKey))
+      .reduce((acc, s) => acc + (s.xp_earned || 0), 0)
     return {
       day: d.toLocaleDateString('en', { weekday: 'short' }),
       xp,
@@ -271,7 +265,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     const d = new Date(since)
     d.setDate(since.getDate() + i)
     const dayKey = d.toISOString().split('T')[0]
-    const count = ((partsLast7 as any[]) || []).filter((p: any) =>
+    const count = (partsLast7 ?? []).filter((p) =>
       (p.created_at || '').startsWith(dayKey),
     ).length
     return {
