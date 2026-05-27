@@ -11,7 +11,7 @@ import type { Submission } from '@/types/database.types'
 import { CheckCircle, X, Loader2, ArrowLeft, ArrowRight, Sparkles, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
-import { HUMAN_REVIEW_THRESHOLD } from '@/lib/utils/submissions'
+import { HUMAN_REVIEW_THRESHOLD } from '@/lib/utils/submission-constants'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type SubmitT = Dictionary['submitForm']

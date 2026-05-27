@@ -1,12 +1,16 @@
 import { anthropic } from '@/lib/anthropic/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify, notifyAllAdmins } from './notifications'
+import {
+  HUMAN_REVIEW_THRESHOLD,
+  MAX_PUBLISH_IMAGES,
+  DESCRIPTION_BONUS_MULT,
+} from './submission-constants'
 
 const AUTO_VALIDATE_LEAGUES = ['Stone', 'Bronze', 'Silver']
 const ANALYZE_MODEL = 'claude-sonnet-4-6'
-const MAX_IMAGES = 4
-const HUMAN_REVIEW_THRESHOLD = 3       // ai_rejection_count ≥ this → user can request human review
-export const DESCRIPTION_BONUS_MULT = 0.20  // +20% XP if description deemed relevant
+const MAX_IMAGES = MAX_PUBLISH_IMAGES
+export { DESCRIPTION_BONUS_MULT }
 
 export interface ImageInput {
   url: string
@@ -180,7 +184,10 @@ Description fournie par l'user : ${hasDescription ? description.trim() : '(vide)
   }
 }
 
-export { HUMAN_REVIEW_THRESHOLD, MAX_IMAGES as MAX_PUBLISH_IMAGES }
+// HUMAN_REVIEW_THRESHOLD + MAX_PUBLISH_IMAGES are re-exported from ./submission-constants
+// for callers that import them via submissions.ts. New consumers should import directly
+// from ./submission-constants to avoid pulling the Anthropic SDK into client bundles.
+export { HUMAN_REVIEW_THRESHOLD, MAX_PUBLISH_IMAGES }
 
 interface ChallengeForValidation {
   id: string
