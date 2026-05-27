@@ -36,9 +36,10 @@ interface Props {
   profile: Profile
   lang: Lang
   t: Dictionary['header']
+  notifTypes: Dictionary['notificationsPage']['types']
 }
 
-export function FloatingNav({ profile, lang, t }: Props) {
+export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -78,7 +79,7 @@ export function FloatingNav({ profile, lang, t }: Props) {
 
       {/* Right — notifications + avatar */}
       <div className="shrink-0 flex items-center gap-1">
-        <NotificationBell userId={profile.id} />
+        <NotificationBell userId={profile.id} types={notifTypes} />
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-1.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">

@@ -317,7 +317,7 @@ export const en: Dictionary = {
       badge_earned:          { emoji: '🏅', label: 'New badge earned' },
       xp_deducted:           { emoji: '⬇️', label: 'XP deducted' },
       joined_challenge:      { emoji: '🎯', label: 'Challenge joined — timer started' },
-      deadline_missed:       { emoji: '❌', label: 'Personal deadline passed — your participation is closed' },
+      deadline_missed:       { emoji: '⏰', label: 'Missed deadline — you can retry this challenge in 24h. You\'ve got this 💪' },
       referral_completed:    { emoji: '🎁', label: 'A friend completed their 1st challenge — +50 XP' },
       submission_liked:      { emoji: '❤️', label: 'Someone liked your submission' },
       submission_commented:  { emoji: '💬', label: 'New comment on your submission' },

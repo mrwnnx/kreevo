@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Bell } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+
 function timeAgo(date: string): string {
   const diff = Date.now() - new Date(date).getTime()
   const m = Math.floor(diff / 60000)
@@ -22,17 +23,24 @@ interface Notification {
   created_at: string
 }
 
-const TYPE_LABELS: Record<string, { label: string; emoji: string }> = {
-  feedback_ready:    { emoji: '💬', label: 'Feedback publié sur ta soumission' },
-  league_up:         { emoji: '🚀', label: 'Promotion de league !' },
-  badge_earned:      { emoji: '🏅', label: 'Nouveau badge obtenu' },
-  xp_deducted:       { emoji: '⬇️', label: 'XP déduit' },
-  joined_challenge:  { emoji: '🎯', label: 'Tu as rejoint un challenge — 3 jours pour soumettre !' },
-  deadline_missed:   { emoji: '❌', label: 'Deadline dépassée — participation close' },
-  referral_completed:{ emoji: '🎁', label: 'Un ami a complété son 1er challenge — +50 XP' },
+interface TypeMeta { emoji: string; label: string }
+
+/** Picks an internal link target from a notification's data payload. */
+function notificationHref(n: Notification): string | null {
+  const challengeId = typeof n.data?.challenge_id === 'string' ? n.data.challenge_id : null
+  const submissionId = typeof n.data?.submission_id === 'string' ? n.data.submission_id : null
+  if (challengeId) return `/dashboard/challenges/${challengeId}`
+  if (submissionId) return `/dashboard/submissions/${submissionId}`
+  return null
 }
 
-export function NotificationBell({ userId }: { userId: string }) {
+export function NotificationBell({
+  userId,
+  types,
+}: {
+  userId: string
+  types: Record<string, TypeMeta>
+}) {
   const [notifs, setNotifs] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
 
@@ -108,12 +116,10 @@ export function NotificationBell({ userId }: { userId: string }) {
                   No notifications yet
                 </div>
               ) : notifs.slice(0, 10).map(n => {
-                const meta = TYPE_LABELS[n.type] ?? { emoji: '🔔', label: n.type }
-                return (
-                  <div
-                    key={n.id}
-                    className={`flex gap-3 px-4 py-3 ${!n.is_read ? 'bg-primary/5' : ''}`}
-                  >
+                const meta = types[n.type] ?? { emoji: '🔔', label: n.type }
+                const href = notificationHref(n)
+                const body = (
+                  <>
                     <span className="text-lg shrink-0 mt-0.5">{meta.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium leading-snug">{meta.label}</p>
@@ -127,6 +133,24 @@ export function NotificationBell({ userId }: { userId: string }) {
                     {!n.is_read && (
                       <div className="size-1.5 rounded-full bg-primary shrink-0 mt-1.5" />
                     )}
+                  </>
+                )
+                const rowCls = `flex gap-3 px-4 py-3 ${!n.is_read ? 'bg-primary/5' : ''}`
+                if (href) {
+                  return (
+                    <Link
+                      key={n.id}
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={`${rowCls} hover:bg-muted/60 transition-colors`}
+                    >
+                      {body}
+                    </Link>
+                  )
+                }
+                return (
+                  <div key={n.id} className={rowCls}>
+                    {body}
                   </div>
                 )
               })}

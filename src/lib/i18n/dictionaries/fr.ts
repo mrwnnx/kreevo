@@ -314,7 +314,7 @@ export const fr = {
       badge_earned:          { emoji: '🏅', label: 'Nouveau badge obtenu' },
       xp_deducted:           { emoji: '⬇️', label: 'XP déduit' },
       joined_challenge:      { emoji: '🎯', label: 'Challenge rejoint — chrono démarré' },
-      deadline_missed:       { emoji: '❌', label: 'Deadline personnelle dépassée — ta participation est close' },
+      deadline_missed:       { emoji: '⏰', label: 'Deadline ratée — tu peux retenter ce challenge dans 24h. Ça va le faire 💪' },
       referral_completed:    { emoji: '🎁', label: 'Un ami a complété son 1er défi — +50 XP' },
       submission_liked:      { emoji: '❤️', label: 'Quelqu\'un a aimé ta soumission' },
       submission_commented:  { emoji: '💬', label: 'Nouveau commentaire sur ta soumission' },
