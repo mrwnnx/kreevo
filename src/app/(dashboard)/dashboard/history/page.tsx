@@ -37,7 +37,7 @@ export default async function HistoryPage() {
   const dateLocale = lang === 'en' ? 'en-US' : 'fr-FR'
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-8 pb-24">
+    <div className="max-w-[1140px] mx-auto px-6 py-8 pb-24">
       <header className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t.title}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t.subtitle}</p>
