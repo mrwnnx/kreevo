@@ -92,7 +92,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
               </span>
               <span className="ml-auto inline-flex items-center gap-0.5 text-xs font-mono text-muted-foreground">
                 <XpIcon className="size-3" />
-                {profile.xp.toLocaleString()} XP
+                {(profile.xp ?? 0).toLocaleString()} XP
               </span>
             </div>
           </DropdownMenuTrigger>

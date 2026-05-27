@@ -406,7 +406,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               challengeId={c.id}
               canResubmit={canResubmit}
               participationStatus={participationStatus}
-              userPlan={p.plan}
+              userPlan={p.plan ?? undefined}
               t={t.mySubmission}
             />
           )}

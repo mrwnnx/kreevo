@@ -339,7 +339,7 @@ export default async function ProfilePage({
         {/* ── STATS BAR ──────────────────────────────────────────── */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: XpIcon, label: t.stats.totalXp,    value: p.xp.toLocaleString(), mono: true },
+            { icon: XpIcon, label: t.stats.totalXp,    value: (p.xp ?? 0).toLocaleString(), mono: true },
             { icon: Trophy, label: t.stats.challenges, value: String(submissionCount ?? 0), mono: true },
             { icon: Star,   label: t.stats.league,     value: league.label, mono: false },
             { icon: Trophy, label: t.stats.rank,       value: rankLabel, mono: true },
