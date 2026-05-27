@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { updateStreak } from '@/lib/utils/streaks'
 import { revalidatePath } from 'next/cache'
+import type { Json } from '@/types/database.types'
 
 export async function submitChallenge(formData: FormData) {
   const supabase = await createClient()
@@ -25,8 +26,8 @@ export async function submitChallenge(formData: FormData) {
   const aiAnalysisRaw = formData.get('aiAnalysis') as string | null
   const aiBypassed = formData.get('aiAnalysisBypassed') === 'true'
   const descriptionBonusEligible = formData.get('descriptionBonusEligible') === 'true'
-  let aiAnalysis: unknown = null
-  try { aiAnalysis = aiAnalysisRaw ? JSON.parse(aiAnalysisRaw) : null } catch {}
+  let aiAnalysis: Json | null = null
+  try { aiAnalysis = aiAnalysisRaw ? (JSON.parse(aiAnalysisRaw) as Json) : null } catch {}
 
   if (!coverUrl) return { error: 'Image de couverture requise' }
 
@@ -48,7 +49,7 @@ export async function submitChallenge(formData: FormData) {
 
   // Verify participation is still active (only for non-draft submissions)
   if (participationId) {
-    const { data: part } = await (supabase as any)
+    const { data: part } = await supabase
       .from('participations')
       .select('status, personal_deadline')
       .eq('id', participationId)
@@ -60,20 +61,21 @@ export async function submitChallenge(formData: FormData) {
     }
   }
 
-  const files: Record<string, unknown> = {}
+  const files: Record<string, Json> = {}
   if (figmaUrl) files.figma = figmaUrl
   if (projectLink) files.link = projectLink
   if (photos.length) files.images = photos
 
   // Check existing submission
-  const { data: existing } = await (supabase.from('submissions') as any)
+  const { data: existing } = await supabase
+    .from('submissions')
     .select('id, attempt_number, is_draft')
     .eq('challenge_id', challengeId)
     .eq('user_id', user.id)
-    .single() as { data: { id: string; attempt_number: number; is_draft: boolean } | null }
+    .maybeSingle()
 
   // Attempt limit check (only count published attempts, not drafts)
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles').select('plan').eq('id', user.id).single()
   const maxAttempts = profile?.plan === 'pro' ? 3 : 2
   const wasDraft = existing?.is_draft ?? true
@@ -114,10 +116,10 @@ export async function submitChallenge(formData: FormData) {
         ai_analysis_bypassed: aiBypassed,
       }
 
-  const table = supabase.from('submissions') as any
+  const submissions = supabase.from('submissions')
   const { data: upsertResult, error } = existing
-    ? await table.update(finalPayload).eq('id', existing.id).select('id').single()
-    : await table.insert(finalPayload).select('id').single()
+    ? await submissions.update(finalPayload).eq('id', existing.id).select('id').single()
+    : await submissions.insert(finalPayload).select('id').single()
 
   if (error) return { error: error.message }
 
@@ -131,7 +133,7 @@ export async function submitChallenge(formData: FormData) {
 
   // Update participation status to 'submitted'
   if (participationId) {
-    await (supabase as any)
+    await supabase
       .from('participations')
       .update({ status: 'submitted' })
       .eq('id', participationId)
@@ -158,19 +160,19 @@ export async function submitChallenge(formData: FormData) {
       )
       // Bump the AI rejection counter. Only AI rejections count — admin rejections
       // and community reports don't unlock the "request human review" path.
-      const { data: cur } = await (supabaseAdmin as any)
+      const { data: cur } = await supabaseAdmin
         .from('submissions')
         .select('ai_rejection_count')
         .eq('id', submissionId)
         .single()
       const nextCount = ((cur?.ai_rejection_count as number | null) ?? 0) + 1
-      await (supabaseAdmin as any)
+      await supabaseAdmin
         .from('submissions')
         .update({ ai_rejection_count: nextCount })
         .eq('id', submissionId)
     } else if (aiVerdict === 'human_review') {
       // Case D: 3+ rejections accumulated → user requested human review
-      await (supabaseAdmin as any)
+      await supabaseAdmin
         .from('submissions')
         .update({ validation_status: 'pending_human_review' })
         .eq('id', submissionId)

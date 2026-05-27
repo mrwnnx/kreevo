@@ -14,7 +14,7 @@ export const getDesignTokens = unstable_cache(
   async (): Promise<DesignTokens> => {
     try {
       const { data } = await supabaseAdmin
-        .from('settings' as any)
+        .from('settings')
         .select('value')
         .eq('key', 'design_tokens')
         .single()

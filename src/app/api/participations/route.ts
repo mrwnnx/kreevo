@@ -17,14 +17,14 @@ export async function POST(request: Request) {
   if (!challenge_id) return NextResponse.json({ error: 'Missing challenge_id' }, { status: 400 })
 
   // Fetch user profile for plan + league check
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('plan, league')
     .eq('id', user.id)
     .single()
 
   // Fetch challenge + league (bypass RLS for public read)
-  const { data: challenge } = await (supabaseAdmin as any)
+  const { data: challenge } = await supabaseAdmin
     .from('challenges')
     .select('id, is_published, league_id, deadline_days, leagues(id, name, access, order_index)')
     .eq('id', challenge_id)
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   // League match: if challenge has a league, verify user is in that league
   if (challenge.league_id && challenge.leagues && profile?.league) {
-    const { data: userLeague } = await (supabaseAdmin as any)
+    const { data: userLeague } = await supabaseAdmin
       .from('leagues')
       .select('id, order_index')
       .ilike('name', profile.league)
@@ -63,20 +63,21 @@ export async function POST(request: Request) {
   // One active participation at a time — but ignore those whose deadline has already passed
   // (cron may not have flipped them to 'expired' yet). Auto-expire on the fly so the user isn't blocked.
   const nowIso = new Date().toISOString()
-  const { data: activeRows } = await (supabaseAdmin as any)
+  const { data: activeRows } = await supabaseAdmin
     .from('participations')
     .select('id, personal_deadline')
     .eq('user_id', user.id)
     .eq('status', 'active')
 
-  const live = (activeRows ?? []).filter((p: any) => p.personal_deadline && new Date(p.personal_deadline) > new Date(nowIso))
-  const stale = (activeRows ?? []).filter((p: any) => !p.personal_deadline || new Date(p.personal_deadline) <= new Date(nowIso))
+  const rows = activeRows ?? []
+  const live = rows.filter((p) => p.personal_deadline && new Date(p.personal_deadline) > new Date(nowIso))
+  const stale = rows.filter((p) => !p.personal_deadline || new Date(p.personal_deadline) <= new Date(nowIso))
 
   if (stale.length > 0) {
-    await (supabaseAdmin as any)
+    await supabaseAdmin
       .from('participations')
       .update({ status: 'expired' })
-      .in('id', stale.map((p: any) => p.id))
+      .in('id', stale.map((p) => p.id))
   }
 
   if (live.length > 0) {
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
   // - active   → 409 (in progress)
   // - submitted → 409 (final, can't restart)
   // - expired   → cooldown 24h, then reset same row (UNIQUE (challenge_id, user_id) blocks INSERT)
-  const { data: existing } = await (supabaseAdmin as any)
+  const { data: existing } = await supabaseAdmin
     .from('participations')
     .select('id, status, personal_deadline')
     .eq('challenge_id', challenge_id)
@@ -122,7 +123,7 @@ export async function POST(request: Request) {
   // Approved/rejected/pending submissions can't co-exist with status='expired'
   // (publish flips participation to 'submitted'), so this only nukes drafts.
   if (existing && existing.status === 'expired') {
-    const { data: draftSub } = await (supabaseAdmin as any)
+    const { data: draftSub } = await supabaseAdmin
       .from('submissions')
       .select('id')
       .eq('challenge_id', challenge_id)
@@ -130,7 +131,7 @@ export async function POST(request: Request) {
       .eq('is_draft', true)
       .maybeSingle()
     if (draftSub) {
-      await (supabaseAdmin as any).from('submissions').delete().eq('id', draftSub.id)
+      await supabaseAdmin.from('submissions').delete().eq('id', draftSub.id)
     }
   }
 
@@ -143,13 +144,13 @@ export async function POST(request: Request) {
   }
 
   const { data: participation, error } = existing
-    ? await (supabaseAdmin as any)
+    ? await supabaseAdmin
         .from('participations')
         .update(upsertPayload)
         .eq('id', existing.id)
         .select()
         .single()
-    : await (supabaseAdmin as any)
+    : await supabaseAdmin
         .from('participations')
         .insert(upsertPayload)
         .select()
@@ -160,7 +161,7 @@ export async function POST(request: Request) {
   try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
   try {
-    await (supabaseAdmin as any).from('notifications').insert({
+    await supabaseAdmin.from('notifications').insert({
       user_id: user.id,
       type: 'joined_challenge',
       data: { challenge_id, deadline: personal_deadline.toISOString() },
@@ -179,7 +180,7 @@ export async function DELETE(request: Request) {
   const challenge_id = searchParams.get('challenge_id')
   if (!challenge_id) return NextResponse.json({ error: 'Missing challenge_id' }, { status: 400 })
 
-  const { data: participation } = await (supabaseAdmin as any)
+  const { data: participation } = await supabaseAdmin
     .from('participations')
     .select('id, status')
     .eq('challenge_id', challenge_id)
@@ -193,7 +194,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Impossible : tu as déjà soumis ce travail' }, { status: 409 })
   }
 
-  const { data: submission } = await (supabaseAdmin as any)
+  const { data: submission } = await supabaseAdmin
     .from('submissions')
     .select('id, is_draft, validation_status, cover_url, files')
     .eq('challenge_id', challenge_id)
@@ -205,17 +206,17 @@ export async function DELETE(request: Request) {
   }
 
   if (submission) {
-    await (supabaseAdmin as any).from('submissions').delete().eq('id', submission.id)
+    await supabaseAdmin.from('submissions').delete().eq('id', submission.id)
   }
 
-  const { error: delErr } = await (supabaseAdmin as any)
+  const { error: delErr } = await supabaseAdmin
     .from('participations')
     .delete()
     .eq('id', participation.id)
   if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 })
 
   try {
-    await (supabaseAdmin as any).from('notifications').insert({
+    await supabaseAdmin.from('notifications').insert({
       user_id: user.id,
       type: 'participation_cancelled',
       data: { challenge_id },
@@ -233,7 +234,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const challenge_id = searchParams.get('challenge_id')
 
-  let query = (supabase as any)
+  let query = supabase
     .from('participations')
     .select('*, challenges(id, title, specialty, challenge_type, industry)')
     .eq('user_id', user.id)

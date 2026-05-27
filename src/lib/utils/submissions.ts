@@ -271,13 +271,15 @@ export async function approveSubmission(
   validatedBy: string | null,
   options: { applyDescriptionBonus?: boolean } = {},
 ): Promise<{ xpAwarded: number; bonusApplied: boolean; bonusXp: number }> {
-  const { data: sub } = await (supabaseAdmin as any)
+  const { data: sub } = await supabaseAdmin
     .from('submissions')
     .select('id, user_id, challenge_id, xp_attributed, validation_status, challenges(xp_reward)')
     .eq('id', submissionId)
     .single()
 
-  if (!sub) return { xpAwarded: 0, bonusApplied: false, bonusXp: 0 }
+  if (!sub || !sub.user_id || !sub.challenge_id) {
+    return { xpAwarded: 0, bonusApplied: false, bonusXp: 0 }
+  }
 
   const baseXp = sub.challenges?.xp_reward ?? 150
   const bonusApplied = !!options.applyDescriptionBonus
@@ -293,7 +295,7 @@ export async function approveSubmission(
   // doesn't refund XP it never granted.
   let otherHoldsXp = false
   if (!wasAttributed) {
-    const { data: priorCredit } = await (supabaseAdmin as any)
+    const { data: priorCredit } = await supabaseAdmin
       .from('submissions')
       .select('id')
       .eq('user_id', sub.user_id)
@@ -307,7 +309,7 @@ export async function approveSubmission(
 
   const shouldCredit = !wasAttributed && !otherHoldsXp
 
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('submissions')
     .update({
       validation_status: 'approved',
@@ -320,19 +322,19 @@ export async function approveSubmission(
     .eq('id', submissionId)
 
   if (shouldCredit) {
-    const { data: prof } = await (supabaseAdmin as any)
+    const { data: prof } = await supabaseAdmin
       .from('profiles')
       .select('xp, referred_by')
       .eq('id', sub.user_id)
       .single()
     const newXP = (prof?.xp ?? 0) + xpReward
-    await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', sub.user_id)
+    await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', sub.user_id)
     const { checkAndUpdateLeague } = await import('@/lib/utils/leagues')
     await checkAndUpdateLeague(sub.user_id)
 
     // Reward referrer +50 XP on referred user's first approved submission
     if (prof?.referred_by) {
-      const { data: pendingReferral } = await (supabaseAdmin as any)
+      const { data: pendingReferral } = await supabaseAdmin
         .from('referrals')
         .select('id')
         .eq('referrer_id', prof.referred_by)
@@ -342,19 +344,19 @@ export async function approveSubmission(
 
       if (pendingReferral?.id) {
         const REFERRAL_XP = 50
-        const { data: referrer } = await (supabaseAdmin as any)
+        const { data: referrer } = await supabaseAdmin
           .from('profiles')
           .select('xp')
           .eq('id', prof.referred_by)
           .single()
         const newReferrerXP = (referrer?.xp ?? 0) + REFERRAL_XP
-        await (supabaseAdmin as any)
+        await supabaseAdmin
           .from('profiles')
           .update({ xp: newReferrerXP })
           .eq('id', prof.referred_by)
-        await (supabaseAdmin as any)
+        await supabaseAdmin
           .from('referrals')
-          .update({ status: 'completed', xp_awarded: REFERRAL_XP })
+          .update({ status: 'completed', xp_awarded: true })
           .eq('id', pendingReferral.id)
         await checkAndUpdateLeague(prof.referred_by)
         await notify(prof.referred_by, 'referral_completed', {
@@ -379,27 +381,27 @@ export async function rejectSubmission(
   reason: string,
   validatedBy: string | null
 ): Promise<void> {
-  const { data: sub } = await (supabaseAdmin as any)
+  const { data: sub } = await supabaseAdmin
     .from('submissions')
     .select('id, user_id, challenge_id, xp_attributed, challenges(xp_reward)')
     .eq('id', submissionId)
     .single()
 
-  if (!sub) return
+  if (!sub || !sub.user_id || !sub.challenge_id) return
 
   // Revoke XP if previously attributed
   if (sub.xp_attributed) {
     const xpReward = sub.challenges?.xp_reward ?? 150
-    const { data: prof } = await (supabaseAdmin as any)
+    const { data: prof } = await supabaseAdmin
       .from('profiles')
       .select('xp')
       .eq('id', sub.user_id)
       .single()
     const newXP = Math.max(0, (prof?.xp ?? 0) - xpReward)
-    await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', sub.user_id)
+    await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', sub.user_id)
   }
 
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('submissions')
     .update({
       validation_status: 'rejected',
@@ -422,7 +424,7 @@ export async function rejectSubmission(
  * Decides AI auto-validation vs pending admin review based on league.
  */
 export async function triggerValidationFlow(submissionId: string): Promise<void> {
-  const { data: sub } = await (supabaseAdmin as any)
+  const { data: sub } = await supabaseAdmin
     .from('submissions')
     .select(`
       id, user_id, challenge_id, cover_url,
@@ -434,12 +436,12 @@ export async function triggerValidationFlow(submissionId: string): Promise<void>
     .eq('id', submissionId)
     .single()
 
-  if (!sub) return
+  if (!sub || !sub.user_id || !sub.challenge_id || !sub.cover_url) return
 
   const challenge = sub.challenges
   const leagueName = challenge?.leagues?.name ?? null
 
-  if (shouldAutoValidate(leagueName)) {
+  if (challenge && shouldAutoValidate(leagueName)) {
     const result = await validateSubmissionWithAI(
       { id: sub.id, user_id: sub.user_id, cover_url: sub.cover_url, challenge_id: sub.challenge_id },
       { id: challenge.id, brief: challenge.brief, specialty: challenge.specialty, challenge_type: challenge.challenge_type, xp_reward: challenge.xp_reward, league_name: leagueName }
@@ -452,7 +454,7 @@ export async function triggerValidationFlow(submissionId: string): Promise<void>
     }
   } else {
     // Higher leagues: pending admin review
-    await (supabaseAdmin as any)
+    await supabaseAdmin
       .from('submissions')
       .update({ validation_status: 'pending' })
       .eq('id', submissionId)
