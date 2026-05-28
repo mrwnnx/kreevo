@@ -42,6 +42,7 @@ export const fr = {
       notifications: 'Notifications',
       history: 'Historique',
       appearance: 'Apparence',
+      switchToAdmin: 'Passer en mode admin',
       signOut: 'Se déconnecter',
       planSuffix: 'plan',
     },

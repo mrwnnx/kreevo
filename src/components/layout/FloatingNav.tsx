@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { House, Trophy, BarChart3 } from 'lucide-react'
+import { House, Trophy, BarChart3, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -113,6 +113,16 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             <DropdownMenuItem>
               <Link href="/dashboard/history" className="w-full text-sm font-medium">{t.menu.history}</Link>
             </DropdownMenuItem>
+            {profile.role === 'admin' && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/admin" className="w-full text-sm font-medium inline-flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                    <Shield className="size-3.5" /> {t.menu.switchToAdmin}
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5 space-y-2">
               <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Language</p>

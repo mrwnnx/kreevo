@@ -44,6 +44,7 @@ export const en: Dictionary = {
       notifications: 'Notifications',
       history: 'History',
       appearance: 'Appearance',
+      switchToAdmin: 'Switch to admin',
       signOut: 'Sign out',
       planSuffix: 'plan',
     },
