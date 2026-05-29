@@ -4,7 +4,8 @@ import { redirect, notFound } from 'next/navigation'
 
 import { MultiStepSubmitForm } from '@/components/features/challenge/MultiStepSubmitForm'
 import type { Profile, Submission } from '@/types/database.types'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, getLang } from '@/lib/i18n/lang'
+import { localizeChallenge } from '@/lib/challenges/i18n'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -30,7 +31,8 @@ export default async function ChallengeSubmitPage({ params }: Props) {
   if (!challenge) notFound()
   if (!participation) redirect(`/dashboard/challenges/${id}`)
 
-  const c = challenge as any
+  const lang = await getLang()
+  const c = localizeChallenge(challenge as any, lang)
   const p = profile as Profile
   const deadlinePassed = new Date(participation.personal_deadline) < new Date()
   if (deadlinePassed || participation.status === 'expired') redirect(`/dashboard/challenges/${id}`)

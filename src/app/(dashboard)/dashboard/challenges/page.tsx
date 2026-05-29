@@ -8,7 +8,8 @@ import { getLeagueThreshold } from '@/lib/utils/leagues'
 import { cooldownRemainingMs, isInCooldown } from '@/lib/utils/participation-cooldown'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
-import { getDict, tx } from '@/lib/i18n/lang'
+import { getDict, getLang, tx } from '@/lib/i18n/lang'
+import { localizeChallenges } from '@/lib/challenges/i18n'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── Pastel palette — each card a different hue, all at a uniform 95% lightness ──
@@ -222,7 +223,7 @@ export default async function ChallengesPage({
       .order('order_index', { ascending: true }),
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, specialty, challenge_type, industry, emoji, xp_reward, deadline_days, league_id, is_published, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
+      .select('*, leagues(id, name, icon, color, order_index, access, min_challenges, is_active)')
       .eq('is_published', true)
       .order('created_at', { ascending: false }),
     (supabase as any)
@@ -245,8 +246,9 @@ export default async function ChallengesPage({
   ])
 
   const profile = profileData as any
+  const lang = await getLang()
   const leagues: LeagueRow[] = allLeagues ?? []
-  const challenges: ChallengeRow[] = allChallenges ?? []
+  const challenges: ChallengeRow[] = localizeChallenges((allChallenges ?? []) as ChallengeRow[], lang)
   const activeParticipation = ((activePartRows as any[]) ?? [])[0] ?? null
   const submittedIds = new Set((userSubmissions ?? []).map((s: any) => s.challenge_id))
 

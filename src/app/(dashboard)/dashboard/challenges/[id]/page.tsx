@@ -18,7 +18,8 @@ import { ChallengeBriefSections } from '@/components/features/challenge/Challeng
 import { CooldownCountdown } from '@/components/features/challenge/CooldownCountdown'
 import { cooldownEnd, isInCooldown } from '@/lib/utils/participation-cooldown'
 import type { Profile } from '@/types/database.types'
-import { getDict, tx } from '@/lib/i18n/lang'
+import { getDict, getLang, tx } from '@/lib/i18n/lang'
+import { localizeChallenge } from '@/lib/challenges/i18n'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -55,7 +56,8 @@ export default async function ChallengePage({ params, searchParams }: Props) {
   if (!profile) redirect('/login')
   if (!challenge) notFound()
 
-  const c = challenge as any
+  const lang = await getLang()
+  const c = localizeChallenge(challenge as any, lang)
   const p = profile as Profile
   const totalParticipants = participantCount ?? 0
 

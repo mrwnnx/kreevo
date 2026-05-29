@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { ArrowRight, Clock } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getDict, getLang } from '@/lib/i18n/lang'
+import { localizeChallenges } from '@/lib/challenges/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,15 +67,16 @@ function specialtyEmoji(specialty: string | null, fallback: string | null): stri
 
 export default async function PublicChallengesPage() {
   const dict = await getDict()
+  const lang = await getLang()
   const t = dict.publicChallenges
 
   const { data } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('id, title, brief, specialty, challenge_type, industry, emoji, xp_reward, deadline_days, updated_at')
+    .select('*')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
 
-  const challenges = (data ?? []) as ChallengeRow[]
+  const challenges = localizeChallenges((data ?? []) as ChallengeRow[], lang)
 
   return (
     <div className="min-h-screen bg-background text-foreground">

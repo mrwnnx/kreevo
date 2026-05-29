@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import { ArrowLeft, ArrowRight, Clock, Users } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { getDict, tx } from '@/lib/i18n/lang'
+import { getDict, getLang, tx } from '@/lib/i18n/lang'
+import { localizeChallenge } from '@/lib/challenges/i18n'
 import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 
@@ -45,16 +46,18 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
+  const lang = await getLang()
   const { data } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('title, brief, is_published')
+    .select('*')
     .eq('id', id)
     .maybeSingle()
 
-  const row = data as { title: string; brief: string; is_published: boolean } | null
-  if (!row || !row.is_published) {
+  const raw = data as { is_published?: boolean } | null
+  if (!raw || !raw.is_published) {
     return { title: 'Challenge — Kreevo' }
   }
+  const row = localizeChallenge(data, lang) as { title: string; brief: string }
 
   const description = row.brief.length > 160 ? row.brief.slice(0, 157) + '…' : row.brief
 
@@ -89,6 +92,7 @@ function specialtyEmoji(specialty: string | null, fallback: string | null): stri
 export default async function PublicChallengeDetailPage({ params }: Props) {
   const { id } = await params
   const dict = await getDict()
+  const lang = await getLang()
   const t = dict.publicChallenges
   const td = dict.challengeDetail
 
@@ -101,7 +105,7 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
   const [{ data: challengeData }, { data: submissionsData }, { count: participantsCount }] = await Promise.all([
     (supabaseAdmin as any)
       .from('challenges')
-      .select('id, title, brief, context, deliverable, constraints, criteria, specialty, challenge_type, industry, emoji, xp_reward, deadline_days, updated_at, is_published')
+      .select('*')
       .eq('id', id)
       .maybeSingle(),
     (supabaseAdmin as any)
@@ -117,8 +121,9 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
       .eq('challenge_id', id),
   ])
 
-  const challenge = challengeData as ChallengeRow | null
-  if (!challenge || !challenge.is_published) notFound()
+  const challengeRaw = challengeData as ChallengeRow | null
+  if (!challengeRaw || !challengeRaw.is_published) notFound()
+  const challenge = localizeChallenge(challengeRaw, lang)
 
   const rawSubmissions = (submissionsData ?? []) as SubmissionRow[]
   // Gallery's Submission shape uses `profiles?: {...}` (undefined-friendly), so

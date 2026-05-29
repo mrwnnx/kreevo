@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
+import { localizeChallenge } from '@/lib/challenges/i18n'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
 import { WhatToDoNow } from '@/components/dashboard/WhatToDoNow'
@@ -37,7 +38,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
     supabase
       .from('participations')
-      .select('*, challenges(id, title, xp_reward, deadline_days, specialty, challenge_type)')
+      .select('*, challenges(*)')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .gt('personal_deadline', new Date().toISOString())
@@ -281,6 +282,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     'Designer'
 
   const [dict, lang] = await Promise.all([getDict(), getLang()])
+  const suggestedChallengeL = suggestedChallenge ? localizeChallenge(suggestedChallenge as any, lang) : null
+  // Localize the active challenge embedded on the participation (countdown card title).
+  if (participation?.challenges) {
+    ;(participation as any).challenges = localizeChallenge((participation as any).challenges, lang)
+  }
 
   return (
     <div className="max-w-[1140px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4">
@@ -308,7 +314,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           totalInLeague={totalInLeague || 50}
           currentXP={currentXP}
           threshold={threshold}
-          suggestedChallenge={suggestedChallenge}
+          suggestedChallenge={suggestedChallengeL}
           completedInLeague={completedInLeague}
           minChallenges={minChallenges}
           minChallengesEnabled={minChallengesEnabled}
@@ -317,7 +323,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
         <LeagueCountdownCard
           participation={participation}
-          suggestedChallenge={suggestedChallenge}
+          suggestedChallenge={suggestedChallengeL}
           participantsCount={participantsCount}
           participantAvatars={participantAvatars}
           t={dict.dashboard.countdownCard}
@@ -326,7 +332,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <WhatToDoNow
-          suggestedChallenge={suggestedChallenge}
+          suggestedChallenge={suggestedChallengeL}
           referralsCount={referrals.length}
           profile={profile}
           t={dict.dashboard.whatToDoNow}
