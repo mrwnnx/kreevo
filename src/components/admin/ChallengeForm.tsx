@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Loader2, ChevronLeft, Check } from 'lucide-react'
+import { Save, Loader2, ChevronLeft, Check, Languages } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { translateChallenge, type ChallengeFields, type ChallengeLang } from '@/app/(admin)/admin/challenges/actions'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -53,36 +54,35 @@ const SPECIALTY_STYLE: Record<string, { border: string; bg: string; text: string
 
 const STEP_LABELS = ['Spécialité', 'Type', 'Industrie', 'Détails']
 
+// ── i18n types ──────────────────────────────────────────────────────────────
+
+type TStatus = 'draft' | 'ai_generated' | 'validated'
+const LANGS: ChallengeLang[] = ['fr', 'en', 'ar']
+const LANG_LABEL: Record<ChallengeLang, string> = { fr: 'Français', en: 'English', ar: 'العربية' }
+const EMPTY_FIELDS: ChallengeFields = { title: '', brief: '', context: '', deliverable: '', constraints: '', criteria: '' }
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface FormData {
+interface MetaData {
   specialty: string
   challenge_type: string
   industry: string
   emoji: string
-  title: string
-  brief: string
-  context: string
-  deliverable: string
-  constraints: string
-  criteria: string
   league_id: string
   xp_reward: string
   deadline_days: string
   is_published: boolean
 }
 
-const EMPTY: FormData = {
-  specialty: '',
-  challenge_type: '',
-  industry: '',
-  emoji: '',
-  title: '', brief: '', context: '', deliverable: '',
-  constraints: '', criteria: '',
-  league_id: '',
-  xp_reward: '250',
-  deadline_days: '7',
-  is_published: false,
+export interface ChallengeFormInitial extends Partial<MetaData> {
+  source_lang?: ChallengeLang
+  texts?: Partial<Record<ChallengeLang, Partial<ChallengeFields>>>
+  status?: Partial<Record<ChallengeLang, TStatus>>
+}
+
+const EMPTY_META: MetaData = {
+  specialty: '', challenge_type: '', industry: '', emoji: '',
+  league_id: '', xp_reward: '250', deadline_days: '7', is_published: false,
 }
 
 const EMOJI_SUGGESTIONS = ['🎯', '📱', '🎨', '✏️', '💡', '🖌️', '📐', '🧩', '🚀', '🔥', '✨', '🏆', '🎬', '📦', '🛍️', '💳', '🎵', '🏠']
@@ -126,13 +126,33 @@ function StepIndicator({ step, onBack }: { step: number; onBack?: () => void }) 
   )
 }
 
+// ── Status badge ───────────────────────────────────────────────────────────────
+
+function StatusBadge({ status, isSource }: { status: TStatus; isSource: boolean }) {
+  if (isSource) return <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Source</span>
+  const map: Record<TStatus, { cls: string; label: string }> = {
+    draft:        { cls: 'bg-muted text-muted-foreground', label: 'Brouillon' },
+    ai_generated: { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', label: 'IA — à relire' },
+    validated:    { cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', label: 'Validé' },
+  }
+  const s = map[status]
+  return <span className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded-full', s.cls)}>{s.label}</span>
+}
+
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id?: string }) {
+export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial; id?: string }) {
   const router = useRouter()
-  const [form, setForm] = useState<FormData>({ ...EMPTY, ...initial })
+
+  const [meta, setMeta] = useState<MetaData>({ ...EMPTY_META, ...stripI18n(initial) })
+  const [sourceLang, setSourceLang] = useState<ChallengeLang>(initial?.source_lang ?? 'fr')
+  const [texts, setTexts] = useState<Record<ChallengeLang, ChallengeFields>>(() => buildTexts(initial))
+  const [status, setStatus] = useState<Record<ChallengeLang, TStatus>>(() => buildStatus(initial))
+  const [activeLang, setActiveLang] = useState<ChallengeLang>(initial?.source_lang ?? 'fr')
+
   const [leagues, setLeagues] = useState<League[]>([])
   const [saving, setSaving] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState(() => {
     if (id) return 3
@@ -146,41 +166,91 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
       .then(d => setLeagues(d.leagues ?? []))
   }, [])
 
-  const set = (key: keyof FormData) => (val: string | boolean) =>
-    setForm(f => ({ ...f, [key]: val }))
+  const setM = (key: keyof MetaData) => (val: string | boolean) =>
+    setMeta(m => ({ ...m, [key]: val }))
+
+  const setField = (lang: ChallengeLang, key: keyof ChallengeFields) => (val: string) =>
+    setTexts(t => ({ ...t, [lang]: { ...t[lang], [key]: val } }))
 
   function selectSpecialty(spec: string) {
-    setForm(f => ({ ...f, specialty: spec, challenge_type: '' }))
+    setMeta(m => ({ ...m, specialty: spec, challenge_type: '' }))
     setTimeout(() => setStep(1), 150)
   }
 
   function selectType(type: string) {
-    setForm(f => ({ ...f, challenge_type: type, deliverable: f.deliverable || DELIVERABLES[type] || '' }))
+    setMeta(m => ({ ...m, challenge_type: type }))
+    // Prefill the deliverable of the source language if still empty.
+    setTexts(t => {
+      if (t[sourceLang].deliverable) return t
+      return { ...t, [sourceLang]: { ...t[sourceLang], deliverable: DELIVERABLES[type] || '' } }
+    })
     setTimeout(() => setStep(2), 150)
   }
 
   function selectIndustry(industry: string) {
-    setForm(f => ({ ...f, industry }))
+    setMeta(m => ({ ...m, industry }))
     setTimeout(() => setStep(3), 150)
+  }
+
+  async function handleTranslate() {
+    setError(null)
+    const src = texts[sourceLang]
+    if (!src.title.trim() || !src.brief.trim()) {
+      setError('Renseigne au moins le titre et le brief dans la langue source avant de traduire.')
+      return
+    }
+    setTranslating(true)
+    const res = await translateChallenge({ sourceLang, fields: src })
+    setTranslating(false)
+    if (!res.ok) { setError(res.error); return }
+    setTexts(prev => {
+      const next = { ...prev }
+      for (const [lang, fields] of Object.entries(res.translations)) {
+        next[lang as ChallengeLang] = fields as ChallengeFields
+      }
+      return next
+    })
+    setStatus(prev => {
+      const next = { ...prev }
+      for (const lang of Object.keys(res.translations)) next[lang as ChallengeLang] = 'ai_generated'
+      return next
+    })
+    // Jump to the first translated tab so the admin can review immediately.
+    const firstTarget = (Object.keys(res.translations)[0] as ChallengeLang) ?? activeLang
+    setActiveLang(firstTarget)
+  }
+
+  function markValidated(lang: ChallengeLang) {
+    setStatus(s => ({ ...s, [lang]: 'validated' }))
   }
 
   async function handleSave() {
     setSaving(true)
     setError(null)
-    const dd = parseInt(form.deadline_days)
-    if (!form.deadline_days || isNaN(dd)) { setError('Deadline requise'); setSaving(false); return }
+    const dd = parseInt(meta.deadline_days)
+    if (!texts[sourceLang].title.trim() || !texts[sourceLang].brief.trim()) {
+      setError('Titre et brief requis dans la langue source.'); setSaving(false); return
+    }
+    if (!meta.deadline_days || isNaN(dd)) { setError('Deadline requise'); setSaving(false); return }
     if (dd < 1) { setError('Minimum 1 jour'); setSaving(false); return }
     if (dd > 365) { setError('Maximum 365 jours'); setSaving(false); return }
+
+    // Source language is the hand-written canonical version → always validated.
+    const finalStatus: Record<ChallengeLang, TStatus> = { ...status, [sourceLang]: 'validated' }
+
     const url = id ? `/api/admin/challenges/${id}` : '/api/admin/challenges'
     const method = id ? 'PATCH' : 'POST'
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...form,
-        xp_reward: parseInt(form.xp_reward),
-        deadline_days: parseInt(form.deadline_days),
-        league_id: form.league_id || null,
+        ...meta,
+        xp_reward: parseInt(meta.xp_reward),
+        deadline_days: parseInt(meta.deadline_days),
+        league_id: meta.league_id || null,
+        source_lang: sourceLang,
+        translation_status: finalStatus,
+        texts,
       }),
     })
     const data = await res.json()
@@ -198,7 +268,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
         <div className="grid sm:grid-cols-3 gap-4">
           {SPECIALTIES.map(s => {
             const style = SPECIALTY_STYLE[s.value]
-            const selected = form.specialty === s.value
+            const selected = meta.specialty === s.value
             return (
               <button
                 key={s.value}
@@ -226,13 +296,13 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
   // ── Step 1 — Type ──────────────────────────────────────────────────────────
   if (step === 1) {
-    const types = TYPES[form.specialty] ?? []
+    const types = TYPES[meta.specialty] ?? []
     return (
       <div className="space-y-6">
         <StepIndicator step={1} onBack={() => setStep(0)} />
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Type de défi pour <span className="font-semibold text-foreground">{form.specialty}</span>
+            Type de défi pour <span className="font-semibold text-foreground">{meta.specialty}</span>
           </p>
           <div className="flex flex-wrap gap-2">
             {types.map(t => (
@@ -241,7 +311,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
                 onClick={() => selectType(t)}
                 className={cn(
                   'px-4 py-2 rounded-full text-sm font-medium border transition-all',
-                  form.challenge_type === t
+                  meta.challenge_type === t
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
                 )}
@@ -269,7 +339,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
                 onClick={() => selectIndustry(ind)}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-sm border transition-all',
-                  form.industry === ind
+                  meta.industry === ind
                     ? 'bg-primary text-primary-foreground border-primary font-medium'
                     : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
                 )}
@@ -284,15 +354,19 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
   }
 
   // ── Step 3 — Details ───────────────────────────────────────────────────────
+  const af = texts[activeLang]
+  const rtl = activeLang === 'ar'
+  const isSourceTab = activeLang === sourceLang
+
   return (
     <div className="space-y-6">
       {!id && <StepIndicator step={3} onBack={() => setStep(2)} />}
 
       {/* Context chips */}
-      {(form.specialty || form.challenge_type || form.industry) && (
+      {(meta.specialty || meta.challenge_type || meta.industry) && (
         <div className="flex items-center gap-2 flex-wrap">
-          {form.specialty && (() => {
-            const style = SPECIALTY_STYLE[form.specialty]
+          {meta.specialty && (() => {
+            const style = SPECIALTY_STYLE[meta.specialty]
             return (
               <button
                 onClick={() => { if (!id) setStep(0) }}
@@ -304,42 +378,37 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
                   !id && 'hover:opacity-80 cursor-pointer'
                 )}
               >
-                {SPECIALTIES.find(s => s.value === form.specialty)?.icon} {form.specialty}
+                {SPECIALTIES.find(s => s.value === meta.specialty)?.icon} {meta.specialty}
               </button>
             )
           })()}
-          {form.challenge_type && (
+          {meta.challenge_type && (
             <button
               onClick={() => { if (!id) setStep(1) }}
               className={cn('inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-muted/60', !id && 'hover:opacity-80 cursor-pointer')}
             >
-              {form.challenge_type}
+              {meta.challenge_type}
             </button>
           )}
-          {form.industry && (
+          {meta.industry && (
             <button
               onClick={() => { if (!id) setStep(2) }}
               className={cn('inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-muted/60', !id && 'hover:opacity-80 cursor-pointer')}
             >
-              {form.industry}
+              {meta.industry}
             </button>
           )}
         </div>
       )}
 
-      {/* Fields */}
+      {/* Meta fields */}
       <div className="grid md:grid-cols-2 gap-5">
-        <div className="md:col-span-2 space-y-1.5">
-          <label className={labelClass}>Titre</label>
-          <input value={form.title} onChange={e => set('title')(e.target.value)} className={inputClass} placeholder="Titre du challenge" />
-        </div>
-
         <div className="md:col-span-2 space-y-1.5">
           <label className={labelClass}>Emoji de la carte</label>
           <div className="flex items-center gap-2 flex-wrap">
             <input
-              value={form.emoji}
-              onChange={e => set('emoji')(e.target.value)}
+              value={meta.emoji}
+              onChange={e => setM('emoji')(e.target.value)}
               className={cn(inputClass, 'w-16 text-center text-xl')}
               placeholder="🎯"
               maxLength={8}
@@ -349,10 +418,10 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
                 <button
                   key={em}
                   type="button"
-                  onClick={() => set('emoji')(em)}
+                  onClick={() => setM('emoji')(em)}
                   className={cn(
                     'size-9 rounded-lg text-lg flex items-center justify-center transition-colors',
-                    form.emoji === em ? 'bg-primary/15 ring-1 ring-primary' : 'hover:bg-muted',
+                    meta.emoji === em ? 'bg-primary/15 ring-1 ring-primary' : 'hover:bg-muted',
                   )}
                 >
                   {em}
@@ -365,7 +434,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
         <div className="space-y-1.5">
           <label className={labelClass}>Ligue</label>
-          <select value={form.league_id} onChange={e => set('league_id')(e.target.value)} className={inputClass}>
+          <select value={meta.league_id} onChange={e => setM('league_id')(e.target.value)} className={inputClass}>
             <option value="">— Aucune ligue —</option>
             {leagues.map(l => <option key={l.id} value={l.id}>{l.icon} {l.name}</option>)}
           </select>
@@ -373,45 +442,123 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
 
         <div className="space-y-1.5">
           <label className={labelClass}>XP reward</label>
-          <input type="number" value={form.xp_reward} onChange={e => set('xp_reward')(e.target.value)} className={inputClass} min={0} />
+          <input type="number" value={meta.xp_reward} onChange={e => setM('xp_reward')(e.target.value)} className={inputClass} min={0} />
         </div>
 
         <div className="space-y-1.5">
           <label className={labelClass}>Deadline (en jours)</label>
-          <input type="number" value={form.deadline_days} onChange={e => set('deadline_days')(e.target.value)} className={inputClass} min={1} max={365} placeholder="Ex: 7" />
+          <input type="number" value={meta.deadline_days} onChange={e => setM('deadline_days')(e.target.value)} className={inputClass} min={1} max={365} placeholder="Ex: 7" />
           <p className="text-xs text-muted-foreground">Durée personnelle à partir de la participation</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => set('is_published')(!form.is_published)}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${form.is_published ? 'bg-primary' : 'bg-muted'}`}
+            onClick={() => setM('is_published')(!meta.is_published)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${meta.is_published ? 'bg-primary' : 'bg-muted'}`}
           >
-            <span className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow transition-transform ${form.is_published ? 'translate-x-5' : 'translate-x-0'}`} />
+            <span className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow transition-transform ${meta.is_published ? 'translate-x-5' : 'translate-x-0'}`} />
           </button>
-          <span className="text-sm font-medium">{form.is_published ? 'Publié' : 'Draft (non publié)'}</span>
+          <span className="text-sm font-medium">{meta.is_published ? 'Publié' : 'Draft (non publié)'}</span>
+        </div>
+      </div>
+
+      {/* ── Multilingual content ──────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-border bg-card/40 p-4 sm:p-5 space-y-4">
+        {/* Source language picker + translate */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className={labelClass}>Langue source</span>
+            <div className="inline-flex items-center gap-1 p-1 rounded-full bg-muted text-xs font-medium">
+              {LANGS.map(l => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => { setSourceLang(l); setActiveLang(l) }}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors',
+                    sourceLang === l ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleTranslate}
+            disabled={translating}
+            className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 disabled:opacity-60"
+          >
+            {translating ? <Loader2 className="size-4 animate-spin" /> : <Languages className="size-4" />}
+            {translating ? 'Traduction…' : 'Traduire vers les autres langues'}
+          </button>
         </div>
 
-        <div className="md:col-span-2 space-y-1.5">
-          <label className={labelClass}>Brief principal</label>
-          <textarea value={form.brief} onChange={e => set('brief')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
+        {/* Language tabs */}
+        <div className="flex items-center gap-1.5 border-b border-border">
+          {LANGS.map(l => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setActiveLang(l)}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+                activeLang === l ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {LANG_LABEL[l]}
+              <StatusBadge status={l === sourceLang ? 'validated' : status[l]} isSource={l === sourceLang} />
+            </button>
+          ))}
         </div>
-        <div className="space-y-1.5">
-          <label className={labelClass}>Contexte</label>
-          <textarea value={form.context} onChange={e => set('context')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
-        </div>
-        <div className="space-y-1.5">
-          <label className={labelClass}>Livrable</label>
-          <textarea value={form.deliverable} onChange={e => set('deliverable')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
-        </div>
-        <div className="space-y-1.5">
-          <label className={labelClass}>Contraintes</label>
-          <textarea value={form.constraints} onChange={e => set('constraints')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
-        </div>
-        <div className="space-y-1.5">
-          <label className={labelClass}>Critères d'évaluation</label>
-          <textarea value={form.criteria} onChange={e => set('criteria')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} />
+
+        {/* Validate action for non-source languages */}
+        {!isSourceTab && (
+          <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              {status[activeLang] === 'validated'
+                ? 'Cette version est validée et sera servie en production.'
+                : 'Relis/corrige la traduction, puis marque-la comme validée pour qu\'elle soit servie en production.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => markValidated(activeLang)}
+              disabled={status[activeLang] === 'validated'}
+              className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-600 text-white hover:opacity-85 disabled:opacity-50"
+            >
+              <Check className="size-3.5" /> {status[activeLang] === 'validated' ? 'Validé' : 'Marquer validé'}
+            </button>
+          </div>
+        )}
+
+        {/* Fields for the active language */}
+        <div className="grid md:grid-cols-2 gap-5" dir={rtl ? 'rtl' : 'ltr'}>
+          <div className="md:col-span-2 space-y-1.5">
+            <label className={labelClass}>Titre</label>
+            <input value={af.title} onChange={e => setField(activeLang, 'title')(e.target.value)} className={inputClass} placeholder="Titre du challenge" dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
+          <div className="md:col-span-2 space-y-1.5">
+            <label className={labelClass}>Brief principal</label>
+            <textarea value={af.brief} onChange={e => setField(activeLang, 'brief')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Contexte</label>
+            <textarea value={af.context} onChange={e => setField(activeLang, 'context')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Livrable</label>
+            <textarea value={af.deliverable} onChange={e => setField(activeLang, 'deliverable')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Contraintes</label>
+            <textarea value={af.constraints} onChange={e => setField(activeLang, 'constraints')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={labelClass}>Critères d&apos;évaluation</label>
+            <textarea value={af.criteria} onChange={e => setField(activeLang, 'criteria')(e.target.value)} rows={3} className={cn(inputClass, 'h-auto py-2 resize-none')} dir={rtl ? 'rtl' : 'ltr'} />
+          </div>
         </div>
       </div>
 
@@ -434,4 +581,37 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
       </div>
     </div>
   )
+}
+
+// ── Initial helpers ──────────────────────────────────────────────────────────
+
+function stripI18n(initial?: ChallengeFormInitial): Partial<MetaData> {
+  if (!initial) return {}
+  const { source_lang: _s, texts: _t, status: _st, ...meta } = initial
+  void _s; void _t; void _st
+  return meta
+}
+
+function buildTexts(initial?: ChallengeFormInitial): Record<ChallengeLang, ChallengeFields> {
+  const base: Record<ChallengeLang, ChallengeFields> = {
+    fr: { ...EMPTY_FIELDS }, en: { ...EMPTY_FIELDS }, ar: { ...EMPTY_FIELDS },
+  }
+  if (initial?.texts) {
+    for (const l of LANGS) {
+      if (initial.texts[l]) base[l] = { ...EMPTY_FIELDS, ...initial.texts[l] }
+    }
+  }
+  return base
+}
+
+function buildStatus(initial?: ChallengeFormInitial): Record<ChallengeLang, TStatus> {
+  const src = initial?.source_lang ?? 'fr'
+  const base: Record<ChallengeLang, TStatus> = { fr: 'draft', en: 'draft', ar: 'draft' }
+  base[src] = 'validated'
+  if (initial?.status) {
+    for (const l of LANGS) {
+      if (initial.status[l]) base[l] = initial.status[l] as TStatus
+    }
+  }
+  return base
 }

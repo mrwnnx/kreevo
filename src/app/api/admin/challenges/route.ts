@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
+import { buildI18nColumns } from '@/lib/challenges/columns'
 
 export async function GET(request: Request) {
   const { error, admin } = await requireAdmin()
@@ -27,12 +28,8 @@ export async function POST(request: Request) {
   const { data, error: dbErr } = await (admin!.supabase as any)
     .from('challenges')
     .insert({
-      title: body.title,
-      brief: body.brief,
-      context: body.context || null,
-      deliverable: body.deliverable || null,
-      constraints: body.constraints || null,
-      criteria: body.criteria || null,
+      // Localized text fields (18 columns) + legacy mirror + source_lang + status.
+      ...buildI18nColumns(body),
       league_id: body.league_id || null,
       xp_reward: body.xp_reward || null,
       deadline_days: body.deadline_days || null,

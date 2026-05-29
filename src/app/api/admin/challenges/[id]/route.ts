@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
+import { buildI18nColumns } from '@/lib/challenges/columns'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -13,6 +14,9 @@ export async function PATCH(request: Request, { params }: Props) {
   const { data, error: dbErr } = await (admin!.supabase as any)
     .from('challenges')
     .update({
+      // Full multilingual save from the admin form (18 cols + legacy mirror + status).
+      // Absent on partial PATCH (e.g. quick publish toggle) → legacy fields untouched.
+      ...(body.texts !== undefined ? buildI18nColumns(body) : {}),
       ...(body.title !== undefined && { title: body.title }),
       ...(body.brief !== undefined && { brief: body.brief }),
       ...(body.context !== undefined && { context: body.context }),

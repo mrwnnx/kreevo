@@ -7,6 +7,23 @@ import Link from 'next/link'
 
 interface Props { params: Promise<{ id: string }> }
 
+const LANGS = ['fr', 'en', 'ar'] as const
+const FIELDS = ['title', 'brief', 'context', 'deliverable', 'constraints', 'criteria'] as const
+
+/** Per-language texts from a challenge row, with legacy fallback for source lang. */
+function buildInitialTexts(data: any) {
+  const src = (data.source_lang ?? 'fr') as (typeof LANGS)[number]
+  const out: Record<string, Record<string, string>> = {}
+  for (const lang of LANGS) {
+    out[lang] = {}
+    for (const field of FIELDS) {
+      const localized = data[`${field}_${lang}`]
+      out[lang][field] = localized ?? (lang === src ? (data[field] ?? '') : '')
+    }
+  }
+  return out as Record<(typeof LANGS)[number], Record<(typeof FIELDS)[number], string>>
+}
+
 function timeAgo(date: string): string {
   const diff = Date.now() - new Date(date).getTime()
   const h = Math.floor(diff / 3600000)
@@ -55,12 +72,11 @@ export default async function EditChallenge({ params }: Props) {
       <ChallengeForm
         id={id}
         initial={{
-          title: data.title ?? '',
-          brief: data.brief ?? '',
-          context: data.context ?? '',
-          deliverable: data.deliverable ?? '',
-          constraints: data.constraints ?? '',
-          criteria: data.criteria ?? '',
+          source_lang: (data.source_lang ?? 'fr') as 'fr' | 'en' | 'ar',
+          texts: buildInitialTexts(data),
+          status: (data.translation_status ?? undefined) as
+            | Record<'fr' | 'en' | 'ar', 'draft' | 'ai_generated' | 'validated'>
+            | undefined,
           league_id: data.league_id ?? '',
           xp_reward: String(data.xp_reward ?? 250),
           deadline_days: String(data.deadline_days ?? 7),
