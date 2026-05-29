@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.9,
       alternates: {
-        languages: { fr: siteUrl('/help'), en: siteUrl('/help') },
+        languages: { fr: siteUrl('/help'), en: siteUrl('/help'), ar: siteUrl('/help') },
       },
     },
     {
@@ -59,6 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       languages: {
         fr: siteUrl(`/help/${c.slug}`),
         en: siteUrl(`/help/${c.slug}`),
+        ar: siteUrl(`/help/${c.slug}`),
       },
     },
   }))
@@ -79,6 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         languages: {
           fr: siteUrl(`/help/${a.category}/${a.slug}`),
           en: siteUrl(`/help/${a.category}/${a.slug}`),
+          ar: siteUrl(`/help/${a.category}/${a.slug}`),
         },
       },
     }),
