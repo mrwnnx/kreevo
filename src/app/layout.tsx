@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google"
 import Script from "next/script"
 import { buildDesignCSS, FONT_OPTIONS } from "@/lib/design-tokens"
 import { getDesignTokens } from "@/lib/design-tokens.server"
-import { getLang } from "@/lib/i18n/lang"
+import { getLang, dirFor } from "@/lib/i18n/lang"
 import "./globals.css"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isCustomFont = tokens.font !== 'Plus Jakarta Sans' && fontOption
 
   return (
-    <html lang={lang} className={`${plusJakartaSans.variable} h-full antialiased`}>
+    <html lang={lang} dir={dirFor(lang)} className={`${plusJakartaSans.variable} h-full antialiased`}>
       <head>
         {isCustomFont && (
           <link rel="stylesheet" href={fontOption.url} />

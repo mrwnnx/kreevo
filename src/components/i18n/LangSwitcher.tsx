@@ -16,7 +16,10 @@ interface Props {
 const LABELS: Record<Lang, string> = {
   fr: 'Français',
   en: 'English',
+  ar: 'العربية',
 }
+
+const LANGS: readonly Lang[] = ['fr', 'en', 'ar']
 
 export function LangSwitcher({ current, variant = 'pill', className }: Props) {
   const router = useRouter()
@@ -33,7 +36,7 @@ export function LangSwitcher({ current, variant = 'pill', className }: Props) {
   if (variant === 'radio') {
     return (
       <div className={cn('grid sm:grid-cols-2 gap-2', isPending && 'opacity-60', className)}>
-        {(['fr', 'en'] as const).map((lang) => (
+        {LANGS.map((lang) => (
           <button
             key={lang}
             type="button"
@@ -69,7 +72,7 @@ export function LangSwitcher({ current, variant = 'pill', className }: Props) {
       role="group"
       aria-label="Language"
     >
-      {(['fr', 'en'] as const).map((lang) => (
+      {LANGS.map((lang) => (
         <button
           key={lang}
           type="button"

@@ -13,4 +13,4 @@ export function tx(
 }
 
 /** Re-export Lang type for client components. */
-export type Lang = 'fr' | 'en'
+export type Lang = 'fr' | 'en' | 'ar'

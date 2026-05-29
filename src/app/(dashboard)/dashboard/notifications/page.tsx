@@ -1,18 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
-import { getDict, getLang } from '@/lib/i18n/lang'
+import { getDict, getLang, type Lang } from '@/lib/i18n/lang'
 
 import type { Profile } from '@/types/database.types'
 
-function timeAgo(date: string, lang: 'fr' | 'en'): string {
+function timeAgo(date: string, lang: Lang): string {
   const diff = Date.now() - new Date(date).getTime()
   const m = Math.floor(diff / 60000)
-  if (m < 1) return lang === 'en' ? 'just now' : 'à l\'instant'
-  if (m < 60) return lang === 'en' ? `${m}m ago` : `il y a ${m}m`
+  if (m < 1) return lang === 'ar' ? 'الآن' : lang === 'en' ? 'just now' : 'à l\'instant'
+  if (m < 60) return lang === 'ar' ? `منذ ${m} د` : lang === 'en' ? `${m}m ago` : `il y a ${m}m`
   const h = Math.floor(m / 60)
-  if (h < 24) return lang === 'en' ? `${h}h ago` : `il y a ${h}h`
+  if (h < 24) return lang === 'ar' ? `منذ ${h} س` : lang === 'en' ? `${h}h ago` : `il y a ${h}h`
   const d = Math.floor(h / 24)
-  if (d < 30) return lang === 'en' ? `${d}d ago` : `il y a ${d}j`
-  return new Date(date).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR')
+  if (d < 30) return lang === 'ar' ? `منذ ${d} يوم` : lang === 'en' ? `${d}d ago` : `il y a ${d}j`
+  return new Date(date).toLocaleDateString(lang === 'ar' ? 'ar' : lang === 'en' ? 'en-US' : 'fr-FR')
 }
 
 export default async function NotificationsPage() {

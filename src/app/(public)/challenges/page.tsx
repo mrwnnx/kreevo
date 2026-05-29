@@ -34,7 +34,7 @@ const PAGE_META = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang()
-  const m = PAGE_META[lang] ?? PAGE_META.fr
+  const m = PAGE_META[lang as keyof typeof PAGE_META] ?? PAGE_META.fr
   return {
     title: m.title,
     description: m.description,
@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: '/challenges',
       siteName: 'Kreevo',
       type: 'website',
-      locale: lang === 'en' ? 'en_US' : 'fr_FR',
+      locale: lang === 'en' ? 'en_US' : lang === 'ar' ? 'ar_AR' : 'fr_FR',
     },
     twitter: {
       card: 'summary_large_image',

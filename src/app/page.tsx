@@ -19,7 +19,7 @@ const LANDING_META = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang()
-  const m = LANDING_META[lang] ?? LANDING_META.fr
+  const m = LANDING_META[lang as keyof typeof LANDING_META] ?? LANDING_META.fr
   return {
     title: m.title,
     description: m.description,
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: '/',
       siteName: 'Kreevo',
       type: 'website',
-      locale: lang === 'en' ? 'en_US' : 'fr_FR',
+      locale: lang === 'en' ? 'en_US' : lang === 'ar' ? 'ar_AR' : 'fr_FR',
     },
     twitter: {
       card: 'summary_large_image',
