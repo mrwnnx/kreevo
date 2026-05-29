@@ -69,7 +69,7 @@ export default function AdminSettings() {
             }}
             className={`relative w-12 h-6 rounded-full transition-colors ${settings.maintenance_mode ? 'bg-primary' : 'bg-muted'}`}
           >
-            <span className={`absolute top-1 size-4 rounded-full bg-white shadow transition-transform ${settings.maintenance_mode ? 'left-7' : 'left-1'}`} />
+            <span className={`absolute top-1 size-4 rounded-full bg-white shadow transition-transform ${settings.maintenance_mode ? 'start-7' : 'start-1'}`} />
           </button>
         </div>
       </section>

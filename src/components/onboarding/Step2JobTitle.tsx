@@ -87,7 +87,7 @@ export function Step2JobTitle({
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className={cn(inputClass, 'flex items-center justify-between text-left')}
+                className={cn(inputClass, 'flex items-center justify-between text-start')}
               >
                 <span className={title ? 'text-foreground' : 'text-muted-foreground'}>
                   {title || t.jobTitlePlaceholder}
@@ -96,7 +96,7 @@ export function Step2JobTitle({
               </button>
 
               {open && (
-                <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+                <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
                   <div className="max-h-64 overflow-auto p-1">
                     {JOB_TITLES.map((jt) => {
                       const active = title === jt
@@ -106,7 +106,7 @@ export function Step2JobTitle({
                           type="button"
                           onClick={() => { setTitle(jt); setOpen(false) }}
                           className={cn(
-                            'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                            'w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
                             active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
                           )}
                         >
@@ -118,7 +118,7 @@ export function Step2JobTitle({
                     <button
                       type="button"
                       onClick={() => { setCustom(true); setTitle(''); setOpen(false) }}
-                      className="w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] hover:bg-accent/40 text-muted-foreground transition-colors"
+                      className="w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] hover:bg-accent/40 text-muted-foreground transition-colors"
                     >
                       {t.jobTitleOther}
                     </button>

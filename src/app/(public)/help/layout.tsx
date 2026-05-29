@@ -30,7 +30,7 @@ export default async function HelpLayout({
       {/* Skip link — visible only when focused (keyboard) */}
       <a
         href="#help-main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-full focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-full focus:text-sm focus:font-semibold"
       >
         {lang === 'en' ? 'Skip to content' : 'Aller au contenu'}
       </a>
@@ -49,7 +49,7 @@ export default async function HelpLayout({
             </span>
           </Link>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             <LanguageSwitcher current={lang} />
           </div>
         </div>

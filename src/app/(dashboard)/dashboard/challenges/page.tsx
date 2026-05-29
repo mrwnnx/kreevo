@@ -155,7 +155,7 @@ function ChallengeCard({
               <span className="size-1.5 rounded-full bg-emerald-500" /> {t.reopenedBadge}
             </span>
           ) : participants && participants.length > 0 && (
-            <div className="flex items-center gap-2 pl-1">
+            <div className="flex items-center gap-2 ps-1">
               <AvatarGroup data-size="sm">
                 {participants.slice(0, 3).map((p) => (
                   <Avatar key={p.username} size="sm">
@@ -393,7 +393,7 @@ export default async function ChallengesPage({
         </div>
 
         {leagueAvatars.length > 0 && (
-          <div className="absolute inset-y-0 right-0 w-1/2 hidden sm:block pointer-events-none">
+          <div className="absolute inset-y-0 end-0 w-1/2 hidden sm:block pointer-events-none">
             {leagueAvatars.map((a, i) => {
               const s = AVATAR_SLOTS[i]
               return (

@@ -479,7 +479,7 @@ export function SubmissionDetailContent({
       {/* Mobile bottom action bar — replaces FloatingNav for this page */}
       {isApproved && (
         <div
-          className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border px-4 pt-3 flex items-center gap-3"
+          className="sm:hidden fixed bottom-0 start-0 end-0 z-40 bg-background/95 backdrop-blur-md border-t border-border px-4 pt-3 flex items-center gap-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
           {/* Like */}
@@ -510,7 +510,7 @@ export function SubmissionDetailContent({
             onClick={handlePrimaryClick}
             disabled={!isOwn && !canComment}
             size="lg"
-            className="ml-auto gap-1.5 flex-1 max-w-[60%] justify-center"
+            className="ms-auto gap-1.5 flex-1 max-w-[60%] justify-center"
           >
             {isOwn ? <Sparkles className="size-4" /> : <MessageSquare className="size-4" />}
             {isOwn ? t.askFeedback : tc.commentCta}

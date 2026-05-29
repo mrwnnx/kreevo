@@ -77,7 +77,7 @@ export default function AdminLeagues() {
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
               {['Ligue', 'Ordre', 'Défis actifs', 'XP seuil', 'Accès', 'Statut', 'Actions'].map(h => (
-                <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
+                <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>

@@ -65,7 +65,7 @@ export function SubmitForm({ challengeId, existing, isClosed, participationId, a
         <Label>
           Image de couverture *
           {attemptsLeft < 2 && (
-            <span className="ml-2 text-xs font-normal text-muted-foreground">
+            <span className="ms-2 text-xs font-normal text-muted-foreground">
               ({attemptsLeft} modification{attemptsLeft !== 1 ? 's' : ''} restante{attemptsLeft !== 1 ? 's' : ''})
             </span>
           )}

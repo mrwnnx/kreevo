@@ -152,7 +152,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           {/* Brief (only) */}
           {c.brief && (
             <section className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 p-6 space-y-2">
-              <h2 className="text-xl font-semibold"><span className="mr-1">📋</span>{t.sections.brief}</h2>
+              <h2 className="text-xl font-semibold"><span className="me-1">📋</span>{t.sections.brief}</h2>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
             </section>
           )}
@@ -406,7 +406,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
       {/* Gallery — full-page width, below the 2-col layout */}
       {allSubmissions && allSubmissions.length > 0 && (
         <section className="space-y-4 pt-8 mt-8 border-t border-border">
-          <h2 className="text-xl font-semibold"><span className="mr-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
+          <h2 className="text-xl font-semibold"><span className="me-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
           <SubmissionGallery
             submissions={allSubmissions}
             currentUserId={user.id}

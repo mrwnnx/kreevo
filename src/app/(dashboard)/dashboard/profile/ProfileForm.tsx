@@ -482,7 +482,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               id="country"
               type="button"
               onClick={() => setCountryOpen((v) => !v)}
-              className={cn(inputClass, 'flex items-center justify-between text-left')}
+              className={cn(inputClass, 'flex items-center justify-between text-start')}
               aria-expanded={countryOpen}
             >
               <span className={country ? 'text-foreground' : 'text-muted-foreground'}>
@@ -492,16 +492,16 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             </button>
 
             {countryOpen && (
-              <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+              <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-30 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
                 <div className="relative p-2 border-b border-border">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <Search className="absolute start-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                   <input
                     autoFocus
                     type="text"
                     value={countryQuery}
                     onChange={(e) => setCountryQuery(e.target.value)}
                     placeholder={t.fields.countrySearch}
-                    className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
+                    className="w-full h-8 ps-8 pe-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                   />
                 </div>
                 <div className="max-h-64 overflow-auto p-1">
@@ -525,7 +525,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                               setCountryQuery('')
                             }}
                             className={cn(
-                              'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                              'w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
                               active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
                             )}
                           >
@@ -553,7 +553,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                           setCountryQuery('')
                         }}
                         className={cn(
-                          'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                          'w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
                           active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
                         )}
                       >
@@ -606,7 +606,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                 disabled={disabled}
                 aria-disabled={disabled}
                 className={cn(
-                  'relative w-full text-left rounded-[var(--radius-card)] border p-5 transition-all',
+                  'relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all',
                   selected
                     ? 'border-2 border-primary bg-primary/5'
                     : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30',
@@ -705,7 +705,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               <button
                 type="button"
                 onClick={() => setJobTitleOpen((v) => !v)}
-                className={cn(inputClass, 'flex items-center justify-between text-left')}
+                className={cn(inputClass, 'flex items-center justify-between text-start')}
               >
                 <span className={jobTitle ? 'text-foreground' : 'text-muted-foreground'}>
                   {jobTitle || t.jobTitle.placeholder}
@@ -714,7 +714,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               </button>
 
               {jobTitleOpen && (
-                <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+                <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
                   <div className="max-h-64 overflow-auto p-1">
                     {JOB_TITLES.map((title) => {
                       const active = jobTitle === title
@@ -724,7 +724,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                           type="button"
                           onClick={() => { setJobTitle(title); setJobTitleOpen(false) }}
                           className={cn(
-                            'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                            'w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
                             active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
                           )}
                         >
@@ -736,7 +736,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                     <button
                       type="button"
                       onClick={() => { setJobTitleCustom(true); setJobTitle(''); setJobTitleOpen(false) }}
-                      className="w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] text-muted-foreground hover:bg-accent/40 hover:text-foreground transition-colors"
+                      className="w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] text-muted-foreground hover:bg-accent/40 hover:text-foreground transition-colors"
                     >
                       {t.jobTitle.other}
                     </button>
@@ -757,7 +757,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
               type="button"
               onClick={() => setToolsOpen((v) => !v)}
               disabled={!specialty}
-              className={cn(inputClass, 'flex items-center justify-between text-left disabled:opacity-50')}
+              className={cn(inputClass, 'flex items-center justify-between text-start disabled:opacity-50')}
             >
               <span className={tools.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
                 {!specialty
@@ -770,16 +770,16 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
             </button>
 
             {toolsOpen && (
-              <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+              <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
                 <div className="relative p-2 border-b border-border">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <Search className="absolute start-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                   <input
                     autoFocus
                     type="text"
                     value={toolsQuery}
                     onChange={(e) => setToolsQuery(e.target.value)}
                     placeholder={t.tools.search}
-                    className="w-full h-8 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
+                    className="w-full h-8 ps-8 pe-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                   />
                 </div>
                 <div className="max-h-64 overflow-auto p-1">
@@ -794,7 +794,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                           type="button"
                           onClick={() => toggleTool(tool)}
                           className={cn(
-                            'w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
+                            'w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors',
                             active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground',
                           )}
                         >
@@ -844,7 +844,7 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                 type="button"
                 onClick={() => toggleObjective(opt.value)}
                 className={cn(
-                  'relative w-full text-left rounded-[var(--radius-card)] border p-5 transition-all',
+                  'relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all',
                   active
                     ? 'border-2 border-primary bg-primary/5'
                     : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30',
@@ -902,9 +902,9 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
                     </button>
                   </div>
                   {err ? (
-                    <p className="text-xs text-destructive mt-1.5 ml-11">{err}</p>
+                    <p className="text-xs text-destructive mt-1.5 ms-11">{err}</p>
                   ) : (
-                    <p className="text-xs text-muted-foreground mt-1.5 ml-11">{def.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1.5 ms-11">{def.name}</p>
                   )}
                 </div>
               )

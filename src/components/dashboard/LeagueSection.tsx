@@ -182,7 +182,7 @@ export function LeagueCountdownCard({
           <Link href={href} className="mt-auto">
             <Button className="group bg-violet-600 text-white hover:bg-violet-700 font-semibold shadow-sm">
               {t.browseCta}
-              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="size-4 ms-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
         </div>
@@ -240,7 +240,7 @@ export function LeagueCountdownCard({
           <Link href={submitHref}>
             <Button className="group bg-foreground text-background hover:opacity-85 font-semibold shadow-sm">
               {isUp ? t.timeUp : t.submitCta}
-              <ArrowRight className="size-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="size-4 ms-1.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground" title={t.xpReward}>

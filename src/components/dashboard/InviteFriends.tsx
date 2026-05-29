@@ -35,7 +35,7 @@ export function InviteFriends({ profile, referrals, t }: Props) {
 
   return (
     <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-100 dark:border-teal-900/30 rounded-[24px] p-5 relative overflow-hidden">
-      <div className="absolute right-4 top-4 text-5xl opacity-10 select-none pointer-events-none">🚀</div>
+      <div className="absolute end-4 top-4 text-5xl opacity-10 select-none pointer-events-none">🚀</div>
 
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Texte + filleuls */}
@@ -79,11 +79,11 @@ export function InviteFriends({ profile, referrals, t }: Props) {
         {/* Boutons — à droite */}
         <div className="flex items-center gap-3 flex-shrink-0 lg:justify-end">
           <Button onClick={shareLink} className="bg-teal-600 hover:bg-teal-700 text-white">
-            <UserPlus className="w-4 h-4 mr-2" />
+            <UserPlus className="w-4 h-4 me-2" />
             {t.inviteCta}
           </Button>
           <Button variant="outline" onClick={copyLink}>
-            <Copy className="w-4 h-4 mr-2" />
+            <Copy className="w-4 h-4 me-2" />
             {t.copyCta}
           </Button>
         </div>

@@ -123,7 +123,7 @@ export default async function EditChallenge({ params }: Props) {
                   </p>
                 </div>
 
-                <div className="text-right">
+                <div className="text-end">
                   <p className="text-xs text-muted-foreground font-mono">
                     Deadline: {new Date(part.personal_deadline).toLocaleDateString('fr', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>

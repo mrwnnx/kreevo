@@ -119,7 +119,7 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
                       </div>
                     )}
                     <span className={cn(
-                      'absolute top-2 right-2 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full bg-background/90 backdrop-blur-sm',
+                      'absolute top-2 end-2 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full bg-background/90 backdrop-blur-sm',
                       info.text,
                     )}>
                       <span className={cn('size-1.5 rounded-full', info.dot)} />

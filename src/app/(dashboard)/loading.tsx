@@ -1,6 +1,6 @@
 export default function DashboardLoading() {
   return (
-    <div className="sm:pl-72 min-h-screen">
+    <div className="sm:ps-72 min-h-screen">
       <div className="p-6 max-w-[960px] mx-auto space-y-6 animate-pulse">
         {/* Profile header */}
         <div className="flex items-center gap-4">

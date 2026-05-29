@@ -695,7 +695,7 @@ function Step1({
 
       {/* Floating motivation */}
       {showMotivation && (
-        <div className="fixed bottom-24 right-6 z-20 max-w-xs rounded-2xl bg-violet-600 text-white p-4 shadow-lg flex items-start gap-3 animate-in slide-in-from-bottom-4 fade-in">
+        <div className="fixed bottom-24 end-6 z-20 max-w-xs rounded-2xl bg-violet-600 text-white p-4 shadow-lg flex items-start gap-3 animate-in slide-in-from-bottom-4 fade-in">
           <Sparkles className="size-5 shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
             <p className="font-semibold">{tStep1.motivationTitle}</p>
@@ -749,7 +749,7 @@ function Step2({
               <button
                 type="button"
                 onClick={() => removePhoto(i)}
-                className="absolute top-2 right-2 size-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                className="absolute top-2 end-2 size-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
                 aria-label={t.removeAlt}
               >
                 <X className="size-4" />

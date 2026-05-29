@@ -26,14 +26,14 @@ const previewClass = `
   [&_strong]:font-semibold
   [&_em]:italic
   [&_a]:text-primary [&_a]:underline
-  [&_ul]:my-3 [&_ul]:pl-5 [&_ul]:space-y-1 [&_ul]:list-disc
-  [&_ol]:my-3 [&_ol]:pl-5 [&_ol]:space-y-1 [&_ol]:list-decimal
-  [&_blockquote]:border-l-4 [&_blockquote]:border-primary/40 [&_blockquote]:bg-muted/40 [&_blockquote]:rounded-r [&_blockquote]:px-3 [&_blockquote]:py-2 [&_blockquote]:my-3 [&_blockquote]:italic
+  [&_ul]:my-3 [&_ul]:ps-5 [&_ul]:space-y-1 [&_ul]:list-disc
+  [&_ol]:my-3 [&_ol]:ps-5 [&_ol]:space-y-1 [&_ol]:list-decimal
+  [&_blockquote]:border-s-4 [&_blockquote]:border-primary/40 [&_blockquote]:bg-muted/40 [&_blockquote]:rounded-e [&_blockquote]:px-3 [&_blockquote]:py-2 [&_blockquote]:my-3 [&_blockquote]:italic
   [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
   [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_pre]:my-3 [&_pre]:overflow-x-auto
   [&_pre_code]:bg-transparent [&_pre_code]:p-0
   [&_table]:w-full [&_table]:my-3 [&_table]:text-xs
-  [&_th]:text-left [&_th]:font-semibold [&_th]:bg-muted/40 [&_th]:px-2 [&_th]:py-1.5 [&_th]:border [&_th]:border-border
+  [&_th]:text-start [&_th]:font-semibold [&_th]:bg-muted/40 [&_th]:px-2 [&_th]:py-1.5 [&_th]:border [&_th]:border-border
   [&_td]:px-2 [&_td]:py-1.5 [&_td]:border [&_td]:border-border
   [&_hr]:my-4
 `
@@ -62,7 +62,7 @@ export function MarkdownEditor({
             {label}
           </label>
         )}
-        <div className="ml-auto inline-flex items-center gap-0.5 p-0.5 bg-muted rounded-lg">
+        <div className="ms-auto inline-flex items-center gap-0.5 p-0.5 bg-muted rounded-lg">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -97,7 +97,7 @@ export function MarkdownEditor({
             placeholder={placeholder}
             rows={rows}
             spellCheck={false}
-            className="w-full font-mono text-xs leading-relaxed p-3 bg-background outline-none border-0 md:border-r md:border-border resize-y min-h-[280px]"
+            className="w-full font-mono text-xs leading-relaxed p-3 bg-background outline-none border-0 md:border-e md:border-border resize-y min-h-[280px]"
           />
         )}
         {(mode === 'preview' || mode === 'split') && (

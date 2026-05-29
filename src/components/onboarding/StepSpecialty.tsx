@@ -47,7 +47,7 @@ export function StepSpecialty({ specialty, onNext, onBack, saving, t, tc }: Step
                 key={s.value}
                 type="button"
                 onClick={() => setSelSpec(s.value)}
-                className={`relative w-full text-left rounded-[var(--radius-card)] border p-5 transition-all ${
+                className={`relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all ${
                   selected
                     ? 'border-2 border-primary bg-primary/5'
                     : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30'

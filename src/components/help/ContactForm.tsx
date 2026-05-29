@@ -120,7 +120,7 @@ export function ContactForm({ lang }: Props) {
         autoComplete="off"
         value={website}
         onChange={(e) => setWebsite(e.target.value)}
-        className="absolute left-[-9999px] w-0 h-0 opacity-0"
+        className="absolute start-[-9999px] w-0 h-0 opacity-0"
         aria-hidden="true"
       />
 

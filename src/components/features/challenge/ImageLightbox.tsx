@@ -132,7 +132,7 @@ export function ImageLightbox({
             type="button"
             onClick={goPrev}
             aria-label={prevLabel}
-            className="fixed left-3 sm:left-6 top-1/2 -translate-y-1/2 size-11 rounded-full bg-white/95 text-zinc-900 inline-flex items-center justify-center hover:bg-white shadow-lg transition-colors z-[100]"
+            className="fixed start-3 sm:start-6 top-1/2 -translate-y-1/2 size-11 rounded-full bg-white/95 text-zinc-900 inline-flex items-center justify-center hover:bg-white shadow-lg transition-colors z-[100]"
           >
             <ChevronLeft className="size-5" />
           </button>
@@ -140,7 +140,7 @@ export function ImageLightbox({
             type="button"
             onClick={goNext}
             aria-label={nextLabel}
-            className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 size-11 rounded-full bg-white/95 text-zinc-900 inline-flex items-center justify-center hover:bg-white shadow-lg transition-colors z-[100]"
+            className="fixed end-3 sm:end-6 top-1/2 -translate-y-1/2 size-11 rounded-full bg-white/95 text-zinc-900 inline-flex items-center justify-center hover:bg-white shadow-lg transition-colors z-[100]"
           >
             <ChevronRight className="size-5" />
           </button>

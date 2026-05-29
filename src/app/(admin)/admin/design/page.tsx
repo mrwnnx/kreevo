@@ -408,7 +408,7 @@ export default function AdminDesignPage() {
                   key={value}
                   onClick={() => { setTokens(p => ({ ...p, font: value })); setSaved(false) }}
                   className={cn(
-                    'px-4 py-3 rounded-xl border text-sm font-medium text-left transition-all',
+                    'px-4 py-3 rounded-xl border text-sm font-medium text-start transition-all',
                     tokens.font === value
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-border hover:border-foreground/30 text-foreground'
@@ -467,7 +467,7 @@ export default function AdminDesignPage() {
                       }}
                       className="flex-1 accent-primary"
                     />
-                    <span className="text-xs font-mono w-16 text-right text-muted-foreground">{raw}</span>
+                    <span className="text-xs font-mono w-16 text-end text-muted-foreground">{raw}</span>
                     <div className="shrink-0">{preview(raw)}</div>
                   </div>
                 )
@@ -528,7 +528,7 @@ export default function AdminDesignPage() {
       </div>
 
       {/* ── Right: Preview ── */}
-      <div className="hidden xl:flex flex-col w-80 shrink-0 border-l border-border bg-white dark:bg-zinc-900/20 overflow-y-auto">
+      <div className="hidden xl:flex flex-col w-80 shrink-0 border-s border-border bg-white dark:bg-zinc-900/20 overflow-y-auto">
         <div className="sticky top-0 bg-white/80 dark:bg-zinc-900/20 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-2">
           <Eye className="size-4 text-muted-foreground" />
           <p className="text-sm font-semibold">Aperçu live</p>

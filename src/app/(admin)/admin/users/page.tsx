@@ -115,10 +115,10 @@ export default function AdminUsers() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Rechercher par nom, username…"
-          className="w-full h-10 pl-9 pr-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors" />
+          className="w-full h-10 ps-9 pe-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors" />
       </div>
 
       {/* Table */}
@@ -127,7 +127,7 @@ export default function AdminUsers() {
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
               {['User', 'Plan', 'Ligue', 'XP', 'Rôle', 'Statut', 'Inscrit', 'Actions'].map(h => (
-                <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
+                <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
@@ -178,7 +178,7 @@ export default function AdminUsers() {
                     </button>
 
                     {openMenu === u.id && (
-                      <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+                      <div className="absolute end-0 top-full mt-1 z-50 w-52 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
                         <Link href={`/u/${u.username}`} target="_blank"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors">
                           <ExternalLink className="size-3.5" /> Voir profil public
@@ -189,39 +189,39 @@ export default function AdminUsers() {
                         </Link>
                         <div className="border-t border-border" />
                         <button onClick={() => action(u.id, { plan: 'pro' })}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <TrendingUp className="size-3.5 text-green-500" /> Passer Pro
                         </button>
                         <button onClick={() => action(u.id, { plan: 'free' })}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <TrendingDown className="size-3.5" /> Passer Free
                         </button>
                         <button onClick={() => { setLeagueVal(u.league || (leagues[0]?.name ?? '')); setLeagueModal(u.id); setOpenMenu(null) }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <Shield className="size-3.5" /> Changer ligue
                         </button>
                         <button onClick={() => { setXpAmount(''); setXpModal(u.id); setOpenMenu(null) }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <Plus className="size-3.5" /> Ajouter XP
                         </button>
                         <button onClick={() => { setSpecialtyVal('ux_ui'); setSpecialtyModal(u.id); setOpenMenu(null) }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <Palette className="size-3.5 text-violet-500" /> Changer spécialité
                         </button>
                         <div className="border-t border-border" />
                         <button onClick={() => action(u.id, { is_suspended: !u.is_suspended })}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <Ban className="size-3.5 text-orange-500" />
                           {u.is_suspended ? 'Réactiver' : 'Suspendre'}
                         </button>
                         <button onClick={() => action(u.id, { role: u.role === 'admin' ? 'user' : 'admin' })}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-start">
                           <Crown className="size-3.5 text-amber-500" />
                           {u.role === 'admin' ? 'Rétrograder' : 'Passer admin'}
                         </button>
                         <div className="border-t border-border" />
                         <button onClick={() => { setConfirmDelete(u.id); setOpenMenu(null) }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors text-start">
                           <Trash2 className="size-3.5" /> Supprimer le compte
                         </button>
                       </div>

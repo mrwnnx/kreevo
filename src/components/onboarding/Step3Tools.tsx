@@ -85,16 +85,16 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: 
           </button>
 
           {open && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
+            <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-20 rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg flex flex-col">
               <div className="relative p-2 border-b border-border">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                <Search className="absolute start-4 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                 <input
                   autoFocus
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t.searchPlaceholder}
-                  className="w-full h-9 pl-8 pr-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
+                  className="w-full h-9 ps-8 pe-3 text-sm rounded-[var(--radius-input)] bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-muted"
                 />
               </div>
               <div className="max-h-64 overflow-auto p-1">
@@ -110,7 +110,7 @@ export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: 
                         key={tool}
                         type="button"
                         onClick={() => toggleTool(tool)}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors ${
+                        className={`w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors ${
                           active ? 'bg-primary/10 text-primary' : 'hover:bg-accent/40 text-foreground'
                         }`}
                       >

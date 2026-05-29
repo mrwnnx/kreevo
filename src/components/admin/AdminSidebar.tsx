@@ -27,7 +27,7 @@ export function AdminSidebar({ pendingMod = 0 }: { pendingMod?: number }) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex flex-col h-full w-56 shrink-0 border-r border-border bg-card">
+    <aside className="flex flex-col h-full w-56 shrink-0 border-e border-border bg-card">
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold tracking-tight">kreevo</span>

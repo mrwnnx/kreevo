@@ -163,9 +163,9 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving, 
                   </button>
                 </div>
                 {err ? (
-                  <p className="text-xs text-destructive mt-1.5 ml-12">{err}</p>
+                  <p className="text-xs text-destructive mt-1.5 ms-12">{err}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground mt-1.5 ml-12">{def.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 ms-12">{def.name}</p>
                 )}
               </div>
             )

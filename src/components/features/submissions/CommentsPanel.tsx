@@ -138,7 +138,7 @@ export function CommentsPanel({
         aria-modal="true"
         aria-label={tc.panelTitle}
         className={cn(
-          'absolute right-0 top-0 bottom-0 w-full sm:w-[520px] lg:w-[600px] bg-background border-l border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out',
+          'absolute end-0 top-0 bottom-0 w-full sm:w-[520px] lg:w-[600px] bg-background border-s border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out',
           open ? 'translate-x-0' : 'translate-x-full',
         )}
       >

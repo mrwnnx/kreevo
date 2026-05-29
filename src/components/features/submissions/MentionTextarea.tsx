@@ -172,7 +172,7 @@ export function MentionTextarea({
       />
 
       {mention && (users.length > 0 || loading) && (
-        <div className="absolute left-0 right-0 z-10 mt-1 max-h-56 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
+        <div className="absolute start-0 end-0 z-10 mt-1 max-h-56 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
           {loading && users.length === 0 && (
             <p className="text-xs text-muted-foreground px-3 py-2">…</p>
           )}
@@ -187,7 +187,7 @@ export function MentionTextarea({
               }}
               onMouseEnter={() => setActiveIndex(i)}
               className={cn(
-                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
+                'flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm transition-colors',
                 i === activeIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50',
               )}
             >

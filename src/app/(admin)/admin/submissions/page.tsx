@@ -88,7 +88,7 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
             {t.label}
             {t.count !== undefined && t.count !== null && t.count > 0 && (
               <span className={cn(
-                'ml-2 text-[10px] font-mono rounded-full px-1.5 py-0.5',
+                'ms-2 text-[10px] font-mono rounded-full px-1.5 py-0.5',
                 t.id === 'pending' || t.id === 'reported' || t.id === 'contested'
                   ? 'bg-amber-500 text-white'
                   : 'bg-muted text-muted-foreground'

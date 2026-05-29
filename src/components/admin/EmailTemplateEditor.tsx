@@ -154,7 +154,7 @@ export function EmailTemplateEditor({
             }
           >
             {t.label}
-            {isAuthType(t.type) && <span className="ml-1.5 text-[10px] opacity-60">Auth</span>}
+            {isAuthType(t.type) && <span className="ms-1.5 text-[10px] opacity-60">Auth</span>}
           </button>
         ))}
       </div>
@@ -201,7 +201,7 @@ export function EmailTemplateEditor({
               placeholder="Une ligne vide = nouveau paragraphe."
             />
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-muted-foreground mr-1">Variables :</span>
+              <span className="text-xs text-muted-foreground me-1">Variables :</span>
               {TEMPLATE_VARIABLES[tpl.type].map(v => (
                 <button
                   key={v.key}

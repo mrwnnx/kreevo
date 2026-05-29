@@ -143,7 +143,7 @@ export function CommentCard({
     const containerRect = containerRef.current.getBoundingClientRect()
     const lastRect = lastReplyRef.current.getBoundingClientRect()
     // Top: just below parent avatar (32px = h-8). Stop where the elbow curve starts:
-    // last reply avatar center (14px) MINUS the curve radius (12px = rounded-bl-xl) so we don't overshoot.
+    // last reply avatar center (14px) MINUS the curve radius (12px = rounded-es-xl) so we don't overshoot.
     const top = 32
     const ELBOW_RADIUS = 12
     const height = lastRect.top - containerRect.top + 14 - ELBOW_RADIUS - top
@@ -193,7 +193,7 @@ export function CommentCard({
   }
 
   return (
-    <div ref={containerRef} className={cn('relative group', isReply && 'pl-2')}>
+    <div ref={containerRef} className={cn('relative group', isReply && 'ps-2')}>
       {/* Continuous threading line — from below parent avatar to last reply's avatar center */}
       {linePos && (
         <span
@@ -266,7 +266,7 @@ export function CommentCard({
       </div>
 
       {/* Indented content/footer/reply, aligned with username (avatar width + gap) */}
-      <div className={cn('mt-0.5', isReply ? 'pl-9' : 'pl-10')}>
+      <div className={cn('mt-0.5', isReply ? 'ps-9' : 'ps-10')}>
       {/* Content (or edit textarea) */}
       <div>
         {editOpen ? (
@@ -362,7 +362,7 @@ export function CommentCard({
 
       {/* Replies — Reddit-style threading lines */}
       {!isReply && replies.length > 0 && (
-        <div className="relative pt-4 pl-10 space-y-4">
+        <div className="relative pt-4 ps-10 space-y-4">
           {replies.map((r, i) => {
             const isLast = i === replies.length - 1
             return (
@@ -374,7 +374,7 @@ export function CommentCard({
                 {/* Curved elbow: horizontal line from threading line to reply avatar center */}
                 <span
                   aria-hidden
-                  className="absolute pointer-events-none border-b border-l border-border rounded-bl-xl"
+                  className="absolute pointer-events-none border-b border-s border-border rounded-es-xl"
                   style={{ left: '-24px', top: '-4px', width: '38px', height: '18px' }}
                 />
                 <CommentCard

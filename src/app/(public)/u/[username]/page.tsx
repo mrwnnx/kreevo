@@ -328,7 +328,7 @@ export default async function ProfilePage({
                 )
               })}
               {isPro && (
-                <button className="flex items-center gap-1.5 text-xs font-semibold bg-foreground text-background px-3 py-1.5 rounded-md hover:opacity-80 transition-opacity ml-1">
+                <button className="flex items-center gap-1.5 text-xs font-semibold bg-foreground text-background px-3 py-1.5 rounded-md hover:opacity-80 transition-opacity ms-1">
                   <Mail className="size-3.5" /> {t.contact}
                 </button>
               )}

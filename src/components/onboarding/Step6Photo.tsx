@@ -118,7 +118,7 @@ export function Step6Photo({ avatarUrl, onNext, onBack, onSkip, saving, t, tc }:
               alt="Profile"
               className="size-24 rounded-full object-cover border-2 border-primary"
             />
-            <div className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+            <div className="absolute -bottom-1 -end-1 size-7 rounded-full bg-primary flex items-center justify-center border-2 border-background">
               <Check className="size-4 text-primary-foreground" strokeWidth={3} />
             </div>
           </div>

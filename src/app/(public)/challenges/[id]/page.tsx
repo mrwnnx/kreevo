@@ -177,7 +177,7 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
                 {challenge.industry && (
                   <span className="text-muted-foreground">{challenge.industry}</span>
                 )}
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground ml-auto">
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground ms-auto">
                   <Users className="size-3.5" />
                   {tx(t.detail.participantsCount, { n: participantsCount ?? 0 })}
                 </span>
@@ -198,7 +198,7 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
 
             {/* Community submissions */}
             <section className="space-y-4 pt-4 border-t border-border">
-              <h2 className="text-xl font-semibold"><span className="mr-1">🖼️</span>{t.detail.submissionsHeading}</h2>
+              <h2 className="text-xl font-semibold"><span className="me-1">🖼️</span>{t.detail.submissionsHeading}</h2>
               {submissions.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                   {t.detail.submissionsEmpty}

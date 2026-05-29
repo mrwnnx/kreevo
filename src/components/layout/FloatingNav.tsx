@@ -82,7 +82,7 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
         <NotificationBell userId={profile.id} types={notifTypes} />
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 pl-1.5 pr-1.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
+          <DropdownMenuTrigger className="flex items-center gap-2 ps-1.5 pe-1.5 py-1 rounded-full hover:bg-foreground/[0.04] transition-colors outline-none">
             <Avatar className="size-7 rounded-full ring-[1.5px] ring-border">
               <AvatarImage src={profile.avatar_url ?? undefined} />
               <AvatarFallback className="rounded-full text-[11px] font-bold bg-primary/15 text-primary">
@@ -136,7 +136,7 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">
-                <button type="submit" className="w-full text-left text-sm">{t.menu.signOut}</button>
+                <button type="submit" className="w-full text-start text-sm">{t.menu.signOut}</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>

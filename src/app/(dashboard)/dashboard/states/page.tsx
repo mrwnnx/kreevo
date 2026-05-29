@@ -87,7 +87,7 @@ function ChallengeCard({
       )}
     >
       {recommended && (
-        <span className="absolute -top-3 left-4 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full">
+        <span className="absolute -top-3 start-4 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full">
           <Star className="size-3 fill-current" /> Recommandé
         </span>
       )}
@@ -161,7 +161,7 @@ function XPBar({ value, total, animated = false, pulse = false }: { value: numbe
       <div className={cn('relative h-2 w-full rounded-full bg-muted overflow-hidden', pulse && 'animate-pulse')}>
         <div
           className={cn(
-            'absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-violet-500 to-pink-500',
+            'absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-violet-500 to-pink-500',
             animated && 'transition-[width] duration-[2s] ease-out',
           )}
           style={{ width: `${pct}%` }}
@@ -252,7 +252,7 @@ function StateConfortable() {
             <span>{elapsedPct}%</span>
           </div>
           <div className="relative h-1.5 w-full rounded-full bg-muted overflow-hidden">
-            <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" style={{ width: `${elapsedPct}%` }} />
+            <div className="absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" style={{ width: `${elapsedPct}%` }} />
           </div>
         </div>
 
@@ -348,7 +348,7 @@ function StateProche() {
           <span className="text-3xl animate-pulse">{mockLeague.icon}</span>
           <ArrowRight className="size-5 text-muted-foreground" />
           <span className="text-3xl">{mockNextLeague.icon}</span>
-          <Rocket className="size-5 text-primary ml-1" />
+          <Rocket className="size-5 text-primary ms-1" />
         </div>
 
         <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-2">

@@ -74,7 +74,7 @@ export function GettingStarted({ steps }: GettingStartedProps) {
                 }
                 <span className={cn(isDone && 'line-through')}>{step.label}</span>
                 {isActive && (
-                  <span className="ml-auto text-[10px] font-mono text-primary uppercase tracking-widest">
+                  <span className="ms-auto text-[10px] font-mono text-primary uppercase tracking-widest">
                     À faire
                   </span>
                 )}

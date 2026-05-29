@@ -47,7 +47,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   ]
 
   return (
-    <aside className="hidden sm:flex fixed top-0 left-0 z-30 h-screen w-72 flex-col border-r border-border bg-zinc-50 dark:bg-zinc-900/40">
+    <aside className="hidden sm:flex fixed top-0 start-0 z-30 h-screen w-72 flex-col border-e border-border bg-zinc-50 dark:bg-zinc-900/40">
       {/* Logo */}
       <div className="px-5 h-14 flex items-baseline gap-1.5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-baseline gap-1.5">
@@ -68,7 +68,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
                   {profile.username[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0 text-left">
+              <div className="flex-1 min-w-0 text-start">
                 <p className="text-sm font-semibold truncate inline-flex items-center gap-1">
                   {displayName}
                   <ProBadge plan={profile.plan} />
@@ -81,7 +81,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
             </div>
 
             {/* Row 2 — league icon + name + XP */}
-            <div className="flex items-center gap-2 pl-0.5">
+            <div className="flex items-center gap-2 ps-0.5">
               {leagueIcon ? (
                 <LeagueIcon icon={leagueIcon} size="md" />
               ) : (
@@ -90,7 +90,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
               <span className={cn('text-xs font-semibold', leagueStyle.textPrimary)}>
                 {leagueStyle.name}
               </span>
-              <span className="ml-auto inline-flex items-center gap-0.5 text-xs font-mono text-muted-foreground">
+              <span className="ms-auto inline-flex items-center gap-0.5 text-xs font-mono text-muted-foreground">
                 <XpIcon className="size-3" />
                 {(profile.xp ?? 0).toLocaleString()} XP
               </span>
@@ -136,7 +136,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
               <form action={signOut} className="w-full">
-                <button type="submit" className="w-full text-left text-sm">{t.menu.signOut}</button>
+                <button type="submit" className="w-full text-start text-sm">{t.menu.signOut}</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -161,7 +161,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
               <Icon className="size-4 shrink-0" strokeWidth={active ? 2.4 : 1.8} />
               <span className="flex-1 truncate">{label}</span>
               {badge != null && badge > 0 && (
-                <span className="ml-auto size-5 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                <span className="ms-auto size-5 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                   {badge > 9 ? '9+' : badge}
                 </span>
               )}

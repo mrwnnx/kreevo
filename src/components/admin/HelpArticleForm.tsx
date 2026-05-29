@@ -268,7 +268,7 @@ export function HelpArticleForm({
             type="button"
             onClick={handleDelete}
             disabled={deleting || saving}
-            className="ml-auto inline-flex items-center gap-2 text-sm text-destructive hover:bg-destructive/5 px-4 py-2 rounded-full transition-colors disabled:opacity-60"
+            className="ms-auto inline-flex items-center gap-2 text-sm text-destructive hover:bg-destructive/5 px-4 py-2 rounded-full transition-colors disabled:opacity-60"
           >
             {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             Supprimer

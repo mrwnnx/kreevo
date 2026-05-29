@@ -66,7 +66,7 @@ export function LikeButton({
           aria-hidden
           strokeWidth={1.8}
           className={cn(
-            'pointer-events-none absolute left-0 top-1/2 fill-red-500 text-red-500',
+            'pointer-events-none absolute start-0 top-1/2 fill-red-500 text-red-500',
             heartClassName,
             '[animation:likeFloatUp_0.9s_ease-out_forwards]',
           )}

@@ -122,7 +122,7 @@ export function ContextualLeaderboard({
                   }}
                 />
               </div>
-              <span className="text-xs text-muted-foreground tabular-nums w-14 text-right">
+              <span className="text-xs text-muted-foreground tabular-nums w-14 text-end">
                 {user.xp.toLocaleString()} {t.xpSuffix}
               </span>
             </div>

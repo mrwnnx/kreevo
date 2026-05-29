@@ -281,7 +281,7 @@ function StatusBadge({ isDraft, status, t }: { isDraft: boolean; status: string;
   else if (status === 'on_hold') { label = t.badges.on_hold; cls = 'bg-amber-600/90 text-white' }
 
   return (
-    <span className={cn('absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm', cls)}>
+    <span className={cn('absolute top-2 start-2 text-[11px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm', cls)}>
       {label}
     </span>
   )

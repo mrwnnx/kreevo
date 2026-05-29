@@ -44,7 +44,7 @@ export function LangSwitcher({ current, variant = 'pill', className }: Props) {
             disabled={isPending}
             aria-pressed={current === lang}
             className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-colors text-left',
+              'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-colors text-start',
               current === lang
                 ? 'border-primary bg-primary/5 text-primary'
                 : 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted/40',
@@ -53,7 +53,7 @@ export function LangSwitcher({ current, variant = 'pill', className }: Props) {
             <span className="text-base font-bold uppercase font-mono w-8">{lang}</span>
             <span>{LABELS[lang]}</span>
             {current === lang && (
-              <span className="ml-auto text-xs text-primary">✓</span>
+              <span className="ms-auto text-xs text-primary">✓</span>
             )}
           </button>
         ))}

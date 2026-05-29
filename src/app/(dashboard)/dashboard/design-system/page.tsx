@@ -99,7 +99,7 @@ export default function DesignSystemPage() {
       <div className="flex min-h-screen">
 
         {/* ── Sidebar ── */}
-        <aside className="hidden lg:flex flex-col w-52 shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] border-r border-border pt-6 pb-10 px-4 overflow-y-auto">
+        <aside className="hidden lg:flex flex-col w-52 shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] border-e border-border pt-6 pb-10 px-4 overflow-y-auto">
           <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground mb-3 px-2">
             Components
           </p>

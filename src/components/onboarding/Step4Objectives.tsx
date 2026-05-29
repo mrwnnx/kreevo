@@ -46,7 +46,7 @@ export function Step4Objectives({ objectives, onNext, onBack, saving, t, tc }: S
               key={opt.value}
               type="button"
               onClick={() => toggle(opt.value)}
-              className={`relative w-full text-left rounded-[var(--radius-card)] border p-5 transition-all ${
+              className={`relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all ${
                 active
                   ? 'border-2 border-primary bg-primary/5'
                   : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30'

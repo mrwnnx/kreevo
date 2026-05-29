@@ -204,7 +204,7 @@ export function ChallengeForm({ initial, id }: { initial?: Partial<FormData>; id
                 key={s.value}
                 onClick={() => selectSpecialty(s.value)}
                 className={cn(
-                  'flex flex-col items-start gap-3 p-5 rounded-2xl border-2 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm',
+                  'flex flex-col items-start gap-3 p-5 rounded-2xl border-2 text-start transition-all hover:-translate-y-0.5 hover:shadow-sm',
                   selected ? cn('border-2', style.border, style.bg) : 'border-border bg-card hover:border-border/80'
                 )}
               >

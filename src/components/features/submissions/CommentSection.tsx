@@ -228,7 +228,7 @@ export function CommentSection({
           {t.commentCta}
         </Button>
 
-        <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+        <span className="ms-auto inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
           <MessageCircle className="size-5" strokeWidth={1.5} />
           {commentsCount}
         </span>

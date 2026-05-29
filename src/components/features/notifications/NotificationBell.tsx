@@ -91,7 +91,7 @@ export function NotificationBell({
       >
         <Bell className="size-4" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 size-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-0.5 -end-0.5 size-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -100,7 +100,7 @@ export function NotificationBell({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-50 w-80 rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+          <div className="absolute end-0 top-10 z-50 w-80 rounded-xl border border-border bg-card shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <span className="text-sm font-semibold">Notifications</span>
               {unread > 0 && (

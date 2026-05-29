@@ -60,7 +60,7 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
             open ? 'border-ring ring-3 ring-ring/50' : 'border-input hover:border-border-hover'
           }`}
         >
-          <Search className="absolute left-3 size-4 text-muted-foreground" />
+          <Search className="absolute start-3 size-4 text-muted-foreground" />
           {open ? (
             <input
               autoFocus
@@ -68,13 +68,13 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full h-full bg-transparent pl-10 pr-4 text-base md:text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              className="w-full h-full bg-transparent ps-10 pe-4 text-base md:text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           ) : (
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="w-full h-full text-left pl-10 pr-4 text-base md:text-sm"
+              className="w-full h-full text-start ps-10 pe-4 text-base md:text-sm"
             >
               {value ? (
                 <span className="text-foreground inline-flex items-center gap-2">
@@ -88,7 +88,7 @@ export function Step7Location({ country, onNext, onBack, saving, t, tc }: Step7P
         </div>
 
         {open && (
-          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 max-h-72 overflow-auto rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg p-1">
+          <div className="absolute start-0 end-0 top-[calc(100%+6px)] z-20 max-h-72 overflow-auto rounded-[var(--radius-popover)] border border-border bg-popover shadow-lg p-1">
             {list.suggested.length > 0 && (
               <>
                 <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -149,7 +149,7 @@ function CountryRow({
     <button
       type="button"
       onClick={() => onSelect(country)}
-      className={`w-full text-left px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors ${
+      className={`w-full text-start px-3 py-2 text-sm rounded-[calc(var(--radius-popover)-4px)] flex items-center justify-between transition-colors ${
         selected
           ? 'bg-primary/10 text-primary'
           : 'hover:bg-accent/40 text-foreground'

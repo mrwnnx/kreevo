@@ -43,7 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           t={dict.header}
         />
         <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} notifTypes={dict.notificationsPage.types} />
-        <main className="sm:pl-72 min-h-screen">{children}</main>
+        <main className="sm:ps-72 min-h-screen">{children}</main>
         <Toaster position="bottom-right" />
       </div>
     </TooltipProvider>

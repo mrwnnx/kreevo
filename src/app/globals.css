@@ -370,3 +370,27 @@
 html[lang="ar"] {
   --font-space-grotesk: var(--font-ibm-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
 }
+
+/* Mirror directional Lucide icons (arrows/chevrons) in RTL. lucide-react stamps
+   a per-icon class (.lucide-arrow-right …), so this flips every navigational
+   arrow at once — no per-call-site JSX edits. Non-directional icons untouched. */
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-chevron-left,
+[dir="rtl"] .lucide-chevrons-right,
+[dir="rtl"] .lucide-chevrons-left,
+[dir="rtl"] .lucide-arrow-up-right,
+[dir="rtl"] .lucide-arrow-up-left,
+[dir="rtl"] .lucide-arrow-down-right,
+[dir="rtl"] .lucide-arrow-down-left,
+[dir="rtl"] .lucide-arrow-big-right,
+[dir="rtl"] .lucide-arrow-big-left,
+[dir="rtl"] .lucide-move-right,
+[dir="rtl"] .lucide-move-left,
+[dir="rtl"] .lucide-corner-down-right,
+[dir="rtl"] .lucide-corner-down-left,
+[dir="rtl"] .lucide-corner-up-right,
+[dir="rtl"] .lucide-corner-up-left {
+  transform: scaleX(-1);
+}

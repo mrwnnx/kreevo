@@ -119,12 +119,12 @@ export default function AdminChallenges() {
           ))}
         </div>
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher…"
-            className="w-full h-10 pl-9 pr-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
+            className="w-full h-10 ps-9 pe-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
           />
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function AdminChallenges() {
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
               {['Titre', 'Ligue', 'Spécialité', 'Type', 'Industrie', 'XP', 'Deadline', 'Publié', 'Actions'].map(h => (
-                <th key={h} className="text-left text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
+                <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>

@@ -158,13 +158,13 @@ export function HeroBanner({
       </div>
 
       {tip && state === 'active' && (
-        <div className="hidden sm:block absolute bottom-12 right-6 max-w-[35%] bg-white/10 backdrop-blur-sm rounded-xl p-3">
+        <div className="hidden sm:block absolute bottom-12 end-6 max-w-[35%] bg-white/10 backdrop-blur-sm rounded-xl p-3">
           <p className="text-xs text-white/60 mb-1">{t.tipLabel}</p>
           <p className="text-xs text-white/90 leading-relaxed">{tip}</p>
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 px-5 sm:px-8 pb-4">
+      <div className="absolute bottom-0 start-0 end-0 px-5 sm:px-8 pb-4">
         <div className="flex justify-between text-xs text-white/50 mb-1">
           <span>{t.todayProgress}</span>
           <span>{tx(t.tasksLabel, { done: completedToday })}</span>
@@ -178,7 +178,7 @@ export function HeroBanner({
       </div>
 
       {xpToday > 0 && (
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-400 text-amber-900 rounded-full px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold shadow-lg whitespace-nowrap">
+        <div className="absolute top-3 end-3 sm:top-4 sm:end-4 bg-amber-400 text-amber-900 rounded-full px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold shadow-lg whitespace-nowrap">
           {tx(t.xpTodayBadge, { n: xpToday })}
         </div>
       )}

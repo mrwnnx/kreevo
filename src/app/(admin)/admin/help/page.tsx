@@ -76,13 +76,13 @@ export default function AdminHelpPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-[360px]">
-          <Search className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher par titre ou slug…"
-            className="w-full h-10 pl-9 pr-3 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
+            className="w-full h-10 ps-9 pe-3 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
           />
         </div>
         <select
@@ -109,10 +109,10 @@ export default function AdminHelpPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-xs font-mono uppercase tracking-widest text-muted-foreground">
               <tr>
-                <th className="text-left px-4 py-3">Titre</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">Catégorie</th>
-                <th className="text-right px-4 py-3 hidden md:table-cell">Vues</th>
-                <th className="text-right px-4 py-3 hidden md:table-cell">Helpful</th>
+                <th className="text-start px-4 py-3">Titre</th>
+                <th className="text-start px-4 py-3 hidden md:table-cell">Catégorie</th>
+                <th className="text-end px-4 py-3 hidden md:table-cell">Vues</th>
+                <th className="text-end px-4 py-3 hidden md:table-cell">Helpful</th>
                 <th className="text-center px-4 py-3 w-20">Statut</th>
                 <th className="px-4 py-3 w-12" />
               </tr>
@@ -147,13 +147,13 @@ export default function AdminHelpPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums hidden md:table-cell">
+                    <td className="px-4 py-3 text-end tabular-nums hidden md:table-cell">
                       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                         <Eye className="size-3" />
                         {a.views ?? 0}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right hidden md:table-cell">
+                    <td className="px-4 py-3 text-end hidden md:table-cell">
                       {ratio === null ? (
                         <span className="text-xs text-muted-foreground">—</span>
                       ) : (
@@ -184,7 +184,7 @@ export default function AdminHelpPage() {
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <Link
                         href={`/admin/help/${a.id}`}
                         className="inline-flex items-center justify-center size-8 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"

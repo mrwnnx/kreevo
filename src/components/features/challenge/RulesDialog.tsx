@@ -56,7 +56,7 @@ export function RulesDialog({
                   <p className="text-sm text-muted-foreground">{row.detail}</p>
                 </div>
                 {row.badge && (
-                  <span className={`ml-auto text-sm font-semibold shrink-0 ${row.badgeClass}`}>
+                  <span className={`ms-auto text-sm font-semibold shrink-0 ${row.badgeClass}`}>
                     {row.badge}
                   </span>
                 )}

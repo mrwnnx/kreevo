@@ -24,21 +24,21 @@ export function ChallengeBriefSections({ challenge, t }: Props) {
     <>
       {challenge.context && (
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold"><span className="mr-1">🎬</span>{t.scenario}</h2>
+          <h2 className="text-xl font-semibold"><span className="me-1">🎬</span>{t.scenario}</h2>
           <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{challenge.context}</p>
         </section>
       )}
 
       {challenge.deliverable && (
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold"><span className="mr-1">📦</span>{t.deliverable}</h2>
+          <h2 className="text-xl font-semibold"><span className="me-1">📦</span>{t.deliverable}</h2>
           <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{challenge.deliverable}</p>
         </section>
       )}
 
       {challenge.constraints && (
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold"><span className="mr-1">🚧</span>{t.constraints}</h2>
+          <h2 className="text-xl font-semibold"><span className="me-1">🚧</span>{t.constraints}</h2>
           <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{challenge.constraints}</p>
         </section>
       )}
@@ -46,7 +46,7 @@ export function ChallengeBriefSections({ challenge, t }: Props) {
       {challenge.criteria && (
         <section className="space-y-4">
           <div>
-            <h2 className="text-xl font-semibold"><span className="mr-1">🎯</span>{t.criteria}</h2>
+            <h2 className="text-xl font-semibold"><span className="me-1">🎯</span>{t.criteria}</h2>
             <p className="text-sm text-muted-foreground mt-1">{t.criteriaIntro}</p>
           </div>
           <div className="space-y-3">

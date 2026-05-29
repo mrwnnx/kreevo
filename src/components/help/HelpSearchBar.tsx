@@ -35,11 +35,11 @@ export function HelpSearchBar({
       onSubmit={onSubmit}
       role="search"
       className={cn(
-        'relative flex items-center w-full h-10 pl-3 pr-1 bg-transparent dark:bg-input/30 border border-input rounded-[var(--radius-input)] transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50',
+        'relative flex items-center w-full h-10 ps-3 pe-1 bg-transparent dark:bg-input/30 border border-input rounded-[var(--radius-input)] transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50',
         className,
       )}
     >
-      <Search className="shrink-0 size-4 mr-2 text-muted-foreground" aria-hidden />
+      <Search className="shrink-0 size-4 me-2 text-muted-foreground" aria-hidden />
       <input
         type="search"
         value={value}

@@ -107,7 +107,7 @@ export function SubmissionGallery({ submissions, currentUserId, t = FALLBACK_T }
                     </Link>
                     {s.profiles.league && (
                       <span className={cn(
-                        'text-[9px] font-mono px-1.5 py-0.5 rounded-full ml-auto',
+                        'text-[9px] font-mono px-1.5 py-0.5 rounded-full ms-auto',
                         LEAGUE_COLOR[s.profiles.league] ?? LEAGUE_COLOR.Stone
                       )}>
                         {s.profiles.league}
@@ -130,7 +130,7 @@ export function SubmissionGallery({ submissions, currentUserId, t = FALLBACK_T }
                     {s.comments_count}
                   </Link>
                   {!isOwn && currentUserId && s.created_at && (
-                    <div className="ml-auto">
+                    <div className="ms-auto">
                       <ReportButton submissionId={s.id} submissionCreatedAt={s.created_at} />
                     </div>
                   )}

@@ -199,7 +199,7 @@ export default async function LeaderboardPage({
             </div>
 
             {/* XP */}
-            <div className="text-right shrink-0">
+            <div className="text-end shrink-0">
               <div className="flex items-center gap-1 justify-end">
                 <XpIcon className="size-3" />
                 <span className="text-sm font-bold font-mono">
