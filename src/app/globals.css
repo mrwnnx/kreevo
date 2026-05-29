@@ -360,3 +360,13 @@
   60%  { transform: translateX(100%); }
   100% { transform: translateX(100%); }
 }
+
+/* ─── Arabic (RTL) typography ─────────────────────────────────────────────
+   Remap the whole font chain to IBM Plex Sans Arabic when locale = ar.
+   `--font-space-grotesk` is what every font var (--font-sans/-mono/-heading)
+   and the base body/heading rules resolve to. buildDesignCSS() injects an
+   inline `:root{--font-space-grotesk}` (specificity 0,1,0); this unlayered
+   `html[lang="ar"]` rule (0,1,1) wins, so FR/EN stay on Plus Jakarta. */
+html[lang="ar"] {
+  --font-space-grotesk: var(--font-ibm-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+}

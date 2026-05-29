@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Plus_Jakarta_Sans } from "next/font/google"
+import localFont from "next/font/local"
 import Script from "next/script"
 import { buildDesignCSS, FONT_OPTIONS } from "@/lib/design-tokens"
 import { getDesignTokens } from "@/lib/design-tokens.server"
@@ -10,6 +11,24 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
+})
+
+// IBM Plex Sans Arabic — used only when locale = ar (RTL).
+// `preload: false` so FR/EN visitors never download these files; the browser
+// fetches them on demand when `globals.css` remaps the font chain for [lang="ar"].
+// Weights mirror Plus Jakarta (300–700); 800 has no Arabic face → falls back to 700.
+const ibmPlexArabic = localFont({
+  variable: "--font-ibm-arabic",
+  display: "swap",
+  preload: false,
+  fallback: ["system-ui", "sans-serif"],
+  src: [
+    { path: "./fonts/IBMPlexSansArabic-Light.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/IBMPlexSansArabic-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/IBMPlexSansArabic-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/IBMPlexSansArabic-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/IBMPlexSansArabic-Bold.woff2", weight: "700", style: "normal" },
+  ],
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.kreevo.online'
@@ -32,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isCustomFont = tokens.font !== 'Plus Jakarta Sans' && fontOption
 
   return (
-    <html lang={lang} dir={dirFor(lang)} className={`${plusJakartaSans.variable} h-full antialiased`}>
+    <html lang={lang} dir={dirFor(lang)} className={`${plusJakartaSans.variable} ${ibmPlexArabic.variable} h-full antialiased`}>
       <head>
         {isCustomFont && (
           <link rel="stylesheet" href={fontOption.url} />
