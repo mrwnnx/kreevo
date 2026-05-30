@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
   Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen, LayoutTemplate,
+  Tag, Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +13,8 @@ const NAV = [
   { href: '/admin/dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
   { href: '/admin/leagues',      label: 'Ligues',         icon: Medal },
   { href: '/admin/challenges',   label: 'Challenges',     icon: Trophy },
+  { href: '/admin/challenges/types',      label: 'Types',      icon: Tag,       sub: true },
+  { href: '/admin/challenges/industries', label: 'Industries', icon: Building2, sub: true },
   { href: '/admin/submissions',  label: 'Soumissions',    icon: FileCheck },
   { href: '/admin/users',        label: 'Users',          icon: Users },
   { href: '/admin/moderation',   label: 'Modération',     icon: ShieldAlert, badge: true },
@@ -44,7 +47,7 @@ export function AdminSidebar({ pendingMod = 0 }: { pendingMod?: number }) {
           const activeHref = NAV
             .filter(n => pathname === n.href || pathname.startsWith(n.href + '/'))
             .sort((a, b) => b.href.length - a.href.length)[0]?.href
-          return NAV.map(({ href, label, icon: Icon, badge }) => {
+          return NAV.map(({ href, label, icon: Icon, badge, sub }) => {
           const active = href === activeHref
           return (
             <Link
@@ -52,12 +55,13 @@ export function AdminSidebar({ pendingMod = 0 }: { pendingMod?: number }) {
               href={href}
               className={cn(
                 'group flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all',
+                sub && 'ms-3 text-[13px]',
                 active
                   ? 'bg-primary/10 text-primary border border-primary/20'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
               )}
             >
-              <Icon className="size-4 shrink-0" />
+              <Icon className={cn('shrink-0', sub ? 'size-3.5' : 'size-4')} />
               <span className="flex-1">{label}</span>
               {badge && pendingMod > 0 && (
                 <span className="text-[10px] font-mono bg-destructive text-destructive-foreground rounded-full px-1.5 min-w-[18px] text-center">
