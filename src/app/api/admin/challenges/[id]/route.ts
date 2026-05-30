@@ -30,6 +30,9 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.specialty !== undefined && { specialty: body.specialty }),
       ...(body.challenge_type !== undefined && { challenge_type: body.challenge_type }),
       ...(body.industry !== undefined && { industry: body.industry }),
+      // FK to taxonomy — only written when truthy (safe before migration).
+      ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),
+      ...(body.industry_id ? { industry_id: body.industry_id } : {}),
       ...(body.emoji !== undefined && { emoji: body.emoji || null }),
     })
     .eq('id', id)

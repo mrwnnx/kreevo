@@ -20,6 +20,7 @@ import { cooldownEnd, isInCooldown } from '@/lib/utils/participation-cooldown'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { localizeChallenge } from '@/lib/challenges/i18n'
+import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -58,6 +59,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
   const lang = await getLang()
   const c = localizeChallenge(challenge as any, lang)
+  const taxoMaps = await getTaxonomyMaps()
+  const typeLabel = localizeType(c, lang, taxoMaps)
+  const industryLabel = localizeIndustry(c, lang, taxoMaps)
   const p = profile as Profile
   const totalParticipants = participantCount ?? 0
 
@@ -120,13 +124,13 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                   {c.specialty}
                 </span>
               )}
-              {c.challenge_type && (
+              {typeLabel && (
                 <span className="text-sm font-semibold px-3 py-1 rounded-full bg-muted text-muted-foreground">
-                  {c.challenge_type}
+                  {typeLabel}
                 </span>
               )}
-              {c.industry && (
-                <span className="text-sm text-muted-foreground">{c.industry}</span>
+              {industryLabel && (
+                <span className="text-sm text-muted-foreground">{industryLabel}</span>
               )}
             </div>
 
@@ -265,13 +269,13 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                   {c.specialty}
                 </span>
               )}
-              {c.challenge_type && (
+              {typeLabel && (
                 <span className="text-sm font-semibold px-3 py-1 rounded-full bg-muted text-muted-foreground">
-                  {c.challenge_type}
+                  {typeLabel}
                 </span>
               )}
-              {c.industry && (
-                <span className="text-sm text-muted-foreground">{c.industry}</span>
+              {industryLabel && (
+                <span className="text-sm text-muted-foreground">{industryLabel}</span>
               )}
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Users className="size-3.5" />
@@ -364,16 +368,16 @@ export default async function ChallengePage({ params, searchParams }: Props) {
                   <span className="font-medium">{c.specialty}</span>
                 </div>
               )}
-              {c.challenge_type && (
+              {typeLabel && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t.sidebar.type}</span>
-                  <span className="font-medium">{c.challenge_type}</span>
+                  <span className="font-medium">{typeLabel}</span>
                 </div>
               )}
-              {c.industry && (
+              {industryLabel && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t.sidebar.industry}</span>
-                  <span className="font-medium">{c.industry}</span>
+                  <span className="font-medium">{industryLabel}</span>
                 </div>
               )}
               {c.deadline_days && (

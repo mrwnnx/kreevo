@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { localizeChallenge } from '@/lib/challenges/i18n'
+import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
 import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
 import { SubmissionGallery } from '@/components/features/challenge/SubmissionGallery'
 
@@ -124,6 +125,9 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
   const challengeRaw = challengeData as ChallengeRow | null
   if (!challengeRaw || !challengeRaw.is_published) notFound()
   const challenge = localizeChallenge(challengeRaw, lang)
+  const taxoMaps = await getTaxonomyMaps()
+  const typeLabel = localizeType(challenge, lang, taxoMaps)
+  const industryLabel = localizeIndustry(challenge, lang, taxoMaps)
 
   const rawSubmissions = (submissionsData ?? []) as SubmissionRow[]
   // Gallery's Submission shape uses `profiles?: {...}` (undefined-friendly), so
@@ -174,13 +178,13 @@ export default async function PublicChallengeDetailPage({ params }: Props) {
                     {challenge.specialty}
                   </span>
                 )}
-                {challenge.challenge_type && (
+                {typeLabel && (
                   <span className="font-semibold px-3 py-1 rounded-full bg-muted text-muted-foreground">
-                    {challenge.challenge_type}
+                    {typeLabel}
                   </span>
                 )}
-                {challenge.industry && (
-                  <span className="text-muted-foreground">{challenge.industry}</span>
+                {industryLabel && (
+                  <span className="text-muted-foreground">{industryLabel}</span>
                 )}
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground ms-auto">
                   <Users className="size-3.5" />

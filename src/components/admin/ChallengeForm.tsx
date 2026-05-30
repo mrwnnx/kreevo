@@ -66,7 +66,9 @@ const EMPTY_FIELDS: ChallengeFields = { title: '', brief: '', context: '', deliv
 interface MetaData {
   specialty: string
   challenge_type: string
+  challenge_type_id: string
   industry: string
+  industry_id: string
   emoji: string
   league_id: string
   xp_reward: string
@@ -81,13 +83,18 @@ export interface ChallengeFormInitial extends Partial<MetaData> {
 }
 
 const EMPTY_META: MetaData = {
-  specialty: '', challenge_type: '', industry: '', emoji: '',
+  specialty: '', challenge_type: '', challenge_type_id: '', industry: '', industry_id: '', emoji: '',
   league_id: '', xp_reward: '250', deadline_days: '7', is_published: false,
 }
 
 const EMOJI_SUGGESTIONS = ['🎯', '📱', '🎨', '✏️', '💡', '🖌️', '📐', '🧩', '🚀', '🔥', '✨', '🏆', '🎬', '📦', '🛍️', '💳', '🎵', '🏠']
 
 interface League { id: string; name: string; icon: string; order_index: number }
+interface TaxoRow { id: string; name_fr: string | null; name_en: string | null; name_ar: string | null; specialty?: string | null; display_order: number }
+interface Option { id: string; name: string }
+
+/** Pick the admin-facing label for a taxonomy row (fr-first). */
+const taxoLabel = (r: TaxoRow) => r.name_fr || r.name_en || r.name_ar || ''
 
 const inputClass = 'w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors'
 const labelClass = 'text-xs font-mono text-muted-foreground uppercase tracking-widest'
@@ -151,6 +158,8 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
   const [activeLang, setActiveLang] = useState<ChallengeLang>(initial?.source_lang ?? 'fr')
 
   const [leagues, setLeagues] = useState<League[]>([])
+  const [fetchedTypes, setFetchedTypes] = useState<TaxoRow[]>([])
+  const [fetchedIndustries, setFetchedIndustries] = useState<TaxoRow[]>([])
   const [saving, setSaving] = useState(false)
   const [translating, setTranslating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -161,10 +170,20 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
   })
 
   useEffect(() => {
-    fetch('/api/admin/leagues')
-      .then(r => r.json())
-      .then(d => setLeagues(d.leagues ?? []))
+    fetch('/api/admin/leagues').then(r => r.json()).then(d => setLeagues(d.leagues ?? []))
+    // Taxonomy is now sourced from the CRUD tables; TS constants are the
+    // pre-migration / empty-table fallback (kept until Lot 3).
+    fetch('/api/admin/challenge-types').then(r => r.json()).then(d => setFetchedTypes(d.types ?? [])).catch(() => {})
+    fetch('/api/admin/industries').then(r => r.json()).then(d => setFetchedIndustries(d.industries ?? [])).catch(() => {})
   }, [])
+
+  // Option lists: fetched tables when available, else the hardcoded TS arrays.
+  const typeOptions: Option[] = fetchedTypes.length
+    ? fetchedTypes.filter(t => t.specialty === meta.specialty).map(t => ({ id: t.id, name: taxoLabel(t) }))
+    : (TYPES[meta.specialty] ?? []).map(name => ({ id: '', name }))
+  const industryOptions: Option[] = fetchedIndustries.length
+    ? fetchedIndustries.map(i => ({ id: i.id, name: taxoLabel(i) }))
+    : INDUSTRIES.map(name => ({ id: '', name }))
 
   const setM = (key: keyof MetaData) => (val: string | boolean) =>
     setMeta(m => ({ ...m, [key]: val }))
@@ -173,22 +192,22 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
     setTexts(t => ({ ...t, [lang]: { ...t[lang], [key]: val } }))
 
   function selectSpecialty(spec: string) {
-    setMeta(m => ({ ...m, specialty: spec, challenge_type: '' }))
+    setMeta(m => ({ ...m, specialty: spec, challenge_type: '', challenge_type_id: '' }))
     setTimeout(() => setStep(1), 150)
   }
 
-  function selectType(type: string) {
-    setMeta(m => ({ ...m, challenge_type: type }))
+  function selectType(opt: Option) {
+    setMeta(m => ({ ...m, challenge_type: opt.name, challenge_type_id: opt.id }))
     // Prefill the deliverable of the source language if still empty.
     setTexts(t => {
       if (t[sourceLang].deliverable) return t
-      return { ...t, [sourceLang]: { ...t[sourceLang], deliverable: DELIVERABLES[type] || '' } }
+      return { ...t, [sourceLang]: { ...t[sourceLang], deliverable: DELIVERABLES[opt.name] || '' } }
     })
     setTimeout(() => setStep(2), 150)
   }
 
-  function selectIndustry(industry: string) {
-    setMeta(m => ({ ...m, industry }))
+  function selectIndustry(opt: Option) {
+    setMeta(m => ({ ...m, industry: opt.name, industry_id: opt.id }))
     setTimeout(() => setStep(3), 150)
   }
 
@@ -296,7 +315,6 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
 
   // ── Step 1 — Type ──────────────────────────────────────────────────────────
   if (step === 1) {
-    const types = TYPES[meta.specialty] ?? []
     return (
       <div className="space-y-6">
         <StepIndicator step={1} onBack={() => setStep(0)} />
@@ -305,18 +323,18 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
             Type de défi pour <span className="font-semibold text-foreground">{meta.specialty}</span>
           </p>
           <div className="flex flex-wrap gap-2">
-            {types.map(t => (
+            {typeOptions.map(opt => (
               <button
-                key={t}
-                onClick={() => selectType(t)}
+                key={opt.id || opt.name}
+                onClick={() => selectType(opt)}
                 className={cn(
                   'px-4 py-2 rounded-full text-sm font-medium border transition-all',
-                  meta.challenge_type === t
+                  meta.challenge_type === opt.name
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
                 )}
               >
-                {t}
+                {opt.name}
               </button>
             ))}
           </div>
@@ -333,18 +351,18 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">Dans quelle industrie se situe le challenge ?</p>
           <div className="flex flex-wrap gap-2">
-            {INDUSTRIES.map(ind => (
+            {industryOptions.map(opt => (
               <button
-                key={ind}
-                onClick={() => selectIndustry(ind)}
+                key={opt.id || opt.name}
+                onClick={() => selectIndustry(opt)}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-sm border transition-all',
-                  meta.industry === ind
+                  meta.industry === opt.name
                     ? 'bg-primary text-primary-foreground border-primary font-medium'
                     : 'bg-card border-border hover:border-primary/50 hover:bg-muted/40'
                 )}
               >
-                {ind}
+                {opt.name}
               </button>
             ))}
           </div>

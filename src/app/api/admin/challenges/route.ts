@@ -38,6 +38,9 @@ export async function POST(request: Request) {
       challenge_type: body.challenge_type || null,
       industry: body.industry || null,
       emoji: body.emoji || null,
+      // FK to taxonomy tables — only written when present (safe before migration).
+      ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),
+      ...(body.industry_id ? { industry_id: body.industry_id } : {}),
     })
     .select()
     .single()
