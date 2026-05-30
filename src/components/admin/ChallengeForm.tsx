@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Loader2, ChevronLeft, Check, Languages } from 'lucide-react'
+import { Save, Loader2, ChevronLeft, Check, Languages, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { translateChallenge, type ChallengeFields, type ChallengeLang } from '@/app/(admin)/admin/challenges/actions'
+import { translateChallenge, generateChallenge, type ChallengeFields, type ChallengeLang } from '@/app/(admin)/admin/challenges/actions'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -162,6 +162,8 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
   const [fetchedIndustries, setFetchedIndustries] = useState<TaxoRow[]>([])
   const [saving, setSaving] = useState(false)
   const [translating, setTranslating] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [genBrief, setGenBrief] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState(() => {
     if (id) return 3
@@ -237,6 +239,28 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
     // Jump to the first translated tab so the admin can review immediately.
     const firstTarget = (Object.keys(res.translations)[0] as ChallengeLang) ?? activeLang
     setActiveLang(firstTarget)
+  }
+
+  async function handleGenerate() {
+    setError(null)
+    if (!genBrief.trim()) { setError('Décris le challenge à générer.'); return }
+    setGenerating(true)
+    const league = leagues.find(l => l.id === meta.league_id)
+    const res = await generateChallenge({
+      sourceLang,
+      genBrief,
+      specialty: meta.specialty || undefined,
+      challengeType: meta.challenge_type || undefined,
+      industry: meta.industry || undefined,
+      league: league?.name,
+      leagueTier: league?.order_index,
+    })
+    setGenerating(false)
+    if (!res.ok) { setError(res.error); return }
+    // Fill the source-language fields as an editable draft (canonical → validated).
+    setTexts(prev => ({ ...prev, [sourceLang]: res.fields }))
+    setStatus(prev => ({ ...prev, [sourceLang]: 'validated' }))
+    setActiveLang(sourceLang)
   }
 
   function markValidated(lang: ChallengeLang) {
@@ -512,6 +536,37 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
             {translating ? <Loader2 className="size-4 animate-spin" /> : <Languages className="size-4" />}
             {translating ? 'Traduction…' : 'Traduire vers les autres langues'}
           </button>
+        </div>
+
+        {/* AI generation — fills the source language only; translation stays the Traduire step. */}
+        <div className="rounded-xl border border-dashed border-primary/30 bg-primary/[0.03] p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-4 text-primary" />
+            <span className="text-sm font-semibold">Générer par IA</span>
+            <span className="text-[11px] text-muted-foreground">→ langue source ({LANG_LABEL[sourceLang]}), brouillon à relire</span>
+          </div>
+          <textarea
+            value={genBrief}
+            onChange={e => setGenBrief(e.target.value)}
+            rows={2}
+            className={cn(inputClass, 'h-auto py-2 resize-none')}
+            placeholder="Décris le challenge voulu (ex : « refonte de l'appli mobile d'une banque pour les jeunes, focus onboarding »). Les sélecteurs ci-dessus servent de contexte."
+            dir={sourceLang === 'ar' ? 'rtl' : 'ltr'}
+          />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground">
+              Remplit les 6 champs en {LANG_LABEL[sourceLang]}. Tu pourras corriger, puis « Traduire ».
+            </p>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={generating}
+              className="shrink-0 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full bg-primary text-primary-foreground hover:opacity-85 disabled:opacity-60"
+            >
+              {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+              {generating ? 'Génération…' : 'Générer par IA'}
+            </button>
+          </div>
         </div>
 
         {/* Language tabs */}
