@@ -20,7 +20,7 @@ begin;
 -- ── 1. Reference tables ─────────────────────────────────────────────────────
 create table if not exists public.challenge_types (
   id uuid primary key default gen_random_uuid(),
-  name_fr text,
+  name_fr text unique,
   name_en text,
   name_ar text,
   specialty text,                       -- 'UX Designer' | 'UI Designer' | 'Graphic Designer'
@@ -31,7 +31,7 @@ create table if not exists public.challenge_types (
 
 create table if not exists public.industries (
   id uuid primary key default gen_random_uuid(),
-  name_fr text,
+  name_fr text unique,
   name_en text,
   name_ar text,
   translation_status jsonb not null default '{"fr":"draft","en":"draft","ar":"draft"}'::jsonb,
@@ -60,7 +60,7 @@ values
   ('Social Media Kit', 'Graphic Designer', 16, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb),
   ('Packaging',        'Graphic Designer', 17, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb),
   ('Motion',           'Graphic Designer', 18, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb)
-on conflict do nothing;
+on conflict (name_fr) do nothing;
 
 -- ── 3. Seed industries (25, incl. unused "Environnement") ───────────────────
 insert into public.industries (name_fr, display_order, translation_status)
@@ -90,7 +90,7 @@ values
   ('Mobilité',        23, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb),
   ('ONG',             24, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb),
   ('Environnement',   25, '{"fr":"validated","en":"draft","ar":"draft"}'::jsonb)
-on conflict do nothing;
+on conflict (name_fr) do nothing;
 
 -- ── 4. FK columns on challenges (nullable) + back-fill by name ──────────────
 alter table public.challenges
