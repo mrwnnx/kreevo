@@ -134,3 +134,82 @@ export async function translateChallenge(input: {
     return { ok: false, error: msg }
   }
 }
+
+// ── AI generation (Lot 2) ────────────────────────────────────────────────────
+// Cousin of translateChallenge: same client / model / structured-JSON shape.
+// Generates the 6 fields in the SOURCE language only — translation to the other
+// two stays a separate step (the existing "Traduire" button / translateChallenge).
+
+export type GenerateResult =
+  | { ok: true; fields: ChallengeFields }
+  | { ok: false; error: string }
+
+export async function generateChallenge(input: {
+  sourceLang: ChallengeLang
+  genBrief: string
+  specialty?: string
+  challengeType?: string
+  industry?: string
+  league?: string
+  leagueTier?: number
+}): Promise<GenerateResult> {
+  const { error } = await requireAdmin()
+  if (error) return { ok: false, error: 'Accès refusé.' }
+
+  const { sourceLang, genBrief } = input
+  if (!genBrief?.trim()) {
+    return { ok: false, error: 'Décris le challenge à générer.' }
+  }
+
+  const ctx: string[] = []
+  if (input.specialty) ctx.push(`Specialty: ${input.specialty}`)
+  if (input.challengeType) ctx.push(`Challenge type: ${input.challengeType}`)
+  if (input.industry) ctx.push(`Industry: ${input.industry}`)
+  if (input.league) {
+    ctx.push(`League / level: ${input.league}${input.leagueTier ? ` (tier ${input.leagueTier}/8 — 1 = easiest, 8 = hardest)` : ''}`)
+  }
+
+  const fieldList = FIELD_KEYS.map((k) => `- "${k}" (${FIELD_HINT[k]})`).join('\n')
+
+  const prompt = `You are an expert design-challenge author for a design-practice platform where designers compete by submitting work. Write ONE complete, realistic design challenge in ${LANG_NAME[sourceLang]} only.
+
+Admin's request:
+${genBrief}
+
+Context to respect:
+${ctx.length ? ctx.join('\n') : '(none provided)'}
+
+Write each field with a concrete, actionable "design brief" tone, calibrated to the league tier (higher tier → more ambitious scope and stricter constraints), and coherent with the specialty, challenge type and industry above:
+- title: short, specific, punchy (not generic).
+- brief: the mission — what to design and why — motivating, 2-4 sentences.
+- context: a believable scenario / fictional client / background.
+- deliverable: the concrete expected output (formats, number of screens, Figma link…), matching the challenge type.
+- constraints: realistic constraints to respect (style, platform, accessibility, dimensions…).
+- criteria: how the work will be judged (3-5 short points).
+
+Keep brand/tool names and design jargon (UI, UX, Figma, dashboard…) as-is. Return STRICTLY valid JSON with exactly these keys and string values, nothing else (no commentary, no code fences):
+${fieldList}`
+
+  try {
+    const res = await anthropic.messages.create({
+      model: TRANSLATE_MODEL,
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    const text = res.content.map((b: any) => (b.type === 'text' ? b.text : '')).join('').trim()
+    const obj = parseJsonObject(text)
+    if (!obj) return { ok: false, error: 'Réponse IA illisible — réessaie.' }
+
+    const fields: ChallengeFields = { title: '', brief: '', context: '', deliverable: '', constraints: '', criteria: '' }
+    for (const k of FIELD_KEYS) {
+      const v = obj[k]
+      fields[k] = typeof v === 'string' ? v : ''
+    }
+    if (!fields.title.trim() && !fields.brief.trim()) {
+      return { ok: false, error: 'Génération vide — réessaie avec un brief plus précis.' }
+    }
+    return { ok: true, fields }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Échec de la génération' }
+  }
+}
