@@ -688,59 +688,6 @@ export type Database = {
           },
         ]
       }
-      random_briefs: {
-        Row: {
-          brief_text: string
-          cover_url: string | null
-          created_at: string | null
-          deadline_at: string | null
-          description: string | null
-          figma_url: string | null
-          id: string
-          is_public: boolean | null
-          prompt: Json
-          started_at: string | null
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          brief_text: string
-          cover_url?: string | null
-          created_at?: string | null
-          deadline_at?: string | null
-          description?: string | null
-          figma_url?: string | null
-          id?: string
-          is_public?: boolean | null
-          prompt: Json
-          started_at?: string | null
-          status?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          brief_text?: string
-          cover_url?: string | null
-          created_at?: string | null
-          deadline_at?: string | null
-          description?: string | null
-          figma_url?: string | null
-          id?: string
-          is_public?: boolean | null
-          prompt?: Json
-          started_at?: string | null
-          status?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "random_briefs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       referrals: {
         Row: {
           created_at: string | null

@@ -36,7 +36,7 @@ export default async function EditChallenge({ params }: Props) {
   const supabase = await createClient()
 
   const [{ data }, { data: participations }, stats] = await Promise.all([
-    (supabase as any).from('challenges').select('*').eq('id', id).single(),
+    (supabase as any).from('challenges').select('*, challenge_types(name_fr), industries(name_fr)').eq('id', id).single(),
     (supabase as any)
       .from('participations')
       .select('*, profiles(username, avatar_url, league)')
@@ -82,9 +82,9 @@ export default async function EditChallenge({ params }: Props) {
           deadline_days: String(data.deadline_days ?? 7),
           is_published: data.is_published ?? false,
           specialty: data.specialty ?? '',
-          challenge_type: data.challenge_type ?? '',
+          challenge_type: data.challenge_types?.name_fr ?? '',
           challenge_type_id: data.challenge_type_id ?? '',
-          industry: data.industry ?? '',
+          industry: data.industries?.name_fr ?? '',
           industry_id: data.industry_id ?? '',
           emoji: data.emoji ?? '',
         }}

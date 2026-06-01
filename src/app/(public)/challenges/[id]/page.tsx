@@ -21,8 +21,8 @@ type ChallengeRow = {
   constraints: string | null
   criteria: string | null
   specialty: string | null
-  challenge_type: string | null
-  industry: string | null
+  challenge_type_id: string | null
+  industry_id: string | null
   emoji: string | null
   xp_reward: number | null
   deadline_days: number | null
