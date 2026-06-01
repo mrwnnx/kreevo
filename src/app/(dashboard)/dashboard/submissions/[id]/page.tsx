@@ -20,7 +20,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   const [{ data: submission }, { data: likeData }, { data: currentProfile }] = await Promise.all([
     (supabase as any)
       .from('submissions')
-      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type, industry)')
+      .select('*, profiles:user_id(id, username, full_name, avatar_url, bio, league, xp, specialty, tools, links, country, city, plan), challenges:challenge_id(id, title, specialty, challenge_type_id, industry_id)')
       .eq('id', id)
       .single(),
     (supabase as any)

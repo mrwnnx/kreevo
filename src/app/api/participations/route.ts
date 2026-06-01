@@ -236,7 +236,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('participations')
-    .select('*, challenges(id, title, specialty, challenge_type, industry)')
+    .select('*, challenges(id, title, specialty, challenge_type_id, industry_id)')
     .eq('user_id', user.id)
 
   if (challenge_id) query = query.eq('challenge_id', challenge_id)
