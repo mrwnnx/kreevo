@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   let query = (admin!.supabase as any)
     .from('challenges')
-    .select('*, leagues(id, name, icon)')
+    .select('*, leagues(id, name, icon), challenge_types(name_fr), industries(name_fr)')
     .order('created_at', { ascending: false })
 
   if (leagueId) query = query.eq('league_id', leagueId)
@@ -35,10 +35,8 @@ export async function POST(request: Request) {
       deadline_days: body.deadline_days || null,
       is_published: body.is_published ?? false,
       specialty: body.specialty || null,
-      challenge_type: body.challenge_type || null,
-      industry: body.industry || null,
       emoji: body.emoji || null,
-      // FK to taxonomy tables — only written when present (safe before migration).
+      // Type / industry are now FK-only (legacy text columns no longer written).
       ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),
       ...(body.industry_id ? { industry_id: body.industry_id } : {}),
     })

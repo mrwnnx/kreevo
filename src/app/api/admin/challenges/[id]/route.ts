@@ -28,9 +28,7 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.deadline_days !== undefined && { deadline_days: body.deadline_days }),
       ...(body.is_published !== undefined && { is_published: body.is_published }),
       ...(body.specialty !== undefined && { specialty: body.specialty }),
-      ...(body.challenge_type !== undefined && { challenge_type: body.challenge_type }),
-      ...(body.industry !== undefined && { industry: body.industry }),
-      // FK to taxonomy — only written when truthy (safe before migration).
+      // Type / industry are now FK-only (legacy text columns no longer written).
       ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),
       ...(body.industry_id ? { industry_id: body.industry_id } : {}),
       ...(body.emoji !== undefined && { emoji: body.emoji || null }),

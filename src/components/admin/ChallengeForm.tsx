@@ -14,19 +14,10 @@ const SPECIALTIES = [
   { value: 'Graphic Designer', icon: '✏️', label: 'Graphic Designer',  desc: 'Logos, affiches, brand identity, motion' },
 ] as const
 
-const TYPES: Record<string, string[]> = {
-  'UX Designer':      ['User Flow', 'UX Research', 'Wireframes', 'UX Case Study', 'Prototype', 'IA / Navigation'],
-  'UI Designer':      ['UI Screen', 'UI Kit', 'Design System', 'Redesign', 'Dark Mode', 'Dashboard'],
-  'Graphic Designer': ['Logo', 'Brand Identity', 'Affiche', 'Social Media Kit', 'Packaging', 'Motion'],
-}
-
-const INDUSTRIES = [
-  'Fintech', 'E-commerce', 'SaaS', 'Retail', 'Immobilier',
-  'Santé', 'Fitness', 'Nutrition', 'Bien-être', 'Éducation',
-  'Musique', 'Gaming', 'Streaming', 'Sport', 'Mode',
-  'Food & Beverage', 'Voyage', 'Luxe', 'Beauté',
-  'IA', 'Cybersécurité', 'Crypto', 'Mobilité', 'ONG', 'Environnement',
-]
+// Types & Industries are now sourced from the CRUD tables (challenge_types /
+// industries) via fetch. The old hardcoded TYPES / INDUSTRIES arrays were
+// removed in Lot 3. SPECIALTIES stays hardcoded (specialty is frozen), and
+// DELIVERABLES (default deliverable text per type) is still an active UX helper.
 
 const DELIVERABLES: Record<string, string> = {
   'User Flow':        'Flow complet annoté (min 5 étapes). Lien Figma.',
@@ -179,13 +170,11 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
     fetch('/api/admin/industries').then(r => r.json()).then(d => setFetchedIndustries(d.industries ?? [])).catch(() => {})
   }, [])
 
-  // Option lists: fetched tables when available, else the hardcoded TS arrays.
-  const typeOptions: Option[] = fetchedTypes.length
-    ? fetchedTypes.filter(t => t.specialty === meta.specialty).map(t => ({ id: t.id, name: taxoLabel(t) }))
-    : (TYPES[meta.specialty] ?? []).map(name => ({ id: '', name }))
-  const industryOptions: Option[] = fetchedIndustries.length
-    ? fetchedIndustries.map(i => ({ id: i.id, name: taxoLabel(i) }))
-    : INDUSTRIES.map(name => ({ id: '', name }))
+  // Option lists are sourced from the CRUD tables (challenge_types / industries).
+  const typeOptions: Option[] = fetchedTypes
+    .filter(t => t.specialty === meta.specialty)
+    .map(t => ({ id: t.id, name: taxoLabel(t) }))
+  const industryOptions: Option[] = fetchedIndustries.map(i => ({ id: i.id, name: taxoLabel(i) }))
 
   const setM = (key: keyof MetaData) => (val: string | boolean) =>
     setMeta(m => ({ ...m, [key]: val }))
@@ -281,13 +270,19 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
     // Source language is the hand-written canonical version → always validated.
     const finalStatus: Record<ChallengeLang, TStatus> = { ...status, [sourceLang]: 'validated' }
 
+    // Type / industry are sent as FK ids only — the legacy text columns
+    // (challenge_type / industry) are no longer written. The names stay
+    // client-side for the chips and the DELIVERABLES prefill.
+    const { challenge_type: _ct, industry: _ind, ...metaToSend } = meta
+    void _ct; void _ind
+
     const url = id ? `/api/admin/challenges/${id}` : '/api/admin/challenges'
     const method = id ? 'PATCH' : 'POST'
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...meta,
+        ...metaToSend,
         xp_reward: parseInt(meta.xp_reward),
         deadline_days: parseInt(meta.deadline_days),
         league_id: meta.league_id || null,
