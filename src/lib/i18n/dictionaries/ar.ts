@@ -477,6 +477,8 @@ export const ar: Dictionary = {
   },
   submissionDetail: {
     askFeedback: 'اطلب تقييمًا',
+    generateFeedback: 'إنشاء تقييم AI',
+    readFeedback: 'قراءة التقييم',
     feedbackPro: {
       modalTitle: 'تقييم AI — حصري لـ Pro',
       modalIntro: 'احصل على تحليل خبير لعملك في ثوانٍ.',
@@ -498,6 +500,8 @@ export const ar: Dictionary = {
       weaknessesLabel: 'للتحسين',
       suggestionsLabel: 'اقتراحات',
       scoreLabel: 'الدرجة الإجمالية',
+      generate: 'إنشاء تقييم AI',
+      scoreExplanation: 'تعكس هذه الدرجة من 100 مدى مطابقة عملك للموجز وجودته الإجمالية.',
     },
     backFallback: 'رجوع',
     backToHistory: 'رجوع إلى السجل',

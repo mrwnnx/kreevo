@@ -470,6 +470,8 @@ export const fr = {
   },
   submissionDetail: {
     askFeedback: 'Demander un feedback',
+    generateFeedback: 'Générer le feedback IA',
+    readFeedback: 'Lire le feedback',
     feedbackPro: {
       modalTitle: 'Feedback IA — réservé Pro',
       modalIntro: 'Obtiens une analyse experte de ton travail en quelques secondes.',
@@ -491,6 +493,8 @@ export const fr = {
       weaknessesLabel: 'À améliorer',
       suggestionsLabel: 'Suggestions',
       scoreLabel: 'Score global',
+      generate: 'Générer le feedback IA',
+      scoreExplanation: 'Ce score sur 100 reflète l\'adéquation de ton travail au brief et sa qualité globale.',
     },
     backFallback: 'Retour',
     backToHistory: 'Retour à l\'historique',

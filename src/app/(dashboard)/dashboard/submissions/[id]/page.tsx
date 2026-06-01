@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { SubmissionDetailContent } from '@/components/features/submissions/SubmissionDetailContent'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getDict, getLang } from '@/lib/i18n/lang'
 
 interface Props {
@@ -59,6 +60,16 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
   const t = dict.submissionDetail
   const dateLocale = lang === 'en' ? 'en-US' : 'fr-FR'
 
+  // Does an AI feedback already exist? (owner only — drives the button label)
+  let hasFeedback = false
+  if (isOwn) {
+    const { count } = await (supabaseAdmin as any)
+      .from('submission_feedbacks')
+      .select('id', { count: 'exact', head: true })
+      .eq('submission_id', id)
+    hasFeedback = (count ?? 0) > 0
+  }
+
   return (
     <div className="max-w-[1140px] mx-auto px-6 py-8 pb-16">
 
@@ -84,6 +95,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pro
         currentProfilePlan={currentProfile?.plan ?? null}
         initialUserLiked={userLiked}
         isOwn={isOwn}
+        hasFeedback={hasFeedback}
         t={t}
         dateLocale={dateLocale}
       />

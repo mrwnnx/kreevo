@@ -473,6 +473,8 @@ export const en: Dictionary = {
   },
   submissionDetail: {
     askFeedback: 'Ask for feedback',
+    generateFeedback: 'Generate AI feedback',
+    readFeedback: 'Read feedback',
     feedbackPro: {
       modalTitle: 'AI feedback — Pro only',
       modalIntro: 'Get an expert analysis of your work in seconds.',
@@ -494,6 +496,8 @@ export const en: Dictionary = {
       weaknessesLabel: 'Weaknesses',
       suggestionsLabel: 'Suggestions',
       scoreLabel: 'Overall score',
+      generate: 'Generate AI feedback',
+      scoreExplanation: 'This score out of 100 reflects how well your work fits the brief and its overall quality.',
     },
     backFallback: 'Back',
     backToHistory: 'Back to history',

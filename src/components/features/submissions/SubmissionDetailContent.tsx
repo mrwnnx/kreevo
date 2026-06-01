@@ -46,6 +46,8 @@ interface Props {
   currentProfilePlan: string | null | undefined
   initialUserLiked: boolean
   isOwn: boolean
+  /** Whether an AI feedback already exists for this submission (owner view → button label). */
+  hasFeedback?: boolean
   t: DetailT
   dateLocale: string
   /** Right column (e.g. ProfilePanel) — rendered alongside the secondary content below the cover. */
@@ -59,10 +61,12 @@ export function SubmissionDetailContent({
   currentProfilePlan,
   initialUserLiked,
   isOwn,
+  hasFeedback = false,
   t,
   dateLocale,
   sidebar,
 }: Props) {
+  const ownFeedbackLabel = hasFeedback ? t.readFeedback : t.generateFeedback
   const [comments, setComments] = useState<ReviewComment[]>([])
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [dailyCount, setDailyCount] = useState(0)
@@ -327,7 +331,7 @@ export function SubmissionDetailContent({
                 className="gap-1.5"
               >
                 {isOwn ? <Sparkles className="size-3.5" /> : <MessageSquare className="size-3.5" />}
-                {isOwn ? t.askFeedback : tc.commentCta}
+                {isOwn ? ownFeedbackLabel : tc.commentCta}
               </Button>
             </div>
           )}
@@ -513,7 +517,7 @@ export function SubmissionDetailContent({
             className="ms-auto gap-1.5 flex-1 max-w-[60%] justify-center"
           >
             {isOwn ? <Sparkles className="size-4" /> : <MessageSquare className="size-4" />}
-            {isOwn ? t.askFeedback : tc.commentCta}
+            {isOwn ? ownFeedbackLabel : tc.commentCta}
           </Button>
         </div>
       )}

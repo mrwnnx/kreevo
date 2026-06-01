@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Sparkles, ThumbsUp, AlertCircle, Lightbulb } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -23,6 +23,8 @@ interface FeedbackPageT {
   weaknessesLabel: string
   suggestionsLabel: string
   scoreLabel: string
+  generate: string
+  scoreExplanation: string
 }
 
 interface Props {
@@ -33,7 +35,7 @@ interface Props {
 
 export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
   const [feedback, setFeedback] = useState<Feedback | null>(initialFeedback)
-  const [loading, setLoading] = useState(!initialFeedback)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function generate() {
@@ -53,11 +55,6 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    if (!initialFeedback) generate()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   if (loading) {
     return (
@@ -91,11 +88,27 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
     )
   }
 
-  if (error || !feedback) {
+  if (error) {
     return (
       <div className="py-16 text-center space-y-4">
         <p className="text-sm text-destructive">{t.generationError}</p>
         <Button onClick={generate}>{t.retry}</Button>
+      </div>
+    )
+  }
+
+  // Idle — no feedback yet: explicit generation (no auto-generation on mount).
+  if (!feedback) {
+    return (
+      <div className="py-16 flex flex-col items-center gap-4 text-center">
+        <div className="size-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 inline-flex items-center justify-center">
+          <Sparkles className="size-6 text-violet-600 dark:text-violet-400" />
+        </div>
+        <p className="text-sm text-muted-foreground max-w-sm">{t.generatingHint}</p>
+        <Button onClick={generate} size="lg" className="gap-1.5">
+          <Sparkles className="size-4" />
+          {t.generate}
+        </Button>
       </div>
     )
   }
