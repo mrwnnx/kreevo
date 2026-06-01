@@ -137,6 +137,7 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
             {t.summaryLabel}
           </p>
           <p className="text-base sm:text-lg leading-relaxed">{feedback.summary}</p>
+          <p className="text-xs text-muted-foreground mt-3">{t.scoreExplanation}</p>
         </div>
       </div>
 
