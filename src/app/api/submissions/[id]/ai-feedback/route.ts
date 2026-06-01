@@ -40,7 +40,7 @@ export async function POST(_request: Request, { params }: Props) {
       .single(),
     (supabaseAdmin as any)
       .from('submissions')
-      .select('id, user_id, cover_url, validation_status, ai_feedback, ai_feedback_at, challenges(brief, specialty, challenge_type, deliverable, criteria)')
+      .select('id, user_id, cover_url, validation_status, ai_feedback, ai_feedback_at, challenges(brief, specialty, challenge_types(name_fr), deliverable, criteria)')
       .eq('id', id)
       .single(),
   ])
@@ -82,7 +82,7 @@ export async function POST(_request: Request, { params }: Props) {
   const prompt = PROMPT(
     ch.brief ?? '',
     ch.specialty ?? '',
-    ch.challenge_type ?? '',
+    ch.challenge_types?.name_fr ?? '',
     ch.deliverable ?? '',
     ch.criteria ?? '',
   )

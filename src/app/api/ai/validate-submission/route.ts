@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const { data: challenge } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('id, brief, specialty, challenge_type, industry, xp_reward, leagues(name)')
+    .select('id, brief, specialty, challenge_types(name_fr), industries(name_fr), xp_reward, leagues(name)')
     .eq('id', challengeId)
     .single()
   if (!challenge) return NextResponse.json({ error: 'Challenge introuvable' }, { status: 404 })
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       id: challenge.id,
       brief: challenge.brief,
       specialty: challenge.specialty,
-      challenge_type: challenge.challenge_type,
+      challenge_type: challenge.challenge_types?.name_fr ?? null,
       xp_reward: challenge.xp_reward,
       league_name: leagueName,
     }

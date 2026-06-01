@@ -20,7 +20,7 @@ async function getSubmission(submissionId: string) {
     .from('submissions')
     .select(`
       id, user_id, title, description, cover_url,
-      challenges:challenge_id (title, brief, context, deliverable, constraints, criteria, specialty, challenge_type, industry)
+      challenges:challenge_id (title, brief, context, deliverable, constraints, criteria, specialty, challenge_types(name_fr), industries(name_fr))
     `)
     .eq('id', submissionId)
     .single()
@@ -43,8 +43,8 @@ function buildPrompt(sub: any): string {
 CHALLENGE BRIEF:
 - Title: ${c?.title ?? 'N/A'}
 - Specialty: ${c?.specialty ?? 'N/A'}
-- Type: ${c?.challenge_type ?? 'N/A'}
-- Industry: ${c?.industry ?? 'N/A'}
+- Type: ${c?.challenge_types?.name_fr ?? 'N/A'}
+- Industry: ${c?.industries?.name_fr ?? 'N/A'}
 - Brief: ${c?.brief ?? 'N/A'}
 - Scenario: ${c?.context ?? 'N/A'}
 - Expected deliverable: ${c?.deliverable ?? 'N/A'}

@@ -436,7 +436,7 @@ export async function triggerValidationFlow(submissionId: string): Promise<void>
     .select(`
       id, user_id, challenge_id, cover_url,
       challenges (
-        id, brief, specialty, challenge_type, xp_reward,
+        id, brief, specialty, challenge_types ( name_fr ), xp_reward,
         leagues ( name )
       )
     `)
@@ -445,13 +445,13 @@ export async function triggerValidationFlow(submissionId: string): Promise<void>
 
   if (!sub || !sub.user_id || !sub.challenge_id || !sub.cover_url) return
 
-  const challenge = sub.challenges
+  const challenge = sub.challenges as any
   const leagueName = challenge?.leagues?.name ?? null
 
   if (challenge && shouldAutoValidate(leagueName)) {
     const result = await validateSubmissionWithAI(
       { id: sub.id, user_id: sub.user_id, cover_url: sub.cover_url, challenge_id: sub.challenge_id },
-      { id: challenge.id, brief: challenge.brief, specialty: challenge.specialty, challenge_type: challenge.challenge_type, xp_reward: challenge.xp_reward, league_name: leagueName }
+      { id: challenge.id, brief: challenge.brief, specialty: challenge.specialty, challenge_type: challenge.challenge_types?.name_fr ?? null, xp_reward: challenge.xp_reward, league_name: leagueName }
     )
 
     if (result.valid) {
