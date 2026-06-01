@@ -161,7 +161,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   const { error: insertErr } = await (supabaseAdmin as any)
     .from('submission_feedbacks')
-    .insert({ submission_id: id, user_id: user.id, content: feedback })
+    .insert({ submission_id: id, user_id: user.id, content: feedback, lang })
   if (insertErr) {
     return NextResponse.json({ error: insertErr.message }, { status: 500 })
   }
