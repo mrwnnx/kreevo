@@ -5,6 +5,8 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { AdminSubmissionActions } from '@/components/admin/AdminSubmissionActions'
+import { getLang } from '@/lib/i18n/lang'
+import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -20,7 +22,7 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
 
   const { data: submission } = await (supabaseAdmin as any)
     .from('submissions')
-    .select('*, profiles:user_id(id, username, avatar_url, full_name, league, plan), challenges(id, title, brief, specialty, challenge_type, industry, xp_reward, leagues(name))')
+    .select('*, profiles:user_id(id, username, avatar_url, full_name, league, plan), challenges(id, title, brief, specialty, challenge_type_id, industry_id, xp_reward, leagues(name))')
     .eq('id', id)
     .single()
 
@@ -42,6 +44,10 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
 
   const s = submission as any
   const challenge = s.challenges
+  const lang = await getLang()
+  const taxoMaps = await getTaxonomyMaps()
+  const challengeTypeLabel = localizeType(challenge ?? {}, lang, taxoMaps)
+  const challengeIndustryLabel = localizeIndustry(challenge ?? {}, lang, taxoMaps)
   const userProfile = s.profiles
 
   return (
@@ -101,8 +107,8 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
             <p className="text-sm whitespace-pre-line">{challenge?.brief ?? '—'}</p>
             <div className="flex flex-wrap gap-2 pt-2">
               {challenge?.specialty && <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{challenge.specialty}</span>}
-              {challenge?.challenge_type && <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{challenge.challenge_type}</span>}
-              {challenge?.industry && <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{challenge.industry}</span>}
+              {challengeTypeLabel && <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{challengeTypeLabel}</span>}
+              {challengeIndustryLabel && <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{challengeIndustryLabel}</span>}
               {challenge?.leagues?.name && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">{challenge.leagues.name}</span>}
             </div>
           </section>

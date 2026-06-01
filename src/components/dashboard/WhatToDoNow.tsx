@@ -6,6 +6,7 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 interface WhatToDoNowProps {
   suggestedChallenge: any | null
+  suggestedType?: string
   referralsCount: number
   profile: any
   t: Dictionary['dashboard']['whatToDoNow']
@@ -13,6 +14,7 @@ interface WhatToDoNowProps {
 
 export function WhatToDoNow({
   suggestedChallenge,
+  suggestedType,
   referralsCount,
   t,
 }: WhatToDoNowProps) {
@@ -23,7 +25,7 @@ export function WhatToDoNow({
         : t.completeAny,
       xp: tx(t.xp, { n: suggestedChallenge?.xp_reward || 200 }),
       detail: suggestedChallenge
-        ? tx(t.daysType, { days: suggestedChallenge.deadline_days, type: suggestedChallenge.challenge_type })
+        ? tx(t.daysType, { days: suggestedChallenge.deadline_days, type: suggestedType ?? '' })
         : t.bestAction,
       href: suggestedChallenge
         ? `/dashboard/challenges/${suggestedChallenge.id}`

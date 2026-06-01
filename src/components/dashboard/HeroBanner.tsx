@@ -88,10 +88,9 @@ export function HeroBanner({
     return () => clearInterval(id)
   }, [state, participation])
 
-  // Tip contextuel si défi actif (fallback FR si la clé n'existe pas)
-  const tip = participation?.challenges?.challenge_type
-    ? t.tips[participation.challenges.challenge_type]
-    : null
+  // Tip contextuel si défi actif (clé = nom canonique du type via FK ; fallback null)
+  const tipKey = participation?.challenges?.challenge_types?.name_fr
+  const tip = tipKey ? t.tips[tipKey] : null
 
   return (
     <div

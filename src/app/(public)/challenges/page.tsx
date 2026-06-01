@@ -4,6 +4,7 @@ import { ArrowRight, Clock } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { localizeChallenges } from '@/lib/challenges/i18n'
+import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,8 +13,8 @@ type ChallengeRow = {
   title: string
   brief: string
   specialty: string | null
-  challenge_type: string | null
-  industry: string | null
+  challenge_type_id: string | null
+  industry_id: string | null
   emoji: string | null
   xp_reward: number | null
   deadline_days: number | null
@@ -77,6 +78,7 @@ export default async function PublicChallengesPage() {
     .order('created_at', { ascending: false })
 
   const challenges = localizeChallenges((data ?? []) as ChallengeRow[], lang)
+  const taxoMaps = await getTaxonomyMaps()
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -140,9 +142,9 @@ export default async function PublicChallengesPage() {
                   <h2 className="text-lg font-semibold leading-snug text-foreground">{c.title}</h2>
                   <p className="text-sm text-muted-foreground leading-snug line-clamp-3">{c.brief}</p>
                 </div>
-                {(c.specialty || c.challenge_type || c.industry) && (
+                {[c.specialty, localizeType(c, lang, taxoMaps), localizeIndustry(c, lang, taxoMaps)].some(Boolean) && (
                   <div className="flex flex-wrap gap-1.5">
-                    {[c.specialty, c.challenge_type, c.industry].filter(Boolean).map((tag) => (
+                    {[c.specialty, localizeType(c, lang, taxoMaps), localizeIndustry(c, lang, taxoMaps)].filter(Boolean).map((tag) => (
                       <span key={tag as string} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
                         {tag}
                       </span>

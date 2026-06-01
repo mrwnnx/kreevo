@@ -12,8 +12,8 @@ interface Challenge {
   id: string
   title: string
   specialty: string | null
-  challenge_type: string | null
-  industry: string | null
+  challenge_types: { name_fr: string | null } | null
+  industries: { name_fr: string | null } | null
   xp_reward: number | null
   deadline_days: number | null
   is_published: boolean
@@ -70,7 +70,8 @@ export default function AdminChallenges() {
   const filtered = challenges.filter(c =>
     c.title.toLowerCase().includes(q) ||
     (c.specialty ?? '').toLowerCase().includes(q) ||
-    (c.industry ?? '').toLowerCase().includes(q)
+    (c.challenge_types?.name_fr ?? '').toLowerCase().includes(q) ||
+    (c.industries?.name_fr ?? '').toLowerCase().includes(q)
   )
 
   return (
@@ -151,8 +152,8 @@ export default function AdminChallenges() {
                     : <span className="text-muted-foreground/40">—</span>}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.specialty ?? '—'}</td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.challenge_type ?? '—'}</td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.industry ?? '—'}</td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.challenge_types?.name_fr ?? '—'}</td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.industries?.name_fr ?? '—'}</td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {c.xp_reward ? `${c.xp_reward} XP` : '—'}
                 </td>

@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
 import type { Profile } from '@/types/database.types'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, getLang } from '@/lib/i18n/lang'
+import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
@@ -156,7 +157,7 @@ export default async function ProfilePage({
   ] = await Promise.all([
     supabase
       .from('submissions')
-      .select('*, challenges(title, specialty, challenge_type, industry)', { count: 'exact' })
+      .select('*, challenges(title, specialty, challenge_type_id, industry_id)', { count: 'exact' })
       .eq('user_id', p.id)
       .eq('is_visible', true)
       .eq('is_draft', false)
@@ -172,6 +173,8 @@ export default async function ProfilePage({
 
   const rank = (rankData?.length ?? 0) + 1
   const dict = await getDict()
+  const lang = await getLang()
+  const taxoMaps = await getTaxonomyMaps()
   const t = dict.publicProfile
 
   // Build Person/ProfilePage JSON-LD — fields with no real value are omitted by the helper.
@@ -190,6 +193,14 @@ export default async function ProfilePage({
   const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
   const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
   const submissions = (allSubmissions ?? []) as any[]
+  // Pre-resolve localized type/industry labels (FK) onto each embedded challenge,
+  // so the module-level SubmissionCard can render them without taxonomy access.
+  for (const s of submissions) {
+    if (s?.challenges) {
+      s.challenges.typeLabel = localizeType(s.challenges, lang, taxoMaps)
+      s.challenges.industryLabel = localizeIndustry(s.challenges, lang, taxoMaps)
+    }
+  }
   const top3 = [...submissions]
     .sort((a, b) => (b.total_likes ?? 0) - (a.total_likes ?? 0))
     .slice(0, 3)
@@ -453,7 +464,7 @@ function SubmissionCard({ submission: s, featured }: { submission: any; featured
         </p>
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-mono text-muted-foreground">
-            {[s.challenges?.specialty, s.challenges?.challenge_type, s.challenges?.industry].filter(Boolean).join(' · ')}
+            {[s.challenges?.specialty, s.challenges?.typeLabel, s.challenges?.industryLabel].filter(Boolean).join(' · ')}
           </span>
           <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-0.5">

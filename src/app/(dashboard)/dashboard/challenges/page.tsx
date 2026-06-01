@@ -10,6 +10,7 @@ import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { localizeChallenges } from '@/lib/challenges/i18n'
+import { getTaxonomyMaps, localizeType, localizeIndustry, type TaxonomyMaps } from '@/lib/challenges/refs'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 // ── Pastel palette — each card a different hue, all at a uniform 95% lightness ──
@@ -43,7 +44,7 @@ interface LeagueRow {
 
 interface ChallengeRow {
   id: string; title: string; brief: string
-  specialty: string | null; challenge_type: string | null; industry: string | null
+  specialty: string | null; challenge_type_id: string | null; industry_id: string | null
   emoji: string | null
   xp_reward: number | null; deadline_days: number | null
   league_id: string | null; is_published: boolean
@@ -54,7 +55,7 @@ type ChallengeStatus = 'available' | 'active' | 'locked' | 'completed' | 'blocke
 
 // ── ChallengeCard ─────────────────────────────────────────────────────────────
 function ChallengeCard({
-  challenge, status, cooldownHoursLeft, participantCount, participants, colorIndex = 0, t,
+  challenge, status, cooldownHoursLeft, participantCount, participants, colorIndex = 0, t, typeLabel, industryLabel,
 }: {
   challenge: ChallengeRow
   status: ChallengeStatus
@@ -63,6 +64,8 @@ function ChallengeCard({
   participants?: Array<{ username: string; avatar_url: string | null }>
   colorIndex?: number
   t: Dictionary['challengesPage']
+  typeLabel?: string
+  industryLabel?: string
 }) {
   const isClickable =
     status === 'available' ||
@@ -77,7 +80,7 @@ function ChallengeCard({
     : challenge.specialty === 'UI Designer' ? '🎨'
     : challenge.specialty === 'Graphic Designer' ? '✏️'
     : '🎯')
-  const tags = [challenge.specialty, challenge.challenge_type, challenge.industry].filter(Boolean) as string[]
+  const tags = [challenge.specialty, typeLabel, industryLabel].filter(Boolean) as string[]
 
   const card = (
     <div className={cn(
@@ -247,6 +250,7 @@ export default async function ChallengesPage({
 
   const profile = profileData as any
   const lang = await getLang()
+  const taxoMaps: TaxonomyMaps = await getTaxonomyMaps()
   const leagues: LeagueRow[] = allLeagues ?? []
   const challenges: ChallengeRow[] = localizeChallenges((allChallenges ?? []) as ChallengeRow[], lang)
   const activeParticipation = ((activePartRows as any[]) ?? [])[0] ?? null
@@ -525,6 +529,8 @@ export default async function ChallengesPage({
                     key={c.id}
                     challenge={c}
                     status={status}
+                    typeLabel={localizeType(c, lang, taxoMaps)}
+                    industryLabel={localizeIndustry(c, lang, taxoMaps)}
                     cooldownHoursLeft={cooldownHoursLeft}
                     participantCount={partCounts[c.id]}
                     participants={participantsByChallenge[c.id]}

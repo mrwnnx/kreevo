@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { localizeChallenge } from '@/lib/challenges/i18n'
+import { getTaxonomyMaps, localizeType } from '@/lib/challenges/refs'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
 import { WhatToDoNow } from '@/components/dashboard/WhatToDoNow'
@@ -38,7 +39,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
     supabase
       .from('participations')
-      .select('*, challenges(*)')
+      .select('*, challenges(*, challenge_types(name_fr))')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .gt('personal_deadline', new Date().toISOString())
@@ -282,7 +283,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     'Designer'
 
   const [dict, lang] = await Promise.all([getDict(), getLang()])
+  const taxoMaps = await getTaxonomyMaps()
   const suggestedChallengeL = suggestedChallenge ? localizeChallenge(suggestedChallenge as any, lang) : null
+  const suggestedType = suggestedChallenge ? localizeType(suggestedChallenge as any, lang, taxoMaps) : undefined
   // Localize the active challenge embedded on the participation (countdown card title).
   if (participation?.challenges) {
     ;(participation as any).challenges = localizeChallenge((participation as any).challenges, lang)
@@ -333,6 +336,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <div className="grid lg:grid-cols-2 gap-4">
         <WhatToDoNow
           suggestedChallenge={suggestedChallengeL}
+          suggestedType={suggestedType}
           referralsCount={referrals.length}
           profile={profile}
           t={dict.dashboard.whatToDoNow}
