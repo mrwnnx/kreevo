@@ -180,14 +180,18 @@ Context to respect:
 ${ctx.length ? ctx.join('\n') : '(none provided)'}
 
 Write each field with a concrete, actionable "design brief" tone, calibrated to the league tier (higher tier → more ambitious scope and stricter constraints), and coherent with the specialty, challenge type and industry above:
-- title: short, specific, punchy (not generic).
-- brief: the mission — what to design and why — motivating, 2-4 sentences.
-- context: a believable scenario / fictional client / background.
-- deliverable: the concrete expected output (formats, number of screens, Figma link…), matching the challenge type.
-- constraints: realistic constraints to respect (style, platform, accessibility, dimensions…).
-- criteria: how the work will be judged (3-5 short points).
+- title: short, specific, punchy (not generic). PROSE (one line).
+- brief: the mission — what to design and why — motivating, 2-4 sentences. PROSE (paragraph).
+- context: a believable scenario / fictional client / background. PROSE (paragraph).
+- deliverable: the concrete expected outputs (formats, number of screens, Figma link…), matching the challenge type. LIST.
+- constraints: realistic constraints to respect (style, platform, accessibility, dimensions…). LIST.
+- criteria: how the work will be judged. LIST (3-5 items).
 
-Keep brand/tool names and design jargon (UI, UX, Figma, dashboard…) as-is. Return STRICTLY valid JSON with exactly these keys and string values, nothing else (no commentary, no code fences):
+FORMAT — strict:
+- title, brief and context are PROSE: a single paragraph each, NO line breaks, NO bullets.
+- deliverable, constraints and criteria are LISTS: write one short, concrete item per line, separated by a real newline character. Do NOT number the items and do NOT prefix them with a dash or bullet — just one item per line. Each item is a self-contained phrase.
+
+Keep brand/tool names and design jargon (UI, UX, Figma, dashboard…) as-is. Return STRICTLY valid JSON with exactly these keys and string values, nothing else (no commentary, no code fences). Newlines inside the list values MUST be encoded as \\n (standard JSON string escaping):
 ${fieldList}`
 
   try {
