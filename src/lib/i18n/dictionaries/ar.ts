@@ -502,6 +502,8 @@ export const ar: Dictionary = {
       scoreLabel: 'الدرجة الإجمالية',
       generate: 'إنشاء تقييم AI',
       scoreExplanation: 'تعكس هذه الدرجة من 100 مدى مطابقة عملك للموجز وجودته الإجمالية.',
+      translate: 'ترجمة التقييم',
+      translating: 'جارٍ الترجمة…',
     },
     backFallback: 'رجوع',
     backToHistory: 'رجوع إلى السجل',

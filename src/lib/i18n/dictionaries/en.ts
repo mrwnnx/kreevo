@@ -498,6 +498,8 @@ export const en: Dictionary = {
       scoreLabel: 'Overall score',
       generate: 'Generate AI feedback',
       scoreExplanation: 'This score out of 100 reflects how well your work fits the brief and its overall quality.',
+      translate: 'Translate feedback',
+      translating: 'Translating…',
     },
     backFallback: 'Back',
     backToHistory: 'Back to history',

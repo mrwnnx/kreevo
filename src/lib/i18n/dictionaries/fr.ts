@@ -495,6 +495,8 @@ export const fr = {
       scoreLabel: 'Score global',
       generate: 'Générer le feedback IA',
       scoreExplanation: 'Ce score sur 100 reflète l\'adéquation de ton travail au brief et sa qualité globale.',
+      translate: 'Traduire le feedback',
+      translating: 'Traduction…',
     },
     backFallback: 'Retour',
     backToHistory: 'Retour à l\'historique',

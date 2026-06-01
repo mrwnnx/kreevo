@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, ThumbsUp, AlertCircle, Lightbulb } from 'lucide-react'
+import { Sparkles, ThumbsUp, AlertCircle, Lightbulb, Languages, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { translateFeedback, type FeedbackLang } from './feedback-actions'
 
 interface Feedback {
   summary: string
@@ -25,18 +26,27 @@ interface FeedbackPageT {
   scoreLabel: string
   generate: string
   scoreExplanation: string
+  translate: string
+  translating: string
 }
 
 interface Props {
   submissionId: string
   initialFeedback: Feedback | null
+  /** Language the feedback was generated in (null for legacy rows). */
+  feedbackLang?: string | null
+  /** User's active UI language. */
+  currentLang?: FeedbackLang
   t: FeedbackPageT
 }
 
-export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
+export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = null, currentLang = 'fr', t }: Props) {
   const [feedback, setFeedback] = useState<Feedback | null>(initialFeedback)
+  const [translated, setTranslated] = useState<Feedback | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [translating, setTranslating] = useState(false)
+  const [translateError, setTranslateError] = useState<string | null>(null)
 
   async function generate() {
     setLoading(true)
@@ -49,11 +59,22 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
       }
       const data = await res.json()
       setFeedback(data.feedback as Feedback)
+      setTranslated(null) // fresh feedback is in the current language
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleTranslate() {
+    if (!feedback) return
+    setTranslating(true)
+    setTranslateError(null)
+    const res = await translateFeedback(feedback, currentLang)
+    setTranslating(false)
+    if (!res.ok) { setTranslateError(res.error); return }
+    setTranslated(res.content as Feedback)
   }
 
   if (loading) {
@@ -113,59 +134,84 @@ export function FeedbackPanel({ submissionId, initialFeedback, t }: Props) {
     )
   }
 
+  // Content actually shown: the on-the-fly translation if any, else the stored feedback.
+  const view = translated ?? feedback
+  // Offer translation only if not yet translated and the feedback language differs
+  // from the active locale (legacy rows with no lang → offer by default).
+  const canTranslate = !translated && (feedbackLang == null || feedbackLang !== currentLang)
+
   const scoreColor =
-    feedback.score >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-    : feedback.score >= 60 ? 'text-violet-600 dark:text-violet-400'
-    : feedback.score >= 40 ? 'text-amber-600 dark:text-amber-400'
+    view.score >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+    : view.score >= 60 ? 'text-violet-600 dark:text-violet-400'
+    : view.score >= 40 ? 'text-amber-600 dark:text-amber-400'
     : 'text-red-600 dark:text-red-400'
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
-      {/* Hero — score + summary (full width) */}
-      <div
-        className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
-        style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
-      >
-        <div className="shrink-0 text-center">
-          <div className={cn('text-5xl sm:text-6xl font-bold leading-none', scoreColor)}>{feedback.score}</div>
-          <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">
-            {t.scoreLabel}
+    <div className="space-y-3">
+      {canTranslate && (
+        <div className="flex justify-end items-center gap-3">
+          {translateError && <span className="text-xs text-destructive">{translateError}</span>}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleTranslate}
+            disabled={translating}
+            className="gap-1.5"
+          >
+            {translating ? <Loader2 className="size-3.5 animate-spin" /> : <Languages className="size-3.5" />}
+            {translating ? t.translating : t.translate}
+          </Button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
+        {/* Hero — score + summary (full width) */}
+        <div
+          className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
+          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+        >
+          <div className="shrink-0 text-center">
+            <div className={cn('text-5xl sm:text-6xl font-bold leading-none', scoreColor)}>{view.score}</div>
+            <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">
+              {t.scoreLabel}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              {t.summaryLabel}
+            </p>
+            <p className="text-base sm:text-lg leading-relaxed">{view.summary}</p>
+            <p className="text-xs text-muted-foreground mt-3">{t.scoreExplanation}</p>
           </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
-            {t.summaryLabel}
-          </p>
-          <p className="text-base sm:text-lg leading-relaxed">{feedback.summary}</p>
-          <p className="text-xs text-muted-foreground mt-3">{t.scoreExplanation}</p>
-        </div>
+
+        {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
+        <Section
+          icon={<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />}
+          label={t.strengthsLabel}
+          items={view.strengths}
+          accent="emerald"
+          className="lg:col-span-7"
+        />
+
+        <Section
+          icon={<AlertCircle className="size-4 text-amber-600 dark:text-amber-400" />}
+          label={t.weaknessesLabel}
+          items={view.weaknesses}
+          accent="amber"
+          className="lg:col-span-5"
+        />
+
+        {/* Row 3 — suggestions (full width, the "act on it" call) */}
+        <Section
+          icon={<Lightbulb className="size-4 text-violet-600 dark:text-violet-400" />}
+          label={t.suggestionsLabel}
+          items={view.suggestions}
+          accent="violet"
+          className="lg:col-span-12"
+        />
       </div>
-
-      {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
-      <Section
-        icon={<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />}
-        label={t.strengthsLabel}
-        items={feedback.strengths}
-        accent="emerald"
-        className="lg:col-span-7"
-      />
-
-      <Section
-        icon={<AlertCircle className="size-4 text-amber-600 dark:text-amber-400" />}
-        label={t.weaknessesLabel}
-        items={feedback.weaknesses}
-        accent="amber"
-        className="lg:col-span-5"
-      />
-
-      {/* Row 3 — suggestions (full width, the "act on it" call) */}
-      <Section
-        icon={<Lightbulb className="size-4 text-violet-600 dark:text-violet-400" />}
-        label={t.suggestionsLabel}
-        items={feedback.suggestions}
-        accent="violet"
-        className="lg:col-span-12"
-      />
     </div>
   )
 }

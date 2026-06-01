@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { FeedbackPanel } from '@/components/features/submissions/FeedbackPanel'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, getLang } from '@/lib/i18n/lang'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -38,12 +38,14 @@ export default async function FeedbackPage({ params }: Props) {
   // Pre-fetch any existing feedback (server-side, bypasses RLS via admin)
   const { data: row } = await (supabaseAdmin as any)
     .from('submission_feedbacks')
-    .select('content')
+    .select('content, lang')
     .eq('submission_id', id)
     .maybeSingle()
   const initialFeedback = row?.content ?? null
+  const feedbackLang = row?.lang ?? null
 
   const dict = await getDict()
+  const currentLang = await getLang()
   const t = dict.submissionDetail.feedbackPage
 
   return (
@@ -70,6 +72,8 @@ export default async function FeedbackPage({ params }: Props) {
       <FeedbackPanel
         submissionId={id}
         initialFeedback={initialFeedback}
+        feedbackLang={feedbackLang}
+        currentLang={currentLang}
         t={t}
       />
     </div>
