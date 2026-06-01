@@ -2,8 +2,15 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { anthropic } from '@/lib/anthropic/client'
+import { getLang, type Lang } from '@/lib/i18n/lang'
 
 interface Params { params: Promise<{ id: string }> }
+
+const FEEDBACK_LANG_NAME: Record<Lang, string> = {
+  fr: 'French',
+  en: 'English',
+  ar: 'Arabic (Modern Standard Arabic)',
+}
 
 interface Feedback {
   summary: string
@@ -36,9 +43,11 @@ async function getExistingFeedback(submissionId: string): Promise<Feedback | nul
   return (data?.content as Feedback) ?? null
 }
 
-function buildPrompt(sub: any): string {
+function buildPrompt(sub: any, lang: Lang): string {
   const c = sub.challenges
   return `You are a senior design critic reviewing a submission for the Kreevo design challenges platform.
+
+IMPORTANT: Write every string value (summary, strengths, weaknesses, suggestions) in ${FEEDBACK_LANG_NAME[lang]}. Keep brand/tool names and design jargon (UI, UX, Figma…) as-is. The JSON keys and the numeric score stay unchanged.
 
 CHALLENGE BRIEF:
 - Title: ${c?.title ?? 'N/A'}
@@ -68,7 +77,7 @@ Please analyze this submission against the brief and return a JSON object with t
 Be specific, reference visual elements you see. Constructive, no fluff. Output ONLY the JSON, no preamble.`
 }
 
-async function generateFeedback(sub: any): Promise<Feedback> {
+async function generateFeedback(sub: any, lang: Lang): Promise<Feedback> {
   const userContent: Anthropic_MessageContentBlock[] = []
   if (sub.cover_url) {
     userContent.push({
@@ -76,7 +85,7 @@ async function generateFeedback(sub: any): Promise<Feedback> {
       source: { type: 'url', url: sub.cover_url },
     } as any)
   }
-  userContent.push({ type: 'text', text: buildPrompt(sub) })
+  userContent.push({ type: 'text', text: buildPrompt(sub, lang) })
 
   const res = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -142,9 +151,10 @@ export async function POST(_req: Request, { params }: Params) {
   const existing = await getExistingFeedback(id)
   if (existing) return NextResponse.json({ feedback: existing, cached: true })
 
+  const lang = await getLang()
   let feedback: Feedback
   try {
-    feedback = await generateFeedback(sub)
+    feedback = await generateFeedback(sub, lang)
   } catch (err) {
     return NextResponse.json({ error: 'Generation failed', detail: String(err) }, { status: 500 })
   }
