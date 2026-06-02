@@ -164,27 +164,31 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
         </Button>
       </div>
 
-      {/* Overall score — its own dedicated frame (gauge + explanation only) */}
-      <div
-        className="rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
-        style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
-      >
-        <ScoreGauge score={score} label={t.scoreOutOf} />
-        <p className="flex-1 min-w-0 text-sm text-muted-foreground leading-relaxed text-center sm:text-start">
-          {t.scoreExplanation}
-        </p>
-      </div>
+      {/* Score + Summary on one row (stacked on mobile, side-by-side on lg).
+          flex respects dir → in RTL the score card sits on the right. */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Overall score — own frame (compact, left) */}
+        <div
+          className="lg:w-[320px] lg:shrink-0 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
+          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+        >
+          <ScoreGauge score={score} label={t.scoreOutOf} />
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {t.scoreExplanation}
+          </p>
+        </div>
 
-      {/* Other sections — separate blocks, outside the score frame */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
-        {/* Summary (full width) */}
-        <div className="lg:col-span-12 rounded-3xl border border-border bg-muted/40 p-6 space-y-2">
+        {/* Summary — own frame (wider, right) */}
+        <div className="flex-1 min-w-0 rounded-3xl border border-border bg-muted/40 p-6 space-y-2">
           <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
             {t.summaryLabel}
           </p>
           <p className="text-base sm:text-lg leading-relaxed">{view.summary}</p>
         </div>
+      </div>
 
+      {/* Other sections — separate blocks below */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
         {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
         <Section
           icon={<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />}
