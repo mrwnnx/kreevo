@@ -164,20 +164,25 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
         </Button>
       </div>
 
+      {/* Overall score — its own dedicated frame (gauge + explanation only) */}
+      <div
+        className="rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
+        style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+      >
+        <ScoreGauge score={score} label={t.scoreOutOf} />
+        <p className="flex-1 min-w-0 text-sm text-muted-foreground leading-relaxed text-center sm:text-start">
+          {t.scoreExplanation}
+        </p>
+      </div>
+
+      {/* Other sections — separate blocks, outside the score frame */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
-        {/* Hero — score + summary (full width) */}
-        <div
-          className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
-          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
-        >
-          <ScoreGauge score={score} label={t.scoreOutOf} />
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
-              {t.summaryLabel}
-            </p>
-            <p className="text-base sm:text-lg leading-relaxed">{view.summary}</p>
-            <p className="text-xs text-muted-foreground mt-3">{t.scoreExplanation}</p>
-          </div>
+        {/* Summary (full width) */}
+        <div className="lg:col-span-12 rounded-3xl border border-border bg-muted/40 p-6 space-y-2">
+          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+            {t.summaryLabel}
+          </p>
+          <p className="text-base sm:text-lg leading-relaxed">{view.summary}</p>
         </div>
 
         {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
