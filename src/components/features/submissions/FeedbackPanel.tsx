@@ -28,6 +28,7 @@ interface FeedbackPageT {
   scoreExplanation: string
   translate: string
   translating: string
+  alreadyInLang: string
 }
 
 interface Props {
@@ -136,9 +137,11 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
 
   // Content actually shown: the on-the-fly translation if any, else the stored feedback.
   const view = translated ?? feedback
-  // Offer translation only if not yet translated and the feedback language differs
-  // from the active locale (legacy rows with no lang → offer by default).
-  const canTranslate = !translated && (feedbackLang == null || feedbackLang !== currentLang)
+  // The button is always visible. It is disabled (nothing to translate) when the
+  // feedback is already in the active language, or once it has been translated.
+  // Legacy rows (feedbackLang null) stay enabled — we don't know their language.
+  const alreadyInActiveLang = (feedbackLang != null && feedbackLang === currentLang) || translated != null
+  const translateDisabled = translating || alreadyInActiveLang
 
   const scoreColor =
     view.score >= 80 ? 'text-emerald-600 dark:text-emerald-400'
@@ -148,22 +151,21 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
 
   return (
     <div className="space-y-3">
-      {canTranslate && (
-        <div className="flex justify-end items-center gap-3">
-          {translateError && <span className="text-xs text-destructive">{translateError}</span>}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleTranslate}
-            disabled={translating}
-            className="gap-1.5"
-          >
-            {translating ? <Loader2 className="size-3.5 animate-spin" /> : <Languages className="size-3.5" />}
-            {translating ? t.translating : t.translate}
-          </Button>
-        </div>
-      )}
+      <div className="flex justify-end items-center gap-3">
+        {translateError && <span className="text-xs text-destructive">{translateError}</span>}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleTranslate}
+          disabled={translateDisabled}
+          title={alreadyInActiveLang ? t.alreadyInLang : undefined}
+          className="gap-1.5"
+        >
+          {translating ? <Loader2 className="size-3.5 animate-spin" /> : <Languages className="size-3.5" />}
+          {translating ? t.translating : t.translate}
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
         {/* Hero — score + summary (full width) */}

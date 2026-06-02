@@ -500,6 +500,7 @@ export const en: Dictionary = {
       scoreExplanation: 'This score out of 100 reflects how well your work fits the brief and its overall quality.',
       translate: 'Translate feedback',
       translating: 'Translating…',
+      alreadyInLang: 'The feedback is already in your language.',
     },
     backFallback: 'Back',
     backToHistory: 'Back to history',

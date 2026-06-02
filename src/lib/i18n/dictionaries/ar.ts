@@ -504,6 +504,7 @@ export const ar: Dictionary = {
       scoreExplanation: 'تعكس هذه الدرجة من 100 مدى مطابقة عملك للموجز وجودته الإجمالية.',
       translate: 'ترجمة التقييم',
       translating: 'جارٍ الترجمة…',
+      alreadyInLang: 'التقييم موجود بالفعل بلغتك.',
     },
     backFallback: 'رجوع',
     backToHistory: 'رجوع إلى السجل',

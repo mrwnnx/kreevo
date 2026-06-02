@@ -497,6 +497,7 @@ export const fr = {
       scoreExplanation: 'Ce score sur 100 reflète l\'adéquation de ton travail au brief et sa qualité globale.',
       translate: 'Traduire le feedback',
       translating: 'Traduction…',
+      alreadyInLang: 'Le feedback est déjà dans votre langue.',
     },
     backFallback: 'Retour',
     backToHistory: 'Retour à l\'historique',
