@@ -500,6 +500,7 @@ export const ar: Dictionary = {
       weaknessesLabel: 'للتحسين',
       suggestionsLabel: 'اقتراحات',
       scoreLabel: 'الدرجة الإجمالية',
+      scoreOutOf: 'من 100',
       generate: 'إنشاء تقييم AI',
       scoreExplanation: 'تعكس هذه الدرجة من 100 مدى مطابقة عملك للموجز وجودته الإجمالية.',
       translate: 'ترجمة التقييم',

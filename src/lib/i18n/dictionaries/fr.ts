@@ -493,6 +493,7 @@ export const fr = {
       weaknessesLabel: 'À améliorer',
       suggestionsLabel: 'Suggestions',
       scoreLabel: 'Score global',
+      scoreOutOf: 'sur 100',
       generate: 'Générer le feedback IA',
       scoreExplanation: 'Ce score sur 100 reflète l\'adéquation de ton travail au brief et sa qualité globale.',
       translate: 'Traduire le feedback',

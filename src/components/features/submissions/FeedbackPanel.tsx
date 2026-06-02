@@ -24,6 +24,7 @@ interface FeedbackPageT {
   weaknessesLabel: string
   suggestionsLabel: string
   scoreLabel: string
+  scoreOutOf: string
   generate: string
   scoreExplanation: string
   translate: string
@@ -143,11 +144,7 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
   const alreadyInActiveLang = (feedbackLang != null && feedbackLang === currentLang) || translated != null
   const translateDisabled = translating || alreadyInActiveLang
 
-  const scoreColor =
-    view.score >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-    : view.score >= 60 ? 'text-violet-600 dark:text-violet-400'
-    : view.score >= 40 ? 'text-amber-600 dark:text-amber-400'
-    : 'text-red-600 dark:text-red-400'
+  const score = Math.max(0, Math.min(100, Math.round(view.score)))
 
   return (
     <div className="space-y-3">
@@ -173,12 +170,7 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
           className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
         >
-          <div className="shrink-0 text-center">
-            <div className={cn('text-5xl sm:text-6xl font-bold leading-none', scoreColor)}>{view.score}</div>
-            <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mt-2">
-              {t.scoreLabel}
-            </div>
-          </div>
+          <ScoreGauge score={score} label={t.scoreOutOf} />
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
               {t.summaryLabel}
@@ -213,6 +205,51 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
           accent="violet"
           className="lg:col-span-12"
         />
+      </div>
+    </div>
+  )
+}
+
+// Semicircle score gauge — SVG arc that fills proportionally to the score, in a
+// threshold colour (red ≤40, amber ≤70, emerald ≥71). Number + "out of 100" sit
+// in the arc. Symmetric → RTL-safe; track + number stay legible in light/dark.
+function ScoreGauge({ score, label }: { score: number; label: string }) {
+  const R = 85
+  const CIRC = Math.PI * R // length of the semicircle arc
+  const fill = (score / 100) * CIRC
+  const arcColor =
+    score <= 40 ? 'text-rose-500 dark:text-rose-400'
+    : score <= 70 ? 'text-amber-500 dark:text-amber-400'
+    : 'text-emerald-500 dark:text-emerald-400'
+
+  return (
+    <div className="relative w-40 sm:w-44 shrink-0">
+      <svg viewBox="0 0 200 116" className="w-full h-auto" aria-hidden>
+        {/* Track */}
+        <path
+          d="M15 100 A85 85 0 0 1 185 100"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={14}
+          strokeLinecap="round"
+          className="text-foreground/10"
+        />
+        {/* Filled portion */}
+        {score > 0 && (
+          <path
+            d="M15 100 A85 85 0 0 1 185 100"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={14}
+            strokeLinecap="round"
+            strokeDasharray={`${fill} ${CIRC}`}
+            className={arcColor}
+          />
+        )}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-1.5">
+        <span className={cn('text-4xl sm:text-5xl font-bold tabular-nums leading-none', arcColor)}>{score}</span>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mt-1">{label}</span>
       </div>
     </div>
   )
