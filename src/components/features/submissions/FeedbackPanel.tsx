@@ -167,10 +167,13 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
       {/* Score + Summary on one row (stacked on mobile, side-by-side on lg).
           flex respects dir → in RTL the score card sits on the right. */}
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Overall score — own frame (compact, left) */}
+        {/* Overall score — own frame (compact, left). Background tinted with the
+            tier hue: very light pastel in light mode, dark tinted in dark mode. */}
         <div
-          className="lg:w-[320px] lg:shrink-0 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex flex-col items-center gap-4 text-center"
-          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
+          className={cn(
+            'lg:w-[320px] lg:shrink-0 rounded-3xl border p-6 sm:p-8 flex flex-col items-center gap-4 text-center',
+            TIER_CARD[scoreTier(score)],
+          )}
         >
           <ScoreGauge score={score} label={t.scoreOutOf} />
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -219,17 +222,34 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
   )
 }
 
-// Semicircle score gauge — SVG arc that fills proportionally to the score, in a
-// threshold colour (red ≤40, amber ≤70, emerald ≥71). Number + "out of 100" sit
-// in the arc. Symmetric → RTL-safe; track + number stay legible in light/dark.
+// Single source of truth for the score threshold → colour. Both the gauge arc
+// and the score card background derive from this, so they never diverge.
+type ScoreTier = 'low' | 'mid' | 'high'
+function scoreTier(score: number): ScoreTier {
+  return score <= 40 ? 'low' : score <= 70 ? 'mid' : 'high'
+}
+// Gauge arc + score number colour per tier.
+const TIER_ARC: Record<ScoreTier, string> = {
+  low: 'text-rose-500 dark:text-rose-400',
+  mid: 'text-amber-500 dark:text-amber-400',
+  high: 'text-emerald-500 dark:text-emerald-400',
+}
+// Score card background: very light pastel of the tier hue in light mode, very
+// dark tinted version in dark mode (border kept in the same hue for cohesion).
+const TIER_CARD: Record<ScoreTier, string> = {
+  low: 'border-rose-200/70 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/30',
+  mid: 'border-amber-200/70 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30',
+  high: 'border-emerald-200/70 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30',
+}
+
+// Semicircle score gauge — SVG arc that fills proportionally to the score, in the
+// tier colour. Number + "out of 100" sit in the arc. Symmetric → RTL-safe;
+// track + number stay legible in light/dark.
 function ScoreGauge({ score, label }: { score: number; label: string }) {
   const R = 85
   const CIRC = Math.PI * R // length of the semicircle arc
   const fill = (score / 100) * CIRC
-  const arcColor =
-    score <= 40 ? 'text-rose-500 dark:text-rose-400'
-    : score <= 70 ? 'text-amber-500 dark:text-amber-400'
-    : 'text-emerald-500 dark:text-emerald-400'
+  const arcColor = TIER_ARC[scoreTier(score)]
 
   return (
     <div className="relative w-40 sm:w-44 shrink-0">
