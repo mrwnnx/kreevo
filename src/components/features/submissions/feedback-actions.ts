@@ -73,7 +73,7 @@ Rules:
 - Translate "summary" and EVERY item of "strengths", "weaknesses" and "suggestions" into ${LANG_NAME[targetLang]}.
 - Keep the SAME keys and the SAME number of items in each array (translate item-for-item, do not merge, drop or add items).
 - Keep brand/tool names and design jargon (UI, UX, Figma, dashboard…) as-is.
-- Return STRICTLY valid JSON with exactly the keys "summary", "strengths", "weaknesses", "suggestions" and string values. No commentary, no code fences.
+- Return STRICTLY valid JSON with exactly the keys "summary", "strengths", "weaknesses", "suggestions" and string values. No commentary, no code fences. Any newline inside a string value MUST be encoded as \\n (standard JSON string escaping) — never a literal line break.
 
 Source JSON:
 ${JSON.stringify(payload, null, 2)}`
@@ -81,7 +81,7 @@ ${JSON.stringify(payload, null, 2)}`
   try {
     const res = await anthropic.messages.create({
       model: TRANSLATE_MODEL,
-      max_tokens: 1500,
+      max_tokens: 3000,
       messages: [{ role: 'user', content: prompt }],
     })
     const text = res.content.map((b: any) => (b.type === 'text' ? b.text : '')).join('').trim()
