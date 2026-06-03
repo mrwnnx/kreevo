@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/help/LanguageSwitcher'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
+import { Logo } from '@/components/ui/Logo'
 
 export default async function HelpLayout({
   children,
@@ -40,10 +41,10 @@ export default async function HelpLayout({
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-3 sm:gap-4">
           <Link
             href="/help"
-            className="shrink-0 flex items-baseline gap-1.5"
+            className="shrink-0 flex items-center gap-1.5"
             aria-label={t.siteName}
           >
-            <span className="text-sm font-bold tracking-tight">kreevo</span>
+            <Logo className="h-4" />
             <span className="hidden sm:inline text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
               help
             </span>

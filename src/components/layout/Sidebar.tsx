@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { House, Trophy, BarChart3, Bell, ScrollText, ChevronRight, Shield } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
+import { Logo } from '@/components/ui/Logo'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
@@ -49,9 +50,9 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   return (
     <aside className="hidden sm:flex fixed top-0 start-0 z-30 h-screen w-72 flex-col border-e border-border bg-zinc-50 dark:bg-zinc-900/40">
       {/* Logo */}
-      <div className="px-5 h-14 flex items-baseline gap-1.5 border-b border-border shrink-0">
-        <Link href="/dashboard" className="flex items-baseline gap-1.5">
-          <span className="text-sm font-bold tracking-tight">kreevo</span>
+      <div className="px-5 h-14 flex items-center gap-1.5 border-b border-border shrink-0">
+        <Link href="/dashboard" className="flex items-center gap-1.5">
+          <Logo className="h-4" />
           <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
         </Link>
       </div>

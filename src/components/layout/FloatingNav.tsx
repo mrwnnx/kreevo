@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
+import { Logo } from '@/components/ui/Logo'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -70,8 +71,8 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
       }}
     >
       {/* Logo — left */}
-      <Link href="/dashboard" className="shrink-0 flex items-baseline gap-1">
-        <span className="text-sm font-bold tracking-tight">kreevo</span>
+      <Link href="/dashboard" className="shrink-0 flex items-center">
+        <Logo className="h-4" />
       </Link>
 
       {/* Spacer to push right actions to the edge */}

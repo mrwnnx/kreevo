@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { ArrowRight, Trophy, Sparkles, TrendingUp } from 'lucide-react'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { organizationSchema, websiteSchema } from '@/lib/seo/jsonld'
+import { Logo } from '@/components/ui/Logo'
 
 const LANDING_META = {
   fr: {
@@ -77,7 +78,7 @@ export default async function Home() {
 
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-border/50">
-        <span className="text-base font-bold tracking-tight">kreevo</span>
+        <Logo className="h-4" />
         <div className="flex items-center gap-6">
           <Link href="/dashboard/challenges" className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono uppercase tracking-wider">
             {t.nav.challenges}
