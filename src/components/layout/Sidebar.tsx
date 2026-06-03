@@ -52,7 +52,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
       {/* Logo */}
       <div className="px-5 h-14 flex items-center gap-1.5 border-b border-border shrink-0">
         <Link href="/dashboard" className="flex items-center gap-1.5">
-          <Logo className="h-4" />
+          <Logo className="h-5" />
           <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">beta</span>
         </Link>
       </div>

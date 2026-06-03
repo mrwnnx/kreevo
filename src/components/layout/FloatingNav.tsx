@@ -72,7 +72,7 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
     >
       {/* Logo — left */}
       <Link href="/dashboard" className="shrink-0 flex items-center">
-        <Logo className="h-4" />
+        <Logo className="h-5" />
       </Link>
 
       {/* Spacer to push right actions to the edge */}
