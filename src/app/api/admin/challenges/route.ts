@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
 import { buildI18nColumns } from '@/lib/challenges/columns'
+import { resolveSpecialtyId } from '@/lib/challenges/specialty'
 
 export async function GET(request: Request) {
   const { error, admin } = await requireAdmin()
@@ -25,6 +26,14 @@ export async function POST(request: Request) {
   if (error) return error
 
   const body = await request.json()
+
+  // PHASE 4 — un challenge DOIT avoir une specialty_id (sinon imparticipable avec
+  // le garde-fou cross-spé). On résout le texte → FK et on refuse si inconnu.
+  const specialtyResolved = await resolveSpecialtyId(body.specialty, admin!.supabase as any)
+  if ('error' in specialtyResolved) {
+    return NextResponse.json({ error: specialtyResolved.error }, { status: 400 })
+  }
+
   const { data, error: dbErr } = await (admin!.supabase as any)
     .from('challenges')
     .insert({
@@ -35,6 +44,7 @@ export async function POST(request: Request) {
       deadline_days: body.deadline_days || null,
       is_published: body.is_published ?? false,
       specialty: body.specialty || null,
+      specialty_id: specialtyResolved.id, // PHASE 4 — FK résolue (texte gardé jusqu'à PHASE 7)
       emoji: body.emoji || null,
       // Type / industry are now FK-only (legacy text columns no longer written).
       ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),

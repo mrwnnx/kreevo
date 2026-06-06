@@ -339,6 +339,9 @@ export const ar: Dictionary = {
   },
   challengeDetail: {
     backToChallenges: 'التحديات',
+    wrongSpecialtyTitle: 'ليس تخصّصك',
+    wrongSpecialtyBody: 'هذا التحدي مخصّص لمصمّمي {specialty}. يمكنك المشاركة فقط في تحديات تخصّصك.',
+    noSpecialtyCta: 'اختر تخصّصك',
     daysSuffix: 'أيام',
     sections: {
       brief: 'الموجز',
@@ -681,6 +684,8 @@ export const ar: Dictionary = {
     proGate: '🔒 انتقل إلى Pro للوصول إلى {icon} {league} وما بعدها',
     upgradeCta: 'الترقية إلى Pro',
     leaguePrefix: 'دوري {name}',
+    noSpecialtyTitle: 'اختر تخصّصك لرؤية تحدياتك',
+    noSpecialtyCta: 'اختر تخصّصك',
     fallbackTitle: 'تحدياتي',
     activeWarning: 'لديك مشاركة نشطة — أنهِها قبل الانضمام إلى أخرى.',
     tabs: {

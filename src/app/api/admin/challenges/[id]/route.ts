@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
 import { buildI18nColumns } from '@/lib/challenges/columns'
+import { resolveSpecialtyId } from '@/lib/challenges/specialty'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -10,6 +11,17 @@ export async function PATCH(request: Request, { params }: Props) {
 
   const { id } = await params
   const body = await request.json()
+
+  // PHASE 4 — si l'édition touche la spécialité, on résout la FK (refus si inconnu).
+  // PATCH partiels (ex. toggle publish) ne portent pas `specialty` → specialty_id intact.
+  let specialtyIdPatch: Record<string, string> = {}
+  if (body.specialty !== undefined) {
+    const resolved = await resolveSpecialtyId(body.specialty, admin!.supabase as any)
+    if ('error' in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 })
+    }
+    specialtyIdPatch = { specialty_id: resolved.id }
+  }
 
   const { data, error: dbErr } = await (admin!.supabase as any)
     .from('challenges')
@@ -28,6 +40,7 @@ export async function PATCH(request: Request, { params }: Props) {
       ...(body.deadline_days !== undefined && { deadline_days: body.deadline_days }),
       ...(body.is_published !== undefined && { is_published: body.is_published }),
       ...(body.specialty !== undefined && { specialty: body.specialty }),
+      ...specialtyIdPatch, // PHASE 4 — FK résolue quand `specialty` est édité
       // Type / industry are now FK-only (legacy text columns no longer written).
       ...(body.challenge_type_id ? { challenge_type_id: body.challenge_type_id } : {}),
       ...(body.industry_id ? { industry_id: body.industry_id } : {}),

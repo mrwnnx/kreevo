@@ -7,6 +7,7 @@ import {
   cooldownRemainingMs,
   isInCooldown,
 } from '@/lib/utils/participation-cooldown'
+import { specialtyMismatch, SPECIALTY_GUARD_MESSAGE } from '@/lib/challenges/specialty'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -16,22 +17,30 @@ export async function POST(request: Request) {
   const { challenge_id } = await request.json()
   if (!challenge_id) return NextResponse.json({ error: 'Missing challenge_id' }, { status: 400 })
 
-  // Fetch user profile for plan + league check
+  // Fetch user profile for plan + league + specialty check
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, league')
+    .select('plan, league, specialty_id')
     .eq('id', user.id)
     .single()
 
   // Fetch challenge + league (bypass RLS for public read)
   const { data: challenge } = await supabaseAdmin
     .from('challenges')
-    .select('id, is_published, league_id, deadline_days, leagues(id, name, access, order_index)')
+    .select('id, is_published, league_id, deadline_days, specialty_id, leagues(id, name, access, order_index)')
     .eq('id', challenge_id)
     .single()
 
   if (!challenge || !challenge.is_published) {
     return NextResponse.json({ error: 'Challenge not active' }, { status: 400 })
+  }
+
+  // PHASE 4 — garde-fou cross-spé : un user ne participe qu'aux challenges de SA spé.
+  // (Couvre aussi le cas legacy d'un user ayant changé de spé : un challenge de son
+  // ancienne spé devient imparticipable — comportement assumé.)
+  const mismatch = specialtyMismatch(profile?.specialty_id, challenge.specialty_id)
+  if (mismatch) {
+    return NextResponse.json({ error: SPECIALTY_GUARD_MESSAGE[mismatch], code: mismatch }, { status: 403 })
   }
 
   // Access check: free users can only join leagues with access = 'all'

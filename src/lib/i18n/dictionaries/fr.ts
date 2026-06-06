@@ -332,6 +332,9 @@ export const fr = {
   },
   challengeDetail: {
     backToChallenges: 'Challenges',
+    wrongSpecialtyTitle: 'Pas ta spécialité',
+    wrongSpecialtyBody: 'Ce défi est réservé aux designers {specialty}. Tu participes uniquement aux défis de ta spécialité.',
+    noSpecialtyCta: 'Choisis ta spécialité',
     daysSuffix: 'jours',
     sections: {
       brief: 'Brief',
@@ -674,6 +677,8 @@ export const fr = {
     proGate: '🔒 Passe en Pro pour accéder à {icon} {league} et au-delà',
     upgradeCta: 'Passer en Pro',
     leaguePrefix: 'Ligue {name}',
+    noSpecialtyTitle: 'Choisis ta spécialité pour voir tes défis',
+    noSpecialtyCta: 'Choisis ta spécialité',
     fallbackTitle: 'Mes challenges',
     activeWarning: 'Tu as une participation active — termine-la avant d\'en rejoindre une autre.',
     tabs: {

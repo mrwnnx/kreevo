@@ -6,6 +6,7 @@ import {
   MAX_PUBLISH_IMAGES,
   type ImageInput,
 } from '@/lib/utils/submissions'
+import { specialtyMismatch, SPECIALTY_GUARD_MESSAGE } from '@/lib/challenges/specialty'
 
 export const maxDuration = 30
 
@@ -33,10 +34,18 @@ export async function POST(req: Request) {
 
   const { data: challenge } = await (supabaseAdmin as any)
     .from('challenges')
-    .select('id, brief, context, deliverable, constraints, criteria, specialty, leagues(name)')
+    .select('id, brief, context, deliverable, constraints, criteria, specialty, specialty_id, leagues(name)')
     .eq('id', challengeId)
     .single()
   if (!challenge) return NextResponse.json({ error: 'Challenge introuvable' }, { status: 404 })
+
+  // PHASE 4 — garde-fou cross-spé avant l'appel IA (anti-gaspillage de tokens).
+  const { data: analyzeProfile } = await supabase
+    .from('profiles').select('specialty_id').eq('id', user.id).single()
+  const mismatch = specialtyMismatch(analyzeProfile?.specialty_id, challenge.specialty_id)
+  if (mismatch) {
+    return NextResponse.json({ error: SPECIALTY_GUARD_MESSAGE[mismatch], code: mismatch }, { status: 403 })
+  }
 
   const leagueName = challenge.leagues?.name ?? null
   // AI no longer gates publishing — it analyzes every submission (all leagues) to

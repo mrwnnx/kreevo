@@ -17,6 +17,7 @@ import { CancelParticipationButton } from '@/components/features/challenge/Cance
 import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
 import { CooldownCountdown } from '@/components/features/challenge/CooldownCountdown'
 import { cooldownEnd, isInCooldown } from '@/lib/utils/participation-cooldown'
+import { specialtyMismatch } from '@/lib/challenges/specialty'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang, tx } from '@/lib/i18n/lang'
 import { localizeChallenge } from '@/lib/challenges/i18n'
@@ -45,7 +46,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
     { data: otherActiveParticipations },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('challenges').select('*').eq('id', id).single(),
+    supabase.from('challenges').select('*, specialties(name_fr, name_en, name_ar)').eq('id', id).single(),
     (supabase as any).from('participations').select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*').eq('challenge_id', id).eq('user_id', user.id).single(),
     (supabase.from('submissions') as any).select('*, profiles:user_id(username, avatar_url, league, plan)').eq('challenge_id', id).eq('is_draft', false).eq('validation_status', 'approved').neq('user_id', user.id).order('total_likes', { ascending: false }),
@@ -103,6 +104,33 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
   const dict = await getDict()
   const t = dict.challengeDetail
+
+  // PHASE 4 — gate cross-spé : si le challenge n'est pas de la spé du user, on
+  // remplace le bouton « Je participe » par un bloc d'info (la participation reste
+  // bloquée côté serveur de toute façon). Les soumissions legacy déjà en base restent
+  // consultables. specialty_id NULL côté user → aussi traité comme « autre spé ».
+  const isOtherSpecialty = !!specialtyMismatch(p.specialty_id, (challenge as any).specialty_id)
+  const challengeSpecialtyRow = (challenge as any).specialties as
+    { name_fr: string | null; name_en: string | null; name_ar: string | null } | null
+  const challengeSpecialtyLabel =
+    (lang === 'ar' ? challengeSpecialtyRow?.name_ar
+      : lang === 'en' ? challengeSpecialtyRow?.name_en
+      : challengeSpecialtyRow?.name_fr) || c.specialty || ''
+  const otherSpecialtyNotice = (
+    <div className="rounded-2xl border border-dashed p-6 text-center space-y-3">
+      <p className="text-sm font-semibold">{t.wrongSpecialtyTitle}</p>
+      <p
+        className="text-xs text-muted-foreground leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: tx(t.wrongSpecialtyBody, { specialty: challengeSpecialtyLabel }) }}
+      />
+      <Link
+        href="/dashboard/settings"
+        className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-full hover:opacity-85 transition-opacity"
+      >
+        {t.noSpecialtyCta}
+      </Link>
+    </div>
+  )
 
   // ── State 1: PREVIEW (no participation) ─────────────────────────────────────
   if (participationStatus === 'none') {
@@ -177,8 +205,10 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          {/* Other active blocker */}
-          {hasOtherActive ? (
+          {/* Other active blocker / cross-specialty gate */}
+          {isOtherSpecialty ? (
+            otherSpecialtyNotice
+          ) : hasOtherActive ? (
             <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
               {t.blockedActive}
             </div>
@@ -345,7 +375,9 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {t.sidebar.reopenedBody}
               </p>
-              {hasOtherActive ? (
+              {isOtherSpecialty ? (
+                otherSpecialtyNotice
+              ) : hasOtherActive ? (
                 <p className="text-xs text-muted-foreground">{t.blockedActive}</p>
               ) : (
                 <ParticipateButton

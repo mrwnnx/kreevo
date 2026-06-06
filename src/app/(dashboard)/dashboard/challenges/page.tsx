@@ -310,6 +310,9 @@ export default async function ChallengesPage({
     .sort((a, b) => (b.avatar_url ? 1 : 0) - (a.avatar_url ? 1 : 0)) // avatars first
     .slice(0, AVATAR_SLOTS.length)
 
+  // PHASE 2/4 — spécialité du user (FK), source unique pour le seuil ET le filtrage.
+  const profileSpecialtyId = (profile?.specialty_id ?? null) as string | null
+
   // XP threshold + completed count for current league
   let leagueXpThreshold = 0
   let leagueChallengesCompleted = 0
@@ -318,7 +321,6 @@ export default async function ChallengesPage({
     // PHASE 2 — seuil + compteur scopés par la spécialité du user. L'affichage
     // doit refléter EXACTEMENT la logique de promotion (checkAndUpdateLeague) :
     // même filtre specialty_id sur le seuil ET sur le comptage de challenges.
-    const profileSpecialtyId = (profile?.specialty_id ?? null) as string | null
     leagueXpThreshold = await getLeagueThreshold(userLeagueRow.id, profileSpecialtyId)
 
     const leagueChallengeIds = challenges
@@ -328,17 +330,11 @@ export default async function ChallengesPage({
     leagueChallengesCompleted = leagueChallengeIds.filter(id => submittedIds.has(id)).length
   }
 
-  // Specialty filter : on filtre selon la spécialité du profil
-  const profileSpecialty = (profile?.specialty ?? '') as string
-  const userTrack: 'graphic' | 'ux_ui' | null = profileSpecialty
-    ? (/graphic|illustration|brand|3d/i.test(profileSpecialty) ? 'graphic' : 'ux_ui')
-    : null
-
-  function matchesUserTrack(c: ChallengeRow): boolean {
-    if (!userTrack) return true
-    const cs = c.specialty ?? ''
-    if (userTrack === 'graphic') return /graphic/i.test(cs)
-    return /ux|ui/i.test(cs)
+  // PHASE 4 — filtrage par FK specialty_id (remplace l'heuristique regex texte).
+  // Un user ne voit que les challenges de SA spé. NULL spé → aucun (liste vide + CTA).
+  function matchesUserSpecialty(c: ChallengeRow): boolean {
+    if (!profileSpecialtyId) return false
+    return c.specialty_id === profileSpecialtyId
   }
 
   // My league challenges (sorted: active first)
@@ -346,7 +342,7 @@ export default async function ChallengesPage({
     if (!c.league_id) return false
     const cl = c.leagues
     if (!cl) return false
-    if (!matchesUserTrack(c)) return false
+    if (!matchesUserSpecialty(c)) return false
     if (!userLeagueRow) return cl.order_index === 1
     return cl.order_index === userLeagueIndex
   })
@@ -497,6 +493,21 @@ export default async function ChallengesPage({
         )}
 
         {(() => {
+          // PHASE 4 — pas de spécialité → aucun challenge participable : CTA dédié.
+          if (!profileSpecialtyId) {
+            return (
+              <div className="rounded-2xl border border-dashed p-12 text-center space-y-3">
+                <p className="text-sm font-medium">{t.noSpecialtyTitle}</p>
+                <Link
+                  href="/dashboard/settings"
+                  className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2 rounded-full hover:opacity-85 transition-opacity"
+                >
+                  {t.noSpecialtyCta}
+                </Link>
+              </div>
+            )
+          }
+
           const visible = sortedMyLeague.filter(c =>
             filter === 'done' ? submittedIds.has(c.id) : !submittedIds.has(c.id),
           )

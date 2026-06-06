@@ -335,6 +335,9 @@ export const en: Dictionary = {
   },
   challengeDetail: {
     backToChallenges: 'Challenges',
+    wrongSpecialtyTitle: 'Not your specialty',
+    wrongSpecialtyBody: 'This challenge is for {specialty} designers. You can only join challenges in your own specialty.',
+    noSpecialtyCta: 'Choose your specialty',
     daysSuffix: 'days',
     sections: {
       brief: 'Brief',
@@ -677,6 +680,8 @@ export const en: Dictionary = {
     proGate: '🔒 Upgrade to Pro to access {icon} {league} and beyond',
     upgradeCta: 'Upgrade Pro',
     leaguePrefix: '{name} League',
+    noSpecialtyTitle: 'Choose your specialty to see your challenges',
+    noSpecialtyCta: 'Choose your specialty',
     fallbackTitle: 'My challenges',
     activeWarning: 'You have an active participation — finish it before joining another.',
     tabs: {

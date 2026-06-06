@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { updateStreak } from '@/lib/utils/streaks'
 import { revalidatePath } from 'next/cache'
+import { specialtyMismatch, SPECIALTY_GUARD_MESSAGE } from '@/lib/challenges/specialty'
 import type { Json } from '@/types/database.types'
 
 export async function submitChallenge(formData: FormData) {
@@ -28,6 +29,19 @@ export async function submitChallenge(formData: FormData) {
   const descriptionBonusEligible = formData.get('descriptionBonusEligible') === 'true'
   let aiAnalysis: Json | null = null
   try { aiAnalysis = aiAnalysisRaw ? (JSON.parse(aiAnalysisRaw) as Json) : null } catch {}
+
+  // PHASE 4 — garde-fou cross-spé EN TÊTE, draft inclus (on ne brouillonne même pas
+  // un challenge d'une autre spé). L'UI cachée est contournable → autorité serveur.
+  // (Couvre le cas legacy switch-de-spé : un challenge de l'ancienne spé devient
+  // non-soumissible, même avec une participation active antérieure — assumé.)
+  {
+    const { data: guardProfile } = await supabase
+      .from('profiles').select('specialty_id').eq('id', user.id).single()
+    const { data: guardChallenge } = await supabaseAdmin
+      .from('challenges').select('specialty_id').eq('id', challengeId).single()
+    const mismatch = specialtyMismatch(guardProfile?.specialty_id, guardChallenge?.specialty_id)
+    if (mismatch) return { error: SPECIALTY_GUARD_MESSAGE[mismatch], code: mismatch }
+  }
 
   if (!coverUrl) return { error: 'Image de couverture requise' }
 
