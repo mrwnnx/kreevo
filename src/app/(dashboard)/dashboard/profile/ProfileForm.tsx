@@ -21,7 +21,7 @@ import type { Profile } from '@/types/database.types'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-import { TOOLS_BY_SPECIALTY, JOB_TITLES, type Specialty, type ExperienceLevel, type Objective } from '@/components/onboarding/types'
+import { TOOLS_BY_SPECIALTY, JOB_TITLES, type Specialty, type SpecialtyOption, type ExperienceLevel, type Objective } from '@/components/onboarding/types'
 import {
   SOCIAL_DEFS,
   SUGGESTED_BY_SPECIALTY,
@@ -63,14 +63,23 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 interface ProfileFormProps {
   profile: Profile
   t: ProfileFormT
+  specialties: SpecialtyOption[]
 }
 
-export function ProfileForm({ profile, t }: ProfileFormProps) {
-  // Re-build option lists with i18n labels
-  const SPECIALTY_OPTIONS: Array<{ value: 'ux_ui' | 'graphic'; icon: string; label: string; description: string }> = [
-    { value: 'ux_ui',   icon: ICONS.ux_ui,   label: t.specialty.ux_uiLabel,   description: t.specialty.ux_uiDescription },
-    { value: 'graphic', icon: ICONS.graphic, label: t.specialty.graphicLabel, description: t.specialty.graphicDescription },
-  ]
+export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
+  // PHASE 6B — cartes spé construites dynamiquement depuis la DB (prop). i18n soigné
+  // par slug pour ux_ui/graphic ; une nouvelle spé → name (DB) + description vide.
+  const SPECIALTY_DESC: Record<string, string> = {
+    ux_ui: t.specialty.ux_uiDescription,
+    graphic: t.specialty.graphicDescription,
+  }
+  const SPECIALTY_OPTIONS: Array<{ value: string; icon: string; label: string; description: string }> =
+    specialties.map((s) => ({
+      value: s.slug,
+      icon: s.emoji || '🎯',
+      label: s.name,
+      description: SPECIALTY_DESC[s.slug] ?? '',
+    }))
 
   const LEVELS: Array<{ value: ExperienceLevel; label: string }> = [
     { value: 'entry',  label: t.levels.entry },
@@ -95,11 +104,15 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
   const [country, setCountry] = useState(profile.country ?? '')
   const [bio, setBio] = useState(profile.bio ?? '')
   const router = useRouter()
-  const [specialty, setSpecialty] = useState<Specialty>(detectSpecialty(profile.specialty))
+  // PHASE 6B — slug sélectionné : on privilégie la FK specialty_id (source de vérité),
+  // fallback sur la détection texte legacy pour les users sans FK.
+  const [specialty, setSpecialty] = useState<string>(
+    specialties.find((s) => s.id === profile.specialty_id)?.slug ?? detectSpecialty(profile.specialty),
+  )
   // A discipline switch is only allowed while in Stone/Bronze; locked from Silver up.
   const UNLOCKED_LEAGUES = ['stone', 'bronze']
   const specialtyLocked = !UNLOCKED_LEAGUES.includes((profile.league ?? 'stone').toLowerCase())
-  const [pendingSpecialty, setPendingSpecialty] = useState<'ux_ui' | 'graphic' | null>(null)
+  const [pendingSpecialty, setPendingSpecialty] = useState<string | null>(null)
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(detectExperience(profile.experience_level))
   const [jobTitle, setJobTitle] = useState(profile.job_title ?? '')
   const [jobTitleOpen, setJobTitleOpen] = useState(false)
@@ -153,10 +166,13 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
-  const availableTools = useMemo(
-    () => (specialty ? TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic'] : []),
-    [specialty]
-  )
+  const availableTools = useMemo(() => {
+    if (!specialty) return []
+    // PHASE 6B — anti-crash : spé sans entrée prédéfinie → liste générique (union),
+    // jamais undefined (sinon crash .includes plus bas).
+    const generic = Array.from(new Set([...TOOLS_BY_SPECIALTY.ux_ui, ...TOOLS_BY_SPECIALTY.graphic]))
+    return TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic'] ?? generic
+  }, [specialty])
   const filteredTools = useMemo(() => {
     const q = toolsQuery.trim().toLowerCase()
     if (!q) return availableTools
@@ -206,9 +222,9 @@ export function ProfileForm({ profile, t }: ProfileFormProps) {
 
   // Social links helpers
   const suggestedSocialKeys = useMemo(() => {
-    const list = specialty
-      ? SUGGESTED_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']
-      : Object.keys(SOCIAL_DEFS)
+    // PHASE 6B — anti-crash : spé sans suggestions prédéfinies → liste générique.
+    const list =
+      (specialty && SUGGESTED_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']) || Object.keys(SOCIAL_DEFS)
     return list.filter((k) => !activeKeys.includes(k))
   }, [specialty, activeKeys])
 
