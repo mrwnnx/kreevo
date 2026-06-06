@@ -118,11 +118,9 @@ export default async function ProfilePage({
 
   const [
     { data: profile },
-    { count: totalUsers },
     { data: { user: viewer } },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('username', username).single(),
-    supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.auth.getUser(),
   ])
 
@@ -153,7 +151,6 @@ export default async function ProfilePage({
   const [
     { data: allSubmissions, count: submissionCount },
     { data: badges },
-    { data: rankData },
   ] = await Promise.all([
     supabase
       .from('submissions')
@@ -164,14 +161,30 @@ export default async function ProfilePage({
       .eq('validation_status', 'approved')
       .order('created_at', { ascending: false }),
     supabase.from('badges').select('*').eq('user_id', p.id),
-    supabase
-      .from('profiles')
-      .select('id')
-      .gte('xp', p.xp)
-      .neq('id', p.id),
   ])
 
-  const rank = (rankData?.length ?? 0) + 1
+  // PHASE 3 — rang « Top n% » scopé par spécialité : comparé aux designers de la
+  // MÊME spé uniquement. ⚠️ p.xp reste profiles.xp GLOBAL (isolation XP = phase
+  // ultérieure) ; seul le RANG est scopé → « Top n% des designers de cette spé ».
+  // specialty_id NULL → pas de rang affiché.
+  let rank = 0
+  let totalUsers = 0
+  if (p.specialty_id) {
+    const [{ data: rankData }, { count: totalInSpec }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('id')
+        .eq('specialty_id', p.specialty_id)
+        .gte('xp', p.xp)
+        .neq('id', p.id),
+      supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('specialty_id', p.specialty_id),
+    ])
+    rank = (rankData?.length ?? 0) + 1
+    totalUsers = totalInSpec ?? 0
+  }
   const dict = await getDict()
   const lang = await getLang()
   const taxoMaps = await getTaxonomyMaps()
@@ -191,7 +204,7 @@ export default async function ProfilePage({
     awards: badgeAwards,
   })
   const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
-  const rankLabel = t.rankLabels[rankKey as keyof typeof t.rankLabels]
+  const rankLabel = p.specialty_id ? t.rankLabels[rankKey as keyof typeof t.rankLabels] : '—'
   const submissions = (allSubmissions ?? []) as any[]
   // Pre-resolve localized type/industry labels (FK) onto each embedded challenge,
   // so the module-level SubmissionCard can render them without taxonomy access.

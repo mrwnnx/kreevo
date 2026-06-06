@@ -12,6 +12,7 @@ import { ContextualLeaderboard } from '@/components/dashboard/ContextualLeaderbo
 import { InviteFriends } from '@/components/dashboard/InviteFriends'
 import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
 import { Analytics } from '@/components/dashboard/Analytics'
+import { getLeagueThreshold, getScopedLeagueScores } from '@/lib/utils/leagues'
 
 interface PageProps {
   searchParams: Promise<{ submitted?: string }>
@@ -125,33 +126,66 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const leagueIndex = userLeague?.order_index || 1
   const nextLeague = allLeagues.find((l) => l.order_index === leagueIndex + 1)
 
-  // XP threshold for current league
-  const { data: leagueChallenges } = await supabaseAdmin
-    .from('challenges')
-    .select('xp_reward')
-    .eq('league_id', userLeague?.id)
-    .eq('is_published', true)
-
-  const totalLeagueXP =
-    leagueChallenges?.reduce((s, c) => s + (c.xp_reward || 0), 0) || 1000
-  const thresholdPercent = userLeague?.xp_threshold_percent ?? 60
-  const threshold = Math.floor((totalLeagueXP * thresholdPercent) / 100)
+  // PHASE 2/3 — seuil scopé par spécialité (source unique getLeagueThreshold).
+  // Plus de calcul inline dupliqué.
+  const userSpecialtyId = (profile?.specialty_id ?? null) as string | null
+  const threshold = userLeague?.id && userSpecialtyId
+    ? await getLeagueThreshold(userLeague.id, userSpecialtyId)
+    : 0
+  // ⚠️ currentXP vient de profiles.xp, ENCORE GLOBAL (toutes spés). Comparé à un
+  // seuil scopé → incohérence temporaire ASSUMÉE (isolation XP = phase ultérieure).
   const currentXP = profile?.xp || 0
   const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
   const xpGap = Math.max(0, threshold - currentXP)
 
-  // User rank in league
-  const { count: rankCount } = await supabaseAdmin
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('league', userLeagueName)
-    .gt('xp', currentXP)
-  const userRank = (rankCount || 0) + 1
+  // PHASE 3 — classement scopé leagueXp (MÊME modèle que le leaderboard).
+  // Rang/total/voisins/top10 basés sur le score leagueXp scopé, plus sur
+  // profiles.xp global. specialty_id NULL → aucun classement (rang neutre).
+  let userRank = 1
+  let totalInLeague = 0
+  let neighborUsers: {
+    rank: number
+    username: string
+    full_name: string | null
+    avatar_url: string | null
+    xp: number
+    isCurrentUser: boolean
+  }[] = []
+  let xpToTop10 = 0
 
-  const { count: totalInLeague } = await supabaseAdmin
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('league', userLeagueName)
+  if (userLeague?.id && userSpecialtyId) {
+    const [scoreByUser, { data: leagueUsers }] = await Promise.all([
+      getScopedLeagueScores(userLeague.id, userSpecialtyId),
+      supabaseAdmin
+        .from('profiles')
+        .select('id, username, full_name, avatar_url, xp')
+        .ilike('league', userLeagueName)
+        .eq('specialty_id', userSpecialtyId),
+    ])
+    const ranked = [...((leagueUsers ?? []) as any[])].sort((a, b) => {
+      const diff = (scoreByUser[b.id] ?? 0) - (scoreByUser[a.id] ?? 0)
+      return diff !== 0 ? diff : (b.xp ?? 0) - (a.xp ?? 0)
+    })
+    totalInLeague = ranked.length
+    const myIdx = ranked.findIndex((u) => u.id === user.id)
+    userRank = myIdx >= 0 ? myIdx + 1 : ranked.length + 1
+
+    // Voisins autour de l'user (leagueXp scopé pour l'affichage, pas profiles.xp).
+    const start = Math.max(0, userRank - 3)
+    neighborUsers = ranked.slice(start, userRank + 1).map((u, i) => ({
+      rank: start + 1 + i,
+      username: u.username,
+      full_name: u.full_name,
+      avatar_url: u.avatar_url,
+      xp: scoreByUser[u.id] ?? 0,
+      isCurrentUser: u.id === user.id,
+    }))
+
+    // Écart leagueXp jusqu'au top 10 (en score scopé).
+    const myScore = scoreByUser[user.id] ?? 0
+    const tenth = ranked[9]
+    xpToTop10 = userRank > 10 && tenth ? Math.max(0, (scoreByUser[tenth.id] ?? 0) - myScore) : 0
+  }
 
   // Suggested challenge
   const { data: suggestedChallenge } = await supabaseAdmin
@@ -163,22 +197,27 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .limit(1)
     .maybeSingle()
 
-  // Completed challenges in current league (for 2nd progress bar)
-  const { data: leagueChallengeIds } = await supabaseAdmin
-    .from('challenges')
-    .select('id')
-    .eq('league_id', userLeague?.id)
-    .eq('is_published', true)
-  const challengeIdList = (leagueChallengeIds ?? []).map((c) => c.id)
+  // Completed challenges in current league+specialty (2nd progress bar).
+  // PHASE 3 — scopé par specialty_id pour rester cohérent avec le comptage
+  // min_challenges de checkAndUpdateLeague (PHASE 2).
   let completedInLeague = 0
-  if (challengeIdList.length > 0) {
-    const { count } = await supabase
-      .from('participations')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'submitted')
-      .in('challenge_id', challengeIdList)
-    completedInLeague = count ?? 0
+  if (userLeague?.id && userSpecialtyId) {
+    const { data: leagueChallengeIds } = await supabaseAdmin
+      .from('challenges')
+      .select('id')
+      .eq('league_id', userLeague.id)
+      .eq('is_published', true)
+      .eq('specialty_id', userSpecialtyId)
+    const challengeIdList = (leagueChallengeIds ?? []).map((c) => c.id)
+    if (challengeIdList.length > 0) {
+      const { count } = await supabase
+        .from('participations')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'submitted')
+        .in('challenge_id', challengeIdList)
+      completedInLeague = count ?? 0
+    }
   }
   const minChallenges = userLeague?.min_challenges ?? 3
   const minChallengesEnabled = userLeague?.min_challenges_enabled ?? true
@@ -203,34 +242,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .eq('status', 'submitted')
     .gte('updated_at', today.toISOString())
 
-  // Contextual leaderboard — neighbors around current user
-  const startRange = Math.max(0, userRank - 3)
-  const endRange = userRank + 1
-  const { data: leaderboardNeighbors } = await supabaseAdmin
-    .from('profiles')
-    .select('id, username, full_name, avatar_url, xp')
-    .eq('league', userLeagueName)
-    .order('xp', { ascending: false })
-    .range(startRange, endRange)
-
-  const neighborUsers = (leaderboardNeighbors ?? []).map((u, i) => ({
-    rank: startRange + 1 + i,
-    username: u.username,
-    full_name: u.full_name,
-    avatar_url: u.avatar_url,
-    xp: u.xp || 0,
-    isCurrentUser: u.id === user.id,
-  }))
-
-  // XP gap to top 10
-  const { data: top10User } = await supabaseAdmin
-    .from('profiles')
-    .select('xp')
-    .eq('league', userLeagueName)
-    .order('xp', { ascending: false })
-    .range(9, 9)
-    .maybeSingle()
-  const xpToTop10 = userRank > 10 ? Math.max(0, (top10User?.xp || 0) - currentXP) : 0
+  // (Classement scopé — userRank / totalInLeague / neighborUsers / xpToTop10 —
+  // calculé plus haut via getScopedLeagueScores.)
 
   // Analytics — last 7 days (actual data)
   const since = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)

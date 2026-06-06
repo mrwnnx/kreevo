@@ -47,6 +47,43 @@ export async function getLeagueThreshold(
   return Math.floor(total * percent / 100)
 }
 
+// PHASE 3 — score « leagueXp » scopé par spécialité.
+// Pour chaque user : somme des xp_reward des challenges SOUMIS dans l'ensemble
+// {league_id + specialty_id + is_published} — EXACTEMENT le même set de challenges
+// que getLeagueThreshold(leagueId, specialtyId). Le score d'un user est donc borné
+// par le seuil (leagueXp ≤ threshold), cohérence garantie. Source unique réutilisée
+// par le leaderboard ET le dashboard (pas de duplication de la logique de score).
+export async function getScopedLeagueScores(
+  leagueId: string,
+  specialtyId: string,
+): Promise<Record<string, number>> {
+  const { data: leagueChallenges } = await supabaseAdmin
+    .from('challenges')
+    .select('id, xp_reward')
+    .eq('league_id', leagueId)
+    .eq('is_published', true)
+    .eq('specialty_id', specialtyId)
+
+  const xpByChallenge: Record<string, number> = {}
+  for (const c of leagueChallenges ?? []) xpByChallenge[c.id] = c.xp_reward ?? 0
+  const challengeIds = Object.keys(xpByChallenge)
+
+  const scoreByUser: Record<string, number> = {}
+  if (challengeIds.length === 0) return scoreByUser
+
+  const { data: parts } = await supabaseAdmin
+    .from('participations')
+    .select('user_id, challenge_id')
+    .in('challenge_id', challengeIds)
+    .eq('status', 'submitted')
+
+  for (const p of parts ?? []) {
+    if (!p.user_id || !p.challenge_id) continue
+    scoreByUser[p.user_id] = (scoreByUser[p.user_id] ?? 0) + (xpByChallenge[p.challenge_id] ?? 0)
+  }
+  return scoreByUser
+}
+
 // Promotion auto si seuil XP + min_challenges atteints.
 export async function checkAndUpdateLeague(userId: string): Promise<void> {
   // PHASE 2 — scoping encapsulé : on charge specialty_id ici pour que les 4
