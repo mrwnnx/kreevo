@@ -44,7 +44,7 @@ interface LeagueRow {
 
 interface ChallengeRow {
   id: string; title: string; brief: string
-  specialty: string | null; challenge_type_id: string | null; industry_id: string | null
+  specialty: string | null; specialty_id: string | null; challenge_type_id: string | null; industry_id: string | null
   emoji: string | null
   xp_reward: number | null; deadline_days: number | null
   league_id: string | null; is_published: boolean
@@ -218,7 +218,7 @@ export default async function ChallengesPage({
     { data: userSubmissions },
     { data: allPartRows },
   ] = await Promise.all([
-    supabase.from('profiles').select('league, plan, xp, specialty').eq('id', user.id).single(),
+    supabase.from('profiles').select('league, plan, xp, specialty, specialty_id').eq('id', user.id).single(),
     (supabaseAdmin as any)
       .from('leagues')
       .select('*')
@@ -315,10 +315,14 @@ export default async function ChallengesPage({
   let leagueChallengesCompleted = 0
 
   if (userLeagueRow) {
-    leagueXpThreshold = await getLeagueThreshold(userLeagueRow.id)
+    // PHASE 2 — seuil + compteur scopés par la spécialité du user. L'affichage
+    // doit refléter EXACTEMENT la logique de promotion (checkAndUpdateLeague) :
+    // même filtre specialty_id sur le seuil ET sur le comptage de challenges.
+    const profileSpecialtyId = (profile?.specialty_id ?? null) as string | null
+    leagueXpThreshold = await getLeagueThreshold(userLeagueRow.id, profileSpecialtyId)
 
     const leagueChallengeIds = challenges
-      .filter(c => c.league_id === userLeagueRow.id)
+      .filter(c => c.league_id === userLeagueRow.id && c.specialty_id === profileSpecialtyId)
       .map(c => c.id)
 
     leagueChallengesCompleted = leagueChallengeIds.filter(id => submittedIds.has(id)).length
