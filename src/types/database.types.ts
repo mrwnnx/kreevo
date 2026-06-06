@@ -107,68 +107,177 @@ export type Database = {
           },
         ]
       }
+      challenge_types: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name_ar: string | null
+          name_en: string | null
+          name_fr: string | null
+          specialty: string | null
+          translation_status: Json
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          specialty?: string | null
+          translation_status?: Json
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          specialty?: string | null
+          translation_status?: Json
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           brief: string
+          brief_ar: string | null
+          brief_en: string | null
+          brief_fr: string | null
           challenge_type: string | null
+          challenge_type_id: string | null
           constraints: string | null
+          constraints_ar: string | null
+          constraints_en: string | null
+          constraints_fr: string | null
           context: string | null
+          context_ar: string | null
+          context_en: string | null
+          context_fr: string | null
           created_at: string | null
           created_by: string | null
           criteria: string | null
+          criteria_ar: string | null
+          criteria_en: string | null
+          criteria_fr: string | null
           deadline_days: number | null
           deliverable: string | null
+          deliverable_ar: string | null
+          deliverable_en: string | null
+          deliverable_fr: string | null
           emoji: string | null
           id: string
           industry: string | null
+          industry_id: string | null
           is_published: boolean | null
           league_id: string | null
+          source_lang: string
           specialty: string | null
+          specialty_id: string | null
           title: string
+          title_ar: string | null
+          title_en: string | null
+          title_fr: string | null
+          translation_status: Json
           updated_at: string
           xp_reward: number | null
         }
         Insert: {
           brief: string
+          brief_ar?: string | null
+          brief_en?: string | null
+          brief_fr?: string | null
           challenge_type?: string | null
+          challenge_type_id?: string | null
           constraints?: string | null
+          constraints_ar?: string | null
+          constraints_en?: string | null
+          constraints_fr?: string | null
           context?: string | null
+          context_ar?: string | null
+          context_en?: string | null
+          context_fr?: string | null
           created_at?: string | null
           created_by?: string | null
           criteria?: string | null
+          criteria_ar?: string | null
+          criteria_en?: string | null
+          criteria_fr?: string | null
           deadline_days?: number | null
           deliverable?: string | null
+          deliverable_ar?: string | null
+          deliverable_en?: string | null
+          deliverable_fr?: string | null
           emoji?: string | null
           id?: string
           industry?: string | null
+          industry_id?: string | null
           is_published?: boolean | null
           league_id?: string | null
+          source_lang?: string
           specialty?: string | null
+          specialty_id?: string | null
           title: string
+          title_ar?: string | null
+          title_en?: string | null
+          title_fr?: string | null
+          translation_status?: Json
           updated_at?: string
           xp_reward?: number | null
         }
         Update: {
           brief?: string
+          brief_ar?: string | null
+          brief_en?: string | null
+          brief_fr?: string | null
           challenge_type?: string | null
+          challenge_type_id?: string | null
           constraints?: string | null
+          constraints_ar?: string | null
+          constraints_en?: string | null
+          constraints_fr?: string | null
           context?: string | null
+          context_ar?: string | null
+          context_en?: string | null
+          context_fr?: string | null
           created_at?: string | null
           created_by?: string | null
           criteria?: string | null
+          criteria_ar?: string | null
+          criteria_en?: string | null
+          criteria_fr?: string | null
           deadline_days?: number | null
           deliverable?: string | null
+          deliverable_ar?: string | null
+          deliverable_en?: string | null
+          deliverable_fr?: string | null
           emoji?: string | null
           id?: string
           industry?: string | null
+          industry_id?: string | null
           is_published?: boolean | null
           league_id?: string | null
+          source_lang?: string
           specialty?: string | null
+          specialty_id?: string | null
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
+          title_fr?: string | null
+          translation_status?: Json
           updated_at?: string
           xp_reward?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "challenges_challenge_type_id_fkey"
+            columns: ["challenge_type_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "challenges_created_by_fkey"
             columns: ["created_by"]
@@ -177,10 +286,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "challenges_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "challenges_league_id_fkey"
             columns: ["league_id"]
             isOneToOne: false
             referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
         ]
@@ -456,6 +579,36 @@ export type Database = {
         }
         Relationships: []
       }
+      industries: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name_ar: string | null
+          name_en: string | null
+          name_fr: string | null
+          translation_status: Json
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          translation_status?: Json
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          translation_status?: Json
+        }
+        Relationships: []
+      }
       leagues: {
         Row: {
           access: string | null
@@ -607,6 +760,7 @@ export type Database = {
           referred_by: string | null
           role: string | null
           specialty: string | null
+          specialty_id: string | null
           tools: string[] | null
           updated_at: string | null
           username: string
@@ -640,6 +794,7 @@ export type Database = {
           referred_by?: string | null
           role?: string | null
           specialty?: string | null
+          specialty_id?: string | null
           tools?: string[] | null
           updated_at?: string | null
           username: string
@@ -673,6 +828,7 @@ export type Database = {
           referred_by?: string | null
           role?: string | null
           specialty?: string | null
+          specialty_id?: string | null
           tools?: string[] | null
           updated_at?: string | null
           username?: string
@@ -682,6 +838,66 @@ export type Database = {
           {
             foreignKeyName: "profiles_referred_by_fkey"
             columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      random_briefs: {
+        Row: {
+          brief_text: string
+          cover_url: string | null
+          created_at: string | null
+          deadline_at: string | null
+          description: string | null
+          figma_url: string | null
+          id: string
+          is_public: boolean | null
+          prompt: Json
+          started_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          brief_text: string
+          cover_url?: string | null
+          created_at?: string | null
+          deadline_at?: string | null
+          description?: string | null
+          figma_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          prompt: Json
+          started_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          brief_text?: string
+          cover_url?: string | null
+          created_at?: string | null
+          deadline_at?: string | null
+          description?: string | null
+          figma_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          prompt?: Json
+          started_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "random_briefs_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -745,6 +961,48 @@ export type Database = {
           key?: string
           updated_at?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      specialties: {
+        Row: {
+          created_at: string | null
+          emoji: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string | null
+          name_en: string | null
+          name_fr: string | null
+          order_index: number
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          order_index?: number
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          order_index?: number
+          slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -849,6 +1107,7 @@ export type Database = {
           content: Json
           created_at: string
           id: string
+          lang: string | null
           model: string
           submission_id: string
           user_id: string
@@ -857,6 +1116,7 @@ export type Database = {
           content: Json
           created_at?: string
           id?: string
+          lang?: string | null
           model?: string
           submission_id: string
           user_id: string
@@ -865,6 +1125,7 @@ export type Database = {
           content?: Json
           created_at?: string
           id?: string
+          lang?: string | null
           model?: string
           submission_id?: string
           user_id?: string
