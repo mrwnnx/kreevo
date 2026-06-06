@@ -40,9 +40,10 @@ export function Step5Social({ specialty, links, onNext, onBack, onSkip, saving, 
   const [customError, setCustomError] = useState<string | null>(null)
 
   const suggestedKeys = useMemo(() => {
-    const list = specialty
-      ? SUGGESTED_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']
-      : Object.keys(SOCIAL_DEFS)
+    // PHASE 5 — accès sûr : une spé sans suggestions prédéfinies retombe sur la
+    // liste générique (tous les réseaux), JAMAIS undefined (sinon crash .filter).
+    const list =
+      (specialty && SUGGESTED_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']) || Object.keys(SOCIAL_DEFS)
     return list.filter((k) => !activeKeys.includes(k))
   }, [specialty, activeKeys])
 

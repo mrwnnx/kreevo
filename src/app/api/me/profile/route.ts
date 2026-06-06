@@ -11,7 +11,7 @@ export async function GET() {
   const { data: profile } = await (supabase as any)
     .from('profiles')
     .select(
-      'id, username, full_name, first_name, last_name, avatar_url, country, specialty, tools, objectives, experience_level, behance_url, linkedin_url, onboarding_completed'
+      'id, username, full_name, first_name, last_name, avatar_url, country, specialty, specialty_id, tools, objectives, experience_level, behance_url, linkedin_url, onboarding_completed'
     )
     .eq('id', user.id)
     .single()

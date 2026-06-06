@@ -21,13 +21,13 @@ interface Step3Props {
 }
 
 export function Step3Tools({ specialty, tools, onNext, onBack, saving, t, tc }: Step3Props) {
-  const available = useMemo(
-    () =>
-      specialty
-        ? TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic']
-        : Array.from(new Set([...TOOLS_BY_SPECIALTY.ux_ui, ...TOOLS_BY_SPECIALTY.graphic])),
-    [specialty]
-  )
+  // PHASE 5 — accès sûr : une spé sans entrée prédéfinie (ex. nouvelle spé admin)
+  // retombe sur la liste générique (union), JAMAIS undefined (sinon crash .includes).
+  const available = useMemo(() => {
+    const generic = Array.from(new Set([...TOOLS_BY_SPECIALTY.ux_ui, ...TOOLS_BY_SPECIALTY.graphic]))
+    if (!specialty) return generic
+    return TOOLS_BY_SPECIALTY[specialty as 'ux_ui' | 'graphic'] ?? generic
+  }, [specialty])
   const [selTools, setSelTools] = useState<string[]>(() =>
     tools.filter((tool) => available.includes(tool))
   )

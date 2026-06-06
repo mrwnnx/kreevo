@@ -1,5 +1,13 @@
 export type Specialty = 'ux_ui' | 'graphic' | ''
 export type ExperienceLevel = 'entry' | 'junior' | 'senior' | ''
+
+// PHASE 5 — option de spécialité lue dynamiquement depuis la table specialties.
+export interface SpecialtyOption {
+  id: string
+  slug: string
+  name: string
+  emoji: string | null
+}
 export type Objective = 'getting_hired' | 'improving_skills'
 
 export interface OnboardingData {

@@ -40,23 +40,29 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // onboarding_completed gate — only meaningful for /dashboard/* and /onboarding,
-  // which are the only paths this middleware now runs on besides /signup.
+  // onboarding gate — only meaningful for /dashboard/* and /onboarding, which are
+  // the only paths this middleware runs on besides /signup.
+  // PHASE 5 — un user « complet » mais SANS specialty_id (legacy NULL) doit encore
+  // passer par l'onboarding (choisir sa spé) : on le considère comme incomplet.
   const { data: profile } = await (supabase as any)
     .from('profiles')
-    .select('onboarding_completed')
+    .select('onboarding_completed, specialty_id')
     .eq('id', user.id)
     .single()
 
   const completed = !!profile?.onboarding_completed
+  const hasSpecialty = !!profile?.specialty_id
+  const needsOnboarding = !completed || !hasSpecialty
 
-  if (!completed && pathname.startsWith('/dashboard')) {
+  if (needsOnboarding && pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
     url.pathname = '/onboarding'
     return NextResponse.redirect(url)
   }
 
-  if (completed && pathname === '/onboarding') {
+  // Éjecte de /onboarding UNIQUEMENT les users entièrement valides (complet + spé).
+  // Un user complet sans spé reste sur /onboarding pour choisir → pas de boucle.
+  if (completed && hasSpecialty && pathname === '/onboarding') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

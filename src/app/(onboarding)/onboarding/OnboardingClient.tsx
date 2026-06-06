@@ -19,6 +19,7 @@ import type {
   Objective,
   OnboardingData,
   Specialty,
+  SpecialtyOption,
 } from '@/components/onboarding/types'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
@@ -40,9 +41,10 @@ const initialData: OnboardingData = {
 
 interface OnboardingClientProps {
   t: OnbT
+  specialties: SpecialtyOption[]
 }
 
-export function OnboardingClient({ t }: OnboardingClientProps) {
+export function OnboardingClient({ t, specialties }: OnboardingClientProps) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [direction, setDirection] = useState<Direction>('forward')
@@ -80,6 +82,13 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
             avatarUrl: p.avatar_url ?? '',
             country: p.country ?? '',
           }))
+
+          // PHASE 5 — user déjà onboardé mais SANS specialty_id (legacy NULL) :
+          // on le pose directement au step Spécialité (8) sans refaire les 8 steps
+          // ni écraser ses données déjà remplies (le merge ci-dessus les conserve).
+          if (p.onboarding_completed && !p.specialty_id) {
+            setStep(TOTAL_STEPS)
+          }
         }
       })
       .catch(() => {})
@@ -136,10 +145,11 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
     } catch {}
   }
 
-  const handleSpecialty = async (v: { specialty: Specialty }) => {
-    setData((d) => ({ ...d, ...v }))
+  // PHASE 5 — on persiste la FK specialty_id (+ le slug texte, gardé jusqu'à PHASE 7).
+  const handleSpecialty = async (v: { specialtyId: string; specialty: string }) => {
+    setData((d) => ({ ...d, specialty: v.specialty as Specialty }))
     try {
-      await persist({ specialty: v.specialty, onboarding_completed: true })
+      await persist({ specialty_id: v.specialtyId, specialty: v.specialty, onboarding_completed: true })
       setDone(true)
     } catch {}
   }
@@ -307,6 +317,7 @@ export function OnboardingClient({ t }: OnboardingClientProps) {
           {step === 8 && (
             <StepSpecialty
               specialty={data.specialty}
+              specialties={specialties}
               onNext={handleSpecialty}
               onBack={goBack}
               saving={saving}
