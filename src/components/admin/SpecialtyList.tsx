@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Loader2, Medal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SpecialtyRow {
@@ -110,8 +110,9 @@ export function SpecialtyList() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Link href={`/admin/specialties/${r.id}`} className="text-muted-foreground hover:text-foreground"><Pencil className="size-4" /></Link>
-                      <button onClick={() => del(r.id)} disabled={busy === r.id} className="text-muted-foreground hover:text-destructive disabled:opacity-50">
+                      <Link href={`/admin/specialties/${r.id}/leagues`} className="text-muted-foreground hover:text-foreground" title="Voir les ligues"><Medal className="size-4" /></Link>
+                      <Link href={`/admin/specialties/${r.id}`} className="text-muted-foreground hover:text-foreground" title="Modifier"><Pencil className="size-4" /></Link>
+                      <button onClick={() => del(r.id)} disabled={busy === r.id} className="text-muted-foreground hover:text-destructive disabled:opacity-50" title="Supprimer">
                         {busy === r.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                       </button>
                     </div>
