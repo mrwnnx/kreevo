@@ -159,6 +159,9 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
   const [step, setStep] = useState(() => {
     if (id) return 3
     if (initial?.specialty && initial?.challenge_type && initial?.industry) return 3
+    // PHASE 6D — création contextuelle : spé pré-remplie (cas graphic) → saute au step
+    // Type. « Précédent » reste possible pour revenir au step 0 et changer la spé.
+    if (initial?.specialty) return 1
     return 0
   })
 
