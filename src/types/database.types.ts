@@ -609,6 +609,45 @@ export type Database = {
         }
         Relationships: []
       }
+      league_specialty_thresholds: {
+        Row: {
+          created_at: string | null
+          league_id: string
+          specialty_id: string
+          updated_at: string | null
+          xp_threshold: number
+        }
+        Insert: {
+          created_at?: string | null
+          league_id: string
+          specialty_id: string
+          updated_at?: string | null
+          xp_threshold: number
+        }
+        Update: {
+          created_at?: string | null
+          league_id?: string
+          specialty_id?: string
+          updated_at?: string | null
+          xp_threshold?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_specialty_thresholds_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "league_specialty_thresholds_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leagues: {
         Row: {
           access: string | null

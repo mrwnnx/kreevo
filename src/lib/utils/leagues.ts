@@ -25,6 +25,21 @@ export async function getLeagueThreshold(
   leagueId: string,
   specialtyId?: string | null,
 ): Promise<number> {
+  // OVERRIDE manuel par bucket (ligue × spé) : s'il existe, il PRIME sur le calcul.
+  // Lookup uniquement si une spé est fournie (un seuil manuel est par bucket ;
+  // l'appel admin-stats sans spé tombe directement sur le fallback global).
+  // row présente → override (0 inclus). Table dans Database depuis la migration 007.
+  if (specialtyId) {
+    const { data: manual } = await supabaseAdmin
+      .from('league_specialty_thresholds')
+      .select('xp_threshold')
+      .eq('league_id', leagueId)
+      .eq('specialty_id', specialtyId)
+      .maybeSingle()
+    if (manual) return manual.xp_threshold
+  }
+
+  // FALLBACK — calcul historique INCHANGÉ (zéro régression si bucket non réglé).
   let challengesQuery = supabaseAdmin
     .from('challenges')
     .select('xp_reward')
