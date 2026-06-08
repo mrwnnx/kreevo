@@ -8,6 +8,7 @@ interface Settings {
   league_thresholds: Record<string, number>
   submission_attempts: { free: number; pro: number }
   maintenance_mode: boolean
+  league_xp_threshold_percent: number
 }
 
 export default function AdminSettings() {
@@ -72,6 +73,29 @@ export default function AdminSettings() {
             <span className={`absolute top-1 size-4 rounded-full bg-white shadow transition-transform ${settings.maintenance_mode ? 'start-7' : 'start-1'}`} />
           </button>
         </div>
+      </section>
+
+      {/* League promotion threshold % */}
+      <section className="rounded-xl border border-border bg-card p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Seuil de promotion (%)</h2>
+          <SaveBtn saving={saving} onClick={() => save('league_xp_threshold_percent', settings.league_xp_threshold_percent ?? 60)} />
+        </div>
+        <div className="flex items-center gap-2 max-w-[220px]">
+          <input
+            type="number"
+            min={10}
+            max={100}
+            step={5}
+            value={settings.league_xp_threshold_percent ?? 60}
+            onChange={e => set('league_xp_threshold_percent')(parseInt(e.target.value) || 0)}
+            className="w-full h-10 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 px-3 py-1 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
+          />
+          <span className="text-xs font-mono text-muted-foreground shrink-0">%</span>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Pourcentage du contenu (Σ XP des challenges publiés) d&apos;un bucket ligue × spécialité requis pour la promotion. Un seuil manuel par bucket prime sur ce calcul.
+        </p>
       </section>
 
       {/* XP Rewards */}

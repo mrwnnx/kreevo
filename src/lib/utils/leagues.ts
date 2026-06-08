@@ -39,7 +39,10 @@ export async function getLeagueThreshold(
     if (manual) return manual.xp_threshold
   }
 
-  // FALLBACK — calcul historique INCHANGÉ (zéro régression si bucket non réglé).
+  // FALLBACK — calcul auto : % GLOBAL (settings) × Σ xp_reward publiés du bucket.
+  // Le % vient d'un réglage unique pour toutes les ligues (settings.league_xp_threshold_percent,
+  // fallback 60 si la clé est absente). leagues.xp_threshold_percent n'est plus lu (colonne
+  // dormante, drop Phase 7).
   let challengesQuery = supabaseAdmin
     .from('challenges')
     .select('xp_reward')
@@ -48,16 +51,16 @@ export async function getLeagueThreshold(
   if (specialtyId) {
     challengesQuery = challengesQuery.eq('specialty_id', specialtyId)
   }
-  const [{ data: league }, { data: challenges }] = await Promise.all([
-    supabaseAdmin
-      .from('leagues')
-      .select('xp_threshold_percent')
-      .eq('id', leagueId)
-      .single(),
+  const [{ data: challenges }, { data: setting }] = await Promise.all([
     challengesQuery,
+    (supabaseAdmin as any)
+      .from('settings')
+      .select('value')
+      .eq('key', 'league_xp_threshold_percent')
+      .maybeSingle(),
   ])
   const total = (challenges ?? []).reduce((s, c) => s + (c.xp_reward || 0), 0)
-  const percent = league?.xp_threshold_percent ?? 60
+  const percent = typeof setting?.value === 'number' ? setting.value : 60
   return Math.floor(total * percent / 100)
 }
 
