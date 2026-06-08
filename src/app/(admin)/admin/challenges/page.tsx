@@ -8,10 +8,13 @@ import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 interface League { id: string; name: string; icon: string }
 
+interface Specialty { id: string; slug: string; name: string | null; name_fr: string | null; emoji: string | null }
+
 interface Challenge {
   id: string
   title: string
   specialty: string | null
+  specialty_id: string | null
   challenge_types: { name_fr: string | null } | null
   industries: { name_fr: string | null } | null
   xp_reward: number | null
@@ -24,7 +27,9 @@ interface Challenge {
 export default function AdminChallenges() {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [leagues, setLeagues] = useState<League[]>([])
+  const [specialties, setSpecialties] = useState<Specialty[]>([])
   const [selectedLeague, setSelectedLeague] = useState<string>('')
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
@@ -34,6 +39,10 @@ export default function AdminChallenges() {
     fetch('/api/admin/leagues')
       .then(r => r.json())
       .then(d => setLeagues(d.leagues ?? []))
+    fetch('/api/admin/specialties')
+      .then(r => r.json())
+      .then(d => setSpecialties(d.specialties ?? []))
+      .catch(() => {})
   }, [])
 
   useEffect(() => { load() }, [selectedLeague])
@@ -67,19 +76,25 @@ export default function AdminChallenges() {
   }
 
   const q = search.toLowerCase()
-  const filtered = challenges.filter(c =>
-    c.title.toLowerCase().includes(q) ||
-    (c.specialty ?? '').toLowerCase().includes(q) ||
-    (c.challenge_types?.name_fr ?? '').toLowerCase().includes(q) ||
-    (c.industries?.name_fr ?? '').toLowerCase().includes(q)
-  )
+  const filtered = challenges.filter(c => {
+    if (selectedSpecialty && c.specialty_id !== selectedSpecialty) return false
+    return (
+      c.title.toLowerCase().includes(q) ||
+      (c.specialty ?? '').toLowerCase().includes(q) ||
+      (c.challenge_types?.name_fr ?? '').toLowerCase().includes(q) ||
+      (c.industries?.name_fr ?? '').toLowerCase().includes(q)
+    )
+  })
 
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Challenges</h1>
-          <p className="text-sm text-muted-foreground">{challenges.length} challenges</p>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length}
+            {filtered.length !== challenges.length ? ` / ${challenges.length}` : ''} challenges
+          </p>
         </div>
         <Link
           href="/admin/challenges/new"
@@ -91,7 +106,8 @@ export default function AdminChallenges() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex flex-col gap-3">
+        {/* Ligues */}
         <div className="flex items-center gap-2 overflow-x-auto">
           <button
             onClick={() => setSelectedLeague('')}
@@ -119,14 +135,45 @@ export default function AdminChallenges() {
             </button>
           ))}
         </div>
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher…"
-            className="w-full h-10 ps-9 pe-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
-          />
+
+        {/* Spécialités + recherche */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSelectedSpecialty('')}
+              className={cn(
+                'shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-all',
+                !selectedSpecialty
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'border-border text-muted-foreground hover:border-foreground/40'
+              )}
+            >
+              Toutes les spés
+            </button>
+            {specialties.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedSpecialty(s.id)}
+                className={cn(
+                  'shrink-0 inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full border transition-all',
+                  selectedSpecialty === s.id
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'border-border text-muted-foreground hover:border-foreground/40'
+                )}
+              >
+                {s.emoji && <span>{s.emoji}</span>} {s.name_fr || s.name || s.slug}
+              </button>
+            ))}
+          </div>
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher…"
+              className="w-full h-10 ps-9 pe-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
+            />
+          </div>
         </div>
       </div>
 
