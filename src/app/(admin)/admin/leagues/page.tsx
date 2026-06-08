@@ -19,7 +19,6 @@ interface League {
 
 interface LeagueStats {
   challengeCount: number
-  xpThreshold: number
 }
 
 export default function AdminLeagues() {
@@ -62,6 +61,9 @@ export default function AdminLeagues() {
         <div>
           <h1 className="text-2xl font-bold">Ligues</h1>
           <p className="text-sm text-muted-foreground">{leagues.length} ligues configurées</p>
+          <Link href="/admin/specialties" className="text-xs text-primary hover:underline">
+            Voir les seuils par spécialité →
+          </Link>
         </div>
         <Link
           href="/admin/leagues/new"
@@ -76,14 +78,14 @@ export default function AdminLeagues() {
         <table className="w-full text-sm">
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
-              {['Ligue', 'Ordre', 'Défis actifs', 'XP seuil', 'Accès', 'Statut', 'Actions'].map(h => (
+              {['Ligue', 'Ordre', 'Défis actifs', 'Accès', 'Statut', 'Actions'].map(h => (
                 <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">Chargement…</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">Chargement…</td></tr>
             ) : leagues.map(league => (
               <tr key={league.id} className="hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3">
@@ -96,9 +98,6 @@ export default function AdminLeagues() {
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{league.order_index}</td>
                 <td className="px-4 py-3 font-mono text-xs">
                   {stats[league.id] !== undefined ? stats[league.id].challengeCount : '…'}
-                </td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                  {stats[league.id] !== undefined ? `${stats[league.id].xpThreshold} XP` : '…'}
                 </td>
                 <td className="px-4 py-3">
                   <span className={cn(

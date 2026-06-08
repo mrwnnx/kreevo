@@ -12,7 +12,6 @@ interface LeagueFormData {
   order_index: string
   min_challenges: string
   min_challenges_enabled: boolean
-  xp_threshold_percent: string
   access: 'all' | 'pro_only'
   is_active: boolean
 }
@@ -24,7 +23,6 @@ const EMPTY: LeagueFormData = {
   order_index: '1',
   min_challenges: '3',
   min_challenges_enabled: true,
-  xp_threshold_percent: '60',
   access: 'all',
   is_active: true,
 }
@@ -193,7 +191,8 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
         order_index: parseInt(form.order_index),
         min_challenges: Math.max(1, Math.min(20, parseInt(form.min_challenges) || 3)),
         min_challenges_enabled: form.min_challenges_enabled,
-        xp_threshold_percent: Math.max(10, Math.min(100, parseInt(form.xp_threshold_percent) || 60)),
+        // xp_threshold_percent volontairement NON envoyé : la garde `!== undefined`
+        // du PATCH préserve la colonne DB (fallback). L'éditer = vue catalogue par bucket.
       }),
     })
     const data = await res.json()
@@ -245,24 +244,6 @@ export function LeagueForm({ initial, id }: { initial?: Partial<LeagueFormData>;
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className={labelClass}>XP threshold (%)</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              value={form.xp_threshold_percent}
-              onChange={e => set('xp_threshold_percent')(e.target.value)}
-              min={10}
-              max={100}
-              step={5}
-              className={inputClass}
-            />
-            <span className="text-xs font-mono text-muted-foreground shrink-0">% du XP publié</span>
-          </div>
-          <p className="text-[11px] text-muted-foreground">
-            Pourcentage du total des <code className="font-mono">xp_reward</code> de cette ligue requis pour la promotion. Défaut 60.
-          </p>
-        </div>
 
         <div className="space-y-1.5">
           <label className={labelClass}>Require minimum challenges</label>
