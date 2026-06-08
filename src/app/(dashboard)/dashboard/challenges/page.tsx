@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Clock, ArrowRight, Check, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getLeagueThreshold } from '@/lib/utils/leagues'
+import { getLeagueThreshold, getScopedLeagueScores } from '@/lib/utils/leagues'
 import { cooldownRemainingMs, isInCooldown } from '@/lib/utils/participation-cooldown'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
@@ -313,15 +313,18 @@ export default async function ChallengesPage({
   // PHASE 2/4 — spécialité du user (FK), source unique pour le seuil ET le filtrage.
   const profileSpecialtyId = (profile?.specialty_id ?? null) as string | null
 
-  // XP threshold + completed count for current league
+  // XP threshold + leagueXp + completed count for current league
   let leagueXpThreshold = 0
   let leagueChallengesCompleted = 0
+  let leagueXp = 0
 
-  if (userLeagueRow) {
-    // PHASE 2 — seuil + compteur scopés par la spécialité du user. L'affichage
-    // doit refléter EXACTEMENT la logique de promotion (checkAndUpdateLeague) :
-    // même filtre specialty_id sur le seuil ET sur le comptage de challenges.
+  if (userLeagueRow && profileSpecialtyId) {
+    // L'affichage reflète EXACTEMENT la logique de promotion (checkAndUpdateLeague) :
+    // seuil scopé + leagueXp (XP gagné dans la ligue courante) via la MÊME source
+    // getScopedLeagueScores. La barre = leagueXp / seuil, pas profiles.xp (= total).
     leagueXpThreshold = await getLeagueThreshold(userLeagueRow.id, profileSpecialtyId)
+    const scores = await getScopedLeagueScores(userLeagueRow.id, profileSpecialtyId)
+    leagueXp = scores[user.id] ?? 0
 
     const leagueChallengeIds = challenges
       .filter(c => c.league_id === userLeagueRow.id && c.specialty_id === profileSpecialtyId)
@@ -360,7 +363,8 @@ export default async function ChallengesPage({
 
   // Progress percentages
   const minCh = userLeagueRow?.min_challenges ?? 3
-  const userXp = (profile?.xp ?? 0) as number
+  // Barre de promotion : leagueXp courant (pas profiles.xp, qui est le total carrière).
+  const userXp = leagueXp
 
   const dict = await getDict()
   const t = dict.challengesPage

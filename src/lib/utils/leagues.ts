@@ -115,7 +115,6 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
   if (!profile.specialty_id) return
 
   const currentLeagueName = profile.league || 'Stone'
-  const currentXP = profile.xp || 0
 
   const { data: currentLeague } = await supabaseAdmin
     .from('leagues')
@@ -126,6 +125,11 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   // Seuil scopé : ne somme que les challenges de la spécialité du user.
   const threshold = await getLeagueThreshold(currentLeague.id, profile.specialty_id)
+
+  // leagueXp = XP gagné par le user DANS sa ligue+spé courante (challenges soumis).
+  // Source unique getScopedLeagueScores (la même que leaderboard + barres dashboard).
+  const scores = await getScopedLeagueScores(currentLeague.id, profile.specialty_id)
+  const leagueXp = scores[userId] ?? 0
 
   const { data: leagueChallenges } = await supabaseAdmin
     .from('challenges')
@@ -148,11 +152,10 @@ export async function checkAndUpdateLeague(userId: string): Promise<void> {
 
   const minChallenges = currentLeague.min_challenges ?? 3
   const minChallengesEnabled = currentLeague.min_challenges_enabled ?? true
-  // ⚠️ PHASE 2 : `threshold` est scopé par spécialité, mais `currentXP` vient de
-  // profiles.xp qui est ENCORE GLOBAL (toutes spés confondues). C'est une
-  // incohérence temporaire ASSUMÉE : l'isolation de l'XP par spécialité est une
-  // phase ultérieure. Ne pas « corriger » ce comparatif comme un bug.
-  const meetsXP = threshold === 0 || currentXP >= threshold
+  // La promotion se base sur le leagueXp (XP gagné DANS la ligue courante), pas sur
+  // profiles.xp (total cumulé à vie, conservé intact en DB). Seuil et leagueXp sont
+  // tous deux scopés ligue+spé → comparatif cohérent (leagueXp ≤ seuil borné).
+  const meetsXP = threshold === 0 || leagueXp >= threshold
   const meetsChallenges = !minChallengesEnabled || completedCount >= minChallenges
 
   if (!meetsXP || !meetsChallenges) return

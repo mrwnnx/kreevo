@@ -132,15 +132,19 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const threshold = userLeague?.id && userSpecialtyId
     ? await getLeagueThreshold(userLeague.id, userSpecialtyId)
     : 0
-  // ⚠️ currentXP vient de profiles.xp, ENCORE GLOBAL (toutes spés). Comparé à un
-  // seuil scopé → incohérence temporaire ASSUMÉE (isolation XP = phase ultérieure).
-  const currentXP = profile?.xp || 0
-  const xpPercent = threshold > 0 ? Math.min((currentXP / threshold) * 100, 100) : 0
-  const xpGap = Math.max(0, threshold - currentXP)
+  // leagueXp scopé — SOURCE UNIQUE (getScopedLeagueScores), réutilisée par la barre
+  // de promotion ET le classement. La barre montre l'avancement DANS la ligue
+  // courante (leagueXp / seuil), cohérent avec checkAndUpdateLeague. profiles.xp
+  // (total carrière) reste affiché via <StatCards profile={profile} /> (« XP total »).
+  const scoreByUser: Record<string, number> =
+    userLeague?.id && userSpecialtyId
+      ? await getScopedLeagueScores(userLeague.id, userSpecialtyId)
+      : {}
+  const leagueXp = scoreByUser[user.id] ?? 0
+  const xpPercent = threshold > 0 ? Math.min((leagueXp / threshold) * 100, 100) : 0
+  const xpGap = Math.max(0, threshold - leagueXp)
 
-  // PHASE 3 — classement scopé leagueXp (MÊME modèle que le leaderboard).
-  // Rang/total/voisins/top10 basés sur le score leagueXp scopé, plus sur
-  // profiles.xp global. specialty_id NULL → aucun classement (rang neutre).
+  // PHASE 3 — classement scopé leagueXp (réutilise scoreByUser, pas de 2e appel).
   let userRank = 1
   let totalInLeague = 0
   let neighborUsers: {
@@ -154,14 +158,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   let xpToTop10 = 0
 
   if (userLeague?.id && userSpecialtyId) {
-    const [scoreByUser, { data: leagueUsers }] = await Promise.all([
-      getScopedLeagueScores(userLeague.id, userSpecialtyId),
-      supabaseAdmin
-        .from('profiles')
-        .select('id, username, full_name, avatar_url, xp')
-        .ilike('league', userLeagueName)
-        .eq('specialty_id', userSpecialtyId),
-    ])
+    const { data: leagueUsers } = await supabaseAdmin
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, xp')
+      .ilike('league', userLeagueName)
+      .eq('specialty_id', userSpecialtyId)
     const ranked = [...((leagueUsers ?? []) as any[])].sort((a, b) => {
       const diff = (scoreByUser[b.id] ?? 0) - (scoreByUser[a.id] ?? 0)
       return diff !== 0 ? diff : (b.xp ?? 0) - (a.xp ?? 0)
@@ -328,7 +329,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           nextLeague={nextLeague}
           userRank={userRank}
           totalInLeague={totalInLeague || 50}
-          currentXP={currentXP}
+          currentXP={leagueXp}
           threshold={threshold}
           suggestedChallenge={suggestedChallengeL}
           completedInLeague={completedInLeague}
