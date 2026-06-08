@@ -1028,7 +1028,7 @@ export const fr = {
     },
     features: {
       monthly: {
-        tag: 'Mensuel',
+        tag: 'Briefs réels',
         title: 'Vrais challenges design',
         desc: 'Briefs en Mobile UI, Web Design, Branding, Design Systems, Motion. Notés par IA et la communauté.',
       },

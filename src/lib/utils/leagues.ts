@@ -11,7 +11,6 @@ export type LeagueRow = {
   xp_threshold_percent: number
   access: 'all' | 'pro_only'
   is_active: boolean
-  specialty?: string | null
   created_at: string
 }
 

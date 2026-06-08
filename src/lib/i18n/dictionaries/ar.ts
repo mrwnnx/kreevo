@@ -1035,7 +1035,7 @@ export const ar: Dictionary = {
     },
     features: {
       monthly: {
-        tag: 'شهري',
+        tag: 'موجزات حقيقية',
         title: 'تحديات تصميم حقيقية',
         desc: 'موجزات في Mobile UI و Web Design و Branding و Design Systems و Motion. يقيّمها الـ AI والمجتمع.',
       },

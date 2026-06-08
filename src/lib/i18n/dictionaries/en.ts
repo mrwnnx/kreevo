@@ -1031,7 +1031,7 @@ export const en: Dictionary = {
     },
     features: {
       monthly: {
-        tag: 'Monthly',
+        tag: 'Real briefs',
         title: 'Real Design Challenges',
         desc: 'Briefs across Mobile UI, Web Design, Branding, Design Systems, Motion. Graded by AI + community.',
       },
