@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getSpecialtyRank } from '@/lib/utils/ranking'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ProBadge } from '@/components/ui/ProBadge'
@@ -166,24 +167,14 @@ export default async function ProfilePage({
   // PHASE 3 — rang « Top n% » scopé par spécialité : comparé aux designers de la
   // MÊME spé uniquement. ⚠️ p.xp reste profiles.xp GLOBAL (isolation XP = phase
   // ultérieure) ; seul le RANG est scopé → « Top n% des designers de cette spé ».
-  // specialty_id NULL → pas de rang affiché.
+  // specialty_id NULL → pas de rang affiché. Source unique getSpecialtyRank (même
+  // calcul, même client RLS) — partagée avec l'onglet « Ma spécialité » du leaderboard.
   let rank = 0
   let totalUsers = 0
   if (p.specialty_id) {
-    const [{ data: rankData }, { count: totalInSpec }] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('id')
-        .eq('specialty_id', p.specialty_id)
-        .gte('xp', p.xp)
-        .neq('id', p.id),
-      supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('specialty_id', p.specialty_id),
-    ])
-    rank = (rankData?.length ?? 0) + 1
-    totalUsers = totalInSpec ?? 0
+    const r = await getSpecialtyRank(supabase, p.specialty_id, p.xp, p.id)
+    rank = r.rank
+    totalUsers = r.total
   }
   const dict = await getDict()
   const lang = await getLang()

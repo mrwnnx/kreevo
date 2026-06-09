@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { House, Trophy, BarChart3, Shield } from 'lucide-react'
+import { House, Trophy, BarChart3, Medal, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -20,10 +20,17 @@ import type { Profile } from '@/types/database.types'
 import type { Lang } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
-const NAV_BASE = [
-  { href: '/dashboard',             icon: House,     match: (p: string) => p === '/dashboard',                key: 'dashboard'  as const },
-  { href: '/dashboard/challenges',  icon: Trophy,    match: (p: string) => p.startsWith('/dashboard/challenges'),  key: 'challenges' as const },
-  { href: '/dashboard/leaderboard', icon: BarChart3, match: (p: string) => p.startsWith('/dashboard/leaderboard'), key: 'leagues'    as const },
+// 4 items : les 2 entrées leaderboard se distinguent par ?tab= (highlight correct).
+const NAV_BASE: Array<{
+  href: string
+  icon: typeof House
+  match: (p: string, tab: string | null) => boolean
+  key: 'dashboard' | 'challenges' | 'leagues' | 'ranking'
+}> = [
+  { href: '/dashboard',                            icon: House,     match: (p) => p === '/dashboard',                                                  key: 'dashboard'  },
+  { href: '/dashboard/challenges',                 icon: Trophy,    match: (p) => p.startsWith('/dashboard/challenges'),                               key: 'challenges' },
+  { href: '/dashboard/leaderboard?tab=league',     icon: BarChart3, match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab !== 'specialty', key: 'leagues'    },
+  { href: '/dashboard/leaderboard?tab=specialty',  icon: Medal,     match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab === 'specialty', key: 'ranking'    },
 ]
 
 // Detail routes where the mobile bottom nav doesn't belong (page-specific actions take over instead)
@@ -42,6 +49,7 @@ interface Props {
 
 export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
   const pathname = usePathname()
+  const tabParam = useSearchParams().get('tab')
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -157,7 +165,7 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
       {NAV_BASE.map(({ href, key, icon: Icon, match }) => {
-        const active = match(pathname)
+        const active = match(pathname, tabParam)
         const label = t.nav[key]
         return (
           <Link
@@ -165,7 +173,7 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             href={href}
             aria-label={label}
             className={cn(
-              'flex flex-col items-center justify-center gap-0.5 rounded-full px-4 py-2 transition-all duration-150 min-w-[64px]',
+              'flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-2 transition-all duration-150 min-w-[58px]',
               active
                 ? 'bg-foreground text-background shadow-sm'
                 : 'text-zinc-500 hover:text-foreground dark:text-zinc-400',

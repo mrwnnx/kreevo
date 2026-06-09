@@ -36,6 +36,7 @@ export const en: Dictionary = {
       dashboard: 'Dashboard',
       challenges: 'Challenges',
       leagues: 'Leagues',
+      ranking: 'Ranking',
     },
     menu: {
       publicProfile: 'Public profile',
@@ -79,6 +80,11 @@ export const en: Dictionary = {
       best: 'Best: {n}d',
       thisWeek: '+{n} this week',
       completeFirst: 'Complete your first!',
+    },
+    leaderboard: {
+      specialtyTitle: '{specialty} ranking',
+      subtitleSpecialty: 'Career standing — all designers in your specialty, across leagues, ranked on total XP.',
+      careerXp: 'total XP',
     },
     leagueSection: {
       yourLeague: 'YOUR LEAGUE',

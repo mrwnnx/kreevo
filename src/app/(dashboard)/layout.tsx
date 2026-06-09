@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { FloatingNav } from '@/components/layout/FloatingNav'
@@ -35,14 +36,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <Sidebar
-          profile={profile as Profile}
-          unreadCount={unreadCount ?? 0}
-          leagueIcon={leagueRow?.icon ?? null}
-          lang={lang}
-          t={dict.header}
-        />
-        <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} notifTypes={dict.notificationsPage.types} />
+        <Suspense fallback={null}>
+          <Sidebar
+            profile={profile as Profile}
+            unreadCount={unreadCount ?? 0}
+            leagueIcon={leagueRow?.icon ?? null}
+            lang={lang}
+            t={dict.header}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} notifTypes={dict.notificationsPage.types} />
+        </Suspense>
         <main className="sm:ps-72 min-h-screen">{children}</main>
         <Toaster position="bottom-right" />
       </div>

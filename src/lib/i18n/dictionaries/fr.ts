@@ -33,7 +33,8 @@ export const fr = {
     nav: {
       dashboard: 'Dashboard',
       challenges: 'Challenges',
-      leagues: 'Leagues',
+      leagues: 'Ligues',
+      ranking: 'Classement',
     },
     menu: {
       publicProfile: 'Profil public',
@@ -77,6 +78,11 @@ export const fr = {
       best: 'Record : {n}j',
       thisWeek: '+{n} cette semaine',
       completeFirst: 'Complète ton premier !',
+    },
+    leaderboard: {
+      specialtyTitle: 'Classement {specialty}',
+      subtitleSpecialty: 'Standing carrière — tous les designers de ta spécialité, toutes ligues, classés sur l\'XP total.',
+      careerXp: 'XP total',
     },
     leagueSection: {
       yourLeague: 'TA LIGUE',

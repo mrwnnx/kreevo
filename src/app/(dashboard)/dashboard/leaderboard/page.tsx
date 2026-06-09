@@ -9,6 +9,8 @@ import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { LeaguesRow } from '@/components/features/league/LeaguesRow'
 import { getScopedLeagueScores } from '@/lib/utils/leagues'
+import { getSpecialtyRank } from '@/lib/utils/ranking'
+import { getDict, tx } from '@/lib/i18n/lang'
 import { cn } from '@/lib/utils'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -39,7 +41,11 @@ const RANK_MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 // ── Page ──────────────────────────────────────────────────────────────────────
 // PHASE 3 — classement scopé par specialty_id (plus de track switcher cosmétique).
 // Un user ne voit QUE sa ligue ET sa spécialité.
-export default async function LeaderboardPage() {
+export default async function LeaderboardPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const sp = await searchParams
+  const tab: 'league' | 'specialty' = sp.tab === 'specialty' ? 'specialty' : 'league'
+  const dict = await getDict()
+  const tl = dict.dashboard.leaderboard
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -74,8 +80,8 @@ export default async function LeaderboardPage() {
   let rankedUsers: RankedUser[] = []
   let myRankedUser: RankedUser | null = null
 
-  // Classement uniquement si l'user a une ligue ET une spécialité.
-  if (userLeagueRow && userSpecialtyId) {
+  // ── Onglet « Ma ligue » — leagueXp, ligue COURANTE × spé (inchangé). ──
+  if (tab === 'league' && userLeagueRow && userSpecialtyId) {
     // Score leagueXp scopé via la source unique (cohérent avec getLeagueThreshold).
     // leagueUsers = profils de la même ligue ET même spé (scope dur par FK).
     const [scoreByUser, { data: leagueUsers }] = await Promise.all([
@@ -108,32 +114,69 @@ export default async function LeaderboardPage() {
     myRankedUser = rankedUsers.find(u => u.id === user.id) ?? null
   }
 
+  // ── Onglet « Ma spécialité » — TOUS les designers de la spé (toutes ligues),
+  // triés XP carrière (profiles.xp). leagueXp porte ici l'XP carrière (réutilise
+  // le rendu). Rang « ma position » via getSpecialtyRank (source unique, = profil public).
+  if (tab === 'specialty' && userSpecialtyId) {
+    const { data: specDesigners } = await (supabaseAdmin as any)
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, specialty, plan, xp')
+      .eq('specialty_id', userSpecialtyId)
+      .order('xp', { ascending: false })
+      .limit(100)
+
+    rankedUsers = ((specDesigners ?? []) as any[]).map((u: any, i: number) => ({
+      id: u.id,
+      username: u.username,
+      full_name: u.full_name ?? null,
+      avatar_url: u.avatar_url ?? null,
+      specialty: u.specialty ?? null,
+      plan: u.plan ?? 'free',
+      xp: u.xp ?? 0,
+      leagueXp: u.xp ?? 0, // XP carrière affichée via le rendu commun
+      rank: i + 1,
+    }))
+
+    const me = await getSpecialtyRank(supabaseAdmin, userSpecialtyId, profile?.xp ?? 0, user.id)
+    const myRow = rankedUsers.find(u => u.id === user.id)
+    myRankedUser = myRow ? { ...myRow, rank: me.rank } : null
+  }
+
   return (
     <div className="max-w-[720px] mx-auto px-6 py-8 pb-16 space-y-8">
 
-      {/* ── Hero — all leagues in 1 row, active always centered (auto-scroll) ── */}
-      {userLeagueRow ? (
-        <div className="text-center space-y-3 py-2">
-          <LeaguesRow leagues={leagues} userLeagueIndex={userLeagueIndex} />
+      {/* ── Header CONDITIONNEL au tab (navigation via sidebar/nav, pas de toggle) ── */}
+      {tab === 'league' ? (
+        // Onglet « Ma ligue » → bandeau ligue COMPLET (8 icônes + nom + « Voir mes défis »).
+        userLeagueRow ? (
+          <div className="text-center space-y-3 py-2">
+            <LeaguesRow leagues={leagues} userLeagueIndex={userLeagueIndex} />
 
-          <div className="pt-2">
-            <h1 className="text-2xl font-bold">{userLeagueRow.name} League</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Complète des défis pour accumuler des XP
-            </p>
+            <div className="pt-2">
+              <h1 className="text-2xl font-bold">{userLeagueRow.name} League</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Complète des défis pour accumuler des XP
+              </p>
+            </div>
+            <Link
+              href="/dashboard/challenges"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2 rounded-full text-white transition-opacity hover:opacity-85"
+              style={{ background: userLeagueRow.color }}
+            >
+              Voir mes défis <ArrowRight className="size-3.5" />
+            </Link>
           </div>
-          <Link
-            href="/dashboard/challenges"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2 rounded-full text-white transition-opacity hover:opacity-85"
-            style={{ background: userLeagueRow.color }}
-          >
-            Voir mes défis <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
+        ) : (
+          <div className="text-center py-8 space-y-2">
+            <p className="text-2xl font-bold">Leaderboard</p>
+            <p className="text-sm text-muted-foreground">Tu n'es pas encore dans une ligue du nouveau système.</p>
+          </div>
+        )
       ) : (
-        <div className="text-center py-8 space-y-2">
-          <p className="text-2xl font-bold">Leaderboard</p>
-          <p className="text-sm text-muted-foreground">Tu n'es pas encore dans une ligue du nouveau système.</p>
+        // Onglet « Ma spécialité » → header NEUTRE : AUCUN élément ligue.
+        <div className="text-center space-y-2 py-2">
+          <h1 className="text-2xl font-bold">{tx(tl.specialtyTitle, { specialty: profile?.specialty ?? '' })}</h1>
+          <p className="text-sm text-muted-foreground">{tl.subtitleSpecialty}</p>
         </div>
       )}
 
@@ -196,7 +239,7 @@ export default async function LeaderboardPage() {
                   {(myRankedUser?.leagueXp ?? 0).toLocaleString()}
                 </span>
               </div>
-              <p className="text-[10px] text-muted-foreground">XP ligue</p>
+              <p className="text-[10px] text-muted-foreground">{tab === 'specialty' ? tl.careerXp : 'XP ligue'}</p>
             </div>
           </div>
         </div>

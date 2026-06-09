@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { House, Trophy, BarChart3, Bell, ScrollText, ChevronRight, Shield } from 'lucide-react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { House, Trophy, BarChart3, Medal, Bell, ScrollText, ChevronRight, Shield } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
 import { Logo } from '@/components/ui/Logo'
 import { cn } from '@/lib/utils'
@@ -31,6 +31,7 @@ interface Props {
 
 export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   const pathname = usePathname()
+  const tabParam = useSearchParams().get('tab')
 
   const displayName =
     profile.full_name?.trim() ||
@@ -39,12 +40,20 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
 
   const leagueStyle = getLeagueStyle(profile.league)
 
-  const items = [
-    { href: '/dashboard',               icon: House,       label: t.nav.dashboard,    match: (p: string) => p === '/dashboard' },
-    { href: '/dashboard/challenges',    icon: Trophy,      label: t.nav.challenges,   match: (p: string) => p.startsWith('/dashboard/challenges') },
-    { href: '/dashboard/leaderboard',   icon: BarChart3,   label: t.nav.leagues,      match: (p: string) => p.startsWith('/dashboard/leaderboard') },
-    { href: '/dashboard/notifications', icon: Bell,        label: t.menu.notifications, match: (p: string) => p.startsWith('/dashboard/notifications'), badge: unreadCount },
-    { href: '/dashboard/history',       icon: ScrollText,  label: t.menu.history,     match: (p: string) => p.startsWith('/dashboard/history') },
+  // match reçoit (pathname, tab) → les 2 entrées leaderboard se distinguent par ?tab=.
+  const items: Array<{
+    href: string
+    icon: typeof House
+    label: string
+    match: (p: string, tab: string | null) => boolean
+    badge?: number
+  }> = [
+    { href: '/dashboard',                            icon: House,       label: t.nav.dashboard,    match: (p) => p === '/dashboard' },
+    { href: '/dashboard/challenges',                 icon: Trophy,      label: t.nav.challenges,   match: (p) => p.startsWith('/dashboard/challenges') },
+    { href: '/dashboard/leaderboard?tab=league',     icon: BarChart3,   label: t.nav.leagues,      match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab !== 'specialty' },
+    { href: '/dashboard/leaderboard?tab=specialty',  icon: Medal,       label: t.nav.ranking,      match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab === 'specialty' },
+    { href: '/dashboard/notifications',              icon: Bell,        label: t.menu.notifications, match: (p) => p.startsWith('/dashboard/notifications'), badge: unreadCount },
+    { href: '/dashboard/history',                    icon: ScrollText,  label: t.menu.history,     match: (p) => p.startsWith('/dashboard/history') },
   ]
 
   return (
@@ -147,7 +156,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
       {/* Nav items */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         {items.map(({ href, icon: Icon, label, match, badge }) => {
-          const active = match(pathname)
+          const active = match(pathname, tabParam)
           return (
             <Link
               key={href}

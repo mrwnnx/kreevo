@@ -41,6 +41,7 @@ export const ar: Dictionary = {
       dashboard: 'الرئيسية',
       challenges: 'التحديات',
       leagues: 'الدوريات',
+      ranking: 'التصنيف',
     },
     menu: {
       publicProfile: 'الملف العام',
@@ -84,6 +85,11 @@ export const ar: Dictionary = {
       best: 'الأفضل: {n} يوم',
       thisWeek: '+{n} هذا الأسبوع',
       completeFirst: 'أكمل تحديك الأول!',
+    },
+    leaderboard: {
+      specialtyTitle: 'تصنيف {specialty}',
+      subtitleSpecialty: 'ترتيب المسيرة — كل المصممين في تخصصك، عبر جميع الدوريات، مُرتّبون حسب إجمالي XP.',
+      careerXp: 'إجمالي XP',
     },
     leagueSection: {
       yourLeague: 'دوريك',
