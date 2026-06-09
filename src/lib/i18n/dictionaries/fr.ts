@@ -67,6 +67,7 @@ export const fr = {
       totalXp: 'XP TOTAL',
       streak: 'STREAK',
       rank: 'RANG',
+      rankValue: '#{rank} / {total}',
       rankSubtext: 'Dans ta ligue',
       challenges: 'DÉFIS',
       tierOf: 'Niveau {n} sur 8',

@@ -74,6 +74,7 @@ export const ar: Dictionary = {
       totalXp: 'إجمالي XP',
       streak: 'سلسلة الأيام',
       rank: 'الترتيب',
+      rankValue: '#{rank} / {total}',
       rankSubtext: 'في دوريك',
       challenges: 'التحديات',
       tierOf: 'المستوى {n} من 8',

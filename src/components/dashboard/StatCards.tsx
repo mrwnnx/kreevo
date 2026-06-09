@@ -30,7 +30,6 @@ export function StatCards({
 }: Props) {
   const leagueName = userLeague?.name || profile?.league || 'Stone'
   const leagueIcon = userLeague?.icon || '🪨'
-  const topPercent = Math.min(100, Math.max(1, Math.ceil((userRank / Math.max(totalInLeague, 1)) * 100)))
   const stats: Array<{
     label: string
     icon: ReactNode
@@ -67,7 +66,7 @@ export function StatCards({
     {
       label: t.rank,
       icon: <Medal className="w-4 h-4 text-sky-500" />,
-      value: `Top ${topPercent}%`,
+      value: userRank && totalInLeague ? tx(t.rankValue, { rank: userRank, total: totalInLeague }) : '—',
       subtext: t.rankSubtext,
       valueClass: 'text-2xl sm:text-xl font-bold text-sky-600',
     },
