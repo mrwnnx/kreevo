@@ -80,7 +80,8 @@ export const fr = {
     leagueSection: {
       yourLeague: 'TA LIGUE',
       leagueSuffix: 'League',
-      xpProgress: '⚡ Progression XP',
+      xpProgress: '⚡ XP de ligue',
+      xpProgressHint: 'XP gagné via les défis de cette ligue. Tes likes et commentaires comptent dans ton XP total, pas pour la promotion.',
       challengesProgress: '🎯 Défis complétés',
       rank: 'Rang #{rank} sur {total}',
       pushToTop: 'Pousser vers le top 10 🔥',

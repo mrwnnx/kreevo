@@ -82,7 +82,8 @@ export const en: Dictionary = {
     leagueSection: {
       yourLeague: 'YOUR LEAGUE',
       leagueSuffix: 'League',
-      xpProgress: '⚡ XP progress',
+      xpProgress: '⚡ League XP',
+      xpProgressHint: 'XP earned through this league\'s challenges. Likes and comments count toward your total XP, not promotion.',
       challengesProgress: '🎯 Challenges progress',
       rank: 'Rank #{rank} of {total}',
       pushToTop: 'Push to top 10 🔥',

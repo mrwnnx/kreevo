@@ -81,6 +81,7 @@ export function LeagueSection({
                 style={{ width: `${xpPercent}%` }}
               />
             </div>
+            <p className={cn('text-[10px] mt-1 opacity-60', leagueStyle.textSecondary)}>{t.xpProgressHint}</p>
           </div>
 
           {minChallengesEnabled && (

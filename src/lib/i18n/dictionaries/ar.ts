@@ -87,7 +87,8 @@ export const ar: Dictionary = {
     leagueSection: {
       yourLeague: 'دوريك',
       leagueSuffix: 'League',
-      xpProgress: '⚡ تقدّم الـ XP',
+      xpProgress: '⚡ XP الدوري',
+      xpProgressHint: 'XP مكتسبة من تحديات هذا الدوري. الإعجابات والتعليقات تُحتسب في إجمالي XP، لا في الترقية.',
       challengesProgress: '🎯 التحديات المكتملة',
       rank: 'الترتيب #{rank} من {total}',
       pushToTop: 'اصعد إلى أفضل 10 🔥',
