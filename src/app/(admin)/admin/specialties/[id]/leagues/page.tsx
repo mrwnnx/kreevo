@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { BucketThresholdEditor } from '@/components/admin/BucketThresholdEditor'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 
 interface Props { params: Promise<{ id: string }> }
 
-interface LeagueRow { id: string; name: string; icon: string | null; order_index: number; xp_threshold_percent: number }
+interface LeagueRow { id: string; name: string; icon: string | null; order_index: number }
 interface ChallengeRow {
   id: string
   title: string | null
@@ -19,10 +20,10 @@ export default async function SpecialtyLeaguesPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
-  // Lecture pure (server). 5 reads en parallèle.
-  const [{ data: specialty }, { data: leaguesData }, { data: challengesData }, { data: usersData }, { data: overridesData }] = await Promise.all([
+  // Lecture pure (server). 6 reads en parallèle.
+  const [{ data: specialty }, { data: leaguesData }, { data: challengesData }, { data: usersData }, { data: overridesData }, { data: globalPctSetting }] = await Promise.all([
     (supabase as any).from('specialties').select('id, slug, name, name_fr, emoji').eq('id', id).single(),
-    (supabase as any).from('leagues').select('id, name, icon, order_index, xp_threshold_percent').order('order_index', { ascending: true }),
+    (supabase as any).from('leagues').select('id, name, icon, order_index').order('order_index', { ascending: true }),
     (supabase as any)
       .from('challenges')
       .select('id, title, xp_reward, is_published, league_id, created_at')
@@ -32,12 +33,15 @@ export default async function SpecialtyLeaguesPage({ params }: Props) {
     (supabase as any).from('profiles').select('league').eq('specialty_id', id),
     // PHASE TEMPS 2 — seuils manuels (overrides) de cette spé, par ligue.
     (supabase as any).from('league_specialty_thresholds').select('league_id, xp_threshold').eq('specialty_id', id),
+    // % GLOBAL (settings) — MÊME source que getLeagueThreshold (cohérence du seuil auto affiché).
+    (supabase as any).from('settings').select('value').eq('key', 'league_xp_threshold_percent').maybeSingle(),
   ])
 
   if (!specialty) notFound()
 
   const leagues: LeagueRow[] = leaguesData ?? []
   const challenges: ChallengeRow[] = challengesData ?? []
+  const globalPct = typeof globalPctSetting?.value === 'number' ? globalPctSetting.value : 60
 
   // Map des overrides par league_id (override manuel s'il existe).
   const overrideByLeague = new Map<string, number>()
@@ -81,14 +85,15 @@ export default async function SpecialtyLeaguesPage({ params }: Props) {
           const xpTotal = list.filter((c) => c.is_published).reduce((s, c) => s + (c.xp_reward ?? 0), 0)
           const nUsers = usersByLeague.get(l.name) ?? 0
           // Seuil auto (fallback) recalculé inline — PAS getLeagueThreshold (qui renverrait l'override).
-          const auto = Math.floor((xpTotal * (l.xp_threshold_percent ?? 60)) / 100)
+          // % GLOBAL (settings), même source que getLeagueThreshold → auto affiché == vrai seuil auto.
+          const auto = Math.floor((xpTotal * globalPct) / 100)
           const override = overrideByLeague.has(l.id) ? (overrideByLeague.get(l.id) as number) : null
 
           return (
             <div key={l.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold flex items-center gap-1.5">
-                  <span>{l.icon ?? '🏅'}</span> {l.name}
+                  <LeagueIcon icon={l.icon ?? '🏅'} size="sm" /> {l.name}
                 </h2>
                 <span className="text-[11px] font-mono text-muted-foreground">#{l.order_index}</span>
               </div>
