@@ -37,14 +37,6 @@ export const en: Dictionary = {
     back: 'Back',
     next: 'Next',
     finish: 'Get started',
-    steps: {
-      welcome:     { name: 'Welcome',  title: 'Step 1 (to fill in)', description: 'Intro copy to be replaced with the Figma content.' },
-      xp:          { name: 'Earn XP',  title: 'Every action moves you forward', description: 'Complete challenges, engage with the community, and invite friends to earn XP and unlock new leagues.' },
-      submit:      { name: 'Submit',      title: 'Step 3 (to fill in)', description: 'Short placeholder copy to be replaced.' },
-      leagues:     { name: 'Leagues',     title: 'Step 4 (to fill in)', description: 'Short placeholder copy to be replaced.' },
-      leaderboard: { name: 'Ranking',     title: 'Step 5 (to fill in)', description: 'Short placeholder copy to be replaced.' },
-      profile:     { name: 'Profile',     title: 'Step 6 (to fill in)', description: 'Short placeholder copy to be replaced.' },
-    },
   },
 
   header: {

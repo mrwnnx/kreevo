@@ -725,6 +725,60 @@ export type Database = {
           },
         ]
       }
+      onboarding_steps: {
+        Row: {
+          created_at: string
+          description_ar: string
+          description_en: string
+          description_fr: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          name_fr: string
+          order_index: number
+          title_ar: string
+          title_en: string
+          title_fr: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_ar: string
+          description_en: string
+          description_fr: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          name_fr: string
+          order_index?: number
+          title_ar: string
+          title_en: string
+          title_fr: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          description_fr?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          name_fr?: string
+          order_index?: number
+          title_ar?: string
+          title_en?: string
+          title_fr?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       participations: {
         Row: {
           challenge_id: string | null

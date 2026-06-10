@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
   Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen, LayoutTemplate,
-  Tag, Building2, Layers,
+  Tag, Building2, Layers, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/Logo'
@@ -25,6 +25,7 @@ const NAV = [
   { href: '/admin/emails/templates', label: 'Templates email', icon: LayoutTemplate },
   { href: '/admin/help',         label: 'Help Center',    icon: BookOpen },
   { href: '/admin/design',       label: 'Design System',  icon: Palette },
+  { href: '/admin/onboarding',   label: 'Onboarding',     icon: Sparkles },
   { href: '/admin/settings',     label: 'Paramètres',     icon: Settings },
 ]
 

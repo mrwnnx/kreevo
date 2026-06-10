@@ -35,14 +35,6 @@ export const fr = {
     back: 'Retour',
     next: 'Suivant',
     finish: 'Commencer',
-    steps: {
-      welcome:     { name: 'Bienvenue',     title: 'Étape 1 (à remplir)', description: 'Texte d\'introduction à remplacer par le contenu Figma.' },
-      xp:          { name: 'Gagne de l\'XP', title: 'Chaque action te fait avancer', description: 'Complète des défis, échange avec la communauté et invite des amis pour gagner de l\'XP et débloquer de nouvelles ligues.' },
-      submit:      { name: 'Soumettre',     title: 'Étape 3 (à remplir)', description: 'Texte placeholder court à remplacer.' },
-      leagues:     { name: 'Ligues',        title: 'Étape 4 (à remplir)', description: 'Texte placeholder court à remplacer.' },
-      leaderboard: { name: 'Classement',    title: 'Étape 5 (à remplir)', description: 'Texte placeholder court à remplacer.' },
-      profile:     { name: 'Profil',        title: 'Étape 6 (à remplir)', description: 'Texte placeholder court à remplacer.' },
-    },
   },
 
   header: {
