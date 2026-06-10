@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { FloatingNav } from '@/components/layout/FloatingNav'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
 import type { Profile } from '@/types/database.types'
@@ -49,6 +50,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} notifTypes={dict.notificationsPage.types} />
         </Suspense>
         <main className="sm:ps-72 min-h-screen">{children}</main>
+        {/* Tour de bienvenue — s'ouvre au 1er passage au dashboard (tour_completed=false). */}
+        <OnboardingTour initialOpen={!profile.tour_completed} t={dict.onboardingTour} />
         <Toaster position="bottom-right" />
       </div>
     </TooltipProvider>

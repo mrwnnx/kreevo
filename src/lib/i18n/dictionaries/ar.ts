@@ -36,6 +36,22 @@ export const ar: Dictionary = {
     saved: 'تم حفظ اللغة',
   },
 
+  onboardingTour: {
+    stepOf: '{current} من {total} — {name}',
+    skip: 'تخطٍّ',
+    back: 'رجوع',
+    next: 'التالي',
+    finish: 'ابدأ',
+    steps: {
+      welcome:     { name: 'مرحبًا',     title: 'الخطوة 1 (للتعبئة)', description: 'نص تعريفي سيُستبدل بمحتوى Figma.' },
+      xp:          { name: 'اكسب XP',    title: 'كل خطوة تقرّبك أكثر', description: 'أكمل التحديات، تفاعل مع المجتمع، وادعُ أصدقاءك لكسب XP وفتح دوريات جديدة.' },
+      submit:      { name: 'الإرسال',    title: 'الخطوة 3 (للتعبئة)', description: 'نص مؤقت قصير سيُستبدل.' },
+      leagues:     { name: 'الدوريات',   title: 'الخطوة 4 (للتعبئة)', description: 'نص مؤقت قصير سيُستبدل.' },
+      leaderboard: { name: 'التصنيف',    title: 'الخطوة 5 (للتعبئة)', description: 'نص مؤقت قصير سيُستبدل.' },
+      profile:     { name: 'الملف',      title: 'الخطوة 6 (للتعبئة)', description: 'نص مؤقت قصير سيُستبدل.' },
+    },
+  },
+
   header: {
     nav: {
       dashboard: 'الرئيسية',

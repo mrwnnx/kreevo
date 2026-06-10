@@ -801,6 +801,7 @@ export type Database = {
           specialty: string | null
           specialty_id: string | null
           tools: string[] | null
+          tour_completed: boolean
           updated_at: string | null
           username: string
           xp: number | null
@@ -835,6 +836,7 @@ export type Database = {
           specialty?: string | null
           specialty_id?: string | null
           tools?: string[] | null
+          tour_completed?: boolean
           updated_at?: string | null
           username: string
           xp?: number | null
@@ -869,6 +871,7 @@ export type Database = {
           specialty?: string | null
           specialty_id?: string | null
           tools?: string[] | null
+          tour_completed?: boolean
           updated_at?: string | null
           username?: string
           xp?: number | null

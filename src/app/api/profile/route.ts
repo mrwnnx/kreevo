@@ -28,6 +28,7 @@ export async function PATCH(request: Request) {
     'behance_url',
     'linkedin_url',
     'onboarding_completed',
+    'tour_completed',
   ]
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
