@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import {
   Search, ChevronDown, ExternalLink, TrendingUp, TrendingDown,
   Ban, Shield, Trash2, Plus, Crown, Palette,
@@ -45,6 +46,7 @@ export default function AdminUsers() {
   const [leagueVal, setLeagueVal] = useState('')
   const [specialtyVal, setSpecialtyVal] = useState<'ux_ui' | 'graphic'>('ux_ui')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -74,7 +76,15 @@ export default function AdminUsers() {
   }
 
   async function deleteUser(id: string) {
-    await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+    setDeleting(true)
+    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+    setDeleting(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => null)
+      toast.error(`Suppression échouée : ${data?.error ?? `erreur ${res.status}`}`)
+      return // la modale reste ouverte : l'admin voit l'échec, peut annuler ou réessayer
+    }
+    toast.success('Compte supprimé.')
     setConfirmDelete(null)
     load()
   }
@@ -294,9 +304,9 @@ export default function AdminUsers() {
           <p className="text-sm text-muted-foreground">Cette action est irréversible. Toutes les données seront supprimées.</p>
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setConfirmDelete(null)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
-            <button onClick={() => deleteUser(confirmDelete)}
-              className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-full hover:opacity-85">
-              Supprimer définitivement
+            <button onClick={() => deleteUser(confirmDelete)} disabled={deleting}
+              className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-full hover:opacity-85 disabled:opacity-50">
+              {deleting ? 'Suppression…' : 'Supprimer définitivement'}
             </button>
           </div>
         </Modal>

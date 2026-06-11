@@ -46,8 +46,25 @@ export async function DELETE(_: Request, { params }: Props) {
   if (error) return error
 
   const { id } = await params
-  await (admin!.supabase as any).from('profiles').delete().eq('id', id)
-  await admin!.supabase.auth.admin.deleteUser(id)
+
+  // Garde-fou : un admin ne peut pas supprimer son propre compte (lock-out).
+  if (admin!.user.id === id) {
+    return NextResponse.json({ error: 'Impossible de supprimer son propre compte.' }, { status: 400 })
+  }
+
+  // Auth-first : DELETE auth.users -> CASCADE profiles -> CASCADE/SET NULL des données liées,
+  // en un seul statement atomique côté Postgres (tout ou rien).
+  const { error: authErr } = await admin!.supabase.auth.admin.deleteUser(id)
+
+  if (authErr) {
+    // Profil orphelin (ligne profiles sans compte auth) : suppression directe.
+    if (authErr.status === 404) {
+      const { error: dbErr } = await admin!.supabase.from('profiles').delete().eq('id', id)
+      if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
+      return NextResponse.json({ ok: true })
+    }
+    return NextResponse.json({ error: authErr.message }, { status: 500 })
+  }
 
   return NextResponse.json({ ok: true })
 }
