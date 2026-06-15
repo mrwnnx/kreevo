@@ -19,6 +19,9 @@ interface Props {
   index?: number
   prevLabel?: string
   nextLabel?: string
+  /** Optional caption under the enlarged image. Omitted by existing callers → no caption rendered. */
+  title?: string
+  meta?: string
 }
 
 export function ImageLightbox({
@@ -32,6 +35,8 @@ export function ImageLightbox({
   index = 0,
   prevLabel = 'Image précédente',
   nextLabel = 'Image suivante',
+  title,
+  meta,
 }: Props) {
   const gallery = images && images.length > 1 ? images : null
   const [open, setOpen] = useState(false)
@@ -106,22 +111,30 @@ export function ImageLightbox({
           className="max-w-[80vw] w-auto p-0 overflow-visible bg-transparent border-0 shadow-none"
           showCloseButton={false}
         >
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
-            className="block cursor-zoom-out touch-pan-y"
-            aria-label={closeLabel}
-          >
-            <img
-              src={currentSrc}
-              alt={alt ?? ''}
-              className="max-w-[80vw] max-h-[85vh] w-auto h-auto object-contain rounded-xl select-none"
-              draggable={false}
-            />
-          </button>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+              className="block cursor-zoom-out touch-pan-y"
+              aria-label={closeLabel}
+            >
+              <img
+                src={currentSrc}
+                alt={alt ?? ''}
+                className="max-w-[80vw] max-h-[85vh] w-auto h-auto object-contain rounded-xl select-none"
+                draggable={false}
+              />
+            </button>
 
+            {(title || meta) && (
+              <div className="max-w-[80vw] rounded-2xl bg-black/70 px-4 py-2 text-center backdrop-blur-sm">
+                {title && <p className="text-sm font-semibold text-white">{title}</p>}
+                {meta && <p className="mt-0.5 text-[11px] font-mono text-white/70">{meta}</p>}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

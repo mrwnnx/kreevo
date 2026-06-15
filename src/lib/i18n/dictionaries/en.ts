@@ -297,6 +297,13 @@ export const en: Dictionary = {
     navMyProfile: 'My profile',
     ownProfileBanner: 'You\'re viewing your profile as a visitor.',
     ownProfileManage: 'Manage my profile',
+    lightbox: {
+      open: 'Expand',
+      close: 'Close',
+      prev: 'Previous image',
+      next: 'Next image',
+    },
+    poweredBy: 'Powered by',
   },
   historyPage: {
     title: 'History',

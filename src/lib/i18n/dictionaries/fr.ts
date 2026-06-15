@@ -294,6 +294,13 @@ export const fr = {
     navMyProfile: 'Mon profil',
     ownProfileBanner: 'Tu vois ton profil comme un visiteur.',
     ownProfileManage: 'Gérer mon profil',
+    lightbox: {
+      open: 'Agrandir',
+      close: 'Fermer',
+      prev: 'Image précédente',
+      next: 'Image suivante',
+    },
+    poweredBy: 'Créé avec',
   },
   historyPage: {
     title: 'Historique',

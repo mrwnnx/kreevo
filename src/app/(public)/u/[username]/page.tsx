@@ -20,6 +20,8 @@ import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
 import { profilePageSchema } from '@/lib/seo/jsonld'
+import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
+import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -245,12 +247,9 @@ export default async function ProfilePage({
               </Link>
             </>
           ) : (
-            <>
-              <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Sign in</Link>
-              <Link href="/signup" className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity">
-                Join free
-              </Link>
-            </>
+            <Link href="/" className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity">
+              Sign up
+            </Link>
           )}
         </div>
       </nav>
@@ -376,7 +375,7 @@ export default async function ProfilePage({
             top3.length > 0 ? (
               <div className="grid md:grid-cols-3 gap-4">
                 {top3.map((s: any) => (
-                  <SubmissionCard key={s.id} submission={s} featured />
+                  <SubmissionCard key={s.id} submission={s} featured lightbox={t.lightbox} />
                 ))}
               </div>
             ) : (
@@ -388,7 +387,7 @@ export default async function ProfilePage({
               {submissions.slice(0, 3).length > 0 && (
                 <div className="grid md:grid-cols-3 gap-4 opacity-30 blur-sm pointer-events-none select-none">
                   {submissions.slice(0, 3).map((s: any) => (
-                    <SubmissionCard key={s.id} submission={s} featured />
+                    <SubmissionCard key={s.id} submission={s} featured lightbox={t.lightbox} />
                   ))}
                 </div>
               )}
@@ -440,21 +439,30 @@ export default async function ProfilePage({
           </>
         )}
       </div>
+
+      <PoweredByFooter label={t.poweredBy} />
     </div>
   )
 }
 
 // ── Sub-components ─────────────────────────────────────────────
 
-function SubmissionCard({ submission: s, featured }: { submission: any; featured?: boolean }) {
+function SubmissionCard({ submission: s, featured, lightbox }: { submission: any; featured?: boolean; lightbox: Dictionary['publicProfile']['lightbox'] }) {
   return (
     <div className="group border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
       {s.cover_url ? (
         <div className="aspect-video bg-muted overflow-hidden">
-          <img
+          <ImageLightbox
             src={s.cover_url}
+            images={[s.cover_url, ...(Array.isArray(s.files?.images) ? s.files.images : [])]}
+            index={0}
             alt={s.challenges?.title ?? 'Submission'}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            title={s.challenges?.title ?? 'Challenge'}
+            meta={[s.challenges?.specialty, s.challenges?.typeLabel, s.challenges?.industryLabel].filter(Boolean).join(' · ')}
+            openLabel={lightbox.open}
+            closeLabel={lightbox.close}
+            prevLabel={lightbox.prev}
+            nextLabel={lightbox.next}
           />
         </div>
       ) : (
@@ -526,7 +534,7 @@ function TrackFilter({
       {visibleSubmissions.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {visibleSubmissions.map((s: any) => (
-            <SubmissionCard key={s.id} submission={s} />
+            <SubmissionCard key={s.id} submission={s} lightbox={t.lightbox} />
           ))}
         </div>
       ) : (

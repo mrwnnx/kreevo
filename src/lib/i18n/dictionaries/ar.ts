@@ -301,6 +301,13 @@ export const ar: Dictionary = {
     navMyProfile: 'ملفي',
     ownProfileBanner: 'أنت ترى ملفك كما يراه الزائر.',
     ownProfileManage: 'إدارة ملفي',
+    lightbox: {
+      open: 'تكبير',
+      close: 'إغلاق',
+      prev: 'الصورة السابقة',
+      next: 'الصورة التالية',
+    },
+    poweredBy: 'مُشغَّل بواسطة',
   },
   historyPage: {
     title: 'السجل',
