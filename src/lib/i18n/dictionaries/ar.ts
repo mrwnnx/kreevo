@@ -331,6 +331,11 @@ export const ar: Dictionary = {
       subtitle: 'ستظهر أعمالك المستقبلية هنا.',
       cta: 'أنجز تحدّيي الأول',
     },
+    visibility: {
+      public: 'عام',
+      hidden: 'مخفي',
+      lockedHint: 'متاح بعد قبول العمل المسلّم',
+    },
   },
   notificationsPage: {
     title: 'الإشعارات',

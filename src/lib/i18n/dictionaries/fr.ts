@@ -324,6 +324,11 @@ export const fr = {
       subtitle: 'Tes futures soumissions apparaîtront ici.',
       cta: 'Faire mon premier challenge',
     },
+    visibility: {
+      public: 'Public',
+      hidden: 'Caché',
+      lockedHint: 'Disponible une fois la soumission validée',
+    },
   },
   notificationsPage: {
     title: 'Notifications',

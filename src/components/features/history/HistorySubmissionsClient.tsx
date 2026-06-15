@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { setSubmissionVisibility } from './actions'
 
 export type HistorySubmission = {
   id: string
@@ -10,6 +11,7 @@ export type HistorySubmission = {
   title: string | null
   validation_status: string | null
   is_draft: boolean
+  is_visible: boolean
   created_at: string
   challenge_id: string | null
   challenge_title: string | null
@@ -21,6 +23,7 @@ interface HistoryT {
   filters: { all: string; approved: string; drafts: string; rejected: string }
   status: { approved: string; pending: string; rejected: string; draft: string; on_hold: string }
   empty: { icon: string; title: string; subtitle: string; cta: string }
+  visibility: { public: string; hidden: string; lockedHint: string }
 }
 
 interface Props {
@@ -43,6 +46,81 @@ function statusInfo(s: HistorySubmission, t: HistoryT['status']) {
     case 'on_hold': return { label: t.on_hold, dot: 'bg-orange-500', text: 'text-orange-700 dark:text-orange-400' }
     default: return { label: t.pending, dot: 'bg-zinc-400', text: 'text-zinc-600 dark:text-zinc-400' }
   }
+}
+
+/**
+ * Public-portfolio visibility switch shown on each card.
+ * Interactive only for approved submissions; disabled (with a hint) otherwise,
+ * since a non-approved submission is never public. Optimistic: flips locally,
+ * reverts if the server action fails. Matches the DS toggle used in the submit
+ * form (track `bg-primary`/`bg-muted`, white knob), at a smaller size.
+ */
+function VisibilityControl({
+  id,
+  approved,
+  initialVisible,
+  t,
+}: {
+  id: string
+  approved: boolean
+  initialVisible: boolean
+  t: HistoryT['visibility']
+}) {
+  // Non-approved rows are never public → force the visual to "hidden".
+  const [visible, setVisible] = useState(approved ? initialVisible : false)
+  const [pending, setPending] = useState(false)
+  const locked = !approved
+
+  async function toggle() {
+    if (locked || pending) return
+    const next = !visible
+    setVisible(next)
+    setPending(true)
+    const res = await setSubmissionVisibility(id, next)
+    setPending(false)
+    if (!res.ok) setVisible(!next) // revert on failure
+  }
+
+  const label = visible ? t.public : t.hidden
+
+  return (
+    <div
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full bg-background/90 backdrop-blur-sm px-2 py-1',
+        locked && 'opacity-60',
+      )}
+      title={locked ? t.lockedHint : undefined}
+    >
+      <span
+        className={cn(
+          'text-[10px] font-mono uppercase tracking-widest',
+          visible ? 'text-foreground' : 'text-muted-foreground',
+        )}
+      >
+        {label}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={visible}
+        aria-label={label}
+        disabled={locked || pending}
+        onClick={toggle}
+        className={cn(
+          'relative inline-flex h-4 w-7 items-center rounded-full transition-colors shrink-0',
+          visible && !locked ? 'bg-primary' : 'bg-muted',
+          (locked || pending) && 'cursor-not-allowed',
+        )}
+      >
+        <span
+          className={cn(
+            'inline-block size-3 rounded-full bg-white shadow transform transition-transform',
+            visible ? 'translate-x-3.5' : 'translate-x-0.5',
+          )}
+        />
+      </button>
+    </div>
+  )
 }
 
 export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) {
@@ -98,7 +176,7 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
           {filtered.map((s) => {
             const info = statusInfo(s, t.status)
             return (
-              <li key={s.id}>
+              <li key={s.id} className="relative">
                 <Link
                   href={s.is_draft && s.challenge_id
                     ? `/dashboard/challenges/${s.challenge_id}/submit`
@@ -140,6 +218,16 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
                     </p>
                   </div>
                 </Link>
+                {/* Public-portfolio visibility — sibling of the Link so toggling
+                    never triggers card navigation. */}
+                <div className="absolute top-2 start-2 z-10">
+                  <VisibilityControl
+                    id={s.id}
+                    approved={!s.is_draft && s.validation_status === 'approved'}
+                    initialVisible={s.is_visible}
+                    t={t.visibility}
+                  />
+                </div>
               </li>
             )
           })}

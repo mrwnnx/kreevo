@@ -13,7 +13,7 @@ export default async function HistoryPage() {
   const { data: rows } = await (supabaseAdmin as any)
     .from('submissions')
     .select(`
-      id, cover_url, title, validation_status, is_draft, created_at, challenge_id,
+      id, cover_url, title, validation_status, is_draft, is_visible, created_at, challenge_id,
       challenges:challenge_id (title)
     `)
     .eq('user_id', user.id)
@@ -26,6 +26,8 @@ export default async function HistoryPage() {
     title: r.title ?? null,
     validation_status: r.validation_status ?? null,
     is_draft: !!r.is_draft,
+    // "public par défaut" : null/undefined ⇒ visible (mirrors the submit form).
+    is_visible: r.is_visible !== false,
     created_at: r.created_at,
     challenge_id: r.challenge_id ?? null,
     challenge_title: r.challenges?.title ?? null,

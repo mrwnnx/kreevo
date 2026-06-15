@@ -327,6 +327,11 @@ export const en: Dictionary = {
       subtitle: 'Your future submissions will show up here.',
       cta: 'Take your first challenge',
     },
+    visibility: {
+      public: 'Public',
+      hidden: 'Hidden',
+      lockedHint: 'Available once the submission is approved',
+    },
   },
   notificationsPage: {
     title: 'Notifications',
