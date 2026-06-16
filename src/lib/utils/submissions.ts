@@ -430,37 +430,48 @@ export async function rejectSubmission(
  * Trigger validation flow on a freshly published submission.
  * Decides AI auto-validation vs pending admin review based on league.
  */
-export async function triggerValidationFlow(submissionId: string): Promise<void> {
-  const { data: sub } = await supabaseAdmin
+export type ValidationOutcome = {
+  status: 'approved' | 'rejected' | 'pending' | 'human_review'
+  bonusXp: number
+}
+
+/**
+ * Server-authoritative validation. The ONLY path that decides validation_status
+ * + XP — the client never supplies a verdict (anti-fraud). Publication is NOT
+ * gated here: the submission row is already inserted by the caller; this only
+ * sets the status/XP.
+ *
+ * - Auto-validate leagues (Stone/Bronze/Silver): the SERVER runs the rich
+ *   analysis on the stored images → approve (+ description bonus) or reject.
+ *   The description bonus is computed server-side here, not trusted from client.
+ * - Reject → bump ai_rejection_count; at HUMAN_REVIEW_THRESHOLD, auto-escalate
+ *   to human review (admin) instead of rejecting again.
+ * - Gold+: pending admin review (unchanged).
+ *
+ * `ai_analysis` is persisted from THIS server analysis (never the client JSON).
+ */
+export async function triggerValidationFlow(submissionId: string): Promise<ValidationOutcome> {
+  const { data: sub } = await (supabaseAdmin as any)
     .from('submissions')
     .select(`
-      id, user_id, challenge_id, cover_url,
+      id, user_id, challenge_id, cover_url, files, title, description, ai_rejection_count,
       challenges (
-        id, brief, specialty, challenge_types ( name_fr ), xp_reward,
-        leagues ( name )
+        id, brief, context, deliverable, constraints, criteria, specialty,
+        challenge_types ( name_fr ), xp_reward, leagues ( name )
       )
     `)
     .eq('id', submissionId)
     .single()
 
-  if (!sub || !sub.user_id || !sub.challenge_id || !sub.cover_url) return
+  if (!sub || !sub.user_id || !sub.challenge_id || !sub.cover_url) {
+    return { status: 'pending', bonusXp: 0 }
+  }
 
   const challenge = sub.challenges as any
   const leagueName = challenge?.leagues?.name ?? null
 
-  if (challenge && shouldAutoValidate(leagueName)) {
-    const result = await validateSubmissionWithAI(
-      { id: sub.id, user_id: sub.user_id, cover_url: sub.cover_url, challenge_id: sub.challenge_id },
-      { id: challenge.id, brief: challenge.brief, specialty: challenge.specialty, challenge_type: challenge.challenge_types?.name_fr ?? null, xp_reward: challenge.xp_reward, league_name: leagueName }
-    )
-
-    if (result.valid) {
-      await approveSubmission(submissionId, null)
-    } else {
-      await rejectSubmission(submissionId, result.reason ?? 'Soumission rejetée par la validation automatique', null)
-    }
-  } else {
-    // Higher leagues: pending admin review
+  // Gold+ (or missing challenge) → deferred admin review. Publication unaffected.
+  if (!challenge || !shouldAutoValidate(leagueName)) {
     await supabaseAdmin
       .from('submissions')
       .update({ validation_status: 'pending' })
@@ -475,5 +486,76 @@ export async function triggerValidationFlow(submissionId: string): Promise<void>
       challenge_id: sub.challenge_id,
       user_id: sub.user_id,
     })
+    return { status: 'pending', bonusXp: 0 }
   }
+
+  // Auto-validate leagues → SERVER runs the authoritative rich analysis on the
+  // stored images (cover + additional photos from `files.images`).
+  const extraImages = Array.isArray(sub.files?.images) ? sub.files.images : []
+  const images: ImageInput[] = [
+    { url: sub.cover_url as string, is_cover: true },
+    ...extraImages
+      .map((it: any) => (typeof it === 'string' ? it : it?.url))
+      .filter((u: any): u is string => typeof u === 'string' && !!u)
+      .map((u: string) => ({ url: u, is_cover: false })),
+  ]
+
+  const result = await analyzeSubmissionForPublish(
+    {
+      id: challenge.id,
+      brief: challenge.brief,
+      context: challenge.context,
+      deliverable: challenge.deliverable,
+      constraints: challenge.constraints,
+      criteria: challenge.criteria,
+      specialty: challenge.specialty,
+      challenge_type: challenge.challenge_types?.name_fr ?? null,
+    },
+    images,
+    (sub.title as string) ?? '',
+    (sub.description as string) ?? '',
+  )
+
+  // Persist the SERVER analysis (authoritative) — same shape the admin UI reads.
+  await supabaseAdmin
+    .from('submissions')
+    .update({ ai_analysis: result as any })
+    .eq('id', submissionId)
+
+  if (result.global_valid) {
+    const approve = await approveSubmission(submissionId, null, {
+      applyDescriptionBonus: result.description_bonus_eligible,
+    })
+    return { status: 'approved', bonusXp: approve.bonusXp }
+  }
+
+  // Rejected by server AI → bump counter; auto-escalate to human review at threshold.
+  const nextCount = ((sub.ai_rejection_count as number | null) ?? 0) + 1
+  const reason =
+    result.images.filter((i) => !i.valid && i.reason).map((i) => i.reason).join(' · ') ||
+    'Ce travail ne semble pas correspondre au brief.'
+
+  if (nextCount >= HUMAN_REVIEW_THRESHOLD) {
+    await supabaseAdmin
+      .from('submissions')
+      .update({ validation_status: 'pending_human_review', ai_rejection_count: nextCount })
+      .eq('id', submissionId)
+    await notify(sub.user_id, 'submission_human_review_pending', {
+      submission_id: submissionId,
+      challenge_id: sub.challenge_id,
+    })
+    await notifyAllAdmins('submission_human_review_requested', {
+      submission_id: submissionId,
+      challenge_id: sub.challenge_id,
+      user_id: sub.user_id,
+    })
+    return { status: 'human_review', bonusXp: 0 }
+  }
+
+  await rejectSubmission(submissionId, reason, null)
+  await supabaseAdmin
+    .from('submissions')
+    .update({ ai_rejection_count: nextCount })
+    .eq('id', submissionId)
+  return { status: 'rejected', bonusXp: 0 }
 }

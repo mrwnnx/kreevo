@@ -146,48 +146,20 @@ export function MultiStepSubmitForm({
     }
   }
 
-  /** Click "Publier" — AI no longer gates: always publish, verdict drives XP only. */
+  /**
+   * Click "Publier" — publication is unconditional. The AI feedback is shown for
+   * the user (informational, instant), but it NO LONGER drives the decision: the
+   * server re-runs the analysis authoritatively in submitChallenge and decides
+   * validation_status + XP. A client can no longer self-approve.
+   */
   async function handlePublishClick() {
     if (!coverUrl) { setError('Image de couverture requise'); setStep(1); return }
     if (!title.trim()) { setError('Un titre est requis pour publier'); setStep(1); return }
     setError(null)
 
-    // After N AI rejections on this same submission, the user can request a
-    // human review instead of being analyzed yet again.
-    if (canRequestHumanReview) {
-      return submitForm({
-        asDraft: false,
-        aiVerdict: 'human_review',
-        bonusEligible: false,
-      })
-    }
-
-    const result = await runAnalyze()
-    if (!result) {
-      setError('Analyse IA indisponible — réessaye dans un instant.')
-      return
-    }
-    if (result.global_valid) {
-      // Matches the brief → approved + XP (+ optional description bonus)
-      return submitForm({
-        asDraft: false,
-        aiVerdict: 'approved',
-        bonusEligible: result.description_bonus_eligible,
-        analysis: result,
-      })
-    }
-    // Doesn't match the brief → still published, but no XP. User can resubmit / fix.
-    const reason = result.images
-      .filter((i) => !i.valid && i.reason)
-      .map((i) => i.reason)
-      .join(' · ')
-    return submitForm({
-      asDraft: false,
-      aiVerdict: 'rejected',
-      bonusEligible: false,
-      analysis: result,
-      rejectionReason: reason || null,
-    })
+    // Informational UI feedback only (does not pilot the verdict). Best-effort.
+    await runAnalyze()
+    return submitForm({ asDraft: false })
   }
 
   async function handleSubmit(asDraft: boolean) {
@@ -202,17 +174,11 @@ export function MultiStepSubmitForm({
       return
     }
     setError(null)
-    return submitForm({ asDraft, aiVerdict: null, bonusEligible: false })
+    return submitForm({ asDraft })
   }
 
-  function submitForm(opts: {
-    asDraft: boolean
-    aiVerdict: 'approved' | 'rejected' | 'skipped' | 'human_review' | null
-    bonusEligible: boolean
-    analysis?: AnalysisResult
-    rejectionReason?: string | null
-  }) {
-    const { asDraft, aiVerdict, bonusEligible, analysis, rejectionReason } = opts
+  function submitForm(opts: { asDraft: boolean }) {
+    const { asDraft } = opts
     const fd = new FormData()
     fd.set('challengeId', challengeId)
     fd.set('coverUrl', coverUrl!)
@@ -223,14 +189,7 @@ export function MultiStepSubmitForm({
     fd.set('isDraft', asDraft ? 'true' : 'false')
     fd.set('isVisible', showOnProfile ? 'true' : 'false')
     fd.set('photos', JSON.stringify(photos))
-
-    if (!asDraft && aiVerdict) {
-      fd.set('aiVerdict', aiVerdict)
-      fd.set('aiAnalysisBypassed', 'false')
-      fd.set('descriptionBonusEligible', bonusEligible ? 'true' : 'false')
-      if (analysis) fd.set('aiAnalysis', JSON.stringify(analysis))
-      if (rejectionReason) fd.set('rejectionReason', rejectionReason)
-    }
+    // No client AI verdict is sent — the server decides validation + XP.
 
     startTransition(async () => {
       const result = await submitChallenge(fd)
