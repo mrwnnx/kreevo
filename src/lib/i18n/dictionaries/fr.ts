@@ -58,6 +58,11 @@ export const fr = {
   },
 
   dashboard: {
+    leaguePromotion: {
+      title: 'Tu montes en {league} !',
+      subtitle: 'Félicitations 🎉 Tu viens de débloquer une nouvelle ligue. Continue comme ça !',
+      cta: 'Voir ma nouvelle ligue',
+    },
     keepGoing: 'Continue, {name}. Demain est un autre jour XP. 🌟',
     profileHeader: {
       editProfile: 'Modifier le profil →',

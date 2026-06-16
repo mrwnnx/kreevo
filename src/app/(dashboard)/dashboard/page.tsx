@@ -12,6 +12,7 @@ import { ContextualLeaderboard } from '@/components/dashboard/ContextualLeaderbo
 import { InviteFriends } from '@/components/dashboard/InviteFriends'
 import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
 import { Analytics } from '@/components/dashboard/Analytics'
+import { LeaguePromotionCelebration, type PromotionData } from '@/components/dashboard/LeaguePromotionCelebration'
 import { getLeagueThreshold, getScopedLeagueScores } from '@/lib/utils/leagues'
 
 interface PageProps {
@@ -297,6 +298,34 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     'Designer'
 
   const [dict, lang] = await Promise.all([getDict(), getLang()])
+
+  // League-promotion celebration: latest UNSEEN `league_up` notification (covers
+  // every path — auto-validated and admin-validated Gold+). The modal marks it
+  // seen on mount so it fires once. Promotion logic itself is untouched.
+  let promo: PromotionData | null = null
+  {
+    const { data: promoNotif } = await (supabaseAdmin as any)
+      .from('notifications')
+      .select('id, data')
+      .eq('user_id', user.id)
+      .eq('type', 'league_up')
+      .eq('is_read', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const d = (promoNotif?.data ?? {}) as { old_league?: string; new_league?: string }
+    if (promoNotif && d.new_league) {
+      const { data: lg } = await (supabaseAdmin as any)
+        .from('leagues').select('icon').eq('name', d.new_league).maybeSingle()
+      promo = {
+        id: promoNotif.id,
+        oldLeague: d.old_league ?? '',
+        newLeague: d.new_league,
+        newLeagueIcon: lg?.icon ?? '🏆',
+      }
+    }
+  }
+
   const taxoMaps = await getTaxonomyMaps()
   const suggestedChallengeL = suggestedChallenge ? localizeChallenge(suggestedChallenge as any, lang) : null
   const suggestedType = suggestedChallenge ? localizeType(suggestedChallenge as any, lang, taxoMaps) : undefined
@@ -307,6 +336,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-[1140px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4">
+
+      <LeaguePromotionCelebration promo={promo} t={dict.dashboard.leaguePromotion} />
 
       <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
 

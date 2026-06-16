@@ -60,6 +60,11 @@ export const en: Dictionary = {
   },
 
   dashboard: {
+    leaguePromotion: {
+      title: 'You\'ve reached {league}!',
+      subtitle: 'Congrats 🎉 You just unlocked a new league. Keep it up!',
+      cta: 'See my new league',
+    },
     keepGoing: 'Keep going, {name}. Tomorrow\'s another XP day. 🌟',
     profileHeader: {
       editProfile: 'Edit profile →',

@@ -65,6 +65,11 @@ export const ar: Dictionary = {
   },
 
   dashboard: {
+    leaguePromotion: {
+      title: 'لقد وصلت إلى {league}!',
+      subtitle: 'تهانينا 🎉 لقد فتحت دوريًا جديدًا. واصل التقدّم!',
+      cta: 'عرض دوريي الجديد',
+    },
     keepGoing: 'واصل يا {name}. غدًا يوم جديد من الـ XP. 🌟',
     profileHeader: {
       editProfile: 'تعديل الملف ←',
