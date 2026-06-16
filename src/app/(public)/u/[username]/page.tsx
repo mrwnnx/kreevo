@@ -22,6 +22,7 @@ import { defForKey } from '@/components/onboarding/socials'
 import { profilePageSchema } from '@/lib/seo/jsonld'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
+import { DashboardChrome } from '@/components/layout/DashboardChrome'
 
 // ── League display config (DB names) ───────────────────────────
 const LEAGUE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -215,13 +216,14 @@ export default async function ProfilePage({
       ? submissions
       : submissions.filter((s) => s.challenges?.specialty === activeTrack)
 
-  return (
+  const shell = (
     <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }}
       />
-      {/* ── Nav bar ────────────────────────────────────────────── */}
+      {/* ── Nav bar (external / logged-out shell only) ───────────── */}
+      {!isLoggedIn && (
       <nav className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
         <Link href={isLoggedIn ? '/dashboard' : '/'} className="text-sm font-bold tracking-tight">kreevo</Link>
         <div className="flex items-center gap-3">
@@ -253,6 +255,7 @@ export default async function ProfilePage({
           )}
         </div>
       </nav>
+      )}
 
       {/* Own-profile banner — visible only when the viewer is looking at their own /u page */}
       {isOwnProfile && (
@@ -440,9 +443,18 @@ export default async function ProfilePage({
         )}
       </div>
 
-      <PoweredByFooter label={t.poweredBy} />
+      {/* Brand footer — external / logged-out shell only */}
+      {!isLoggedIn && <PoweredByFooter label={t.poweredBy} />}
     </div>
   )
+
+  // Logged-in viewer (own profile OR someone else's) → render inside the
+  // dashboard chrome so they stay "inside" the platform. Same canonical URL.
+  // Logged-out → autonomous external portfolio shell (LOT 1, unchanged).
+  if (viewer) {
+    return <DashboardChrome viewerId={viewer.id}>{shell}</DashboardChrome>
+  }
+  return shell
 }
 
 // ── Sub-components ─────────────────────────────────────────────
