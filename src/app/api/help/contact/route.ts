@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { getTemplate } from '@/lib/email/store'
-import { renderEmail } from '@/lib/email/render'
-import { DEFAULT_TEMPLATES } from '@/lib/email/defaults'
+import { getContactRatelimit, clientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const SUPPORT_EMAIL = 'kreevodesign@gmail.com'
@@ -18,13 +16,14 @@ const SUBJECT_LABELS: Record<Subject, { fr: string; en: string }> = {
   other: { fr: 'Autre', en: 'Other' },
 }
 
-const ERR: Record<'fr' | 'en', { name: string; email: string; subject: string; message: string; send: string }> = {
+const ERR: Record<'fr' | 'en', { name: string; email: string; subject: string; message: string; send: string; rateLimited: string }> = {
   fr: {
     name: 'Nom invalide (2-100 caractères)',
     email: 'Email invalide',
     subject: 'Sujet invalide',
     message: 'Message trop court ou trop long (10-5000 caractères)',
     send: 'Échec de l\'envoi de l\'email',
+    rateLimited: 'Trop de demandes. Réessaye dans un moment.',
   },
   en: {
     name: 'Invalid name (2–100 characters)',
@@ -32,6 +31,7 @@ const ERR: Record<'fr' | 'en', { name: string; email: string; subject: string; m
     subject: 'Invalid subject',
     message: 'Message too short or too long (10–5000 characters)',
     send: 'Email send failed',
+    rateLimited: 'Too many requests. Please try again later.',
   },
 }
 
@@ -41,13 +41,25 @@ function isValidEmail(email: string): boolean {
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}))
+  const lang = (body.lang as 'fr' | 'en' | undefined) ?? 'fr'
+  const e = ERR[lang]
+
+  // Rate-limit by IP — 5/hour. Counted BEFORE honeypot/validation so invalid-
+  // payload spam is capped too. FAIL-OPEN if Upstash isn't configured (dev / env
+  // unset): the route still works, just uncapped. Anonymous access is preserved.
+  const rl = getContactRatelimit()
+  if (rl) {
+    const { success } = await rl.limit(clientIp(request))
+    if (!success) {
+      return NextResponse.json({ error: e.rateLimited }, { status: 429 })
+    }
+  }
+
   const name = (body.name as string | undefined)?.trim() ?? ''
   const email = (body.email as string | undefined)?.trim() ?? ''
   const subject = body.subject as Subject | undefined
   const message = (body.message as string | undefined)?.trim() ?? ''
   const honeypot = (body.website as string | undefined) ?? ''
-  const lang = (body.lang as 'fr' | 'en' | undefined) ?? 'fr'
-  const e = ERR[lang]
 
   // Honeypot — silently succeed if filled (bot)
   if (honeypot) {
@@ -70,7 +82,8 @@ export async function POST(request: Request) {
 
   const subjectLabel = SUBJECT_LABELS[subject][lang]
 
-  // Email to support — full details
+  // Single email → FIXED support address (no client-controlled recipient, so no
+  // third-party spam vector). replyTo lets support answer the user directly.
   const supportSubject = `[Help Center · ${subjectLabel}] ${name}`
   const supportHtml = `
 <div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#0f172a">
@@ -86,32 +99,14 @@ export async function POST(request: Request) {
   <p style="margin-top:24px;font-size:12px;color:#64748b">Réponds directement à <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a> pour répondre à l'utilisateur.</p>
 </div>`.trim()
 
-  // Confirmation to the user — rendered from the editable "contact_confirmation" template.
-  const userSubject =
-    lang === 'en'
-      ? `We received your message — Kreevo Help`
-      : `Ton message est bien reçu — Aide Kreevo`
-  const userTpl = (await getTemplate('contact_confirmation')) ?? DEFAULT_TEMPLATES.contact_confirmation
-  const userHtml = renderEmail(userTpl, {
-    vars: { 'prénom': name.split(' ')[0], message },
-  })
-
   try {
-    await Promise.all([
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: SUPPORT_EMAIL,
-        replyTo: email,
-        subject: supportSubject,
-        html: supportHtml.trim(),
-      }),
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: userSubject,
-        html: userHtml.trim(),
-      }),
-    ])
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: SUPPORT_EMAIL,
+      replyTo: email,
+      subject: supportSubject,
+      html: supportHtml.trim(),
+    })
     return NextResponse.json({ ok: true })
   } catch (err: any) {
     console.error('[help/contact] Resend error', err)
