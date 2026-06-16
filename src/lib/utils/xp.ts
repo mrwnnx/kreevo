@@ -1,17 +1,9 @@
 // Ligues dynamiques depuis la table `leagues` (Supabase).
 // La DB enforce les 8 noms canoniques via le CHECK `profiles_league_valid`.
 
-export const XP_REWARDS = {
-  like_received:     2,
-  comment_received:  5,
-  comment_given:    10,
-} as const
-
 export const XP_PENALTIES = {
   no_submission: -100,
 } as const
-
-export type XPAction = keyof typeof XP_REWARDS
 
 export const LEAGUE_COLORS: Record<string, string> = {
   'Stone':    '#8B8B8B',
