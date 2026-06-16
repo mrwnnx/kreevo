@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { StatCard } from './StatCard'
 
 type Props = {
   profile: any
@@ -47,48 +48,41 @@ export function StatCards({
         </span>
       ),
       subtext: tx(t.tierOf, { n: leagueIndex }),
-      valueClass: 'text-2xl sm:text-xl font-bold',
+      valueClass: '',
     },
     {
       label: t.totalXp,
       icon: <XpIcon className="w-4 h-4" />,
       value: (profile?.xp || 0).toLocaleString(),
       subtext: xpToday > 0 ? tx(t.xpToday, { n: xpToday }) : t.keepGoing,
-      valueClass: 'text-2xl sm:text-xl font-bold text-violet-600',
+      valueClass: 'text-violet-600',
     },
     {
       label: t.challenges,
       icon: <Target className="w-4 h-4 text-green-500" />,
       value: (completedTotal || 0).toString(),
       subtext: completedThisWeek > 0 ? tx(t.thisWeek, { n: completedThisWeek }) : t.completeFirst,
-      valueClass: 'text-2xl sm:text-xl font-bold text-green-500',
+      valueClass: 'text-green-500',
     },
     {
       label: t.rank,
       icon: <Medal className="w-4 h-4 text-sky-500" />,
       value: userRank && totalInLeague ? tx(t.rankValue, { rank: userRank, total: totalInLeague }) : '—',
       subtext: t.rankSubtext,
-      valueClass: 'text-2xl sm:text-xl font-bold text-sky-600',
+      valueClass: 'text-sky-600',
     },
   ]
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map(stat => (
-        <div
+        <StatCard
           key={stat.label}
-          className="h-full flex flex-col justify-between gap-4 bg-card border border-border rounded-[24px] p-4 hover:shadow-sm transition-shadow duration-200"
-        >
-          <div className="flex items-center justify-between h-5">
-            <span className="text-xs font-bold text-foreground tracking-widest leading-none">
-              {stat.label}
-            </span>
-            <span className="inline-flex items-center justify-center w-5 h-5 shrink-0">
-              {stat.icon}
-            </span>
-          </div>
-          <p className={stat.valueClass}>{stat.value}</p>
-        </div>
+          label={stat.label}
+          icon={stat.icon}
+          value={stat.value}
+          valueClass={stat.valueClass}
+        />
       ))}
     </div>
   )

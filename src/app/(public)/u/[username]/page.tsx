@@ -10,9 +10,11 @@ import { Separator } from '@/components/ui/separator'
 import {
   MapPin,
   Heart, MessageCircle, Lock, ExternalLink, Mail,
-  Trophy, Star,
+  Trophy, Medal, Target,
 } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
+import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { StatCard } from '@/components/dashboard/StatCard'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
@@ -50,16 +52,6 @@ function parseLinks(links: unknown): Record<string, string> {
   return out
 }
 
-// ── Rank calculation ───────────────────────────────────────────
-function getRankLabel(rank: number, total: number): string {
-  const pct = Math.round((rank / total) * 100)
-  if (pct <= 1)  return 'top1'
-  if (pct <= 5)  return 'top5'
-  if (pct <= 10) return 'top10'
-  if (pct <= 25) return 'top25'
-  if (pct <= 50) return 'top50'
-  return 'participant'
-}
 
 // ── Metadata ───────────────────────────────────────────────────
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
@@ -155,6 +147,7 @@ export default async function ProfilePage({
   const [
     { data: allSubmissions, count: submissionCount },
     { data: badges },
+    { data: leagueRow },
   ] = await Promise.all([
     supabase
       .from('submissions')
@@ -165,6 +158,7 @@ export default async function ProfilePage({
       .eq('validation_status', 'approved')
       .order('created_at', { ascending: false }),
     supabase.from('badges').select('*').eq('user_id', p.id),
+    supabase.from('leagues').select('icon').eq('name', p.league ?? 'Stone').maybeSingle(),
   ])
 
   // PHASE 3 — rang « Top n% » scopé par spécialité : comparé aux designers de la
@@ -197,8 +191,6 @@ export default async function ProfilePage({
     sameAs: Object.values(social),
     awards: badgeAwards,
   })
-  const rankKey = getRankLabel(rank, Math.max(totalUsers ?? 1, 1))
-  const rankLabel = p.specialty_id ? t.rankLabels[rankKey as keyof typeof t.rankLabels] : '—'
   const submissions = (allSubmissions ?? []) as any[]
   // Pre-resolve localized type/industry labels (FK) onto each embedded challenge,
   // so the module-level SubmissionCard can render them without taxonomy access.
@@ -260,7 +252,7 @@ export default async function ProfilePage({
       {/* Own-profile banner — visible only when the viewer is looking at their own /u page */}
       {isOwnProfile && (
         <div className="border-b border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-6 py-2.5">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3 text-xs">
+          <div className="max-w-[1140px] mx-auto flex items-center justify-between gap-3 text-xs">
             <span className="text-amber-800 dark:text-amber-300">{t.ownProfileBanner}</span>
             <Link href="/dashboard/settings" className="font-semibold text-amber-900 dark:text-amber-200 hover:underline whitespace-nowrap">
               {t.ownProfileManage} →
@@ -269,7 +261,7 @@ export default async function ProfilePage({
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-12">
+      <div className="max-w-[1140px] mx-auto px-6 py-12 space-y-12">
 
         {/* ── HEADER ─────────────────────────────────────────────── */}
         <section className="flex flex-col md:flex-row gap-6 items-start">
@@ -353,21 +345,36 @@ export default async function ProfilePage({
           </div>
         </section>
 
-        {/* ── STATS BAR ──────────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { icon: XpIcon, label: t.stats.totalXp,    value: (p.xp ?? 0).toLocaleString(), mono: true },
-            { icon: Trophy, label: t.stats.challenges, value: String(submissionCount ?? 0), mono: true },
-            { icon: Star,   label: t.stats.league,     value: league.label, mono: false },
-            { icon: Trophy, label: t.stats.rank,       value: rankLabel, mono: true },
-          ].map(({ icon: Icon, label, value, mono }) => (
-            <div key={label} className="border border-border rounded-xl p-4 space-y-1">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Icon className="size-3.5" /> {label}
-              </div>
-              <p className={`text-xl font-semibold ${mono ? 'font-mono' : ''}`}>{value}</p>
-            </div>
-          ))}
+        {/* ── STATS BAR — shared <StatCard> (aligned with dashboard) ─ */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label={t.stats.league}
+            icon={<Trophy className="w-4 h-4 text-amber-500" />}
+            value={
+              <span className="inline-flex items-center gap-2">
+                <LeagueIcon icon={leagueRow?.icon ?? '🪨'} size="lg" />
+                {league.label}
+              </span>
+            }
+          />
+          <StatCard
+            label={t.stats.totalXp}
+            icon={<XpIcon className="w-4 h-4" />}
+            value={(p.xp ?? 0).toLocaleString()}
+            valueClass="text-violet-600"
+          />
+          <StatCard
+            label={t.stats.challenges}
+            icon={<Target className="w-4 h-4 text-green-500" />}
+            value={String(submissionCount ?? 0)}
+            valueClass="text-green-500"
+          />
+          <StatCard
+            label={t.stats.rank}
+            icon={<Medal className="w-4 h-4 text-sky-500" />}
+            value={p.specialty_id && rank > 0 && totalUsers > 0 ? `#${rank} / ${totalUsers}` : '—'}
+            valueClass="text-sky-600"
+          />
         </section>
 
         {/* ── TOP 3 PROJETS ──────────────────────────────────────── */}
