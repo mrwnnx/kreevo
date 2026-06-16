@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 import { getContactRatelimit, clientIp } from '@/lib/ratelimit'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const SUPPORT_EMAIL = 'kreevodesign@gmail.com'
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL ?? 'support@kreevo.online'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.online'
 
 const VALID_SUBJECTS = ['bug', 'billing', 'suggestion', 'other'] as const

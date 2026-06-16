@@ -1,6 +1,6 @@
 /**
  * Contact page — form to reach support.
- * POST /api/help/contact → 2 emails: support (kreevodesign@gmail.com) + auto-reply to user.
+ * POST /api/help/contact → 1 email to support (support@kreevo.online).
  */
 
 import type { Metadata } from 'next'

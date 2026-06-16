@@ -27,7 +27,7 @@ const T = {
     submit: 'Envoyer le message',
     submitting: 'Envoi…',
     success: 'Ton message est envoyé ! On te répond sous 24h.',
-    error: 'Erreur lors de l\'envoi. Réessaie ou écris à kreevodesign@gmail.com.',
+    error: 'Erreur lors de l\'envoi. Réessaie ou écris à support@kreevo.online.',
     minMsg: 'Au moins 10 caractères.',
   },
   en: {
@@ -40,7 +40,7 @@ const T = {
     submit: 'Send message',
     submitting: 'Sending…',
     success: 'Your message was sent! We\'ll reply within 24 hours.',
-    error: 'Send failed. Try again or write to kreevodesign@gmail.com.',
+    error: 'Send failed. Try again or write to support@kreevo.online.',
     minMsg: 'At least 10 characters.',
   },
 } as const
