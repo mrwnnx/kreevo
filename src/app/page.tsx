@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getLang } from '@/lib/i18n/lang'
 import { organizationSchema, websiteSchema } from '@/lib/seo/jsonld'
+import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { BodyPlaceholderSection } from '@/components/marketing/BodyPlaceholderSection'
 import { StatsSection } from '@/components/marketing/StatsSection'
@@ -55,6 +56,7 @@ export default function Home() {
       <MovingGradientBackground />
 
       <div className="relative z-10">
+        <MarketingHeader />
         <HeroSection />
         <BodyPlaceholderSection />
         <StatsSection />
