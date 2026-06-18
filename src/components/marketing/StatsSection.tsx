@@ -1,35 +1,61 @@
 import { MarketingStatCard } from './MarketingStatCard'
+import { FallingBadges } from './FallingBadges'
 
 /**
- * StatsSection — rangée de stat cards façon « Ipsum » : largeurs inégales, fonds
- * variés (tokens DS uniquement), grand chiffre + label court + sous-texte.
- * Réutilise MarketingStatCard (recette DS du StatCard, non modifié).
+ * StatsSection — rangée de stat cards façon « Ipsum » : 3 colonnes.
+ *   col 1 → Designers (image en fond)
+ *   col 2 → Challenges relevés
+ *   col 3 → Ligues à débloquer + Specialties, empilées sur 2 lignes
+ * Réutilise MarketingStatCard (recette DS du StatCard, non modifié). Tokens DS only.
+ * Valeurs/copy éditables directement dans le JSX (placeholders).
  */
-
-/* ── Chiffres éditables ici (placeholders copy — valeurs Kreevo réelles) ── */
-const STATS = [
-  { variant: 'card',   label: 'Designers',          value: '73',              sub: 'designers qui pratiquent', span: 'lg:col-span-2', imageSrc: '/marketing/designers.avif' },
-  { variant: 'muted',  label: 'Challenges relevés', value: '74',              sub: 'briefs réels à relever',   span: 'lg:col-span-1' },
-  { variant: 'dark',   label: 'Ligues à débloquer', value: '8',               sub: 'de Stone à Legend',        span: 'lg:col-span-1' },
-  { variant: 'accent', label: 'Specialties',        value: 'UX·UI + Graphic', sub: 'deux parcours', span: 'lg:col-span-2', valueClass: 'text-2xl sm:text-3xl' },
-] as const
-
 export function StatsSection() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        {STATS.map((s) => (
+      {/* keyframes des badges qui « tombent » (définies hors du <p> des cartes) */}
+      <style>{`
+        @keyframes kvDrop {
+          0%   { transform: translateY(-260%); opacity: 0; }
+          55%  { transform: translateY(10%);   opacity: 1; }
+          75%  { transform: translateY(-5%); }
+          100% { transform: translateY(0);     opacity: 1; }
+        }
+      `}</style>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {/* Col 1 — Designers (photo) */}
+        <MarketingStatCard
+          variant="card"
+          label={
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/logo_kreevo_white.svg" alt="Kreevo" className="h-4 w-auto" />
+          }
+          value="73"
+          sub="designers qui pratiquent"
+          imageSrc="/marketing/designers.avif"
+        />
+
+        {/* Col 2 — Challenges */}
+        <MarketingStatCard
+          variant="muted"
+          label="Challenges relevés"
+          value="74"
+          sub="briefs réels à relever"
+        />
+
+        {/* Col 3 — Ligues + Specialties empilées (2 lignes) */}
+        <div className="grid grid-rows-2 gap-4">
           <MarketingStatCard
-            key={s.label}
-            variant={s.variant}
-            label={s.label}
-            value={s.value}
-            sub={s.sub}
-            valueClass={'valueClass' in s ? s.valueClass : undefined}
-            imageSrc={'imageSrc' in s ? s.imageSrc : undefined}
-            className={s.span}
+            variant="dark"
+            label="Ligues à débloquer"
+            value="8"
+            sub="de Stone à Legend"
           />
-        ))}
+          <MarketingStatCard
+            variant="glass"
+            label="Specialties"
+            value={<FallingBadges items={['UX', 'UI', 'Graphic']} />}
+          />
+        </div>
       </div>
     </section>
   )

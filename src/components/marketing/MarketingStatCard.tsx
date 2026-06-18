@@ -11,13 +11,15 @@ import { cn } from '@/lib/utils'
  * Couleurs 100 % tokens DS : --card / --secondary / --foreground / --color-league-gold.
  */
 
-type Variant = 'card' | 'muted' | 'dark' | 'accent'
+type Variant = 'card' | 'muted' | 'dark' | 'accent' | 'glass'
 
 const VARIANTS: Record<Variant, { wrap: string; fg: string; sub: string; style?: React.CSSProperties }> = {
   card:   { wrap: 'bg-card border border-border', fg: 'text-foreground', sub: 'text-muted-foreground' },
   muted:  { wrap: 'bg-secondary border border-border', fg: 'text-foreground', sub: 'text-muted-foreground' },
   dark:   { wrap: 'bg-foreground border border-transparent', fg: 'text-background', sub: 'text-background/70' },
   accent: { wrap: 'border border-transparent', fg: 'text-foreground', sub: 'text-foreground/70', style: { background: 'var(--color-league-gold)' } },
+  // liquid glass (iOS) : translucide + backdrop-blur (laisse voir le gradient animé derrière) + sheen + ombre
+  glass:  { wrap: 'relative border border-foreground/10 bg-background/35 shadow-xl shadow-foreground/10 backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-background/40 before:to-transparent', fg: 'text-foreground', sub: 'text-foreground/70' },
 }
 
 export function MarketingStatCard({
@@ -30,7 +32,7 @@ export function MarketingStatCard({
   imageSrc,
   className,
 }: {
-  label: string
+  label: ReactNode
   value: ReactNode
   sub?: string
   variant?: Variant
