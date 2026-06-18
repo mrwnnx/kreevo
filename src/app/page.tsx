@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getLang } from '@/lib/i18n/lang'
+import { getLang, getDict } from '@/lib/i18n/lang'
 import { organizationSchema, websiteSchema } from '@/lib/seo/jsonld'
 import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { HeroSection } from '@/components/marketing/HeroSection'
@@ -43,7 +43,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function Home() {
+export default async function Home() {
+  const dict = await getDict()
+  const t = dict.landing
   const orgLd = organizationSchema()
   const siteLd = websiteSchema()
 
@@ -56,10 +58,10 @@ export default function Home() {
       <MovingGradientBackground />
 
       <div className="relative z-10">
-        <MarketingHeader />
-        <HeroSection />
-        <BodyPlaceholderSection />
-        <StatsSection />
+        <MarketingHeader t={t.nav} />
+        <HeroSection t={t} />
+        <BodyPlaceholderSection t={t.body} />
+        <StatsSection t={t.stats} />
       </div>
     </main>
   )

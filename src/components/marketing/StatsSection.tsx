@@ -1,5 +1,6 @@
 import { MarketingStatCard } from './MarketingStatCard'
 import { FallingBadges } from './FallingBadges'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 /**
  * StatsSection — rangée de stat cards façon « Ipsum » : 3 colonnes.
@@ -9,7 +10,7 @@ import { FallingBadges } from './FallingBadges'
  * Réutilise MarketingStatCard (recette DS du StatCard, non modifié). Tokens DS only.
  * Valeurs/copy éditables directement dans le JSX (placeholders).
  */
-export function StatsSection() {
+export function StatsSection({ t }: { t: Dictionary['landing']['stats'] }) {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
       {/* keyframes des badges qui « tombent » (définies hors du <p> des cartes) */}
@@ -30,30 +31,30 @@ export function StatsSection() {
             <img src="/logo_kreevo_white.svg" alt="Kreevo" className="h-4 w-auto" />
           }
           value="73"
-          sub="designers qui pratiquent"
+          sub={t.designers.sub}
           imageSrc="/marketing/designers.avif"
         />
 
         {/* Col 2 — Challenges */}
         <MarketingStatCard
           variant="muted"
-          label="Challenges relevés"
+          label={t.challenges.label}
           value="74"
-          sub="briefs réels à relever"
+          sub={t.challenges.sub}
         />
 
         {/* Col 3 — Ligues + Specialties empilées (2 lignes) */}
         <div className="grid grid-rows-2 gap-4">
           <MarketingStatCard
             variant="dark"
-            label="Ligues à débloquer"
+            label={t.leagues.label}
             value="8"
-            sub="de Stone à Legend"
+            sub={t.leagues.sub}
           />
           <MarketingStatCard
             variant="glass"
-            label="Specialties"
-            value={<FallingBadges items={['UX', 'UI', 'Graphic']} />}
+            label={t.specialties.label}
+            value={<FallingBadges items={t.specialties.badges} />}
           />
         </div>
       </div>

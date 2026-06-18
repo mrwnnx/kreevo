@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChallengePreviewCard, type ChallengePreview } from '@/components/features/challenge/ChallengePreviewCard'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 /**
  * HeroSection — hero de la landing Kreevo.
@@ -38,35 +39,29 @@ const WHEEL = {
 
 const TOTAL = WHEEL.count * WHEEL.step
 
-/* Destination au clic d'une carte (placeholder, à brancher comme le CTA — ex. /signup). */
-const CARD_HREF = '#start'
+/* Destination au clic d'une carte → démarre le parcours d'inscription. */
+const CARD_HREF = '/signup'
 
-const COPY = {
-  title: 'Practice made perfect',
-  // ⬇️ PLACEHOLDER — remplace par le copy final.
-  body:
-    '[Body placeholder] Des briefs design réels, un feedback IA et un système de ligues pour progresser et construire ton portfolio. Pour les designers UX/UI et graphic.',
-  cta: 'Get started',
-}
-
-/* Aperçus — VRAIS challenges publiés (mix UX/UI + graphic). Remplaçables par un fetch live. */
-const CHALLENGES: ChallengePreview[] = [
-  { title: 'Univers de marque gaming — lancement mondial', brief: 'Crée l’univers visuel complet pour le lancement mondial d’un jeu AAA.', specialty: 'Graphic Designer', type: 'Brand Identity', xp: 1500, deadlineDays: 45 },
-  { title: 'Redesign OS mobile — paradigme IA-first', brief: 'Imagine le redesign complet d’un OS mobile centré sur l’IA générative.', specialty: 'UX Designer', type: 'Redesign', xp: 1500, deadlineDays: 45 },
-  { title: 'Design system génératif — IA-driven', brief: 'Crée un design system dont les composants s’adaptent dynamiquement via IA.', specialty: 'UI Designer', type: 'Design System', xp: 1500, deadlineDays: 45 },
-  { title: 'Écosystème produit IA — vision stratégique', brief: 'Conçois la vision UX stratégique d’un écosystème de produits IA pour une entreprise Fortune 500.', specialty: 'UX Designer', type: 'UX Case Study', xp: 1500, deadlineDays: 45 },
-  { title: 'Identité de marque pays — tourisme', brief: 'Crée l’identité de marque nationale d’un pays pour attirer touristes et investisseurs.', specialty: 'Graphic Designer', type: 'Brand Identity', xp: 1200, deadlineDays: 30 },
-  { title: 'Futur de l’interface bancaire — vision 2030', brief: 'Imagine et conçois l’interface bancaire du futur pour 2030, IA générative intégrée.', specialty: 'UX Designer', type: 'Prototype', xp: 1200, deadlineDays: 30 },
-  { title: 'Design system open-source gouvernance', brief: 'Crée un design system open-source complet avec sa gouvernance communautaire.', specialty: 'UI Designer', type: 'Design System', xp: 1200, deadlineDays: 30 },
-  { title: 'Plateforme IA santé — éthique & expérience', brief: 'Conçois une plateforme de diagnostic IA médicale en intégrant les enjeux éthiques.', specialty: 'UX Designer', type: 'UX Case Study', xp: 1200, deadlineDays: 30 },
-  { title: 'Brand universe marque luxe — omnicanal', brief: 'Développe l’univers de marque complet d’une maison de mode de luxe pour tous les canaux.', specialty: 'Graphic Designer', type: 'Brand Identity', xp: 900, deadlineDays: 30 },
-  { title: 'Super-app voyage — expérience bout-en-bout', brief: 'Conçois l’expérience complète d’une super-app de voyage de bout en bout.', specialty: 'UX Designer', type: 'UX Case Study', xp: 900, deadlineDays: 30 },
-  { title: 'Design System multi-marque entreprise', brief: 'Architecte un design system d’entreprise gérant 4 marques sous une fondation commune.', specialty: 'UI Designer', type: 'Design System', xp: 900, deadlineDays: 30 },
-  { title: 'Identité motion brand crypto', brief: 'Crée une identité de marque animée pour un exchange crypto nouvelle génération.', specialty: 'Graphic Designer', type: 'Motion', xp: 700, deadlineDays: 21 },
-  { title: 'Packaging produit bien-être premium', brief: 'Conçois le packaging d’une gamme de suppléments bien-être pour une marque D2C premium.', specialty: 'Graphic Designer', type: 'Packaging', xp: 500, deadlineDays: 14 },
-  { title: 'Social Media Kit agence immobilière', brief: 'Conçois un kit de templates réseaux sociaux pour une agence immobilière premium.', specialty: 'Graphic Designer', type: 'Social Media Kit', xp: 350, deadlineDays: 10 },
-  { title: 'Packaging gamme cosmétiques', brief: 'Crée le packaging d’une gamme de 3 produits cosmétiques naturels.', specialty: 'Graphic Designer', type: 'Packaging', xp: 320, deadlineDays: 7 },
-  { title: 'Packaging café premium', brief: 'Crée le packaging d’une gamme de cafés premium single origin.', specialty: 'Graphic Designer', type: 'Packaging', xp: 320, deadlineDays: 7 },
+/* Méta des cartes (indépendant de la langue) : emoji + xp + deadline.
+   Le texte (title/brief/specialty/type) vient de l'i18n (t.cards), fusionné par index.
+   ⚠️ emoji baké ici (et pas dérivé de `specialty`) pour rester correct dans toutes les langues. */
+const CARD_META: { emoji: string; xp: number; deadlineDays: number }[] = [
+  { emoji: '✏️', xp: 1500, deadlineDays: 45 },
+  { emoji: '📱', xp: 1500, deadlineDays: 45 },
+  { emoji: '🎨', xp: 1500, deadlineDays: 45 },
+  { emoji: '📱', xp: 1500, deadlineDays: 45 },
+  { emoji: '✏️', xp: 1200, deadlineDays: 30 },
+  { emoji: '📱', xp: 1200, deadlineDays: 30 },
+  { emoji: '🎨', xp: 1200, deadlineDays: 30 },
+  { emoji: '📱', xp: 1200, deadlineDays: 30 },
+  { emoji: '✏️', xp: 900, deadlineDays: 30 },
+  { emoji: '📱', xp: 900, deadlineDays: 30 },
+  { emoji: '🎨', xp: 900, deadlineDays: 30 },
+  { emoji: '✏️', xp: 700, deadlineDays: 21 },
+  { emoji: '✏️', xp: 500, deadlineDays: 14 },
+  { emoji: '✏️', xp: 350, deadlineDays: 10 },
+  { emoji: '✏️', xp: 320, deadlineDays: 7 },
+  { emoji: '✏️', xp: 320, deadlineDays: 7 },
 ]
 
 /* Wrap centré : ramène n'importe quel angle dans [−TOTAL/2, +TOTAL/2). */
@@ -78,7 +73,14 @@ function zForAngle(angle: number): number {
   return 1000 + Math.round(Math.cos((angle * Math.PI) / 180) * 1000)
 }
 
-export function HeroSection({ items = CHALLENGES }: { items?: ChallengePreview[] }) {
+export function HeroSection({ t }: { t: Dictionary['landing'] }) {
+  // Fusionne le texte i18n (t.cards) avec la méta lang-independent (CARD_META).
+  const items: ChallengePreview[] = t.cards.map((c, i) => ({
+    ...c,
+    emoji: CARD_META[i]?.emoji,
+    xp: CARD_META[i]?.xp,
+    deadlineDays: CARD_META[i]?.deadlineDays,
+  }))
   // count cartes en bouclant sur les vraies données
   const cards = Array.from({ length: WHEEL.count }, (_, i) => items[i % items.length])
 
@@ -201,14 +203,14 @@ export function HeroSection({ items = CHALLENGES }: { items?: ChallengePreview[]
       {/* ── Bloc centré (inchangé) ── */}
       <div className="mx-auto max-w-2xl px-4 pt-28 text-center sm:px-6 sm:pt-40">
         <h1 className="font-heading text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl">
-          {COPY.title}
+          {t.hero.title}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          {COPY.body}
+          {t.hero.body}
         </p>
         <div className="mt-8 flex justify-center">
-          <Button size="lg" render={<a href="#start" />}>
-            {COPY.cta}
+          <Button size="lg" render={<a href="/signup" />}>
+            {t.hero.cta}
           </Button>
         </div>
       </div>
@@ -247,7 +249,7 @@ export function HeroSection({ items = CHALLENGES }: { items?: ChallengePreview[]
                 className="block"
                 style={{ cursor: 'inherit' }} // garde le curseur grab de la roue
               >
-                <ChallengePreviewCard colorIndex={i} {...it} />
+                <ChallengePreviewCard colorIndex={i} xpLabel={t.card.xp} daysSuffix={t.card.daysSuffix} {...it} />
               </a>
             </div>
           )

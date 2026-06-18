@@ -1,28 +1,23 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 /**
- * BodyPlaceholderSection — body placeholder en grande taille (semibold) avec
- * révélation au scroll : le texte démarre GRIS (pas trop clair) et chaque mot
- * devient NOIR au fil du scroll (fill mot par mot, gauche → droite).
+ * BodyPlaceholderSection — body en grande taille (semibold) avec révélation au
+ * scroll : le texte démarre GRIS (pas trop clair) et chaque mot devient NOIR au
+ * fil du scroll (fill mot par mot, gauche → droite). Texte via i18n (t.text).
  *
  * 100 % design system : couleur = token `text-foreground` (noir), le « gris » est
  * obtenu par l'OPACITÉ (0.28 → 1). Aucune font ni couleur inventée.
  */
 
-const COPY = {
-  // ⬇️ PLACEHOLDER — texte de grande taille à remplacer par le copy final.
-  body:
-    'Des briefs design réels. Un feedback IA. Un système de ligues. Tout ce qu’il te faut pour progresser pour de vrai.',
-}
-
 const GRAY_OPACITY = 0.28 // opacité de départ (gris pas trop clair)
 
-export function BodyPlaceholderSection() {
+export function BodyPlaceholderSection({ t }: { t: Dictionary['landing']['body'] }) {
   const ref = useRef<HTMLParagraphElement>(null)
   const [progress, setProgress] = useState(0) // 0 → 1 au fil du scroll
-  const words = COPY.body.split(' ')
+  const words = t.text.split(' ')
 
   useEffect(() => {
     // prefers-reduced-motion : pas d'animation → texte plein (noir).

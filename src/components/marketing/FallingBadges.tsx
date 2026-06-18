@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react'
  * Les @keyframes `kvDrop` sont définies par le parent (StatsSection) — hors du <p>.
  * Root = <span> (valide à l'intérieur du <p> de MarketingStatCard).
  */
-export function FallingBadges({ items }: { items: string[] }) {
+export function FallingBadges({ items }: { items: readonly string[] }) {
   const ref = useRef<HTMLSpanElement>(null)
   const [state, setState] = useState<'hidden' | 'play' | 'static'>('hidden')
 
