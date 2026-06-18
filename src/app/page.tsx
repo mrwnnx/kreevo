@@ -5,7 +5,10 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { BodyPlaceholderSection } from '@/components/marketing/BodyPlaceholderSection'
 import { StatsSection } from '@/components/marketing/StatsSection'
+import { FeaturesSection } from '@/components/marketing/FeaturesSection'
+import { PricingSection } from '@/components/marketing/PricingSection'
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
+import { BackdropFade } from '@/components/marketing/BackdropFade'
 
 const LANDING_META = {
   fr: {
@@ -56,12 +59,16 @@ export default async function Home() {
 
       {/* Fond à gradient animé (derrière le contenu) */}
       <MovingGradientBackground />
+      {/* Fondu du fond vers blanc à partir du bloc #features */}
+      <BackdropFade />
 
       <div className="relative z-10">
         <MarketingHeader t={t.nav} />
         <HeroSection t={t} />
         <BodyPlaceholderSection t={t.body} />
         <StatsSection t={t.stats} />
+        <FeaturesSection />
+        <PricingSection />
       </div>
     </main>
   )
