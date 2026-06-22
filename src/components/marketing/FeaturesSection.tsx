@@ -1,7 +1,9 @@
-import { cn } from '@/lib/utils'
-import { LeagueIcon } from '@/components/features/league/LeagueIcon'
-import { LEAGUE_ICONS } from '@/lib/utils/xp'
-import { ChallengePreviewCard, type ChallengePreview } from '@/components/features/challenge/ChallengePreviewCard'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { type ChallengePreview } from '@/components/features/challenge/ChallengePreviewCard'
+import { FeedbackScore } from './FeedbackScore'
+import { LeagueClimb } from './LeagueClimb'
+import { PortfolioCard } from './PortfolioCard'
+import { BriefStack } from './BriefStack'
 
 /**
  * FeaturesSection — grille 2×2 de « mini-cartes flottantes » (réf. visuelle Aeline,
@@ -24,7 +26,7 @@ const COPY = {
   leagues:   { title: 'Monte les ligues',                  sub: 'De Stone à Legend — chaque ligue débloque des briefs plus exigeants.' },
   feedback:  { title: 'Un feedback qui te fait progresser', sub: 'L’IA note chaque soumission et te dit précisément où t’améliorer.' },
   portfolio: { title: 'Ton portfolio, partageable',         sub: 'Tes meilleurs travaux réunis sur une page publique à ton nom.' },
-  reveal:    { title: 'Le grand reveal',                    sub: 'Les soumissions se dévoilent toutes à la fin du challenge.' },
+  briefs:    { title: 'Des briefs réels',                   sub: 'Des challenges inspirés de vrais projets — toujours un nouveau brief à relever.' },
 }
 
 /* Données échantillon — challenges Kreevo crédibles (UX/UI + graphic). */
@@ -51,25 +53,51 @@ function FeatureCard({ title, sub, children }: { title: string; sub: string; chi
   )
 }
 
-/* Pastille de ligue flottante : LeagueIcon réel dans un disque teinté du token de ligue. */
-function LeagueChip({ name, bg, ring, wrap }: { name: string; bg: string; ring: string; wrap: string }) {
-  return (
-    <div className={cn('rounded-full bg-card p-2 shadow-xl ring-1 ring-border', wrap)}>
-      <div className={cn('flex size-12 items-center justify-center rounded-full ring-1 sm:size-14', bg, ring)}>
-        <LeagueIcon icon={LEAGUE_ICONS[name]} size="xl" />
-      </div>
-    </div>
+export async function FeaturesSection() {
+  // Vrais icônes de ligues (SVG base64 en DB) pour le mini-classement animé.
+  const { data: leagueRows } = await supabaseAdmin.from('leagues').select('name, icon')
+  const leagueIcons: Record<string, string> = Object.fromEntries(
+    (leagueRows ?? []).map((l) => [String(l.name), String(l.icon ?? '')]),
   )
-}
 
-/* Wrapper de carte flottante (rotation/scale/blur/z) autour d'une ChallengePreviewCard. */
-function FloatCard({ className, children }: { className: string; children: React.ReactNode }) {
-  return <div className={cn('absolute w-[200px] origin-center', className)}>{children}</div>
-}
-
-export function FeaturesSection() {
   return (
     <section id="features" className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+      {/* Shimmer « skeleton qui charge » des barres de la carte Feedback IA (reflet clair qui balaie) */}
+      <style>{`
+        @keyframes kvSkelSweep { 100% { transform: translateX(100%); } }
+        .kv-skel { position: relative; overflow: hidden; }
+        .kv-skel::after {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(90deg, transparent 0%, color-mix(in oklch, white 60%, transparent) 50%, transparent 100%);
+          transform: translateX(-100%);
+          animation: kvSkelSweep 1.6s ease-in-out infinite;
+          animation-delay: var(--kv-d, 0s);
+        }
+        @media (prefers-reduced-motion: reduce) { .kv-skel::after { animation: none; } }
+
+        /* La carte Feedback IA « respire » : flottement en DÉBUT de cycle (0→30%) puis repos.
+           Le mouvement est calé au tout début pour coïncider avec animationiteration (compteur). */
+        @keyframes kvCardBob {
+          0%, 30%, 100% { transform: translateY(0) rotate(0deg); }
+          8%  { transform: translateY(-8px) rotate(-1.2deg); }
+          16% { transform: translateY(-1px) rotate(0.4deg); }
+          24% { transform: translateY(-4px) rotate(-0.6deg); }
+        }
+        .kv-card-bob { animation: kvCardBob 4s ease-in-out infinite; will-change: transform; }
+        @media (prefers-reduced-motion: reduce) { .kv-card-bob { animation: none; } }
+
+        /* Horloge 4s du score (même période/phase que le bob) — sert d'émetteur d'événements
+           animationiteration, capté en JS pour relancer le décompte 0→92 à chaque cycle. */
+        @keyframes kvScoreTick { 0%, 100% { opacity: 1; } }
+        .kv-score { animation: kvScoreTick 4s linear infinite; }
+        @media (prefers-reduced-motion: reduce) { .kv-score { animation: none; } }
+
+        /* Carte portfolio : flottement doux continu */
+        @keyframes kvFloatSoft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .kv-float-soft { animation: kvFloatSoft 5s ease-in-out infinite; will-change: transform; }
+        @media (prefers-reduced-motion: reduce) { .kv-float-soft { animation: none; } }
+      `}</style>
+
       {/* Header de section — titre + body (placeholders, i18n plus tard) */}
       <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
         <h2 className="font-heading text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
@@ -84,22 +112,10 @@ export function FeaturesSection() {
       <div className="rounded-[28px] bg-secondary/50 p-2 backdrop-blur-xl">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
 
-        {/* 1 — SYSTÈME DE LIGUES : 3 LeagueIcon flottants inclinés + pill XP */}
+        {/* 1 — SYSTÈME DE LIGUES : mini-classement animé (toi grimpes 3ᵉ→1ᵉ puis promotion) */}
         <FeatureCard title={COPY.leagues.title} sub={COPY.leagues.sub}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex items-end">
-              <LeagueChip name="Gold"   bg="bg-league-gold/15"   ring="ring-league-gold/40"   wrap="z-10 translate-y-3 rotate-0 sm:-rotate-12" />
-              <LeagueChip name="Master" bg="bg-league-master/15" ring="ring-league-master/40" wrap="z-20 -mx-2 sm:scale-110" />
-              <LeagueChip name="Legend" bg="bg-league-legend/15" ring="ring-league-legend/40" wrap="z-10 translate-y-3 rotate-0 sm:rotate-12" />
-            </div>
-          </div>
-          {/* pill XP (track bg-secondary / fill bg-primary, tokens only) */}
-          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 shadow-md sm:bottom-4">
-            <span className="text-xs font-bold text-foreground">+1500</span>
-            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-secondary">
-              <div className="h-full w-2/3 rounded-full bg-primary" />
-            </div>
-            <span className="text-xs font-semibold text-muted-foreground">XP</span>
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <LeagueClimb icons={leagueIcons} />
           </div>
         </FeatureCard>
 
@@ -107,14 +123,15 @@ export function FeaturesSection() {
         <FeatureCard title={COPY.feedback.title} sub={COPY.feedback.sub}>
           <div className="absolute inset-0 flex items-center justify-center">
             {/* carte fantôme derrière (profondeur) */}
-            <div className="absolute w-[72%] max-w-[230px] rotate-0 rounded-[16px] border border-border bg-card opacity-60 shadow-lg blur-[1px] sm:rotate-6">
+            <div className="absolute w-[82%] max-w-[270px] rotate-0 rounded-[16px] border border-border bg-card opacity-60 shadow-lg blur-[1px] sm:rotate-6">
               <div className="h-28" />
             </div>
-            {/* carte feedback nette */}
-            <div className="relative w-[76%] max-w-[240px] rotate-0 rounded-[16px] border border-border bg-card p-4 shadow-xl sm:-rotate-6">
+            {/* carte feedback nette — wrapper animé (bob) + carte inclinée à l'intérieur */}
+            <div className="kv-card-bob relative w-[86%] max-w-[280px]">
+            <div className="rotate-0 rounded-[16px] border border-border bg-card p-4 shadow-xl sm:-rotate-6">
               <div className="flex items-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
-                  <span className="text-lg font-bold text-foreground">92</span>
+                <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/25">
+                  <FeedbackScore to={92} className="kv-score text-lg font-bold text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">Feedback IA</p>
@@ -122,45 +139,26 @@ export function FeaturesSection() {
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-                <div className="h-2 w-full rounded-full bg-muted" />
-                <div className="h-2 w-4/5 rounded-full bg-muted" />
-                <div className="h-2 w-3/5 rounded-full bg-muted" />
+                <div className="kv-skel h-2 w-full rounded-full bg-muted" style={{ '--kv-d': '0s' } as React.CSSProperties} />
+                <div className="kv-skel h-2 w-4/5 rounded-full bg-muted" style={{ '--kv-d': '0.2s' } as React.CSSProperties} />
+                <div className="kv-skel h-2 w-3/5 rounded-full bg-muted" style={{ '--kv-d': '0.4s' } as React.CSSProperties} />
               </div>
             </div>
+            </div>
           </div>
         </FeatureCard>
 
-        {/* 3 — PORTFOLIO PUBLIC : 2 ChallengePreviewCard réelles, réduites + inclinées */}
+        {/* 3 — PORTFOLIO PUBLIC : carte profil (avatar Notion + XP + rang ligue + grille soumissions) */}
         <FeatureCard title={COPY.portfolio.title} sub={COPY.portfolio.sub}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative h-[180px] w-[260px]">
-              <FloatCard className="left-[2%] top-[10%] scale-[0.62] rotate-0 opacity-95 sm:-rotate-8">
-                <ChallengePreviewCard colorIndex={4} {...SAMPLES[1]} />
-              </FloatCard>
-              <FloatCard className="left-[34%] top-[20%] z-10 scale-[0.66] rotate-0 sm:rotate-6">
-                <ChallengePreviewCard colorIndex={0} {...SAMPLES[0]} />
-              </FloatCard>
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <PortfolioCard leagueIcon={leagueIcons['Gold']} />
           </div>
         </FeatureCard>
 
-        {/* 4 — LE GRAND REVEAL (signature) : 3 cartes empilées, arrière floutées → avant nette */}
-        <FeatureCard title={COPY.reveal.title} sub={COPY.reveal.sub}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative h-[190px] w-[260px]">
-              {/* arrière — le plus flouté/petit/incliné/effacé */}
-              <FloatCard className="left-1/2 top-[16%] -translate-x-1/2 scale-[0.56] rotate-0 opacity-55 blur-[5px] sm:-rotate-[14deg]">
-                <ChallengePreviewCard colorIndex={2} {...SAMPLES[2]} />
-              </FloatCard>
-              {/* milieu — flou moyen */}
-              <FloatCard className="left-1/2 top-[12%] -translate-x-1/2 scale-[0.6] rotate-0 opacity-80 blur-[2px] sm:rotate-[10deg]">
-                <ChallengePreviewCard colorIndex={6} {...SAMPLES[3]} />
-              </FloatCard>
-              {/* avant — net, le plus grand, devant (le reveal) */}
-              <FloatCard className="left-1/2 top-[8%] z-10 -translate-x-1/2 scale-[0.66] rotate-0 sm:-rotate-[3deg]">
-                <ChallengePreviewCard colorIndex={0} {...SAMPLES[0]} />
-              </FloatCard>
-            </div>
+        {/* 4 — DES BRIEFS RÉELS : pile de cartes challenge, la carte du dessus passe en bas (4s) */}
+        <FeatureCard title={COPY.briefs.title} sub={COPY.briefs.sub}>
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <BriefStack items={SAMPLES} colors={[0, 4, 2, 6]} />
           </div>
         </FeatureCard>
 

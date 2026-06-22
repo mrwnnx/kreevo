@@ -9,6 +9,7 @@ import { FeaturesSection } from '@/components/marketing/FeaturesSection'
 import { PricingSection } from '@/components/marketing/PricingSection'
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
 import { BackdropFade } from '@/components/marketing/BackdropFade'
+import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 
 const LANDING_META = {
   fr: {
@@ -69,6 +70,7 @@ export default async function Home() {
         <StatsSection t={t.stats} />
         <FeaturesSection />
         <PricingSection />
+        <MarketingFooter />
       </div>
     </main>
   )

@@ -14,6 +14,11 @@ export function MarketingHeader({ t }: { t: Dictionary['landing']['nav'] }) {
         <a href="/" aria-label="Kreevo" className="inline-flex items-center">
           <Logo className="h-6 w-auto" />
         </a>
+        <nav className="hidden items-center gap-8 text-base sm:flex">
+          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">About</a>
+          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">Hire talent</a>
+          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">Blog</a>
+        </nav>
         <Button size="lg" render={<a href="/signup" />}>
           {t.getStarted}
         </Button>

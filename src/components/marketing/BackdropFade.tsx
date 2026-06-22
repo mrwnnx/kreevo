@@ -23,11 +23,14 @@ export function BackdropFade() {
       if (!el) return
       const rect = el.getBoundingClientRect()
       const vh = window.innerHeight
-      // démarre quand le haut de Features entre par le bas (rect.top = vh),
-      // fondu complet quand il atteint 45% de la hauteur d'écran.
+      // Ancre = milieu de la section Features (≈ début de la 2ᵉ ligne de cartes) :
+      // le gradient reste visible derrière la 1ʳᵉ ligne et commence à fondre à la 2ᵉ.
+      const anchor = rect.top + rect.height * 0.5
+      // démarre quand l'ancre entre par le bas (anchor = vh),
+      // fondu complet quand elle atteint 40% de la hauteur d'écran.
       const start = vh
-      const end = vh * 0.45
-      const p = (start - rect.top) / (start - end)
+      const end = vh * 0.4
+      const p = (start - anchor) / (start - end)
       setOpacity(Math.max(0, Math.min(1, p)))
     }
     const onScroll = () => {
