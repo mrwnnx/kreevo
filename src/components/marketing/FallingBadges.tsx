@@ -33,7 +33,7 @@ export function FallingBadges({ items }: { items: readonly string[] }) {
       {items.map((it, i) => (
         <span
           key={it}
-          className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-foreground shadow-sm"
+          className="rounded-full bg-background px-4 py-2 text-base font-semibold text-foreground"
           style={
             state === 'play'
               ? { animation: 'kvDrop 0.6s cubic-bezier(.2,.9,.3,1) both', animationDelay: `${i * 0.12}s` }

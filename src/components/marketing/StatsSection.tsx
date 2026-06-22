@@ -31,6 +31,7 @@ export function StatsSection({ t }: { t: Dictionary['landing']['stats'] }) {
             <img src="/logo_kreevo_white.svg" alt="Kreevo" className="h-4 w-auto" />
           }
           value="73"
+          valueClass="text-5xl sm:text-6xl"
           sub={t.designers.sub}
           imageSrc="/marketing/designers.avif"
         />
@@ -40,6 +41,7 @@ export function StatsSection({ t }: { t: Dictionary['landing']['stats'] }) {
           variant="muted"
           label={t.challenges.label}
           value="74"
+          valueClass="text-5xl sm:text-6xl"
           sub={t.challenges.sub}
         />
 
@@ -49,6 +51,7 @@ export function StatsSection({ t }: { t: Dictionary['landing']['stats'] }) {
             variant="dark"
             label={t.leagues.label}
             value="8"
+            valueClass="text-5xl sm:text-6xl"
             sub={t.leagues.sub}
           />
           <MarketingStatCard

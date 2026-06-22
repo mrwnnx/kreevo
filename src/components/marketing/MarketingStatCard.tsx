@@ -19,7 +19,7 @@ const VARIANTS: Record<Variant, { wrap: string; fg: string; sub: string; style?:
   dark:   { wrap: 'bg-foreground border border-transparent', fg: 'text-background', sub: 'text-background/70' },
   accent: { wrap: 'border border-transparent', fg: 'text-foreground', sub: 'text-foreground/70', style: { background: 'var(--color-league-gold)' } },
   // liquid glass (iOS) : translucide + backdrop-blur (laisse voir le gradient animé derrière) + sheen + ombre
-  glass:  { wrap: 'relative border border-foreground/10 bg-background/35 shadow-xl shadow-foreground/10 backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-background/40 before:to-transparent', fg: 'text-foreground', sub: 'text-foreground/70' },
+  glass:  { wrap: 'relative border border-foreground/10 bg-background/35 backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-background/40 before:to-transparent', fg: 'text-foreground', sub: 'text-foreground/70' },
 }
 
 export function MarketingStatCard({
@@ -49,7 +49,7 @@ export function MarketingStatCard({
   return (
     <div
       className={cn(
-        'relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-[24px] p-6 transition-shadow duration-200 hover:shadow-md',
+        'relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-[24px] p-6',
         // image : padding 16px → arrondi interne (8px) = externe (24px) − padding (16px)
         onImage ? 'min-h-[240px] border border-transparent p-4' : v.wrap,
         className,

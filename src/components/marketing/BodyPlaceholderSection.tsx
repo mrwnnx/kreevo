@@ -62,9 +62,12 @@ export function BodyPlaceholderSection({ t }: { t: Dictionary['landing']['body']
         {words.map((w, i) => {
           const wp = Math.max(0, Math.min(1, fill - i)) // 0 (gris) → 1 (noir) par mot
           const opacity = GRAY_OPACITY + (1 - GRAY_OPACITY) * wp
+          const isLast = i === words.length - 1
+          const endsSentence = w.endsWith('.') // retour à la ligne après chaque point
           return (
             <span key={i} style={{ opacity, transition: 'opacity 0.15s linear' }}>
-              {w}{i < words.length - 1 ? ' ' : ''}
+              {w}
+              {!isLast && (endsSentence ? <br /> : ' ')}
             </span>
           )
         })}
