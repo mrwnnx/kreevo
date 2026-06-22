@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Logo } from '@/components/ui/Logo'
 import { ProgressBar } from '@/components/onboarding/ProgressBar'
 import { Step1BasicInfo } from '@/components/onboarding/Step1BasicInfo'
 import { Step2JobTitle } from '@/components/onboarding/Step2JobTitle'
@@ -206,11 +207,8 @@ export function OnboardingClient({ t, specialties }: OnboardingClientProps) {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-between px-6 py-5 max-w-screen-xl mx-auto w-full">
-        <Link
-          href="/"
-          className="text-2xl font-bold tracking-tight text-foreground"
-        >
-          kreevo
+        <Link href="/" className="inline-flex items-center">
+          <Logo className="h-6 w-auto" />
         </Link>
         <div className="flex items-center gap-2 text-sm">
           <span className="text-muted-foreground hidden sm:inline">{t.header.alreadyAccount}</span>
