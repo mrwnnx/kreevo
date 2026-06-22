@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { signUpWithEmail } from '@/app/(auth)/actions'
-import { isValidUsername, normalizeUsername, USERNAME_REGEX } from '@/lib/username'
+import { isValidUsername, sanitizeUsernameInput, USERNAME_REGEX } from '@/lib/username'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type AuthT = Dictionary['auth']
@@ -77,7 +77,7 @@ export function SignupForm({ t, tc }: SignupFormProps) {
           name="username"
           type="text"
           value={username}
-          onChange={(e) => setUsername(normalizeUsername(e.target.value))}
+          onChange={(e) => setUsername(sanitizeUsernameInput(e.target.value))}
           placeholder={t.usernamePlaceholder}
           required
           autoComplete="username"

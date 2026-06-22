@@ -52,3 +52,26 @@ export function normalizeUsername(raw: string): string {
   if (s.length < USERNAME_MIN_LENGTH) return ''
   return s
 }
+
+/**
+ * Live input sanitizer for the username field. Strips disallowed characters as
+ * the user types (lowercase, accents removed, spaces → hyphens) but — unlike
+ * `normalizeUsername` — keeps partial input: it never empties short strings and
+ * keeps a trailing separator so the user can type "alex-" before "alex-martin".
+ * Validation is still gated by `isValidUsername` on the resulting value.
+ */
+export function sanitizeUsernameInput(raw: string): string {
+  let s = raw
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')        // strip combining marks (accents)
+    .toLowerCase()
+    .replace(/\s+/g, '-')                   // spaces → hyphens
+    .replace(/[^a-z0-9_-]/g, '')            // drop disallowed chars
+    .replace(/[-_]{2,}/g, (m) => m[0])      // collapse repeats
+    .replace(/^[-_]+/g, '')                 // trim leading separators only
+
+  if (s.length > USERNAME_MAX_LENGTH) {
+    s = s.slice(0, USERNAME_MAX_LENGTH)
+  }
+  return s
+}

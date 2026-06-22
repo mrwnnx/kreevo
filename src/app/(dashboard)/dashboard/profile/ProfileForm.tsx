@@ -6,7 +6,7 @@ import { Check, ChevronDown, Plus, Search, X, CheckCircle, Loader2 } from 'lucid
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { isValidUsername, normalizeUsername } from '@/lib/username'
+import { isValidUsername, sanitizeUsernameInput } from '@/lib/username'
 import {
   Dialog,
   DialogContent,
@@ -463,7 +463,7 @@ export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
           <Input
             id="username"
             value={username}
-            onChange={(e) => setUsername(normalizeUsername(e.target.value))}
+            onChange={(e) => setUsername(sanitizeUsernameInput(e.target.value))}
             placeholder={t.fields.usernamePlaceholder}
             autoComplete="username"
           />
