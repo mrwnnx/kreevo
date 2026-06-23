@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getDict } from '@/lib/i18n/lang'
 import { Button } from '@/components/ui/button'
 import { Reveal } from './Reveal'
 
@@ -19,42 +20,8 @@ type Plan = {
   price: string
   period: string
   badge?: string
-  features: string[]
+  features: readonly string[]
   cta: string
-}
-
-const COPY: { header: { title: string; body: string }; free: Plan; pro: Plan } = {
-  header: {
-    title: 'Passe au niveau supérieur',
-    body: 'Commence gratuitement. Passe en Pro quand tu veux débloquer toutes les ligues et le feedback sans limite.',
-  },
-  free: {
-    name: 'Free',
-    price: 'Gratuit',
-    period: 'pour toujours',
-    features: [
-      'Un défi design chaque semaine',
-      'Feedback IA sur tes soumissions',
-      'Ligues de Stone à Gold',
-      'Portfolio public partageable',
-      'Commentaires limités par jour',
-    ],
-    cta: 'Commencer gratuitement',
-  },
-  pro: {
-    name: 'Pro',
-    badge: 'Populaire',
-    price: '149 TND',
-    period: '/ an',
-    features: [
-      'Tout le plan Free',
-      'Toutes les ligues, jusqu’à Legend',
-      'Commentaires illimités',
-      'Feedback IA approfondi & prioritaire',
-      'Soutiens le projet Kreevo',
-    ],
-    cta: 'Passer en Pro',
-  },
 }
 
 function PlanCard({ plan, highlight = false, gradient = false }: { plan: Plan; highlight?: boolean; gradient?: boolean }) {
@@ -109,25 +76,43 @@ function PlanCard({ plan, highlight = false, gradient = false }: { plan: Plan; h
   )
 }
 
-export function PricingSection() {
+export async function PricingSection() {
+  const dict = await getDict()
+  const p = dict.landing.pricing
+  const free: Plan = {
+    name: 'Free',
+    price: p.freePrice,
+    period: p.freePeriod,
+    features: p.freeFeatures,
+    cta: p.freeCta,
+  }
+  const pro: Plan = {
+    name: 'Pro',
+    badge: p.proBadge,
+    price: '149 TND',
+    period: p.proPeriod,
+    features: p.proFeatures,
+    cta: p.proCta,
+  }
+
   return (
     <section className="mx-auto w-full max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
       <Reveal>
-      {/* Header — titre + body (placeholders, i18n plus tard) */}
+      {/* Header — titre + body (i18n) */}
       <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
         <h2 className="font-heading text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-          {COPY.header.title}
+          {p.headerTitle}
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          {COPY.header.body}
+          {p.headerBody}
         </p>
       </div>
 
       {/* Frame glass gris translucide (même style que Features) */}
       <div className="rounded-[28px] bg-secondary/50 p-2 backdrop-blur-xl">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <PlanCard plan={COPY.free} />
-          <PlanCard plan={COPY.pro} highlight gradient />
+          <PlanCard plan={free} />
+          <PlanCard plan={pro} highlight gradient />
         </div>
       </div>
       </Reveal>

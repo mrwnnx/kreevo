@@ -7,7 +7,15 @@ import { XpIcon } from '@/components/ui/XpIcon'
  * Flottement doux (kv-float-soft). Statique, tokens DS, thème-safe.
  */
 
-export function PortfolioCard({ leagueIcon }: { leagueIcon?: string }) {
+export function PortfolioCard({
+  leagueIcon,
+  xpEarned,
+  leagueLabel,
+}: {
+  leagueIcon?: string
+  xpEarned: string
+  leagueLabel: string
+}) {
   return (
     <div className="kv-float-soft w-full max-w-[320px] rounded-3xl border border-border bg-card p-6 shadow-sm">
       {/* En-tête profil */}
@@ -34,14 +42,14 @@ export function PortfolioCard({ leagueIcon }: { leagueIcon?: string }) {
             <XpIcon className="size-4" />
             <span className="text-lg font-bold text-foreground">4 820</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">XP gagnés</p>
+          <p className="mt-1 text-xs text-muted-foreground">{xpEarned}</p>
         </div>
         <div className="rounded-2xl bg-secondary px-4 py-3">
           <div className="flex items-center gap-1.5">
             {leagueIcon ? <LeagueIcon icon={leagueIcon} size="md" /> : null}
             <span className="text-lg font-bold text-foreground">#2</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Ligue Gold</p>
+          <p className="mt-1 text-xs text-muted-foreground">{leagueLabel}</p>
         </div>
       </div>
     </div>

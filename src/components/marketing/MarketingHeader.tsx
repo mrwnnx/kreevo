@@ -15,9 +15,9 @@ export function MarketingHeader({ t }: { t: Dictionary['landing']['nav'] }) {
           <Logo className="h-6 w-auto" />
         </a>
         <nav className="hidden items-center gap-8 text-base sm:flex">
-          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">About</a>
-          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">Hire talent</a>
-          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">Blog</a>
+          <a href="#" className="font-medium text-foreground transition-opacity hover:opacity-70">{t.about}</a>
+          <a href="/hire" className="font-medium text-foreground transition-opacity hover:opacity-70">{t.hireTalent}</a>
+          <a href="/blog" className="font-medium text-foreground transition-opacity hover:opacity-70">{t.blog}</a>
         </nav>
         <Button size="lg" render={<a href="/signup" />}>
           {t.getStarted}

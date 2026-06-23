@@ -1,0 +1,155 @@
+import type { Metadata } from 'next'
+import { Compass, FileText, Medal, ShieldCheck, RefreshCw, ArrowLeft } from 'lucide-react'
+import { getDict } from '@/lib/i18n/lang'
+import { siteUrl } from '@/lib/site'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { MarketingHeader } from '@/components/marketing/MarketingHeader'
+import { MarketingFooter } from '@/components/marketing/MarketingFooter'
+import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
+import { HireMediaSection } from '@/components/hire/HireMediaSection'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDict()
+  const t = dict.landing.hire
+  return {
+    title: `${t.heroTitle} — Kreevo`,
+    description: t.heroBody,
+    alternates: { canonical: '/hire' },
+    openGraph: {
+      title: t.heroTitle,
+      description: t.heroBody,
+      url: siteUrl('/hire'),
+      siteName: 'Kreevo',
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title: t.heroTitle, description: t.heroBody },
+  }
+}
+
+/* Carte générique (tokens home : rounded-[24px] bg-card border). */
+function InfoCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="rounded-[24px] border border-border bg-card p-7 sm:p-8">
+      <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">{icon}</div>
+      <h3 className="mt-5 font-heading text-xl font-semibold tracking-tight text-foreground">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{children}</p>
+    </div>
+  )
+}
+
+export default async function HirePage() {
+  const dict = await getDict()
+  const t = dict.landing.hire
+
+  const reasons = [
+    { icon: <Medal className="size-5" />, title: t.reasonLeagueTitle, body: t.reasonLeagueBody },
+    { icon: <ShieldCheck className="size-5" />, title: t.reasonVerifiedTitle, body: t.reasonVerifiedBody },
+    { icon: <RefreshCw className="size-5" />, title: t.reasonLivingTitle, body: t.reasonLivingBody },
+  ]
+  const steps = [
+    { n: 1, title: t.step1Title, body: t.step1Body },
+    { n: 2, title: t.step2Title, body: t.step2Body },
+    { n: 3, title: t.step3Title, body: t.step3Body },
+  ]
+
+  return (
+    <main className="relative min-h-screen overflow-x-clip bg-background">
+      <MovingGradientBackground />
+
+      <div className="relative z-10">
+        <MarketingHeader t={dict.landing.nav} />
+
+        {/* 1 — HERO */}
+        <section className="mx-auto max-w-3xl px-4 pt-24 pb-12 text-center sm:px-6 sm:pt-32">
+          <Badge variant="secondary" className="mb-5">{t.badge}</Badge>
+          <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+            {t.heroTitle}
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {t.heroBody}
+          </p>
+        </section>
+
+        {/* 2 — LES 2 VOIES */}
+        <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <InfoCard icon={<Compass className="size-5" />} title={t.voie1Title}>
+              {t.voie1Body}
+            </InfoCard>
+            <InfoCard icon={<FileText className="size-5" />} title={t.voie2Title}>
+              {t.voie2Body}
+            </InfoCard>
+          </div>
+        </section>
+
+        {/* 2.5 — BLOCS MÉDIA ALTERNÉS + MODALS */}
+        <HireMediaSection t={t} />
+
+        {/* 3 — POURQUOI LE TALENT KREEVO */}
+        <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <h2 className="mb-8 text-center font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {t.whyTitle}
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {reasons.map((r) => (
+              <InfoCard key={r.title} icon={r.icon} title={r.title}>
+                {r.body}
+              </InfoCard>
+            ))}
+          </div>
+        </section>
+
+        {/* 4 — COMMENT ÇA MARCHE */}
+        <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+          <h2 className="mb-8 text-center font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {t.howTitle}
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {steps.map((s) => (
+              <div key={s.n} className="rounded-[24px] border border-border bg-card p-7 text-center sm:p-8">
+                <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground">
+                  {s.n}
+                </span>
+                <h3 className="mt-4 font-heading text-lg font-semibold tracking-tight text-foreground">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 5 — CTA FINAL */}
+        <section className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
+          <div className="rounded-[28px] border border-border bg-card p-10 text-center sm:p-12">
+            <h2 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              {t.ctaTitle}
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground">{t.ctaBody}</p>
+            <div className="mt-7 flex flex-col items-center gap-3">
+              <Button size="lg" disabled>
+                {t.ctaButton}
+              </Button>
+              <a
+                href="/"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="size-4" />
+                {t.backHome}
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <MarketingFooter />
+      </div>
+    </main>
+  )
+}

@@ -32,7 +32,13 @@ const RANKS: Record<number, Record<Person['id'], number>> = {
 }
 const SLOT_XP: Record<number, string> = { 1: '2 480', 2: '2 150', 3: '1 920' }
 
-export function LeagueClimb({ icons }: { icons: Record<string, string> }) {
+export function LeagueClimb({
+  icons,
+  t,
+}: {
+  icons: Record<string, string>
+  t: { leaguePrefix: string; promoted: string; you: string }
+}) {
   const [tick, setTick] = useState(0)
   const [reduced, setReduced] = useState(false)
 
@@ -64,10 +70,10 @@ export function LeagueClimb({ icons }: { icons: Record<string, string> }) {
         >
           <LeagueIcon icon={icons[league] || LEAGUE_ICONS[league]} size="lg" />
         </div>
-        <span className="text-sm font-bold text-foreground">Ligue {league}</span>
+        <span className="text-sm font-bold text-foreground">{t.leaguePrefix} {league}</span>
         {promote && (
           <span className="ms-1 rounded-full bg-league-gold/20 px-2 py-0.5 text-[10px] font-bold text-foreground">
-            Promu ↑
+            {t.promoted} ↑
           </span>
         )}
       </div>
@@ -103,7 +109,7 @@ export function LeagueClimb({ icons }: { icons: Record<string, string> }) {
                   className="size-full object-cover"
                 />
               </span>
-              <span className="truncate text-xs font-semibold text-foreground">{p.name}</span>
+              <span className="truncate text-xs font-semibold text-foreground">{isYou ? t.you : p.name}</span>
               <span className="ms-auto text-[11px] font-semibold text-muted-foreground">{SLOT_XP[rank]} XP</span>
             </div>
           )

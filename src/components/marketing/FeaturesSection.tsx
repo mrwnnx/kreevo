@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getDict } from '@/lib/i18n/lang'
 import { type ChallengePreview } from '@/components/features/challenge/ChallengePreviewCard'
 import { FeedbackScore } from './FeedbackScore'
 import { LeagueClimb } from './LeagueClimb'
@@ -20,14 +21,6 @@ import { BriefStack } from './BriefStack'
  *
  * ⚠️ Titres/sous-textes = PLACEHOLDERS (copy FR/EN/AR final fourni plus tard → i18n).
  */
-
-const COPY = {
-  header:    { title: 'Tout pour progresser pour de vrai', body: 'Des briefs réels, un feedback IA, un système de ligues et un portfolio public — réunis pour faire décoller ta pratique.' },
-  leagues:   { title: 'Monte les ligues',                  sub: 'De Stone à Legend — chaque ligue débloque des briefs plus exigeants.' },
-  feedback:  { title: 'Un feedback qui te fait progresser', sub: 'L’IA note chaque soumission et te dit précisément où t’améliorer.' },
-  portfolio: { title: 'Ton portfolio, partageable',         sub: 'Tes meilleurs travaux réunis sur une page publique à ton nom.' },
-  briefs:    { title: 'Des briefs réels',                   sub: 'Des challenges inspirés de vrais projets — toujours un nouveau brief à relever.' },
-}
 
 /* Données échantillon — challenges Kreevo crédibles (UX/UI + graphic). */
 const SAMPLES: ChallengePreview[] = [
@@ -59,6 +52,16 @@ export async function FeaturesSection() {
   const leagueIcons: Record<string, string> = Object.fromEntries(
     (leagueRows ?? []).map((l) => [String(l.name), String(l.icon ?? '')]),
   )
+
+  const dict = await getDict()
+  const f = dict.landing.features
+  const COPY = {
+    header: { title: f.headerTitle, body: f.headerBody },
+    leagues: { title: f.leaguesTitle, sub: f.leaguesSub },
+    feedback: { title: f.feedbackTitle, sub: f.feedbackSub },
+    portfolio: { title: f.portfolioTitle, sub: f.portfolioSub },
+    briefs: { title: f.briefsTitle, sub: f.briefsSub },
+  }
 
   return (
     <section id="features" className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
@@ -115,7 +118,7 @@ export async function FeaturesSection() {
         {/* 1 — SYSTÈME DE LIGUES : mini-classement animé (toi grimpes 3ᵉ→1ᵉ puis promotion) */}
         <FeatureCard title={COPY.leagues.title} sub={COPY.leagues.sub}>
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <LeagueClimb icons={leagueIcons} />
+            <LeagueClimb icons={leagueIcons} t={{ leaguePrefix: f.leaguePrefix, promoted: f.promoted, you: f.you }} />
           </div>
         </FeatureCard>
 
@@ -151,7 +154,7 @@ export async function FeaturesSection() {
         {/* 3 — PORTFOLIO PUBLIC : carte profil (avatar Notion + XP + rang ligue + grille soumissions) */}
         <FeatureCard title={COPY.portfolio.title} sub={COPY.portfolio.sub}>
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <PortfolioCard leagueIcon={leagueIcons['Gold']} />
+            <PortfolioCard leagueIcon={leagueIcons['Gold']} xpEarned={f.xpEarned} leagueLabel={`${f.leaguePrefix} Gold`} />
           </div>
         </FeatureCard>
 

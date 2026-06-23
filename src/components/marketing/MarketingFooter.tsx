@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LangSwitcher } from '@/components/i18n/LangSwitcher'
+import { getLang, getDict } from '@/lib/i18n/lang'
 
 /**
  * MarketingFooter — pied de page de la landing.
@@ -28,20 +31,22 @@ function Linkedin({ className }: { className?: string }) {
   )
 }
 
-const NAV = [
-  { label: 'About', href: '#' },
-  { label: 'How it works', href: '#features' },
-  { label: 'Hire talent', href: '#' },
-  { label: 'Blog', href: '#' },
-  { label: 'Help', href: '/help' },
-]
-
 const SOCIALS = [
   { label: 'Instagram', href: 'https://instagram.com/kreevo', Icon: Instagram },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/kreevo', Icon: Linkedin },
 ]
 
-export function MarketingFooter() {
+export async function MarketingFooter() {
+  const lang = await getLang()
+  const dict = await getDict()
+  const f = dict.landing.footer
+  const nav = [
+    { label: f.about, href: '#' },
+    { label: f.howItWorks, href: '#features' },
+    { label: f.hireTalent, href: '/hire' },
+    { label: f.blog, href: '/blog' },
+    { label: f.help, href: '/help' },
+  ]
   return (
     <footer className="relative z-10 border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -52,9 +57,9 @@ export function MarketingFooter() {
           </div>
 
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm sm:justify-self-center">
-            {NAV.map(({ label, href }) => (
+            {nav.map(({ label, href }) => (
               <Link
-                key={label}
+                key={href}
                 href={href}
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
@@ -80,15 +85,19 @@ export function MarketingFooter() {
           </div>
         </div>
 
-        {/* Bas-gauche : © + mentions légales */}
-        <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        {/* Bas : © + mentions légales (gauche) · switch thème (droite) */}
+        <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-3 text-xs text-muted-foreground">
           <span>© 2026 Kreevo</span>
           <Link href="#" className="transition-colors hover:text-foreground">
-            Terms
+            {f.terms}
           </Link>
           <Link href="#" className="transition-colors hover:text-foreground">
-            Privacy
+            {f.privacy}
           </Link>
+          <div className="ms-auto flex items-center gap-3">
+            <LangSwitcher current={lang} />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </footer>
