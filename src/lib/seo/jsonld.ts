@@ -44,6 +44,39 @@ export function websiteSchema(): JsonLd {
   }
 }
 
+interface BlogPostingInput {
+  title: string
+  description: string
+  url: string
+  image: string | null
+  datePublished: string
+  dateModified: string
+}
+
+/**
+ * BlogPosting schema for blog articles. `image` omitted when null.
+ * Mirrors the help center `articleSchema` shape (publisher = Kreevo Organization).
+ */
+export function blogPostingSchema(input: BlogPostingInput): JsonLd {
+  const ld: JsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: input.title,
+    description: input.description,
+    url: input.url.startsWith('http') ? input.url : siteUrl(input.url),
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Kreevo',
+      url: siteUrl(),
+      logo: siteUrl('/favicon.ico'),
+    },
+  }
+  if (input.image) ld.image = input.image
+  return ld
+}
+
 interface ProfilePageInput {
   username: string
   name: string

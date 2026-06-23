@@ -33,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: siteUrl('/blog'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
       url: siteUrl('/help'),
       lastModified: now,
       changeFrequency: 'weekly',
@@ -130,5 +136,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...profileRoutes, ...challengeRoutes]
+  // Published blog articles
+  const { data: blogData } = await (supabaseAdmin as any)
+    .from('articles')
+    .select('slug, updated_at, published_at')
+    .eq('status', 'published')
+
+  const blogRows = (blogData ?? []) as Array<{ slug: string; updated_at: string; published_at: string | null }>
+  const blogRoutes: MetadataRoute.Sitemap = blogRows.map((a) => ({
+    url: siteUrl(`/blog/${a.slug}`),
+    lastModified: new Date(a.updated_at ?? a.published_at ?? now),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+
+  return [
+    ...staticRoutes,
+    ...categoryRoutes,
+    ...articleRoutes,
+    ...profileRoutes,
+    ...challengeRoutes,
+    ...blogRoutes,
+  ]
 }

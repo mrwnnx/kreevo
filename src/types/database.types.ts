@@ -75,6 +75,69 @@ export type Database = {
           },
         ]
       }
+      articles: {
+        Row: {
+          author_id: string | null
+          category: string | null
+          content: string
+          cover_image: string | null
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          locale: string | null
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          reading_time: number | null
+          slug: string
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string | null
+          content: string
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          locale?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug: string
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          author_id?: string | null
+          category?: string | null
+          content?: string
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          locale?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           badge_type: string
@@ -1277,7 +1340,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "submission_claps_user_id_fkey"
+            foreignKeyName: "submission_likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
