@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import { Medal, ShieldCheck, RefreshCw, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { getDict } from '@/lib/i18n/lang'
 import { siteUrl } from '@/lib/site'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
@@ -28,21 +27,25 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-/* Carte générique (tokens home : rounded-[24px] bg-card border). */
-function InfoCard({
-  icon,
+/* Carte type FeaturesSection : panneau déco + texte centré. */
+function ReasonCard({
+  emoji,
   title,
   children,
 }: {
-  icon: React.ReactNode
+  emoji: string
   title: string
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-[24px] border border-border bg-card p-7 sm:p-8">
-      <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">{icon}</div>
-      <h3 className="mt-5 font-heading text-xl font-semibold tracking-tight text-foreground">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{children}</p>
+    <div className="rounded-[24px] bg-card p-3">
+      <div className="flex aspect-square items-center justify-center overflow-hidden rounded-[12px] bg-secondary text-5xl sm:text-6xl">
+        {emoji}
+      </div>
+      <div className="px-3 pb-4 pt-5 text-center">
+        <h3 className="font-heading text-2xl font-semibold leading-tight tracking-tight text-foreground">{title}</h3>
+        <p className="mx-auto mt-2 max-w-[34ch] text-sm leading-relaxed text-muted-foreground">{children}</p>
+      </div>
     </div>
   )
 }
@@ -52,9 +55,9 @@ export default async function HirePage() {
   const t = dict.landing.hire
 
   const reasons = [
-    { icon: <Medal className="size-5" />, title: t.reasonLeagueTitle, body: t.reasonLeagueBody },
-    { icon: <ShieldCheck className="size-5" />, title: t.reasonVerifiedTitle, body: t.reasonVerifiedBody },
-    { icon: <RefreshCw className="size-5" />, title: t.reasonLivingTitle, body: t.reasonLivingBody },
+    { emoji: '🏆', title: t.reasonLeagueTitle, body: t.reasonLeagueBody },
+    { emoji: '✅', title: t.reasonVerifiedTitle, body: t.reasonVerifiedBody },
+    { emoji: '🛡️', title: t.reasonLivingTitle, body: t.reasonLivingBody },
   ]
   const steps = [
     { n: 1, title: t.step1Title, body: t.step1Body },
@@ -93,9 +96,9 @@ export default async function HirePage() {
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {reasons.map((r) => (
-              <InfoCard key={r.title} icon={r.icon} title={r.title}>
+              <ReasonCard key={r.title} emoji={r.emoji} title={r.title}>
                 {r.body}
-              </InfoCard>
+              </ReasonCard>
             ))}
           </div>
         </section>

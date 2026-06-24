@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { Mail, Calendar, Hash } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +26,13 @@ export default async function AdminHireWaitlistPage() {
             {entries?.length ?? 0} inscription{entries?.length !== 1 ? 's' : ''}
           </p>
         </div>
+        <a
+          href="/api/admin/hire-waitlist/export"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          <Download className="size-4" />
+          CSV
+        </a>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
