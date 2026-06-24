@@ -89,7 +89,8 @@ export function HireWaitlistCta({ t }: { t: T }) {
                 <X className="size-4" />
               </button>
 
-              <h3 className="font-heading text-xl font-semibold tracking-tight text-foreground">{t.waitlistTitle}</h3>
+              <img src="/logo_kreevo.svg" alt="Kreevo" className="mx-auto h-6 w-auto" />
+              <h3 className="mt-4 font-heading text-xl font-semibold tracking-tight text-foreground">{t.waitlistTitle}</h3>
 
               {status === 'success' ? (
                 <div className="mt-4 flex flex-col items-center gap-2">

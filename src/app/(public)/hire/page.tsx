@@ -71,10 +71,6 @@ export default async function HirePage() {
 
         {/* 1 — HERO */}
         <section className="mx-auto max-w-3xl px-4 pt-24 pb-12 text-center sm:px-6 sm:pt-32">
-          <a href="/" aria-label="Kreevo" className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-full border border-border bg-card px-5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            <img src="/logo_kreevo.svg" alt="Kreevo" className="h-5 w-auto" />
-            Kreevo
-          </a>
           <Badge variant="secondary" className="mb-5">{t.badge}</Badge>
           <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
             {t.heroTitle}
