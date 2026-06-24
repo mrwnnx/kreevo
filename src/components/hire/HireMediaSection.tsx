@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Maximize2, X, Image as ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -127,7 +127,7 @@ function MediaBlock({
 }) {
   const orderCls = imageRight ? 'md:order-2' : 'md:order-1'
   return (
-    <div className="relative rounded-[24px] border border-foreground/10 bg-background/35 p-6 backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-background/40 before:to-transparent sm:p-8">
+    <div className="relative w-full rounded-[24px] border border-foreground/10 bg-background/35 p-6 backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-background/40 before:to-transparent sm:p-8">
       <div className="relative z-10 grid items-stretch gap-6 md:grid-cols-2 md:gap-10">
         {/* Image (1ère dans le DOM → au-dessus sur mobile) */}
         {image ? (
@@ -152,7 +152,10 @@ function MediaBlock({
             type="button"
             onClick={onOpen}
             aria-label="Voir en grand"
-            className="mt-auto inline-flex size-10 items-center justify-center self-start rounded-full border border-border text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
+            className={cn(
+              'mt-auto inline-flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-foreground hover:text-background',
+              imageRight ? 'self-start' : 'self-end',
+            )}
           >
             <Maximize2 className="size-4" />
           </button>
@@ -164,6 +167,44 @@ function MediaBlock({
 
 export function HireMediaSection({ t }: { t: HireT }) {
   const [openModal, setOpenModal] = useState<1 | 2 | null>(null)
+  const card1Ref = useRef<HTMLDivElement>(null)
+  const item2Ref = useRef<HTMLDivElement>(null)
+
+  // La carte 1 recule (scale −20% + blur + fondu) à mesure que la carte 2 monte
+  // par-dessus. p = progression de la montée de la carte 2 (0 → 1). Desktop seulement.
+  useEffect(() => {
+    const card1 = card1Ref.current
+    const item2 = item2Ref.current
+    if (!card1 || !item2) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let raf = 0
+    const apply = () => {
+      if (window.innerWidth < 640) {
+        card1.style.transform = ''
+        card1.style.filter = ''
+        card1.style.opacity = ''
+        return
+      }
+      const top = item2.getBoundingClientRect().top
+      const vh = window.innerHeight
+      const p = Math.max(0, Math.min(1, 1 - top / vh))
+      card1.style.transform = `scale(${(1 - 0.2 * p).toFixed(4)})`
+      card1.style.filter = p > 0.001 ? `blur(${(p * 8).toFixed(2)}px)` : ''
+      card1.style.opacity = String(1 - 0.3 * p)
+    }
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(apply)
+    }
+    apply()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
 
   // Tabs des modals = placeholder traduit (à remplir ensuite).
   const modalTabs: Tab[] = [
@@ -173,16 +214,34 @@ export function HireMediaSection({ t }: { t: HireT }) {
   ]
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="space-y-6">
-        <MediaBlock
-          title={t.media1Title}
-          body={t.media1Body}
-          imageRight
-          image="/hire/hire-brief.webp"
-          onOpen={() => setOpenModal(1)}
-        />
-        <MediaBlock title={t.media2Title} body={t.media2Body} imageRight={false} onOpen={() => setOpenModal(2)} />
+    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-0">
+      {/* Cartes empilées au scroll (desktop) : la 1ʳᵉ se fige au centre, la 2ᵉ monte
+          par-dessus jusqu'au même alignement, puis scroll normal vers la suite.
+          Mobile = flux normal (évite le clipping des cartes hautes). */}
+      <div className="space-y-6 sm:space-y-0">
+        <div className="z-[1] sm:sticky sm:top-0 sm:flex sm:h-screen sm:items-center sm:justify-center">
+          <div ref={card1Ref} className="w-full will-change-transform">
+            <MediaBlock
+              title={t.media1Title}
+              body={t.media1Body}
+              imageRight
+              image="/hire/hire-brief.webp"
+              onOpen={() => setOpenModal(1)}
+            />
+          </div>
+        </div>
+        <div
+          ref={item2Ref}
+          className="z-[2] sm:sticky sm:top-0 sm:flex sm:h-screen sm:items-center sm:justify-center"
+        >
+          <MediaBlock
+            title={t.media2Title}
+            body={t.media2Body}
+            imageRight
+            image="/hire/hire-talent.webp"
+            onOpen={() => setOpenModal(2)}
+          />
+        </div>
       </div>
 
       <Modal open={openModal === 1} onClose={() => setOpenModal(null)} title={t.media1Title}>

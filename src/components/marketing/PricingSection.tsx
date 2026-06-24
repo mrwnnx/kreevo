@@ -65,7 +65,7 @@ function PlanCard({ plan, highlight = false, gradient = false }: { plan: Plan; h
           <Button
             size="lg"
             variant={highlight ? 'default' : 'outline'}
-            className="w-full"
+            className="h-[50px] w-full text-base"
             render={<a href="/signup" />}
           >
             {plan.cta}

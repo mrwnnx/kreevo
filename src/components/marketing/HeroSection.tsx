@@ -209,7 +209,7 @@ export function HeroSection({ t }: { t: Dictionary['landing'] }) {
           {t.hero.body}
         </p>
         <div className="mt-8 flex justify-center">
-          <Button size="lg" render={<a href="/signup" />}>
+          <Button size="lg" className="h-[50px] text-base" render={<a href="/signup" />}>
             {t.hero.cta}
           </Button>
         </div>

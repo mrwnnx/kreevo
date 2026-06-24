@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Compass, FileText, Medal, ShieldCheck, RefreshCw, ArrowLeft } from 'lucide-react'
+import { Medal, ShieldCheck, RefreshCw, ArrowLeft } from 'lucide-react'
 import { getDict } from '@/lib/i18n/lang'
 import { siteUrl } from '@/lib/site'
 import { Badge } from '@/components/ui/badge'
@@ -77,17 +77,10 @@ export default async function HirePage() {
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {t.heroBody}
           </p>
-        </section>
-
-        {/* 2 — LES 2 VOIES */}
-        <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <InfoCard icon={<Compass className="size-5" />} title={t.voie1Title}>
-              {t.voie1Body}
-            </InfoCard>
-            <InfoCard icon={<FileText className="size-5" />} title={t.voie2Title}>
-              {t.voie2Body}
-            </InfoCard>
+          <div className="mt-8 flex justify-center">
+            <Button size="lg" className="h-[50px] text-base" render={<a href="/help/contact" />}>
+              {t.recruiterCta}
+            </Button>
           </div>
         </section>
 
@@ -134,7 +127,7 @@ export default async function HirePage() {
             </h2>
             <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground">{t.ctaBody}</p>
             <div className="mt-7 flex flex-col items-center gap-3">
-              <Button size="lg" disabled>
+              <Button size="lg" className="h-[50px] text-base" disabled>
                 {t.ctaButton}
               </Button>
               <a
