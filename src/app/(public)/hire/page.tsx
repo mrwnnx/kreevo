@@ -8,6 +8,7 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
 import { HireMediaSection } from '@/components/hire/HireMediaSection'
+import { HireWaitlistCta } from '@/components/hire/HireWaitlistCta'
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDict()
@@ -78,9 +79,7 @@ export default async function HirePage() {
             {t.heroBody}
           </p>
           <div className="mt-8 flex justify-center">
-            <Button size="lg" className="h-[50px] text-base" render={<a href="/help/contact" />}>
-              {t.recruiterCta}
-            </Button>
+            <HireWaitlistCta t={t} />
           </div>
         </section>
 
@@ -127,9 +126,7 @@ export default async function HirePage() {
             </h2>
             <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground">{t.ctaBody}</p>
             <div className="mt-7 flex flex-col items-center gap-3">
-              <Button size="lg" className="h-[50px] text-base" disabled>
-                {t.ctaButton}
-              </Button>
+              <HireWaitlistCta t={t} />
               <a
                 href="/"
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
