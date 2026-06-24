@@ -21,6 +21,7 @@ const NAV = [
   { href: '/admin/users',        label: 'Users',          icon: Users },
   { href: '/admin/moderation',   label: 'Modération',     icon: ShieldAlert, badge: true },
   { href: '/admin/feedbacks',    label: 'Feedbacks Pro',  icon: MessageSquare },
+  { href: '/admin/hire-waitlist', label: 'Waitlist Hiring', icon: Mail },
   { href: '/admin/emails',       label: 'Emails',         icon: Mail },
   { href: '/admin/emails/templates', label: 'Templates email', icon: LayoutTemplate },
   { href: '/admin/help',         label: 'Help Center',    icon: BookOpen },
