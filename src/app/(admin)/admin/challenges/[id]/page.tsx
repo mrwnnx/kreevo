@@ -56,7 +56,7 @@ export default async function EditChallenge({ params }: Props) {
   if (!data) notFound()
 
   return (
-    <div className="p-6 max-w-3xl space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Éditer challenge</h1>
         <p className="text-sm text-muted-foreground">{data.title}</p>
@@ -69,6 +69,7 @@ export default async function EditChallenge({ params }: Props) {
         </div>
       )}
 
+      <div className="grid lg:grid-cols-[1fr_420px] gap-8 items-start">
       <ChallengeForm
         id={id}
         initial={{
@@ -102,7 +103,7 @@ export default async function EditChallenge({ params }: Props) {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="flex flex-col gap-3">
           <div className="rounded-lg border p-3 text-center">
             <p className="text-2xl font-bold">{stats.total}</p>
             <p className="text-xs text-muted-foreground">Participants</p>
@@ -165,6 +166,7 @@ export default async function EditChallenge({ params }: Props) {
             Aucun participant pour l&apos;instant.
           </div>
         )}
+      </div>
       </div>
     </div>
   )

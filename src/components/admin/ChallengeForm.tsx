@@ -605,7 +605,7 @@ export function ChallengeForm({ initial, id }: { initial?: ChallengeFormInitial;
         )}
 
         {/* Fields for the active language */}
-        <div className="grid md:grid-cols-2 gap-5" dir={rtl ? 'rtl' : 'ltr'}>
+        <div className="flex flex-col gap-5" dir={rtl ? 'rtl' : 'ltr'}>
           <div className="md:col-span-2 space-y-1.5">
             <label className={labelClass}>Titre</label>
             <input value={af.title} onChange={e => setField(activeLang, 'title')(e.target.value)} className={inputClass} placeholder="Titre du challenge" dir={rtl ? 'rtl' : 'ltr'} />
