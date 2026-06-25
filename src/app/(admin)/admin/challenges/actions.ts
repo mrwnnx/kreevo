@@ -183,7 +183,7 @@ Write each field with a concrete, actionable "design brief" tone, calibrated to 
 - title: short, specific, punchy (not generic). PROSE (one line).
 - brief: the mission — what to design and why — motivating, 2-4 sentences. PROSE (paragraph).
 - context: a believable scenario / fictional client / background. PROSE (paragraph).
-- deliverable: the concrete expected outputs (formats, number of screens, Figma link…), matching the challenge type. LIST.
+- deliverable: the concrete expected outputs (formats, number of screens…), matching the challenge type. LIST. ALWAYS include — as separate items — a requirement to submit images of the work (screenshots or mockup/presentation visuals) and, when possible, the project link (e.g. Figma, Behance, or live URL).
 - constraints: realistic constraints to respect (style, platform, accessibility, dimensions…). LIST.
 - criteria: how the work will be judged. LIST (3-5 items).
 
