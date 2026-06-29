@@ -30,6 +30,8 @@ interface FeedbackPageT {
   translate: string
   translating: string
   alreadyInLang: string
+  upsellBasic: string
+  upsellCta: string
 }
 
 interface Props {
@@ -39,10 +41,12 @@ interface Props {
   feedbackLang?: string | null
   /** User's active UI language. */
   currentLang?: FeedbackLang
+  /** Pro/Studio user → no upsell. Free user → 'basic' feedback + upsell card. */
+  isProUser?: boolean
   t: FeedbackPageT
 }
 
-export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = null, currentLang = 'fr', t }: Props) {
+export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = null, currentLang = 'fr', isProUser = true, t }: Props) {
   const [feedback, setFeedback] = useState<Feedback | null>(initialFeedback)
   const [translated, setTranslated] = useState<Feedback | null>(null)
   const [loading, setLoading] = useState(false)
@@ -189,6 +193,19 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
           <p className="text-base sm:text-lg leading-relaxed">{view.summary}</p>
         </div>
       </div>
+
+      {/* Annonce — basic tier only (free user) : le feedback détaillé arrive bientôt (informatif, non cliquable) */}
+      {!isProUser && (
+        <div className="flex items-start gap-3 rounded-[24px] border border-border bg-card p-5">
+          <Sparkles className="size-5 shrink-0 mt-0.5 text-primary" />
+          <div className="space-y-1.5">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              {t.upsellCta}
+            </span>
+            <p className="text-sm text-muted-foreground leading-relaxed">{t.upsellBasic}</p>
+          </div>
+        </div>
+      )}
 
       {/* Other sections — separate blocks below */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">

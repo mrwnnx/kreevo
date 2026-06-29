@@ -31,14 +31,16 @@ export default async function FeedbackPage({ params }: Props) {
 
   if (!submission) notFound()
   if (submission.user_id !== user.id) redirect(`/dashboard/submissions/${id}`)
-  // Feedback IA réservé aux soumissions validées par l'IA (l'API le bloque aussi).
+  // Feedback IA réservé aux soumissions validées par l'IA.
   if (submission.validation_status !== 'approved') redirect(`/dashboard/submissions/${id}`)
-  if (!PRO_PLANS.has(String(profile?.plan ?? ''))) redirect(`/dashboard/submissions/${id}`)
+
+  // Feedback IA ouvert à tous : free → 'basic', pro/studio → 'detailed'.
+  const isProUser = PRO_PLANS.has(String(profile?.plan ?? ''))
 
   // Pre-fetch any existing feedback (server-side, bypasses RLS via admin)
   const { data: row } = await (supabaseAdmin as any)
     .from('submission_feedbacks')
-    .select('content, lang')
+    .select('content, lang, tier')
     .eq('submission_id', id)
     .maybeSingle()
   const initialFeedback = row?.content ?? null
@@ -74,6 +76,7 @@ export default async function FeedbackPage({ params }: Props) {
         initialFeedback={initialFeedback}
         feedbackLang={feedbackLang}
         currentLang={currentLang}
+        isProUser={isProUser}
         t={t}
       />
     </div>

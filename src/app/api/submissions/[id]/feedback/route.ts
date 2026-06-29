@@ -22,6 +22,12 @@ interface Feedback {
 
 const PRO_PLANS = new Set(['pro', 'studio'])
 
+type FeedbackTier = 'basic' | 'detailed'
+
+function resolveTier(plan: string | null | undefined): FeedbackTier {
+  return PRO_PLANS.has(String(plan ?? '')) ? 'detailed' : 'basic'
+}
+
 async function getSubmission(submissionId: string) {
   const { data } = await (supabaseAdmin as any)
     .from('submissions')
@@ -77,7 +83,49 @@ Please analyze this submission against the brief and return a JSON object with t
 Be specific, reference visual elements you see. Constructive, no fluff. Output ONLY the JSON, no preamble.`
 }
 
-async function generateFeedback(sub: any, lang: Lang): Promise<Feedback> {
+// BASIC tier (free) — verdict général uniquement : score + résumé qui NOMME les
+// axes forts/faibles SANS les détailler ni dire comment corriger (réservé au Pro).
+function buildBasicPrompt(sub: any, lang: Lang): string {
+  const c = sub.challenges
+  return `You are a senior design critic giving a SHORT, high-level verdict on a submission for the Kreevo design challenges platform.
+
+IMPORTANT: Write the summary in ${FEEDBACK_LANG_NAME[lang]}. Keep brand/tool names and design jargon (UI, UX, Figma…) as-is. The JSON keys and the numeric score stay unchanged.
+
+CHALLENGE BRIEF:
+- Title: ${c?.title ?? 'N/A'}
+- Specialty: ${c?.specialty ?? 'N/A'}
+- Type: ${c?.challenge_types?.name_fr ?? 'N/A'}
+- Industry: ${c?.industries?.name_fr ?? 'N/A'}
+- Brief: ${c?.brief ?? 'N/A'}
+- Scenario: ${c?.context ?? 'N/A'}
+- Expected deliverable: ${c?.deliverable ?? 'N/A'}
+- Constraints: ${c?.constraints ?? 'N/A'}
+- Evaluation criteria: ${c?.criteria ?? 'N/A'}
+
+USER SUBMISSION:
+- Title: ${sub.title ?? 'Untitled'}
+- Description: ${sub.description ?? '(no description)'}
+- The cover image is attached.
+
+Write a GENERAL VERDICT in 2-3 short paragraphs that:
+- States the overall impression and how well the work fits the brief.
+- NAMES the axes where the work is strong and the axes where it is weak (e.g. visual hierarchy, accessibility, consistency, typography, brief fit, craft) — name them, do NOT explain or expand on them.
+
+STRICT RULES — this is the FREE tier:
+- Do NOT provide a list of strengths, weaknesses, or suggestions.
+- Do NOT give step-by-step improvement actions or tell the user HOW to fix anything — detailed, actionable guidance is reserved for the Pro tier.
+- Stay at the level of "what" (the verdict and which axes), never "how" (the fix).
+
+Return a JSON object with EXACTLY this shape:
+{
+  "summary": "2-3 paragraph general verdict naming strong and weak axes",
+  "score": 75   // 0-100 based on brief fit, craft, and originality
+}
+
+Output ONLY the JSON, no preamble.`
+}
+
+async function generateFeedback(sub: any, lang: Lang, tier: FeedbackTier): Promise<Feedback> {
   const userContent: Anthropic_MessageContentBlock[] = []
   if (sub.cover_url) {
     userContent.push({
@@ -85,11 +133,12 @@ async function generateFeedback(sub: any, lang: Lang): Promise<Feedback> {
       source: { type: 'url', url: sub.cover_url },
     } as any)
   }
-  userContent.push({ type: 'text', text: buildPrompt(sub, lang) })
+  const isBasic = tier === 'basic'
+  userContent.push({ type: 'text', text: isBasic ? buildBasicPrompt(sub, lang) : buildPrompt(sub, lang) })
 
   const res = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 1500,
+    max_tokens: isBasic ? 600 : 1500,
     messages: [{ role: 'user', content: userContent as any }],
   })
 
@@ -98,12 +147,13 @@ async function generateFeedback(sub: any, lang: Lang): Promise<Feedback> {
   const jsonMatch = raw.match(/\{[\s\S]*\}/)
   if (!jsonMatch) throw new Error('AI did not return JSON')
   const parsed = JSON.parse(jsonMatch[0]) as Feedback
-  // Defensive normalization
+  // Defensive normalization. For the basic tier the three lists are always empty
+  // (the panel hides empty sections) — detailed guidance is Pro-only.
   return {
     summary: String(parsed.summary ?? ''),
-    strengths: Array.isArray(parsed.strengths) ? parsed.strengths.map(String) : [],
-    weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses.map(String) : [],
-    suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions.map(String) : [],
+    strengths: isBasic ? [] : Array.isArray(parsed.strengths) ? parsed.strengths.map(String) : [],
+    weaknesses: isBasic ? [] : Array.isArray(parsed.weaknesses) ? parsed.weaknesses.map(String) : [],
+    suggestions: isBasic ? [] : Array.isArray(parsed.suggestions) ? parsed.suggestions.map(String) : [],
     score: typeof parsed.score === 'number' ? Math.max(0, Math.min(100, parsed.score)) : 0,
   }
 }
@@ -137,34 +187,57 @@ export async function POST(_req: Request, { params }: Params) {
   if (!sub) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (sub.user_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  // Pro gate
+  // Tier selon le plan : free → 'basic' (score + verdict), pro/studio → 'detailed'.
   const { data: profile } = await (supabaseAdmin as any)
     .from('profiles')
     .select('plan')
     .eq('id', user.id)
     .single()
-  if (!PRO_PLANS.has(String(profile?.plan ?? ''))) {
-    return NextResponse.json({ error: 'Pro plan required' }, { status: 402 })
-  }
-
-  // Reuse existing if already generated
-  const existing = await getExistingFeedback(id)
-  if (existing) return NextResponse.json({ feedback: existing, cached: true })
+  const tier = resolveTier(profile?.plan)
 
   const lang = await getLang()
+
+  // Cache + upgrade : réutiliser le feedback existant, SAUF si un user devenu Pro a
+  // un feedback 'basic' en cache → régénérer en 'detailed' et mettre à jour la même
+  // ligne (un Pro ne reste jamais coincé sur un basic).
+  const { data: existingRow } = await (supabaseAdmin as any)
+    .from('submission_feedbacks')
+    .select('content, tier')
+    .eq('submission_id', id)
+    .maybeSingle()
+
+  if (existingRow) {
+    const needsUpgrade = existingRow.tier === 'basic' && tier === 'detailed'
+    if (!needsUpgrade) {
+      return NextResponse.json({ feedback: existingRow.content as Feedback, tier: existingRow.tier, cached: true })
+    }
+    let upgraded: Feedback
+    try {
+      upgraded = await generateFeedback(sub, lang, 'detailed')
+    } catch (err) {
+      return NextResponse.json({ error: 'Generation failed', detail: String(err) }, { status: 500 })
+    }
+    const { error: updateErr } = await (supabaseAdmin as any)
+      .from('submission_feedbacks')
+      .update({ content: upgraded, lang, tier: 'detailed' })
+      .eq('submission_id', id)
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+    return NextResponse.json({ feedback: upgraded, tier: 'detailed', cached: false })
+  }
+
   let feedback: Feedback
   try {
-    feedback = await generateFeedback(sub, lang)
+    feedback = await generateFeedback(sub, lang, tier)
   } catch (err) {
     return NextResponse.json({ error: 'Generation failed', detail: String(err) }, { status: 500 })
   }
 
   const { error: insertErr } = await (supabaseAdmin as any)
     .from('submission_feedbacks')
-    .insert({ submission_id: id, user_id: user.id, content: feedback, lang })
+    .insert({ submission_id: id, user_id: user.id, content: feedback, lang, tier })
   if (insertErr) {
     return NextResponse.json({ error: insertErr.message }, { status: 500 })
   }
 
-  return NextResponse.json({ feedback, cached: false })
+  return NextResponse.json({ feedback, tier, cached: false })
 }

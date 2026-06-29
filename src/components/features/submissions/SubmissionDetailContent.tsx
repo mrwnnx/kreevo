@@ -6,7 +6,6 @@ import { MessageSquare, MessageCircle, ExternalLink, Sparkles } from 'lucide-rea
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { CommentsPanel } from './CommentsPanel'
 import { LikeButton } from './LikeButton'
-import { ProUpsellModal } from './ProUpsellModal'
 import { type ReviewComment } from './CommentCard'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -75,7 +74,6 @@ export function SubmissionDetailContent({
   const [likePending, setLikePending] = useState(false)
   // commentsCount is derived from comments.length once fetched (counts top-level + replies). Falls back to DB count during initial load.
   const [panelOpen, setPanelOpen] = useState(false)
-  const [proModalOpen, setProModalOpen] = useState(false)
   const router = useRouter()
   const [isStuck, setIsStuck] = useState(false)
   const stickySentinelRef = useRef<HTMLDivElement>(null)
@@ -112,8 +110,9 @@ export function SubmissionDetailContent({
 
   function handlePrimaryClick() {
     if (isOwn) {
-      if (isProUser) router.push(`/dashboard/submissions/${submission.id}/feedback`)
-      else setProModalOpen(true)
+      // Feedback IA ouvert à tous : free → version basic, pro → version détaillée
+      // (le tier est résolu côté serveur dans la page + l'API).
+      router.push(`/dashboard/submissions/${submission.id}/feedback`)
     } else {
       setPanelOpen(true)
     }
@@ -522,14 +521,6 @@ export function SubmissionDetailContent({
         </div>
       )}
 
-      {/* Pro upsell modal (own + free user) */}
-      {isOwn && !isProUser && (
-        <ProUpsellModal
-          open={proModalOpen}
-          onOpenChange={setProModalOpen}
-          t={t.feedbackPro}
-        />
-      )}
     </div>
   )
 }

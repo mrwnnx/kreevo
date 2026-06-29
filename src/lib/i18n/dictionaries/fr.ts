@@ -535,6 +535,8 @@ export const fr = {
       translate: 'Traduire le feedback',
       translating: 'Traduction…',
       alreadyInLang: 'Le feedback est déjà dans votre langue.',
+      upsellBasic: 'Le feedback détaillé — tes forces, tes faiblesses et des actions concrètes pour t\'améliorer — arrive bientôt.',
+      upsellCta: 'Bientôt',
     },
     backFallback: 'Retour',
     backToHistory: 'Retour à l\'historique',

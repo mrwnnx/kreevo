@@ -538,6 +538,8 @@ export const en: Dictionary = {
       translate: 'Translate feedback',
       translating: 'Translating…',
       alreadyInLang: 'The feedback is already in your language.',
+      upsellBasic: 'Detailed feedback — your strengths, your weaknesses, and concrete actions to improve — is coming soon.',
+      upsellCta: 'Coming soon',
     },
     backFallback: 'Back',
     backToHistory: 'Back to history',

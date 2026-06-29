@@ -542,6 +542,8 @@ export const ar: Dictionary = {
       translate: 'ترجمة التقييم',
       translating: 'جارٍ الترجمة…',
       alreadyInLang: 'التقييم موجود بالفعل بلغتك.',
+      upsellBasic: 'التقييم المفصّل — نقاط قوتك ونقاط ضعفك وخطوات ملموسة للتحسّن — متاح قريبًا.',
+      upsellCta: 'قريبًا',
     },
     backFallback: 'رجوع',
     backToHistory: 'رجوع إلى السجل',
