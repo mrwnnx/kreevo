@@ -139,7 +139,9 @@ export function CommentsPanel({
         aria-label={tc.panelTitle}
         className={cn(
           'absolute end-0 top-0 bottom-0 w-full sm:w-[520px] lg:w-[600px] bg-background border-s border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out',
-          open ? 'translate-x-0' : 'translate-x-full',
+          // `end-0` = right in LTR, left in RTL. CSS transforms don't follow `dir`,
+          // so the closed offset must flip: off-screen right (LTR) vs left (RTL).
+          open ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full',
         )}
       >
         {/* Sticky header */}
