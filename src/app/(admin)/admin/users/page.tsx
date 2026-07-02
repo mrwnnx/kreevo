@@ -22,7 +22,12 @@ interface User {
   role: string
   is_suspended: boolean
   created_at: string
+  submissions: number
+  completionRate: number | null
+  avgScore: number | null
 }
+
+type SortKey = 'xp' | 'submissions' | 'completionRate' | 'avgScore' | 'created_at'
 
 const PLAN_STYLE: Record<string, string> = {
   free:   'bg-muted text-muted-foreground',
@@ -47,6 +52,13 @@ export default function AdminUsers() {
   const [specialtyVal, setSpecialtyVal] = useState<'ux_ui' | 'graphic'>('ux_ui')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [sortKey, setSortKey] = useState<SortKey>('created_at')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    else { setSortKey(key); setSortDir('desc') }
+  }
 
   useEffect(() => { load() }, [])
 
@@ -102,6 +114,12 @@ export default function AdminUsers() {
     return matchSearch && matchFilter
   })
 
+  const sorted = filtered.slice().sort((a, b) => {
+    const va = sortKey === 'created_at' ? +new Date(a.created_at) : (a[sortKey] ?? -1)
+    const vb = sortKey === 'created_at' ? +new Date(b.created_at) : (b[sortKey] ?? -1)
+    return sortDir === 'asc' ? (va as number) - (vb as number) : (vb as number) - (va as number)
+  })
+
   return (
     <div className="p-6 space-y-5">
       <div>
@@ -136,15 +154,25 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
-              {['User', 'Plan', 'Ligue', 'XP', 'Rôle', 'Statut', 'Inscrit', 'Actions'].map(h => (
-                <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">{h}</th>
+              {([
+                ['User', null], ['Plan', null], ['Ligue', null], ['XP', 'xp'],
+                ['Soum.', 'submissions'], ['Complétion', 'completionRate'], ['Score', 'avgScore'],
+                ['Rôle', null], ['Statut', null], ['Inscrit', 'created_at'], ['Actions', null],
+              ] as [string, SortKey | null][]).map(([h, key]) => (
+                <th key={h} className="text-start text-xs font-mono text-muted-foreground uppercase tracking-widest px-4 py-3 whitespace-nowrap">
+                  {key ? (
+                    <button onClick={() => toggleSort(key)} className="inline-flex items-center gap-1 hover:text-foreground transition-colors uppercase">
+                      {h}{sortKey === key && <span>{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                    </button>
+                  ) : h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Chargement…</td></tr>
-            ) : filtered.map(u => (
+              <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">Chargement…</td></tr>
+            ) : sorted.map(u => (
               <tr key={u.id} className={cn('hover:bg-muted/20 transition-colors', u.is_suspended && 'opacity-60')}>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5">
@@ -165,6 +193,9 @@ export default function AdminUsers() {
                 </td>
                 <td className="px-4 py-3 text-xs">{getLeagueLabel(u.league)}</td>
                 <td className="px-4 py-3 font-mono text-xs">{u.xp?.toLocaleString()}</td>
+                <td className="px-4 py-3 font-mono text-xs">{u.submissions}</td>
+                <td className="px-4 py-3 font-mono text-xs">{u.completionRate === null ? '—' : `${u.completionRate}%`}</td>
+                <td className="px-4 py-3 font-mono text-xs">{u.avgScore === null ? '—' : `${u.avgScore}/100`}</td>
                 <td className="px-4 py-3">
                   {u.role === 'admin' && (
                     <span className="text-[10px] font-mono bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">admin</span>
