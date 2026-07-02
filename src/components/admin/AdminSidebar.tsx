@@ -5,13 +5,14 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Trophy, Users, ShieldAlert, MessageSquare,
   Mail, Settings, ArrowLeft, Palette, Medal, FileCheck, BookOpen, LayoutTemplate,
-  Tag, Building2, Layers, Sparkles, Newspaper,
+  Tag, Building2, Layers, Sparkles, Newspaper, BarChart3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/Logo'
 
 const NAV = [
   { href: '/admin/dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
+  { href: '/admin/analytics',    label: 'Analytics',      icon: BarChart3 },
   { href: '/admin/leagues',      label: 'Ligues',         icon: Medal },
   { href: '/admin/challenges',   label: 'Challenges',     icon: Trophy },
   { href: '/admin/specialties',           label: 'Spécialités', icon: Layers,   sub: true },
