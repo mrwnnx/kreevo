@@ -21,6 +21,16 @@ export interface ChallengeStat {
   avgScore: number | null
 }
 
+export interface WeekBucket { label: string; count: number }
+export interface Contributor {
+  id: string
+  username: string | null
+  full_name: string | null
+  avatar_url: string | null
+  comments: number
+  likesGiven: number
+}
+
 export interface PlatformStats {
   totalUsers: number
   active7d: number
@@ -36,6 +46,28 @@ export interface PlatformStats {
   topByCompletion: ChallengeStat[]
   hardest: ChallengeStat[]
   moderation: { reported: number; onHold: number; pendingContests: number; pendingReview: number }
+  signupsByWeek: WeekBucket[]
+  submissionsByWeek: WeekBucket[]
+  topContributors: Contributor[]
+}
+
+const WEEKS = 12
+
+/** Bucket ISO timestamps into the last WEEKS 7-day windows (oldest first). */
+function weeklyBuckets(now: number, dates: (string | null | undefined)[]): WeekBucket[] {
+  const counts = new Array(WEEKS).fill(0)
+  for (const d of dates) {
+    if (!d) continue
+    const weeksAgo = Math.floor((now - +new Date(d)) / (7 * 864e5))
+    if (weeksAgo >= 0 && weeksAgo < WEEKS) counts[WEEKS - 1 - weeksAgo]++
+  }
+  return counts.map((count, i) => ({
+    label: new Date(now - (WEEKS - 1 - i) * 7 * 864e5).toLocaleDateString('fr', {
+      day: 'numeric',
+      month: 'short',
+    }),
+    count,
+  }))
 }
 
 export async function getPlatformStats(): Promise<PlatformStats> {
@@ -53,8 +85,10 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     { data: specialties },
     { data: contests },
     { data: recentComments },
+    { data: allComments },
+    { data: commentLikes },
   ] = await Promise.all([
-    supabaseAdmin.from('profiles').select('id, league, specialty_id, plan, xp'),
+    supabaseAdmin.from('profiles').select('id, username, full_name, avatar_url, league, specialty_id, plan, xp, created_at'),
     supabaseAdmin.from('participations').select('user_id, status, joined_at, challenge_id'),
     supabaseAdmin
       .from('submissions')
@@ -66,6 +100,8 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     supabaseAdmin.from('specialties').select('id, name_fr, name, emoji'),
     supabaseAdmin.from('submission_contests').select('status'),
     supabaseAdmin.from('comments').select('user_id, created_at').gte('created_at', d30),
+    supabaseAdmin.from('comments').select('user_id'),
+    supabaseAdmin.from('comment_likes').select('user_id'),
   ])
 
   const profileList = (profiles ?? []) as Record<string, any>[]
@@ -186,6 +222,32 @@ export async function getPlatformStats(): Promise<PlatformStats> {
   const pendingReview = subList.filter((s) => s.validation_status === 'pending' && !s.is_draft).length
   const pendingContests = (contests ?? []).filter((c: any) => c.status === 'pending').length
 
+  // Temporal buckets.
+  const signupsByWeek = weeklyBuckets(now, profileList.map((p) => p.created_at))
+  const submissionsByWeek = weeklyBuckets(now, subList.map((s) => s.created_at))
+
+  // Top contributors (comments given + likes given).
+  const commentsByUser = new Map<string, number>()
+  for (const c of allComments ?? []) if (c.user_id) commentsByUser.set(c.user_id, (commentsByUser.get(c.user_id) ?? 0) + 1)
+  const likesByUser = new Map<string, number>()
+  for (const l of commentLikes ?? []) if (l.user_id) likesByUser.set(l.user_id, (likesByUser.get(l.user_id) ?? 0) + 1)
+  const profById = new Map<string, Record<string, any>>()
+  for (const p of profileList) profById.set(p.id, p)
+  const topContributors: Contributor[] = [...commentsByUser.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([id, comments]) => {
+      const p = profById.get(id)
+      return {
+        id,
+        username: p?.username ?? null,
+        full_name: p?.full_name ?? null,
+        avatar_url: p?.avatar_url ?? null,
+        comments,
+        likesGiven: likesByUser.get(id) ?? 0,
+      }
+    })
+
   return {
     totalUsers,
     active7d: active(d7),
@@ -201,5 +263,8 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     topByCompletion,
     hardest,
     moderation: { reported, onHold, pendingContests, pendingReview },
+    signupsByWeek,
+    submissionsByWeek,
+    topContributors,
   }
 }

@@ -1,6 +1,7 @@
 import { Users, Activity, CheckCircle2, Star, Zap, CalendarClock, ShieldAlert } from 'lucide-react'
-import { getPlatformStats, type ChallengeStat } from '@/lib/admin/platform-stats'
+import { getPlatformStats, type ChallengeStat, type WeekBucket, type Contributor } from '@/lib/admin/platform-stats'
 import { leagueLabel } from '@/lib/utils/xp'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 function StatCard({ label, value, sub, icon: Icon, accent }: {
   label: string; value: string | number; sub?: string
@@ -33,6 +34,59 @@ function BarRow({ label, emoji, count, max }: { label: string; emoji?: string | 
 
 function pct(n: number | null): string {
   return n === null ? '—' : `${Math.round(n * 100)}%`
+}
+
+function WeekChart({ title, data, accent }: { title: string; data: WeekBucket[]; accent: string }) {
+  const max = Math.max(1, ...data.map((d) => d.count))
+  const total = data.reduce((a, d) => a + d.count, 0)
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-baseline justify-between mb-4">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <span className="text-xs font-mono text-muted-foreground">{total} sur 12 sem.</span>
+      </div>
+      <div className="flex items-end gap-1.5 h-28">
+        {data.map((d, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+            <span className="text-[10px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{d.count}</span>
+            <div
+              className={`w-full rounded-t ${accent} min-h-[2px]`}
+              style={{ height: `${Math.round((d.count / max) * 100)}%` }}
+              title={`${d.label} · ${d.count}`}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground">
+        <span>{data[0]?.label}</span>
+        <span>{data[data.length - 1]?.label}</span>
+      </div>
+    </div>
+  )
+}
+
+function ContributorsCard({ items }: { items: Contributor[] }) {
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="px-5 py-4 border-b border-border">
+        <h2 className="text-sm font-semibold">Top contributeurs communauté</h2>
+      </div>
+      <div className="divide-y divide-border">
+        {items.length === 0 && <p className="px-5 py-4 text-sm text-muted-foreground">Aucun commentaire</p>}
+        {items.map((c, i) => (
+          <div key={c.id} className="flex items-center gap-3 px-5 py-3">
+            <span className="text-xs font-mono text-muted-foreground w-5 shrink-0">#{i + 1}</span>
+            <Avatar className="size-7 rounded-md">
+              <AvatarImage src={c.avatar_url ?? undefined} />
+              <AvatarFallback className="rounded-md text-[10px]">{c.username?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <p className="text-sm flex-1 min-w-0 truncate">{c.full_name ?? c.username ?? '—'}</p>
+            <span className="text-xs font-mono text-muted-foreground shrink-0">{c.comments} comm. · {c.likesGiven} ♥</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function ChallengeList({ title, items, metric }: {
@@ -81,6 +135,12 @@ export default async function AdminAnalytics() {
         <StatCard label="Score IA moyen" value={s.avgAiScore !== null ? `${s.avgAiScore}/100` : '—'} sub="sur feedbacks générés" icon={Star} accent="text-amber-500" />
         <StatCard label="XP distribué" value={s.xpDistributed.toLocaleString()} sub="via soumissions validées" icon={Zap} accent="text-yellow-500" />
         <StatCard label="Conversion payante" value={`${conversion}%`} sub={`${s.plan.pro} pro · ${s.plan.studio} studio`} icon={CalendarClock} accent="text-violet-500" />
+      </div>
+
+      {/* Lot 3 — temporal curves */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <WeekChart title="Inscriptions par semaine" data={s.signupsByWeek} accent="bg-primary" />
+        <WeekChart title="Soumissions par semaine" data={s.submissionsByWeek} accent="bg-blue-500" />
       </div>
 
       {/* §4 — distributions */}
@@ -159,6 +219,9 @@ export default async function AdminAnalytics() {
           ))}
         </div>
       </div>
+
+      {/* Lot 3 — community contributors */}
+      <ContributorsCard items={s.topContributors} />
     </div>
   )
 }
