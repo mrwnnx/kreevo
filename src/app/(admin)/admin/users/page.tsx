@@ -60,6 +60,42 @@ export default function AdminUsers() {
     else { setSortKey(key); setSortDir('desc') }
   }
 
+  // Bulk selection + actions (reuse the per-id PATCH/DELETE endpoints).
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
+
+  function toggleOne(id: string) {
+    setSelected(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+
+  async function runBulk(fn: (id: string) => Promise<boolean>, label: string) {
+    setBulkBusy(true)
+    let ok = 0, fail = 0
+    for (const id of [...selected]) {
+      try { (await fn(id)) ? ok++ : fail++ } catch { fail++ }
+    }
+    setBulkBusy(false)
+    setSelected(new Set())
+    if (fail) toast.error(`${label} : ${ok} ok · ${fail} échec`)
+    else toast.success(`${label} : ${ok} ok`)
+    load()
+  }
+
+  function bulkPatch(body: Record<string, unknown>, label: string) {
+    return runBulk(async (id) => {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      })
+      return res.ok
+    }, label)
+  }
+
+  function bulkDelete() {
+    setConfirmBulkDelete(false)
+    return runBulk(async (id) => (await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })).ok, 'Suppression')
+  }
+
   useEffect(() => { load() }, [])
 
   async function load() {
@@ -120,6 +156,11 @@ export default function AdminUsers() {
     return sortDir === 'asc' ? (va as number) - (vb as number) : (vb as number) - (va as number)
   })
 
+  const allVisibleSelected = sorted.length > 0 && sorted.every(u => selected.has(u.id))
+  function toggleAll() {
+    setSelected(allVisibleSelected ? new Set() : new Set(sorted.map(u => u.id)))
+  }
+
   return (
     <div className="p-6 space-y-5">
       <div>
@@ -149,11 +190,42 @@ export default function AdminUsers() {
           className="w-full h-10 ps-9 pe-4 rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 text-base md:text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors" />
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="sticky top-2 z-30 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 shadow-md">
+          <span className="text-sm font-medium">{selected.size} sélectionné{selected.size > 1 ? 's' : ''}</span>
+          <button onClick={() => setSelected(new Set())} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1">
+            Désélectionner
+          </button>
+          <div className="flex-1" />
+          <button disabled={bulkBusy} onClick={() => bulkPatch({ plan: 'pro' }, 'Passage Pro')} className="text-xs font-medium border border-border px-3 py-1.5 rounded-lg hover:bg-muted disabled:opacity-50">Pro</button>
+          <button disabled={bulkBusy} onClick={() => bulkPatch({ plan: 'free' }, 'Passage Free')} className="text-xs font-medium border border-border px-3 py-1.5 rounded-lg hover:bg-muted disabled:opacity-50">Free</button>
+          <button disabled={bulkBusy} onClick={() => bulkPatch({ is_suspended: true }, 'Suspension')} className="text-xs font-medium border border-border px-3 py-1.5 rounded-lg hover:bg-muted disabled:opacity-50">Suspendre</button>
+          <button disabled={bulkBusy} onClick={() => bulkPatch({ is_suspended: false }, 'Réactivation')} className="text-xs font-medium border border-border px-3 py-1.5 rounded-lg hover:bg-muted disabled:opacity-50">Réactiver</button>
+          <select
+            value=""
+            disabled={bulkBusy}
+            onChange={e => { if (e.target.value) bulkPatch({ league: e.target.value }, 'Changement ligue') }}
+            className="h-8 rounded-lg border border-input bg-transparent dark:bg-input/30 px-2 text-xs outline-none focus-visible:border-ring disabled:opacity-50"
+          >
+            <option value="">Changer ligue…</option>
+            {leagues.map(l => <option key={l.id} value={l.name}>{getLeagueLabel(l.name)}</option>)}
+          </select>
+          <button disabled={bulkBusy} onClick={() => setConfirmBulkDelete(true)} className="text-xs font-medium bg-destructive text-destructive-foreground px-3 py-1.5 rounded-lg hover:opacity-85 disabled:opacity-50">
+            Supprimer
+          </button>
+          {bulkBusy && <span className="text-xs text-muted-foreground">traitement…</span>}
+        </div>
+      )}
+
       {/* Table */}
       <div className="rounded-xl border border-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-white dark:bg-zinc-900/20 border-b border-border">
             <tr>
+              <th className="px-4 py-3 w-10">
+                <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} aria-label="Tout sélectionner" className="size-4 accent-primary cursor-pointer align-middle" />
+              </th>
               {([
                 ['User', null], ['Plan', null], ['Ligue', null], ['XP', 'xp'],
                 ['Soum.', 'submissions'], ['Complétion', 'completionRate'], ['Score', 'avgScore'],
@@ -171,9 +243,12 @@ export default function AdminUsers() {
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">Chargement…</td></tr>
+              <tr><td colSpan={12} className="px-4 py-8 text-center text-muted-foreground">Chargement…</td></tr>
             ) : sorted.map(u => (
-              <tr key={u.id} className={cn('hover:bg-muted/20 transition-colors', u.is_suspended && 'opacity-60')}>
+              <tr key={u.id} className={cn('hover:bg-muted/20 transition-colors', u.is_suspended && 'opacity-60', selected.has(u.id) && 'bg-primary/5')}>
+                <td className="px-4 py-3">
+                  <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggleOne(u.id)} aria-label={`Sélectionner ${u.username}`} className="size-4 accent-primary cursor-pointer align-middle" />
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5">
                     <Avatar className="size-7 rounded-md">
@@ -338,6 +413,22 @@ export default function AdminUsers() {
             <button onClick={() => deleteUser(confirmDelete)} disabled={deleting}
               className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-full hover:opacity-85 disabled:opacity-50">
               {deleting ? 'Suppression…' : 'Supprimer définitivement'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Bulk delete confirm */}
+      {confirmBulkDelete && (
+        <Modal title={`Supprimer ${selected.size} compte${selected.size > 1 ? 's' : ''}`} onClose={() => setConfirmBulkDelete(false)}>
+          <p className="text-sm text-muted-foreground">
+            Action irréversible. Toutes les données de {selected.size} compte{selected.size > 1 ? 's' : ''} seront supprimées. Ton propre compte sera ignoré s&apos;il est dans la sélection.
+          </p>
+          <div className="flex justify-end gap-2 mt-4">
+            <button onClick={() => setConfirmBulkDelete(false)} className="text-sm text-muted-foreground px-4 py-2">Annuler</button>
+            <button onClick={bulkDelete} disabled={bulkBusy}
+              className="text-sm bg-destructive text-destructive-foreground px-4 py-2 rounded-full hover:opacity-85 disabled:opacity-50">
+              {bulkBusy ? 'Suppression…' : 'Supprimer définitivement'}
             </button>
           </div>
         </Modal>
