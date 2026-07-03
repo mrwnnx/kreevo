@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { anthropic } from '@/lib/anthropic/client'
 import { getLang, type Lang } from '@/lib/i18n/lang'
+import { MAX_PUBLISH_IMAGES } from '@/lib/utils/submission-constants'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -32,7 +33,7 @@ async function getSubmission(submissionId: string) {
   const { data } = await (supabaseAdmin as any)
     .from('submissions')
     .select(`
-      id, user_id, title, description, cover_url,
+      id, user_id, title, description, cover_url, files,
       challenges:challenge_id (title, brief, context, deliverable, constraints, criteria, specialty, challenge_types(name_fr), industries(name_fr))
     `)
     .eq('id', submissionId)
@@ -69,7 +70,7 @@ CHALLENGE BRIEF:
 USER SUBMISSION:
 - Title: ${sub.title ?? 'Untitled'}
 - Description: ${sub.description ?? '(no description)'}
-- The cover image is attached.
+- All submitted images are attached (cover first, then any additional screens). Judge the work as a WHOLE across every attached image — a multi-screen flow may be split across several images, so do not conclude a deliverable is missing just because it is not on the cover.${sub.files?.link ? `\n- External project link (you CANNOT open it — do not penalize for content that may only live there): ${sub.files.link}` : ''}
 
 Please analyze this submission against the brief and return a JSON object with this exact shape:
 {
@@ -105,7 +106,7 @@ CHALLENGE BRIEF:
 USER SUBMISSION:
 - Title: ${sub.title ?? 'Untitled'}
 - Description: ${sub.description ?? '(no description)'}
-- The cover image is attached.
+- All submitted images are attached (cover first, then any additional screens). Judge the work as a WHOLE across every attached image — a multi-screen flow may be split across several images, so do not conclude a deliverable is missing just because it is not on the cover.${sub.files?.link ? `\n- External project link (you CANNOT open it — do not penalize for content that may only live there): ${sub.files.link}` : ''}
 
 Write a GENERAL VERDICT in 2-3 short paragraphs that:
 - States the overall impression and how well the work fits the brief.
@@ -125,13 +126,25 @@ Return a JSON object with EXACTLY this shape:
 Output ONLY the JSON, no preamble.`
 }
 
+// Collect every submitted image (cover first, then `files.images`), tolerating both
+// stored shapes: array of strings (legacy) and array of { url, caption } (current).
+// Deduplicated and capped like the publish analysis, so the AI judges the whole work
+// — not just the cover (which alone made multi-screen flows look "off-brief").
+function collectImageUrls(sub: any): string[] {
+  const urls: string[] = []
+  if (sub.cover_url) urls.push(sub.cover_url)
+  const extra = Array.isArray(sub.files?.images) ? sub.files.images : []
+  for (const it of extra) {
+    const u = typeof it === 'string' ? it : it?.url
+    if (typeof u === 'string' && u) urls.push(u)
+  }
+  return [...new Set(urls)].slice(0, MAX_PUBLISH_IMAGES)
+}
+
 async function generateFeedback(sub: any, lang: Lang, tier: FeedbackTier): Promise<Feedback> {
   const userContent: Anthropic_MessageContentBlock[] = []
-  if (sub.cover_url) {
-    userContent.push({
-      type: 'image',
-      source: { type: 'url', url: sub.cover_url },
-    } as any)
+  for (const url of collectImageUrls(sub)) {
+    userContent.push({ type: 'image', source: { type: 'url', url } } as any)
   }
   const isBasic = tier === 'basic'
   userContent.push({ type: 'text', text: isBasic ? buildBasicPrompt(sub, lang) : buildPrompt(sub, lang) })
