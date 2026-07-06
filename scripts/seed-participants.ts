@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://ndflytgtduuvacjmdobc.supabase.co'
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kZmx5dGd0ZHV1dmFjam1kb2JjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjcwMTk5MSwiZXhwIjoyMDkyMjc3OTkxfQ.7gKvxIij7iyp9M84gThduKF4nhRKYkR5RDggThyVKAs'
+// Run with: npx tsx --env-file=.env.local scripts/seed-participants.ts
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const CHALLENGE_ID = '5cb81391-c8b4-4db0-b542-e1c6a6a49006'
 
