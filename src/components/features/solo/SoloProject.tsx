@@ -182,22 +182,26 @@ export function SoloProject({ name, challenges = [] }: { name?: string | null; c
         <button className="solo-back" onClick={back}><ArrowLeft size={15} /> Retour</button>
         <p className="solo-eyebrow r0">Récap</p>
         <h2 className="solo-q r1">{name ? `${name}, on lance ton parcours ?` : 'On lance ton parcours ?'}</h2>
-        <p className="solo-qsub r1">Vérifie tes choix avant que je compose les challenges.</p>
-        <div className="solo-recap r2">
-          <div className="rrow">
-            <span className="rk">Domaine</span>
-            <span className="rv">{d?.emoji} {d?.label}</span>
-          </div>
-          <div className="rrow">
-            <span className="rk">Focus</span>
-            <span className="rv rchips">{subPicks.map((s) => <span key={s.id} className="rchip">{s.label}</span>)}</span>
-          </div>
-          <div className="rrow">
-            <span className="rk">Niveau</span>
-            <span className="rv">{l?.emoji} {l?.label} · {l?.steps} challenges</span>
+        <p className="solo-qsub r1">Voici ce que tu as choisi.</p>
+
+        <div className="rsec r2">
+          <h3 className="rh">{d?.emoji} Domaine</h3>
+          <div className="rpills"><span className="rpill dom">{d?.label}</span></div>
+        </div>
+
+        <div className="rsec r2">
+          <h3 className="rh">🎯 Focus</h3>
+          <div className="rpills">
+            {subPicks.map((s) => <span key={s.id} className="rpill foc">{s.label}</span>)}
           </div>
         </div>
-        <button className="solo-next r3" onClick={generate}>Générer mon parcours <Sparkles size={18} /></button>
+
+        <div className="rsec r2">
+          <h3 className="rh">{l?.emoji} Niveau</h3>
+          <div className="rpills"><span className="rpill lvl">{l?.label} · {l?.steps} challenges</span></div>
+        </div>
+
+        <button className="solo-next r3" onClick={generate} disabled={subPicks.length === 0}>Générer mon parcours <Sparkles size={18} /></button>
       </div>
     )
   }
@@ -352,7 +356,7 @@ const SOLO_CSS = `
 .kreevo-solo .solo-display .b{opacity:.9}
 .kreevo-solo .solo-body{margin:32px 0 0;max-width:52ch;font-size:17px;font-weight:500;line-height:1.6;color:var(--k-mutedfg)}
 .kreevo-solo .solo-body strong{color:var(--k-ink);font-weight:600}
-.kreevo-solo .solo-start{margin:40px 0 0;height:56px;padding:0 30px;border:none;border-radius:9999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.9375rem;letter-spacing:-.01em;color:#fff;background:linear-gradient(90deg,var(--xp-from),var(--xp-to));box-shadow:0 6px 20px color-mix(in oklch,var(--xp-from) 22%,transparent);transition:filter .18s ease,transform .18s ease}
+.kreevo-solo .solo-start{margin:40px 0 0;height:56px;padding:0 30px;border:none;border-radius:9999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.9375rem;letter-spacing:-.01em;color:var(--background);background:var(--foreground);box-shadow:0 6px 18px rgba(20,20,30,.18);transition:filter .18s ease,transform .18s ease,opacity .18s ease}
 .kreevo-solo .solo-start svg{transition:transform .18s ease}
 .kreevo-solo .solo-start:hover{filter:brightness(1.06)}
 .kreevo-solo .solo-start:hover svg{transform:translateX(3px)}
@@ -388,7 +392,7 @@ const SOLO_CSS = `
 .kreevo-solo .solo-pill:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in oklch,var(--k-acc) 40%,transparent)}
 .kreevo-solo .solo-pill.sel{border-color:var(--k-acc);background:color-mix(in oklch,var(--k-acc) 12%,var(--k-card));color:var(--k-ink)}
 .kreevo-solo .solo-pill .pc{color:var(--k-acc);flex:0 0 auto}
-.kreevo-solo .solo-next{margin-top:26px;height:50px;padding:0 26px;border:none;border-radius:9999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(90deg,var(--k-acc),var(--k-acc2));box-shadow:0 6px 20px color-mix(in oklch,var(--k-acc) 22%,transparent);transition:filter .18s ease,transform .18s ease,opacity .18s ease}
+.kreevo-solo .solo-next{margin-top:26px;height:50px;padding:0 26px;border:none;border-radius:9999px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px;color:var(--background);background:var(--foreground);box-shadow:0 6px 18px rgba(20,20,30,.18);transition:filter .18s ease,transform .18s ease,opacity .18s ease}
 .kreevo-solo .solo-next svg{transition:transform .18s ease}
 .kreevo-solo .solo-next:hover{filter:brightness(1.06)}
 .kreevo-solo .solo-next:hover svg{transform:translateX(3px)}
@@ -396,13 +400,14 @@ const SOLO_CSS = `
 .kreevo-solo .solo-next:disabled{opacity:.4;cursor:default;box-shadow:none;filter:none}
 .kreevo-solo .solo-next:focus-visible{outline:2px solid var(--k-acc);outline-offset:3px}
 
-/* ---- Recap ---- */
-.kreevo-solo .solo-recap{margin-top:28px;width:100%;max-width:560px;display:flex;flex-direction:column;background:var(--k-card);border:1px solid var(--k-border);border-radius:20px;overflow:hidden;box-shadow:var(--sh)}
-.kreevo-solo .rrow{display:flex;align-items:flex-start;gap:16px;padding:15px 18px;border-bottom:1px solid var(--k-border)}
-.kreevo-solo .rrow:last-child{border-bottom:none}
-.kreevo-solo .rk{flex:0 0 84px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--k-mutedfg);padding-top:3px}
-.kreevo-solo .rv{flex:1;min-width:0;font-size:15px;font-weight:600;color:var(--k-ink);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.kreevo-solo .rchip{font-size:12.5px;font-weight:600;color:var(--k-ink);background:var(--k-surface);border-radius:9999px;padding:5px 11px}
+/* ---- Recap (emoji sections + editable pills) ---- */
+.kreevo-solo .rsec{margin-top:26px;width:100%}
+.kreevo-solo .rh{margin:0;display:flex;align-items:center;gap:9px;font-size:21px;font-weight:600;color:var(--k-ink);letter-spacing:-.01em}
+.kreevo-solo .rpills{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.kreevo-solo .rpill{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:9999px;padding:11px 18px;font-size:15px;font-weight:600;font-family:inherit;color:var(--k-ink)}
+.kreevo-solo .rpill.dom{background:color-mix(in oklch,var(--xp-from) 22%,var(--card))}
+.kreevo-solo .rpill.foc{background:color-mix(in oklch,#22c55e 26%,var(--card))}
+.kreevo-solo .rpill.lvl{background:color-mix(in oklch,#f59e0b 26%,var(--card))}
 
 /* ---- Generating ---- */
 .kreevo-solo .solo-gen{min-height:70vh;padding-top:clamp(24px,6vh,72px)}
@@ -430,7 +435,7 @@ const SOLO_CSS = `
 .kreevo-solo .cta-sticky{position:sticky;bottom:0;display:flex;gap:10px;padding:14px 0 20px;margin-top:8px;background:linear-gradient(to top,var(--background) 74%,transparent)}
 .kreevo-solo .btn{border:none;cursor:pointer;font-weight:700;font-size:15px;padding:0 22px;height:50px;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity .16s ease,box-shadow .16s ease,border-color .16s ease,color .16s ease}
 .kreevo-solo .btn:active{transform:translateY(1px)}
-.kreevo-solo .btn-primary{flex:1;background:linear-gradient(120deg,var(--k-acc),var(--k-acc2));color:#fff;box-shadow:0 8px 22px color-mix(in oklch,var(--k-acc) 34%,transparent)}
+.kreevo-solo .btn-primary{flex:1;background:var(--foreground);color:var(--background);box-shadow:0 6px 18px rgba(20,20,30,.18)}
 .kreevo-solo .btn-primary:hover{opacity:.9}
 .kreevo-solo .btn-ghost{flex:0 0 auto;background:var(--k-card);color:var(--k-ink2);border:1px solid var(--k-border)}
 .kreevo-solo .btn-ghost:hover{border-color:color-mix(in oklch,var(--k-acc) 45%,var(--k-border));color:var(--k-ink)}

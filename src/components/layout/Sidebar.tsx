@@ -155,23 +155,25 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
 
       {/* Nav items */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        {/* Solo project — highlighted entry with animated gradient label */}
-        <Link
-          href="/dashboard/solo"
-          className={cn(
-            'group relative flex items-center gap-3 px-3 py-2 mb-1.5 rounded-lg text-sm overflow-hidden',
-            'border bg-gradient-to-r from-violet-500/[0.08] via-fuchsia-500/[0.05] to-blue-500/[0.07] transition-colors',
-            pathname.startsWith('/dashboard/solo')
-              ? 'border-violet-500/50'
-              : 'border-violet-500/25 hover:border-violet-500/45',
-          )}
-        >
-          <Sparkles className="size-4 shrink-0 text-violet-500" strokeWidth={2.2} />
-          <span className="flex-1 truncate font-extrabold solo-shimmer">Solo</span>
-          <span className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-500/12 rounded-full px-1.5 py-0.5">
-            Pro
-          </span>
-        </Link>
+        {/* Solo project — WIP, admin-only for now (hidden from regular users) */}
+        {profile.role === 'admin' && (
+          <Link
+            href="/dashboard/solo"
+            className={cn(
+              'group relative flex items-center gap-3 px-3 py-2 mb-1.5 rounded-lg text-sm overflow-hidden',
+              'border bg-gradient-to-r from-violet-500/[0.08] via-fuchsia-500/[0.05] to-blue-500/[0.07] transition-colors',
+              pathname.startsWith('/dashboard/solo')
+                ? 'border-violet-500/50'
+                : 'border-violet-500/25 hover:border-violet-500/45',
+            )}
+          >
+            <Sparkles className="size-4 shrink-0 text-violet-500" strokeWidth={2.2} />
+            <span className="flex-1 truncate font-extrabold solo-shimmer">Solo</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-500/12 rounded-full px-1.5 py-0.5">
+              Pro
+            </span>
+          </Link>
+        )}
         {items.map(({ href, icon: Icon, label, match, badge }) => {
           const active = match(pathname, tabParam)
           return (

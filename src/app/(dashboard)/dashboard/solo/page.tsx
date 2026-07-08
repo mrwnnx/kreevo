@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { SoloProject, type SoloChallenge } from '@/components/features/solo/SoloProject'
@@ -9,20 +10,22 @@ export const metadata: Metadata = { title: 'Solo project · Kreevo' }
 export default async function SoloPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  let name: string | null = null
-  if (user) {
-    const { data: profile } = await (supabase as any)
-      .from('profiles')
-      .select('first_name, full_name, username')
-      .eq('id', user.id)
-      .single()
-    name =
-      profile?.first_name?.trim() ||
-      profile?.full_name?.trim()?.split(' ')[0] ||
-      profile?.username ||
-      null
-  }
+  const { data: profile } = await (supabase as any)
+    .from('profiles')
+    .select('first_name, full_name, username, role')
+    .eq('id', user.id)
+    .single()
+
+  // Solo is WIP — admin-only for now. Regular users are bounced to the dashboard.
+  if (profile?.role !== 'admin') redirect('/dashboard')
+
+  const name =
+    profile?.first_name?.trim() ||
+    profile?.full_name?.trim()?.split(' ')[0] ||
+    profile?.username ||
+    null
 
   // Draw pool: real published challenges (specialty slug + league tier for the ramp).
   const { data: rows } = await (supabaseAdmin as any)
