@@ -303,6 +303,19 @@
     background: linear-gradient(90deg, var(--xp-from), var(--xp-to));
   }
 
+  /* Solo nav label — moving multi-stop gradient text (loops seamlessly: ends = start) */
+  .solo-shimmer {
+    background: linear-gradient(90deg, var(--xp-from), var(--xp-to), #2563eb, var(--xp-to), var(--xp-from));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: soloShimmer 3.5s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .solo-shimmer { animation: none; }
+  }
+
   /* Noise texture overlay */
   .noise::before {
     content: '';
@@ -359,6 +372,12 @@
   0%   { transform: translateX(-100%); }
   60%  { transform: translateX(100%); }
   100% { transform: translateX(100%); }
+}
+
+/* Solo nav label — continuous gradient travel (seamless because ends = start colour) */
+@keyframes soloShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 /* ─── Arabic (RTL) typography ─────────────────────────────────────────────
