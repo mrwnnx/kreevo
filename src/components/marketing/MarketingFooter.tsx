@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import { getLang, getDict } from '@/lib/i18n/lang'
 
@@ -96,7 +95,6 @@ export async function MarketingFooter() {
           </Link>
           <div className="ms-auto flex items-center gap-3">
             <LangSwitcher current={lang} />
-            <ThemeToggle />
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { Sparkles, ThumbsUp, AlertCircle, Lightbulb, Languages, Loader2 } from '
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translateFeedback, type FeedbackLang } from './feedback-actions'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 interface Feedback {
   summary: string
@@ -85,10 +86,10 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
+      <div className="flex flex-col gap-4">
         {/* Hero skeleton — score + summary placeholder */}
         <div
-          className="lg:col-span-12 rounded-3xl border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
+          className="rounded-[24px] border border-violet-200/70 dark:border-violet-900/40 p-6 sm:p-8 flex items-start gap-6"
           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.02) 60%)' }}
         >
           <div className="shrink-0 flex flex-col items-center gap-3">
@@ -108,9 +109,9 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
           </div>
         </div>
 
-        <SkeletonSection accent="emerald" className="lg:col-span-7" delayBase={600} />
-        <SkeletonSection accent="amber" className="lg:col-span-5" delayBase={900} />
-        <SkeletonSection accent="violet" className="lg:col-span-12" delayBase={1200} lines={4} />
+        <SkeletonSection accent="emerald" delayBase={600} />
+        <SkeletonSection accent="amber" delayBase={900} />
+        <SkeletonSection accent="violet" delayBase={1200} lines={4} />
       </div>
     )
   }
@@ -168,14 +169,14 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
         </Button>
       </div>
 
-      {/* Score + Summary on one row (stacked on mobile, side-by-side on lg).
-          flex respects dir → in RTL the score card sits on the right. */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      {/* Lecture verticale : le score, puis la synthèse, puis les sections —
+          une seule colonne, du général au détail. */}
+      <div className="flex flex-col gap-4">
         {/* Overall score — own frame (compact, left). Background tinted with the
             tier hue: very light pastel in light mode, dark tinted in dark mode. */}
         <div
           className={cn(
-            'lg:w-[320px] lg:shrink-0 rounded-3xl border p-6 sm:p-8 flex flex-col items-center gap-4 text-center',
+            'rounded-[24px] border p-6 sm:p-8 flex flex-col items-center gap-4 text-center',
             TIER_CARD[scoreTier(score)],
           )}
         >
@@ -186,7 +187,7 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
         </div>
 
         {/* Summary — own frame (wider, right) */}
-        <div className="flex-1 min-w-0 rounded-3xl border border-border bg-muted/40 p-6 space-y-2">
+        <div className={`${GLASS_SURFACE} min-w-0 flex-1 space-y-2 rounded-[24px] p-6`} style={GLASS_GRADIENT}>
           <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
             {t.summaryLabel}
           </p>
@@ -196,7 +197,7 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
 
       {/* Annonce — basic tier only (free user) : le feedback détaillé arrive bientôt (informatif, non cliquable) */}
       {!isProUser && (
-        <div className="flex items-start gap-3 rounded-[24px] border border-border bg-card p-5">
+        <div className={`${GLASS_SURFACE} flex items-start gap-3 rounded-[24px] p-5`} style={GLASS_GRADIENT}>
           <Sparkles className="size-5 shrink-0 mt-0.5 text-primary" />
           <div className="space-y-1.5">
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
@@ -208,14 +209,13 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
       )}
 
       {/* Other sections — separate blocks below */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min">
-        {/* Row 2 — strengths (wider) + weaknesses (narrower) */}
+      {/* Sections empilées : points forts → points faibles → suggestions. */}
+      <div className="flex flex-col gap-4">
         <Section
           icon={<ThumbsUp className="size-4 text-emerald-600 dark:text-emerald-400" />}
           label={t.strengthsLabel}
           items={view.strengths}
           accent="emerald"
-          className="lg:col-span-7"
         />
 
         <Section
@@ -223,16 +223,13 @@ export function FeedbackPanel({ submissionId, initialFeedback, feedbackLang = nu
           label={t.weaknessesLabel}
           items={view.weaknesses}
           accent="amber"
-          className="lg:col-span-5"
         />
 
-        {/* Row 3 — suggestions (full width, the "act on it" call) */}
         <Section
           icon={<Lightbulb className="size-4 text-violet-600 dark:text-violet-400" />}
           label={t.suggestionsLabel}
           items={view.suggestions}
           accent="violet"
-          className="lg:col-span-12"
         />
       </div>
     </div>

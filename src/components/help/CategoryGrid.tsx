@@ -11,7 +11,7 @@ interface Props {
 export function CategoryGrid({ countsByCategory, lang, t }: Props) {
   return (
     <section className="max-w-[1080px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
-      <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6 sm:mb-8">
+      <h2 className="mb-6 text-xl font-semibold leading-[1.1] text-[#2b2c36] sm:mb-8 sm:text-2xl">
         {t.categoriesTitle}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

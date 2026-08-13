@@ -8,6 +8,7 @@ import { MessageSquare, MessageCircle, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 type CommentsT = Dictionary['submissionDetail']['comments']
 type ReviewT = Dictionary['submissionDetail']['review']
@@ -203,7 +204,7 @@ export function CommentSection({
   return (
     <div className="space-y-6">
       {/* Combined actions bar */}
-      <div className="rounded-2xl border border-border bg-card flex items-center gap-4 px-4 py-3">
+      <div className={`${GLASS_SURFACE} flex items-center gap-4 rounded-[24px] px-4 py-3`} style={GLASS_GRADIENT}>
         <button
           onClick={handleLike}
           disabled={isOwner || likePending}

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 const FREE_LIMIT = 5
 
@@ -250,7 +251,7 @@ export function SubmissionDetailContent({
         <div ref={stickySentinelRef} aria-hidden className="h-px" />
         <div
           className={cn(
-            'sticky top-14 sm:top-0 z-20 -mx-6 px-6 bg-background/95 supports-[backdrop-filter]:backdrop-blur transition-all duration-200',
+            'sticky top-14 sm:top-0 z-20 -mx-6 px-6 bg-white/60 supports-[backdrop-filter]:backdrop-blur-[32px] transition-all duration-200',
             isStuck ? 'py-2' : 'py-3',
           )}
         >
@@ -363,7 +364,7 @@ export function SubmissionDetailContent({
         </div>
       )}
       {/* Cover (full container width) */}
-      <div className="rounded-2xl overflow-hidden bg-card">
+      <div className={`${GLASS_SURFACE} overflow-hidden rounded-[24px]`} style={GLASS_GRADIENT}>
         <div className="relative aspect-video bg-muted">
           {submission.cover_url ? (
             <ImageLightbox
@@ -430,7 +431,7 @@ export function SubmissionDetailContent({
       {additionalImages.length > 0 && (
         <div className="space-y-14 mt-14!">
           {additionalImages.map((photo, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden bg-card">
+            <div key={i} className={`${GLASS_SURFACE} overflow-hidden rounded-[24px]`} style={GLASS_GRADIENT}>
               <div className="relative aspect-video bg-muted">
                 <ImageLightbox
                   src={photo.url}
@@ -482,7 +483,7 @@ export function SubmissionDetailContent({
       {/* Mobile bottom action bar — replaces FloatingNav for this page */}
       {isApproved && (
         <div
-          className="sm:hidden fixed bottom-0 start-0 end-0 z-40 bg-background/95 backdrop-blur-md border-t border-border px-4 pt-3 flex items-center gap-3"
+          className="sm:hidden fixed bottom-0 start-0 end-0 z-40 bg-white/60 backdrop-blur-[32px] border-t border-[#dcdce8] px-4 pt-3 flex items-center gap-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
           {/* Like */}

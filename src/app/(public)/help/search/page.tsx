@@ -8,6 +8,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Search, ChevronRight } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { HelpBreadcrumb } from '@/components/help/HelpBreadcrumb'
 import { HelpSearchBar } from '@/components/help/HelpSearchBar'
@@ -112,7 +113,7 @@ export default async function HelpSearchPage({ searchParams }: Props) {
         </p>
       ) : results.length === 0 ? (
         <>
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center space-y-3">
+          <div className="space-y-3 rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-8 text-center backdrop-blur-[59.18px]">
             <Search className="size-6 text-muted-foreground mx-auto" />
             <p className="text-sm font-medium text-foreground">{t.notFound}</p>
             <p className="text-xs text-muted-foreground">
@@ -135,7 +136,7 @@ export default async function HelpSearchPage({ searchParams }: Props) {
           />
         </>
       ) : (
-        <div className="rounded-[24px] border border-border bg-card overflow-hidden divide-y divide-border">
+        <div className={`${GLASS_SURFACE} divide-y divide-[#dcdce8] overflow-hidden`} style={GLASS_GRADIENT}>
           {results.map((r) => {
             const cat = getCategoryBySlug(r.category)
             const title = lang === 'en' ? r.title_en : r.title_fr
@@ -149,7 +150,7 @@ export default async function HelpSearchPage({ searchParams }: Props) {
               <Link
                 key={r.slug}
                 href={`/help/${r.category}/${r.slug}`}
-                className="flex items-start gap-4 p-5 hover:bg-muted/40 transition-colors group"
+                className="flex items-start gap-4 p-5 hover:bg-white/40 transition-colors group"
               >
                 {cat?.icon && (
                   <div

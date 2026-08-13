@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { ChevronRight } from 'lucide-react'
 import type { HelpDictionary } from '@/lib/help/lang'
 
@@ -13,7 +14,8 @@ export function ArticleCard({ href, title, excerpt, t }: Props) {
   return (
     <Link
       href={href}
-      className="group flex items-start justify-between gap-4 rounded-2xl border border-border bg-card p-5 hover:bg-muted/40 hover:border-primary/30 transition-colors"
+      className={`${GLASS_SURFACE} group flex items-start justify-between gap-4 p-5 transition-[translate,scale,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)] hover:-translate-y-[6px] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
+      style={GLASS_GRADIENT}
     >
       <div className="flex-1 min-w-0">
         <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug mb-1">

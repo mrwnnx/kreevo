@@ -30,6 +30,7 @@ import {
 } from '@/components/onboarding/socials'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { ALL_COUNTRIES, MENA_SUGGESTED } from '@/components/onboarding/countries'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 type ProfileFormT = Dictionary['profileForm']
 
@@ -625,7 +626,7 @@ export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
                   'relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all',
                   selected
                     ? 'border-2 border-primary bg-primary/5'
-                    : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30',
+                    : 'border-[#dcdce8] bg-white/55 hover:border-primary/40 hover:bg-white/75',
                   disabled && 'opacity-40 cursor-not-allowed hover:border-border hover:bg-card',
                   specialtyLocked && selected && 'cursor-default',
                 )}
@@ -863,7 +864,7 @@ export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
                   'relative w-full text-start rounded-[var(--radius-card)] border p-5 transition-all',
                   active
                     ? 'border-2 border-primary bg-primary/5'
-                    : 'border-border bg-card hover:border-primary/40 hover:bg-accent/30',
+                    : 'border-[#dcdce8] bg-white/55 hover:border-primary/40 hover:bg-white/75',
                 )}
               >
                 <div className="flex items-start gap-4">
@@ -941,7 +942,7 @@ export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
                     key={key}
                     type="button"
                     onClick={() => addNetwork(key)}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card text-sm text-foreground px-3 py-1.5 hover:border-primary/40 hover:bg-accent/30 transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#dcdce8] bg-white/55 text-sm text-foreground px-3 py-1.5 hover:border-primary/40 hover:bg-accent/30 transition-colors"
                   >
                     <SocialLogo def={def} size="sm" />
                     {def.name}
@@ -955,7 +956,7 @@ export function ProfileForm({ profile, t, specialties }: ProfileFormProps) {
 
         <div>
           {showCustom ? (
-            <div className="rounded-[var(--radius-card)] border border-border bg-card p-4 space-y-2">
+            <div className={`${GLASS_SURFACE} space-y-2 rounded-[16px] p-4`} style={GLASS_GRADIENT}>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">{t.socialLinks.addCustomTitle}</p>
                 <button

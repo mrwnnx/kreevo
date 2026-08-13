@@ -16,6 +16,7 @@ import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { HelpBreadcrumb } from '@/components/help/HelpBreadcrumb'
 import { ArticleContent } from '@/components/help/ArticleContent'
 import { ArticleFeedback } from '@/components/help/ArticleFeedback'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { ArticleCard } from '@/components/help/ArticleCard'
 import { siteUrl } from '@/lib/site'
 import { articleSchema, breadcrumbList, maybeFaqSchema } from '@/lib/help/jsonld'
@@ -174,7 +175,7 @@ export default async function HelpArticlePage({ params }: Props) {
         />
       )}
 
-      <div className="mb-6">
+      <div className="mx-auto mb-6 max-w-[720px]">
         <HelpBreadcrumb
           items={[
             { label: t.breadcrumbHome, href: '/help' },
@@ -186,22 +187,24 @@ export default async function HelpArticlePage({ params }: Props) {
 
       {/* Article body */}
       <div className="max-w-[720px] mx-auto">
-        <header className="mb-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-            {title}
-          </h1>
-          <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mt-3">
-            <Calendar className="size-3.5" />
-            {t.lastUpdated} {formattedDate}
-          </p>
-        </header>
+        <article className={`${GLASS_SURFACE} p-6 sm:p-8`} style={GLASS_GRADIENT}>
+          <header className="mb-2">
+            <h1 className="text-3xl font-semibold leading-[1.1] text-[#2b2c36] sm:text-4xl">
+              {title}
+            </h1>
+            <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#484848]">
+              <Calendar className="size-3.5" />
+              {t.lastUpdated} {formattedDate}
+            </p>
+          </header>
 
-        <ArticleContent markdown={content} />
+          <ArticleContent markdown={content} />
+        </article>
 
         <ArticleFeedback articleId={art.id} t={t} />
 
         {related.length > 0 && (
-          <section className="mt-12 pt-8 border-t border-border">
+          <section className="mt-12 border-t border-[#dcdce8] pt-8">
             <h2 className="text-lg font-bold text-foreground mb-4">
               {t.relatedTitle}
             </h2>

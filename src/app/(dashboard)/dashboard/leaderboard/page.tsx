@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProBadge } from '@/components/ui/ProBadge'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { LeaguesRow } from '@/components/features/league/LeaguesRow'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { getScopedLeagueScores } from '@/lib/utils/leagues'
 import { getSpecialtyRank } from '@/lib/utils/ranking'
 import { getDict, tx } from '@/lib/i18n/lang'
@@ -143,8 +144,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
   }
 
   return (
-    <div className="max-w-[720px] mx-auto px-6 py-8 pb-16 space-y-8">
-
+    <div className="mx-auto w-full max-w-[720px] space-y-8 px-6 py-8 pb-16">
       {/* ── Header CONDITIONNEL au tab (navigation via sidebar/nav, pas de toggle) ── */}
       {tab === 'league' ? (
         // Onglet « Ma ligue » → bandeau ligue COMPLET (8 icônes + nom + « Voir mes défis »).
@@ -153,7 +153,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
             <LeaguesRow leagues={leagues} userLeagueIndex={userLeagueIndex} />
 
             <div className="pt-2">
-              <h1 className="text-2xl font-bold">{userLeagueRow.name} League</h1>
+              <h1 className="text-2xl font-semibold leading-[1.1] text-[#2b2c36]">{userLeagueRow.name} League</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 Complète des défis pour accumuler des XP
               </p>
@@ -182,7 +182,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
       {/* ── Pas de spécialité → CTA, aucun classement ── */}
       {userLeagueRow && !userSpecialtyId && (
-        <div className="rounded-2xl border border-dashed p-12 text-center space-y-3">
+        <div className="space-y-3 rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center backdrop-blur-[59.18px]">
           <p className="text-sm font-medium">Choisis ta spécialité pour rejoindre un classement</p>
           <p className="text-xs text-muted-foreground">
             Le classement est propre à ta spécialité (UX/UI ou Graphic).
@@ -198,7 +198,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
       {/* ── Ma position ── */}
       {userLeagueRow && userSpecialtyId && (
-        <div className="rounded-2xl border border-border bg-zinc-50 dark:bg-zinc-900/50 p-4">
+        <div className={`${GLASS_SURFACE} p-4`} style={GLASS_GRADIENT}>
           <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-3">Ma position</p>
           <div className="flex items-center gap-3">
             {/* Rank */}
@@ -254,7 +254,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
           </div>
 
           {rankedUsers.length === 0 && (
-            <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+            <div className="rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center text-sm text-[#484848] backdrop-blur-[59.18px]">
               Aucun designer dans cette catégorie pour l&apos;instant.
             </div>
           )}
@@ -347,7 +347,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
           {/* Free gate */}
           {!isPro && rankedUsers.length > 3 && (
-            <div className="rounded-2xl border border-border bg-card p-5 text-center space-y-3 mt-2">
+            <div className={`${GLASS_SURFACE} mt-2 space-y-3 p-5 text-center`} style={GLASS_GRADIENT}>
               <p className="text-sm font-medium">
                 🔒 Passe en Pro pour voir le classement complet
               </p>
@@ -367,7 +367,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
       {/* Empty state */}
       {userLeagueRow && userSpecialtyId && rankedUsers.length === 0 && (
-        <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center text-sm text-[#484848] backdrop-blur-[59.18px]">
           Aucun designer dans cette ligue pour l'instant.
         </div>
       )}

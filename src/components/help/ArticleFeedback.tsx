@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ThumbsUp, ThumbsDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import type { HelpDictionary } from '@/lib/help/lang'
 
 interface Props {
@@ -32,7 +33,7 @@ export function ArticleFeedback({ articleId, t }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-muted/30 p-6 my-10 text-center space-y-4">
+    <div className={`${GLASS_SURFACE} my-10 space-y-4 p-6 text-center`} style={GLASS_GRADIENT}>
       <p className="text-sm font-semibold text-foreground">
         {t.helpfulQuestion}
       </p>

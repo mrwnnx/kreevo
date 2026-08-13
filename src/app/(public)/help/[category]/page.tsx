@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { getCategoryBySlug, HELP_CATEGORIES } from '@/lib/help/categories'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { HelpBreadcrumb } from '@/components/help/HelpBreadcrumb'
@@ -128,7 +129,7 @@ export default async function HelpCategoryPage({ params }: Props) {
       <div className="grid lg:grid-cols-[1fr_240px] gap-8">
         <div className="space-y-3">
           {list.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center space-y-3">
+            <div className="space-y-3 rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-8 text-center backdrop-blur-[59.18px]">
               <p className="text-sm font-medium text-foreground">{t.notFound}</p>
               <Link
                 href="/help/contact"

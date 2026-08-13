@@ -25,7 +25,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   Tooltip, TooltipTrigger, TooltipContent, TooltipProvider,
 } from '@/components/ui/tooltip'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 // ─── Nav sections ─────────────────────────────────────────────
 const SECTIONS = [
@@ -40,7 +39,6 @@ const SECTIONS = [
   { id: 'tabs',         label: 'Tabs',         icon: Layers },
   { id: 'separator',    label: 'Separator',    icon: Minus },
   { id: 'tooltip',      label: 'Tooltip',      icon: MessageSquare },
-  { id: 'theme',        label: 'ThemeToggle',  icon: Sun },
   { id: 'spacing',      label: 'Spacing',      icon: Layers },
   { id: 'leagues',      label: 'Leagues',      icon: Star },
 ]
@@ -659,37 +657,6 @@ export default function DesignSystemPage() {
 
           </Section>
 
-          {/* ═══════════════ THEME TOGGLE ═══════════════ */}
-          <Section id="theme" title="ThemeToggle" description="Sélecteur light / dark / system — persiste dans localStorage">
-
-            <Block label="Composant">
-              <ThemeToggle />
-            </Block>
-
-            <Block label="Emplacement">
-              <p className="text-sm text-muted-foreground">
-                Intégré dans le dropdown avatar de <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">FloatingNav</code> et{' '}
-                <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">Header</code> — section «&nbsp;Apparence&nbsp;».
-              </p>
-            </Block>
-
-            <CodeSnip code={`// globals.css
-@custom-variant dark (&:is(.dark *));
-
-.dark {
-  --background: #0A0A0A;
-  --primary:    #7C3AED;
-  /* ... */
-}
-
-// layout.tsx — anti-flash script dans <head>
-(function(){
-  var t = localStorage.getItem('theme') || 'system';
-  var d = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-  if (d) document.documentElement.classList.add('dark');
-})()`} />
-
-          </Section>
 
           {/* ═══════════════ SPACING ═══════════════ */}
           <Section id="spacing" title="Spacing" description="Grille 4px — spacing-1=4px … spacing-48=192px">

@@ -1,4 +1,5 @@
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 /**
  * Renders the structured brief sections of a challenge (context, deliverable,
@@ -56,7 +57,10 @@ function ListSection({ icon, title, intro, value }: { icon: string; title: strin
   const asList = items.length > 1
 
   return (
-    <section className="space-y-3 rounded-2xl border border-border bg-muted/40 p-5">
+    <section
+      className={`${GLASS_SURFACE} space-y-3 rounded-[24px] p-5`}
+      style={GLASS_GRADIENT}
+    >
       <div>
         <h2 className="text-xl font-semibold"><span className="me-1">{icon}</span>{title}</h2>
         {intro && <p className="text-sm text-muted-foreground mt-1">{intro}</p>}

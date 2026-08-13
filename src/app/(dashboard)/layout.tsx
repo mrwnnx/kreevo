@@ -1,12 +1,11 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { FloatingNav } from '@/components/layout/FloatingNav'
-import { Sidebar } from '@/components/layout/Sidebar'
+import { GlassShell } from '@/components/layout/GlassShell'
+import { GlassHeader } from '@/components/layout/GlassHeader'
 import { OnboardingTour, type TourStepData } from '@/components/onboarding/OnboardingTour'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
-import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
@@ -18,19 +17,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: profile } = await (supabase as any)
     .from('profiles').select('*').eq('id', user.id).single()
   if (!profile) redirect('/login')
-
-  const [{ count: unreadCount }, { data: leagueRow }] = await Promise.all([
-    (supabaseAdmin as any)
-      .from('notifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('is_read', false),
-    (supabaseAdmin as any)
-      .from('leagues')
-      .select('icon')
-      .ilike('name', (profile as any).league ?? 'Stone')
-      .maybeSingle(),
-  ])
 
   const [lang, dict] = await Promise.all([getLang(), getDict()])
 
@@ -62,26 +48,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
+      <GlassShell>
         <Suspense fallback={null}>
-          <Sidebar
-            profile={profile as Profile}
-            unreadCount={unreadCount ?? 0}
-            leagueIcon={leagueRow?.icon ?? null}
-            lang={lang}
-            t={dict.header}
-          />
+          <GlassHeader />
         </Suspense>
-        <Suspense fallback={null}>
-          <FloatingNav profile={profile as Profile} lang={lang} t={dict.header} notifTypes={dict.notificationsPage.types} />
-        </Suspense>
-        <main className="sm:ps-72 min-h-screen">{children}</main>
+        <main className="min-h-screen">{children}</main>
         {/* Tour de bienvenue (DB) — flag activé + non terminé + ≥1 étape active. */}
         {tourEnabled && !profile.tour_completed && tourSteps.length > 0 && (
           <OnboardingTour steps={tourSteps} t={dict.onboardingTour} />
         )}
         <Toaster position="bottom-right" />
-      </div>
+      </GlassShell>
     </TooltipProvider>
   )
 }

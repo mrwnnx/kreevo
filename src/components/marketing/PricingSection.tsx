@@ -96,7 +96,7 @@ export async function PricingSection() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
+    <section id="pricing" className="mx-auto w-full max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
       <Reveal>
       {/* Header — titre + body (i18n) */}
       <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">

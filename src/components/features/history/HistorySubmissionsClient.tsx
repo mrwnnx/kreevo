@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { setSubmissionVisibility } from './actions'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 export type HistorySubmission = {
   id: string
@@ -181,7 +182,8 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
                   href={s.is_draft && s.challenge_id
                     ? `/dashboard/challenges/${s.challenge_id}/submit`
                     : `/dashboard/submissions/${s.id}?from=history`}
-                  className="block group rounded-2xl border border-border bg-card overflow-hidden hover:border-foreground/30 transition-colors"
+                  className={`${GLASS_SURFACE} group block overflow-hidden rounded-[24px] transition-[translate,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)] hover:-translate-y-[6px] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
+                  style={GLASS_GRADIENT}
                 >
                   <div className="relative aspect-video bg-muted">
                     {s.cover_url ? (

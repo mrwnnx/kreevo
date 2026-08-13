@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Plus_Jakarta_Sans } from "next/font/google"
 import localFont from "next/font/local"
-import Script from "next/script"
 import { buildDesignCSS, FONT_OPTIONS } from "@/lib/design-tokens"
 import { getDesignTokens } from "@/lib/design-tokens.server"
 import { getLang, dirFor } from "@/lib/i18n/lang"
@@ -59,11 +58,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <style dangerouslySetInnerHTML={{ __html: designCSS }} />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');})();` }}
-        />
         {children}
       </body>
     </html>

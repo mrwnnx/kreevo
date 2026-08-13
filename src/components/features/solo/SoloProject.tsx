@@ -333,12 +333,21 @@ export function SoloProject({ name, challenges = [] }: { name?: string | null; c
 
 const SOLO_CSS = `
 .kreevo-solo{
-  --k-card:var(--card); --k-ink:var(--foreground);
-  --k-ink2:color-mix(in oklch, var(--foreground) 74%, var(--card));
-  --k-surface:var(--secondary); --k-mutedfg:var(--muted-foreground); --k-border:var(--border);
+  /* Refonte « verre » : surfaces translucides + filet #dcdce8 au lieu des
+     couleurs opaques, pour laisser passer le fond pastel. Redéfinir ces trois
+     tokens suffit — toutes les règles ci-dessous en héritent. */
+  --k-card:rgba(255,255,255,.55); --k-ink:var(--foreground);
+  --k-ink2:color-mix(in oklch, var(--foreground) 74%, white);
+  --k-surface:rgba(255,255,255,.35); --k-mutedfg:var(--muted-foreground); --k-border:#dcdce8;
   --k-acc:var(--xp-from); --k-acc2:var(--xp-to);
   --sh:0 1px 2px rgba(20,20,30,.06); --sh-hover:0 6px 20px rgba(20,20,30,.09);
 }
+
+/* Flou d'arrière-plan des surfaces verre (refonte). */
+.kreevo-solo .solo-choice,
+.kreevo-solo .solo-pill,
+.kreevo-solo .btn-ghost,
+.kreevo-solo .sim{backdrop-filter:blur(59.18px);-webkit-backdrop-filter:blur(59.18px)}
 
 /* ---- entrance ---- */
 @keyframes soloRise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}

@@ -12,6 +12,7 @@ import { CheckCircle, Loader2, Shield, Zap } from 'lucide-react'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { translateAuthError } from '@/lib/auth-errors'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 type SettingsT = Dictionary['settings']
 type AuthErrorsT = Dictionary['auth']['errors']
@@ -55,8 +56,8 @@ export function SettingsClient({
     <div className="space-y-8">
 
       {/* Plan & League */}
-      <section className="rounded-xl border border-border overflow-hidden">
-        <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
+      <section className={`${GLASS_SURFACE} overflow-hidden rounded-[24px]`} style={GLASS_GRADIENT}>
+        <div className="px-5 py-4 border-b border-[#dcdce8]">
           <div className="flex items-center gap-2">
             <Zap className="size-4 text-primary" />
             <h2 className="text-sm font-semibold">{t.plan.sectionTitle}</h2>
@@ -84,7 +85,7 @@ export function SettingsClient({
             </Button>
           )}
 
-          <div className="pt-2 border-t border-border space-y-2">
+          <div className="pt-2 border-t border-[#dcdce8] space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">{t.plan.currentLeague}</span>
               <span
@@ -102,8 +103,8 @@ export function SettingsClient({
       </section>
 
       {/* Account */}
-      <section className="rounded-xl border border-border overflow-hidden">
-        <div className="px-5 py-4 border-b border-border bg-white dark:bg-zinc-900/20">
+      <section className={`${GLASS_SURFACE} overflow-hidden rounded-[24px]`} style={GLASS_GRADIENT}>
+        <div className="px-5 py-4 border-b border-[#dcdce8]">
           <div className="flex items-center gap-2">
             <Shield className="size-4 text-primary" />
             <h2 className="text-sm font-semibold">{t.account.sectionTitle}</h2>
@@ -115,7 +116,7 @@ export function SettingsClient({
             <p className="text-sm font-medium">{email}</p>
           </div>
 
-          <div className="pt-3 border-t border-border space-y-4">
+          <div className="pt-3 border-t border-[#dcdce8] space-y-4">
             <p className="text-sm font-medium">{t.account.changePassword}</p>
             <div className="space-y-3">
               <div className="space-y-1.5">

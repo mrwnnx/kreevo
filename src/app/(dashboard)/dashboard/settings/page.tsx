@@ -5,6 +5,7 @@ import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import { Globe } from 'lucide-react'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -23,7 +24,7 @@ export default async function SettingsPage() {
       <div className="max-w-[960px] mx-auto px-6 py-8 space-y-8">
 
         {/* Language section */}
-        <section className="rounded-[24px] border border-border bg-card p-6 space-y-4">
+        <section className={`${GLASS_SURFACE} space-y-4 rounded-[24px] p-6`} style={GLASS_GRADIENT}>
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center">
               <Globe className="size-5 text-indigo-600 dark:text-indigo-400" />

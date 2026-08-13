@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang, type Lang } from '@/lib/i18n/lang'
 
 import type { Profile } from '@/types/database.types'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 function timeAgo(date: string, lang: Lang): string {
   const diff = Date.now() - new Date(date).getTime()
@@ -50,11 +51,11 @@ export default async function NotificationsPage() {
             <p className="text-xs text-muted-foreground">{t.empty.subtitle}</p>
           </div>
         ) : (
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+          <div className={`${GLASS_SURFACE} divide-y divide-[#dcdce8] overflow-hidden rounded-[24px]`} style={GLASS_GRADIENT}>
             {notifications.map((n: any) => {
               const meta = t.types[n.type] ?? { emoji: '🔔', label: n.type }
               return (
-                <div key={n.id} className={`flex gap-4 px-5 py-4 ${!n.is_read ? 'bg-primary/5' : 'bg-background'}`}>
+                <div key={n.id} className={`flex gap-4 px-5 py-4 ${!n.is_read ? 'bg-primary/5' : ''}`}>
                   <span className="text-xl shrink-0 mt-0.5">{meta.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{meta.label}</p>

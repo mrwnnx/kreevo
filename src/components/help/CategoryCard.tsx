@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import type { HelpCategory } from '@/lib/help/categories'
 import type { HelpLang, HelpDictionary } from '@/lib/help/lang'
 
@@ -19,7 +20,14 @@ export function CategoryCard({ category, count, lang, t }: Props) {
   return (
     <Link
       href={`/help/${category.slug}`}
-      className="group block rounded-[24px] border border-border bg-card p-5 hover:shadow-md hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-150"
+      className={cn(
+        GLASS_SURFACE,
+        'group block p-5 transition-[translate,scale,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)]',
+        'hover:-translate-y-[9px] hover:scale-[1.006] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)]',
+        'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#6040C0]',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100',
+      )}
+      style={GLASS_GRADIENT}
     >
       <div
         className={cn(

@@ -17,6 +17,7 @@ import { ArrowLeft } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/help/LanguageSwitcher'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { Logo } from '@/components/ui/Logo'
+import { GlassShell, GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 export default async function HelpLayout({
   children,
@@ -27,7 +28,7 @@ export default async function HelpLayout({
   const t = HELP_T[lang]
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <GlassShell className="text-foreground">
       {/* Skip link — visible only when focused (keyboard) */}
       <a
         href="#help-main"
@@ -37,8 +38,8 @@ export default async function HelpLayout({
       </a>
 
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-3 sm:gap-4">
+      <header className="sticky top-0 z-40">
+        <div className="mx-auto flex h-14 max-w-[1200px] items-center gap-3 px-6 sm:gap-4 lg:px-[144px]">
           <Link
             href="/help"
             className="shrink-0 flex items-center gap-1.5"
@@ -60,9 +61,9 @@ export default async function HelpLayout({
       <main id="help-main" className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card mt-12">
+      <footer className="mt-12">
         <div className="max-w-[1080px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <div className="rounded-[24px] border border-border bg-background p-6 sm:p-8 text-center space-y-3 mb-10">
+          <div className={`${GLASS_SURFACE} mb-10 space-y-3 p-6 text-center sm:p-8`} style={GLASS_GRADIENT}>
             <h2 className="text-lg sm:text-xl font-bold text-foreground">
               {t.contactTitle}
             </h2>
@@ -87,6 +88,6 @@ export default async function HelpLayout({
           </div>
         </div>
       </footer>
-    </div>
+    </GlassShell>
   )
 }

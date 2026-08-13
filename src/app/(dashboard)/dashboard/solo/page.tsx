@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { SoloProject, type SoloChallenge } from '@/components/features/solo/SoloProject'
-import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
 
 export const metadata: Metadata = { title: 'Solo project · Kreevo' }
 
@@ -47,7 +46,6 @@ export default async function SoloPage() {
   return (
     <div className="relative min-h-screen">
       {/* Même fond animé que la page d'accueil (landing) */}
-      <MovingGradientBackground />
       <div className="relative z-10">
         <SoloProject name={name} challenges={challenges} />
       </div>

@@ -12,6 +12,7 @@ import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { ParticipateButton } from '@/components/features/challenge/ParticipateButton'
 import { ParticipantsDialog } from '@/components/features/challenge/ParticipantsDialog'
 import { RulesDialog } from '@/components/features/challenge/RulesDialog'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import { MySubmissionCard } from '@/components/features/challenge/MySubmissionCard'
 import { CancelParticipationButton } from '@/components/features/challenge/CancelParticipationButton'
 import { ChallengeBriefSections } from '@/components/features/challenge/ChallengeBriefSections'
@@ -135,46 +136,34 @@ export default async function ChallengePage({ params, searchParams }: Props) {
   // ── State 1: PREVIEW (no participation) ─────────────────────────────────────
   if (participationStatus === 'none') {
     return (
-      <div className="p-6 max-w-[720px] mx-auto pb-16 bg-white dark:bg-background">
+      <div className="mx-auto flex max-w-[720px] flex-col gap-[32px] p-6 pb-16">
 
-        <div className="mb-6">
-          <Link href="/dashboard/challenges" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="size-3.5" /> {t.backToChallenges}
+        {/* ── En-tête (Figma 492:2995) ── */}
+        <div className="flex w-full flex-col items-start justify-center gap-[16px]">
+          <Link
+            href="/dashboard/challenges"
+            className="flex items-center gap-[2px] text-[#71717a] transition-colors hover:text-[#2b2c36]"
+          >
+            <ChevronLeft className="size-[15.781px]" />
+            <span className="text-[14px] font-bold leading-[1.2]">{t.backToChallenges}</span>
+            <span className="text-[14px] font-normal leading-[1.2]">/</span>
+            <span className="text-[14px] font-normal leading-[1.2]">{t.sections.brief}</span>
           </Link>
-        </div>
 
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              {c.specialty && (
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full ${specialtyColor}`}>
-                  {c.specialty}
-                </span>
-              )}
-              {typeLabel && (
-                <span className="text-sm font-semibold px-3 py-1 rounded-full bg-muted text-muted-foreground">
-                  {typeLabel}
-                </span>
-              )}
-              {industryLabel && (
-                <span className="text-sm text-muted-foreground">{industryLabel}</span>
-              )}
-            </div>
+          <div className="flex w-full flex-col items-start gap-[8px]">
+            <h1 className="text-[40px] font-semibold leading-[1.2] text-[#2b2c36]">{c.title}</h1>
 
-            <h1 className="text-3xl font-bold leading-tight">{c.title}</h1>
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-[16px] text-[12px] text-[#71717a]">
               {c.xp_reward != null && c.xp_reward > 0 && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-[4px]">
                   <XpIcon className="size-4" />
-                  <strong className="text-foreground">{c.xp_reward}</strong> XP
+                  {c.xp_reward} XP
                 </span>
               )}
               {c.deadline_days != null && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-[6px]">
                   <Clock className="size-4" />
-                  <strong className="text-foreground">{c.deadline_days}</strong> {t.daysSuffix}
+                  {c.deadline_days} {t.daysSuffix}
                 </span>
               )}
               {totalParticipants > 0 && (
@@ -183,46 +172,69 @@ export default async function ChallengePage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          {/* Brief (only) */}
-          {c.brief && (
-            <section className="rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 p-6 space-y-2">
-              <h2 className="text-xl font-semibold"><span className="me-1">📋</span>{t.sections.brief}</h2>
-              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">{c.brief}</p>
-            </section>
-          )}
+        </div>
 
-          {/* Warning */}
-          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4 flex gap-3">
-            <span className="text-xl shrink-0">⚠️</span>
-            <div>
-              <p className="font-semibold text-amber-900 dark:text-amber-300">
-                {t.warning.title}
-              </p>
-              <p
-                className="text-amber-800 dark:text-amber-200/90 text-sm mt-1 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: tx(t.warning.body, { days: c.deadline_days ?? 3 }) }}
-              />
+        {/* ── Carte Brief (Figma 492:4852) ── */}
+        <div
+          className={`${GLASS_SURFACE} flex w-full items-start justify-center overflow-clip rounded-[32px]`}
+          style={GLASS_GRADIENT}
+        >
+          <div className="flex min-w-px flex-[1_0_0] flex-col items-start gap-[16px] rounded-[32px] border-[0.986px] border-[#dcdce8] p-[16px]">
+            <div className="flex w-full flex-col items-start gap-[8px]">
+              <p className="w-full text-[16px] font-semibold text-[#2b2c36]">{t.sections.brief}</p>
+              {c.brief && (
+                <p className="w-full whitespace-pre-line text-[14px] font-normal leading-[1.2] text-[#484848]">
+                  {c.brief}
+                </p>
+              )}
+              {(c.specialty || typeLabel || industryLabel) && (
+                <div className="flex w-full flex-wrap items-start gap-[8px]">
+                  {[c.specialty, typeLabel, industryLabel].filter(Boolean).map((tag) => (
+                    <span
+                      key={tag as string}
+                      className={`${GLASS_SURFACE} flex items-center justify-center rounded-[7.891px]`}
+                      style={GLASS_GRADIENT}
+                    >
+                      <span className="flex flex-col items-start rounded-[7.891px] border-[0.986px] border-[#dcdce8] p-[7.891px] text-[12px] font-normal leading-[1.2] text-[#484848]">
+                        {tag as string}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Other active blocker / cross-specialty gate */}
-          {isOtherSpecialty ? (
-            otherSpecialtyNotice
-          ) : hasOtherActive ? (
-            <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-              {t.blockedActive}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <ParticipateButton challengeId={c.id} deadlineDays={c.deadline_days ?? 3} t={t.participate} />
-              <div className="text-center">
-                <RulesDialog xpReward={c.xp_reward ?? 150} deadlineDays={c.deadline_days ?? 3} t={t.rules} />
+            {/* Encart « Avant de participer » (Figma 492:5050) — verre teinté jaune */}
+            <div
+              className="flex w-full items-start justify-center overflow-clip rounded-[16px] border-[1.973px] border-white shadow-[0px_3.945px_44.385px_0px_rgba(0,0,0,0.1)] backdrop-blur-[59.18px]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(191.43deg, rgba(254,237,170,0.51) 23.035%, rgba(254,237,170,0.117) 119.63%)',
+              }}
+            >
+              <div className="flex min-w-px flex-[1_0_0] flex-col items-start gap-[8px] rounded-[16px] border-[0.986px] border-[#dcdce8] p-[16px]">
+                <p className="w-full text-[16px] font-semibold text-[#2b2c36]">{t.warning.title}</p>
+                <p
+                  className="w-full text-[14px] font-normal leading-[1.2] text-[#484848]"
+                  dangerouslySetInnerHTML={{ __html: tx(t.warning.body, { days: c.deadline_days ?? 3 }) }}
+                />
               </div>
             </div>
-          )}
 
-          {/* Gallery hidden in preview state — only revealed once the user joins,
-              keeps the pre-participation page focused on the brief + CTA. */}
+            {/* Actions — en pied de carte, sous « Avant de participer ». */}
+            {isOtherSpecialty ? (
+              otherSpecialtyNotice
+            ) : hasOtherActive ? (
+              <div className="w-full rounded-[16px] border border-[#dcdce8] bg-white/40 p-4 text-sm text-[#484848] backdrop-blur-[59.18px]">
+                {t.blockedActive}
+              </div>
+            ) : (
+              <div className="flex w-full flex-wrap items-center justify-end gap-[8px]">
+                <RulesDialog compact xpReward={c.xp_reward ?? 150} deadlineDays={c.deadline_days ?? 3} t={t.rules} />
+                <ParticipateButton compact challengeId={c.id} deadlineDays={c.deadline_days ?? 3} t={t.participate} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -230,11 +242,17 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
   // ── State 2+: ACTIVE / SUBMITTED / EXPIRED — full brief + sidebar ───────────
   return (
-    <div className="p-6 max-w-[1140px] mx-auto pb-16 bg-white dark:bg-background">
+    <div className="mx-auto max-w-[1140px] p-6 pb-16">
 
       <div className="mb-6">
-        <Link href="/dashboard/challenges" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="size-3.5" /> Challenges
+        <Link
+          href="/dashboard/challenges"
+          className="flex w-fit items-center gap-[2px] text-[#71717a] transition-colors hover:text-[#2b2c36]"
+        >
+          <ChevronLeft className="size-[15.781px]" />
+          <span className="text-[14px] font-bold leading-[1.2]">{t.backToChallenges}</span>
+          <span className="text-[14px] font-normal leading-[1.2]">/</span>
+          <span className="text-[14px] font-normal leading-[1.2]">{t.sections.brief}</span>
         </Link>
       </div>
 
@@ -313,7 +331,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold leading-tight">{c.title}</h1>
+            <h1 className="text-[40px] font-semibold leading-[1.2] text-[#2b2c36]">{c.title}</h1>
 
             {c.brief && (
               <p className="text-base text-muted-foreground leading-relaxed">{c.brief}</p>
@@ -391,7 +409,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
           )}
 
           {/* Challenge meta card */}
-          <div className="rounded-xl border border-border p-4 space-y-3">
+          <div className={`${GLASS_SURFACE} space-y-3 rounded-[16px] p-4`} style={GLASS_GRADIENT}>
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{t.sidebar.detailsTitle}</p>
             <div className="space-y-2.5">
               {c.specialty && (
@@ -442,7 +460,7 @@ export default async function ChallengePage({ params, searchParams }: Props) {
 
       {/* Gallery — full-page width, below the 2-col layout */}
       {allSubmissions && allSubmissions.length > 0 && (
-        <section className="space-y-4 pt-8 mt-8 border-t border-border">
+        <section className="mt-8 space-y-4 border-t border-[#dcdce8] pt-8">
           <h2 className="text-xl font-semibold"><span className="me-1">🖼️</span>{tx(t.otherSubmissions, { n: allSubmissions.length })}</h2>
           <SubmissionGallery
             submissions={allSubmissions}

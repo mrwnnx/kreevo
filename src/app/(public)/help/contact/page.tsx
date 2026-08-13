@@ -8,6 +8,7 @@ import { Mail, Clock, ShieldCheck } from 'lucide-react'
 import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { HelpBreadcrumb } from '@/components/help/HelpBreadcrumb'
 import { ContactForm } from '@/components/help/ContactForm'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getHelpLang()
@@ -71,7 +72,7 @@ export default async function HelpContactPage() {
       </div>
 
       {/* Form card */}
-      <div className="rounded-[24px] border border-border bg-card p-6 sm:p-8">
+      <div className={`${GLASS_SURFACE} p-6 sm:p-8`} style={GLASS_GRADIENT}>
         <ContactForm lang={lang} />
       </div>
     </div>

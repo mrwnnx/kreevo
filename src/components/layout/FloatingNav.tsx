@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { signOut } from '@/app/(auth)/actions'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LangSwitcher } from '@/components/i18n/LangSwitcher'
 import type { Profile } from '@/types/database.types'
 import type { Lang } from '@/lib/i18n/tx'
@@ -136,11 +135,6 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             <div className="px-2 py-1.5 space-y-2">
               <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Language</p>
               <LangSwitcher current={lang} variant="pill" />
-            </div>
-            <DropdownMenuSeparator />
-            <div className="px-2 py-1.5">
-              <p className="text-sm text-muted-foreground mb-2">{t.menu.appearance}</p>
-              <ThemeToggle />
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">

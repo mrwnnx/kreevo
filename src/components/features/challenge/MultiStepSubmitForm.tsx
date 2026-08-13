@@ -13,6 +13,8 @@ import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import { HUMAN_REVIEW_THRESHOLD } from '@/lib/utils/submission-constants'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
+import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
 
 type SubmitT = Dictionary['submitForm']
 
@@ -225,7 +227,8 @@ export function MultiStepSubmitForm({
       : t.success.pendingBody
 
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background p-6">
+        <MovingGradientBackground intensity="strong" />
         <div className="max-w-md w-full text-center space-y-4">
           <div className={cn(
             'size-16 rounded-full mx-auto flex items-center justify-center',
@@ -255,9 +258,10 @@ export function MultiStepSubmitForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-      {/* Top bar */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+      <MovingGradientBackground intensity="strong" />
+      {/* Top bar — z-10 : au-dessus du fond dégradé (z-0). */}
+      <div className="sticky top-0 z-10 border-b border-[#dcdce8] bg-white/60 backdrop-blur-[32px]">
         <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <button
             type="button"
@@ -281,7 +285,7 @@ export function MultiStepSubmitForm({
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 py-8 pb-32">
+      <div className="relative z-10 mx-auto max-w-3xl px-6 py-8 pb-32">
         {step === 1 ? (
           <Step1
             coverUrl={coverUrl}
@@ -315,7 +319,7 @@ export function MultiStepSubmitForm({
       </div>
 
       {/* Bottom bar */}
-      <div className="fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur border-t border-border">
+      <div className="fixed bottom-0 inset-x-0 z-20 border-t border-[#dcdce8] bg-white/60 backdrop-blur-[32px]">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between gap-3">
           {step === 1 ? (
             <>
@@ -390,7 +394,7 @@ export function MultiStepSubmitForm({
       {/* Sync analyze overlay with progress bar (5–15s during AI analysis) */}
       {analyzing && (
         <div className="fixed inset-0 z-[55] bg-black/40 supports-[backdrop-filter]:backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="rounded-2xl bg-background border border-border shadow-xl p-6 max-w-sm w-full space-y-4">
+          <div className={`${GLASS_SURFACE} w-full max-w-sm space-y-4 rounded-[24px] bg-white/80 p-6`} style={GLASS_GRADIENT}>
             <div className="text-center space-y-1">
               <Sparkles className="size-7 mx-auto text-violet-600 dark:text-violet-400 animate-pulse" />
               <p className="text-sm font-semibold">{t.aiVerdict.analyzing}</p>
@@ -451,7 +455,7 @@ export function AnalysisResultModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background shadow-xl p-5 space-y-4">
+      <div className={`${GLASS_SURFACE} max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto rounded-[24px] bg-white/80 p-5`} style={GLASS_GRADIENT}>
         <div className="flex items-start gap-3">
           <span className={cn('size-9 rounded-full inline-flex items-center justify-center shrink-0', headerColor)}>
             {mode === 'success' ? <CheckCircle className="size-5" /> : <X className="size-5" />}
@@ -465,7 +469,7 @@ export function AnalysisResultModal({
               key={i}
               className={cn(
                 'flex items-start gap-2 rounded-xl border p-2',
-                r.valid ? 'border-border bg-card' : 'border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20',
+                r.valid ? 'border-[#dcdce8] bg-white/50' : 'border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20',
               )}
             >
               <div className="flex-1 min-w-0">

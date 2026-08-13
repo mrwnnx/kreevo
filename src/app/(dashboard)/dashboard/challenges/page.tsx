@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import Link from 'next/link'
-import { Lock, Clock, ArrowRight, Check, Trophy } from 'lucide-react'
+import { Lock, Clock, ArrowRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeagueThreshold, getScopedLeagueScores } from '@/lib/utils/leagues'
 import { cooldownRemainingMs, isInCooldown } from '@/lib/utils/participation-cooldown'
@@ -24,16 +25,6 @@ const PASTELS: { top: string; pill: string; xp: string }[] = [
   { top: 'bg-[hsl(190,80%,95%)] dark:bg-[hsl(190,40%,13%)]', pill: 'bg-[hsl(190,65%,84%)] text-[hsl(190,55%,28%)] dark:bg-[hsl(190,40%,24%)] dark:text-[hsl(190,65%,80%)]', xp: 'bg-gradient-to-br from-[hsl(185,92%,42%)] to-[hsl(232,90%,52%)] text-white' },
   { top: 'bg-[hsl(43,96%,95%)] dark:bg-[hsl(43,40%,13%)]',   pill: 'bg-[hsl(43,85%,84%)] text-[hsl(43,70%,30%)] dark:bg-[hsl(43,40%,24%)] dark:text-[hsl(43,80%,80%)]',   xp: 'bg-gradient-to-br from-[hsl(52,98%,54%)] to-[hsl(18,95%,52%)] text-[hsl(28,90%,13%)]' },
   { top: 'bg-[hsl(290,80%,95%)] dark:bg-[hsl(290,40%,13%)]', pill: 'bg-[hsl(290,65%,86%)] text-[hsl(290,50%,34%)] dark:bg-[hsl(290,40%,24%)] dark:text-[hsl(290,65%,82%)]', xp: 'bg-gradient-to-br from-[hsl(278,82%,54%)] to-[hsl(335,85%,54%)] text-white' },
-]
-
-// ── Floating avatar slots (right side of header card) — varied size/position/timing ──
-const AVATAR_SLOTS = [
-  { size: 66, top: '6%',  right: '5%',  dur: 4.6, delay: 0 },
-  { size: 44, top: '54%', right: '1%',  dur: 5.3, delay: 0.7 },
-  { size: 54, top: '28%', right: '20%', dur: 4.1, delay: 0.3 },
-  { size: 36, top: '72%', right: '26%', dur: 5.9, delay: 1.0 },
-  { size: 50, top: '4%',  right: '33%', dur: 4.9, delay: 0.2 },
-  { size: 40, top: '48%', right: '42%', dur: 5.6, delay: 1.2 },
 ]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -84,15 +75,15 @@ function ChallengeCard({
 
   const card = (
     <div className={cn(
-      'group relative block rounded-[28px] border bg-card overflow-hidden p-2 transition-all duration-150',
-      status === 'available' && 'border-border hover:shadow-lg',
+      'group relative block overflow-hidden rounded-[28px] border-[1.973px] border-white p-2 shadow-[0px_3.945px_44.385px_0px_rgba(0,0,0,0.1)] backdrop-blur-[59.18px] transition-[translate,scale,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)] hover:-translate-y-[9px] hover:scale-[1.006] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+      // 'available' : on garde l'anneau blanc du verre, pas de bordure neutre.
       status === 'active'    && 'border-green-400 dark:border-green-600 shadow-sm shadow-green-500/10',
-      status === 'completed' && 'border-border/60',
-      status === 'locked'    && 'border-border opacity-50 cursor-default',
-      status === 'blocked'   && 'border-border opacity-60 cursor-default',
+      status === 'completed' && 'opacity-90',
+      status === 'locked'    && 'cursor-default opacity-50',
+      status === 'blocked'   && 'cursor-default opacity-60',
       status === 'cooldown'  && 'border-amber-300 dark:border-amber-700 shadow-sm shadow-amber-500/10',
       status === 'reopened'  && 'border-emerald-400 dark:border-emerald-600 shadow-sm shadow-emerald-500/10 hover:shadow-lg',
-    )}>
+    )} style={GLASS_GRADIENT}>
 
       {status === 'blocked' && (
         <div className="absolute inset-0 bg-card/85 backdrop-blur-[2px] flex items-center justify-center z-10 p-4">
@@ -295,21 +286,6 @@ export default async function ChallengesPage({
   const userLeagueRow = leagues.find(l => l.name.toLowerCase() === userLeagueName.toLowerCase()) ?? null
   const userLeagueIndex = userLeagueRow?.order_index ?? 0
 
-  // Avatars of people who participated in this league's challenges (floating header)
-  const leagueChallengeIdSet = new Set(
-    challenges.filter(c => c.league_id === userLeagueRow?.id).map(c => c.id)
-  )
-  const leagueParticipantIds = [...new Set(
-    ((allPartRows ?? []) as any[])
-      .filter(p => leagueChallengeIdSet.has(p.challenge_id))
-      .map(p => p.user_id)
-  )]
-  const leagueAvatars = leagueParticipantIds
-    .map(id => profileById.get(id))
-    .filter((p): p is { username: string; avatar_url: string | null } => !!p)
-    .sort((a, b) => (b.avatar_url ? 1 : 0) - (a.avatar_url ? 1 : 0)) // avatars first
-    .slice(0, AVATAR_SLOTS.length)
-
   // PHASE 2/4 — spécialité du user (FK), source unique pour le seuil ET le filtrage.
   const profileSpecialtyId = (profile?.specialty_id ?? null) as string | null
 
@@ -370,61 +346,57 @@ export default async function ChallengesPage({
   const t = dict.challengesPage
 
   return (
-    <div className="p-6 max-w-[1140px] mx-auto pb-16 space-y-8">
+    <div className="mx-auto max-w-[1140px] space-y-8 p-6 pb-16">
 
       {/* ── Header card (profile-card style) with floating league avatars ── */}
       <div
-        className="relative overflow-hidden rounded-[24px] border border-border bg-card px-5 py-6 sm:px-8 sm:py-7"
-        style={userLeagueRow?.color
-          ? { backgroundImage: `linear-gradient(135deg, ${userLeagueRow.color}29, transparent 55%, ${userLeagueRow.color}14)` }
-          : undefined}
+        className={`${GLASS_SURFACE} relative flex items-start justify-center overflow-clip rounded-[32px]`}
+        style={GLASS_GRADIENT}
       >
-        <style>{`@keyframes kreevoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}`}</style>
+        {/* Halos internes (Figma 489:2947 / 489:2949) */}
+        <span aria-hidden className="pointer-events-none absolute -end-[137px] top-1/2 size-[369px] -translate-y-1/2 rounded-full bg-[#f3cbc7] opacity-[0.42] blur-[165.751px]" />
+        <span aria-hidden className="pointer-events-none absolute -start-[197px] top-1/2 size-[369px] -translate-y-1/2 rounded-full bg-[#c6dbe9] opacity-50 blur-[149.29px]" />
 
-        <div className="relative z-10 space-y-3 max-w-[62%]">
-          <div className="space-y-2">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">{t.title}</h1>
-            <p className="text-base text-muted-foreground">{t.motivation}</p>
-          </div>
-          {userLeagueRow && (
-            <div className="inline-flex items-center gap-3 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 px-2 py-2">
-              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-zinc-900">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/xp-flash.svg" alt="" className="size-4" />
-                {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()} {t.xp}
-              </span>
-              <span className="h-4 w-px bg-zinc-200" />
-              <span className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-zinc-900">
-                <Trophy className="size-4 text-violet-500" />
-                {leagueChallengesCompleted} / {minCh} {t.challengesCompleted}
-              </span>
+        {/* Illustration cible (Figma 489:2951) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/illu-challenges.png"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -end-[180px] top-1/2 hidden h-[560px] w-[587px] max-w-none -translate-y-1/2 object-cover opacity-40 sm:block"
+        />
+
+        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start rounded-[32px] border-[0.986px] border-[#dcdce8] p-[24px]">
+          <div className="flex flex-col items-start gap-[16px]">
+            <div className="flex flex-col items-start gap-[8px]">
+              <h1 className="text-[48px] font-semibold leading-[1.1] text-[#2b2c36]">{t.title}</h1>
+              <p className="text-[16px] font-normal leading-[1.2] text-[#484848]">{t.motivation}</p>
             </div>
-          )}
-        </div>
 
-        {leagueAvatars.length > 0 && (
-          <div className="absolute inset-y-0 end-0 w-1/2 hidden sm:block pointer-events-none">
-            {leagueAvatars.map((a, i) => {
-              const s = AVATAR_SLOTS[i]
-              return (
-                <div
-                  key={i}
-                  className="absolute rounded-full overflow-hidden ring-2 ring-white/80 dark:ring-white/15 shadow-lg"
-                  style={{ width: s.size, height: s.size, top: s.top, right: s.right, animation: `kreevoFloat ${s.dur}s ease-in-out ${s.delay}s infinite` }}
-                >
-                  {a.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={a.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center font-bold" style={{ fontSize: s.size * 0.4 }}>
-                      {a.username?.[0]?.toUpperCase() ?? '?'}
-                    </div>
-                  )}
+            {userLeagueRow && (
+              <div
+                className={`${GLASS_SURFACE} flex items-center justify-center rounded-[7.891px] shadow-[0px_2px_14px_0px_rgba(0,0,0,0.1)]`}
+                style={GLASS_GRADIENT}
+              >
+                <div className="flex flex-col items-start rounded-[7.891px] border-[0.986px] border-[#dcdce8] p-[7.891px]">
+                  <div className="flex items-center gap-[16px]">
+                    <span className="flex items-center gap-[4px] text-[14px] font-semibold leading-[1.2] text-[#080808]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/brand/icon-star-xp.png" alt="" aria-hidden className="h-[15px] w-[16px] object-contain" />
+                      {userXp.toLocaleString()} / {leagueXpThreshold.toLocaleString()} {t.xp}
+                    </span>
+                    <span aria-hidden className="h-4 w-px bg-[#dcdce8]" />
+                    <span className="flex items-center gap-[4px] text-[14px] font-semibold leading-[1.2] text-[#080808]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/brand/icon-trophy.png" alt="" aria-hidden className="size-[16px] object-contain" />
+                      {leagueChallengesCompleted} / {minCh} {t.challengesCompleted}
+                    </span>
+                  </div>
                 </div>
-              )
-            })}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── Pro upgrade gate ── */}
@@ -500,7 +472,7 @@ export default async function ChallengesPage({
           // PHASE 4 — pas de spécialité → aucun challenge participable : CTA dédié.
           if (!profileSpecialtyId) {
             return (
-              <div className="rounded-2xl border border-dashed p-12 text-center space-y-3">
+              <div className="space-y-3 rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center backdrop-blur-[59.18px]">
                 <p className="text-sm font-medium">{t.noSpecialtyTitle}</p>
                 <Link
                   href="/dashboard/settings"
@@ -518,7 +490,7 @@ export default async function ChallengesPage({
 
           if (visible.length === 0) {
             return (
-              <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+              <div className="rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center text-sm text-[#484848] backdrop-blur-[59.18px]">
                 {filter === 'done' ? t.empty.done : t.empty.todo}
               </div>
             )

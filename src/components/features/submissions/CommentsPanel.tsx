@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { tx } from '@/lib/i18n/tx'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 const FREE_LIMIT = 5
 const MIN_CONTENT = 10
@@ -138,14 +139,14 @@ export function CommentsPanel({
         aria-modal="true"
         aria-label={tc.panelTitle}
         className={cn(
-          'absolute end-0 top-0 bottom-0 w-full sm:w-[520px] lg:w-[600px] bg-background border-s border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out',
+          'absolute end-0 top-0 bottom-0 w-full sm:w-[520px] lg:w-[600px] bg-white/85 backdrop-blur-[32px] border-s border-[#dcdce8] shadow-2xl flex flex-col transition-transform duration-300 ease-out',
           // `end-0` = right in LTR, left in RTL. CSS transforms don't follow `dir`,
           // so the closed offset must flip: off-screen right (LTR) vs left (RTL).
           open ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full',
         )}
       >
         {/* Sticky header */}
-        <div className="sticky top-0 z-10 bg-background/95 supports-[backdrop-filter]:backdrop-blur border-b border-border px-4 py-3 flex items-center justify-between gap-3">
+        <div className="sticky top-0 z-10 bg-white/60 supports-[backdrop-filter]:backdrop-blur-[32px] border-b border-[#dcdce8] px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate">
               {submission.title ?? tc.panelTitle}
@@ -166,7 +167,7 @@ export function CommentsPanel({
 
         {/* Compact post preview */}
         {(submission.cover_url || submission.created_at) && (
-          <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
+          <div className="px-4 py-3 border-b border-[#dcdce8] flex items-center gap-3 bg-white/40">
             {submission.cover_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -246,7 +247,7 @@ export function CommentsPanel({
 
         {/* Sticky bottom input */}
         {canComment && (
-          <div className="sticky bottom-0 bg-background border-t border-border p-3 space-y-2">
+          <div className="sticky bottom-0 border-t border-[#dcdce8] bg-white/70 p-3 space-y-2 backdrop-blur-[32px]">
             <MentionTextarea
               textareaRef={inputRef}
               value={content}

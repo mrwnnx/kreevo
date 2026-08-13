@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -14,10 +15,13 @@ export function RulesDialog({
   xpReward,
   deadlineDays,
   t,
+  compact = false,
 }: {
   xpReward: number
   deadlineDays: number
   t: Dictionary['challengeDetail']['rules']
+  /** Bouton blanc bordé du design refondu (Figma 492:5074) au lieu du lien souligné. */
+  compact?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -33,13 +37,19 @@ export function RulesDialog({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
-      >
-        {t.seeRules}
-      </button>
+      {compact ? (
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          {t.seeRules}
+        </Button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
+        >
+          {t.seeRules}
+        </button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg p-0 overflow-hidden">

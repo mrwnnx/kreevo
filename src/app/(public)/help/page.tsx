@@ -20,6 +20,7 @@ import { getHelpLang, HELP_T } from '@/lib/help/lang'
 import { getCategoryBySlug, HELP_CATEGORIES } from '@/lib/help/categories'
 import { siteUrl } from '@/lib/site'
 import { websiteWithSearch } from '@/lib/help/jsonld'
+import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getHelpLang()
@@ -97,10 +98,10 @@ export default async function HelpHomePage() {
 
       {popular.length > 0 && (
         <section className="max-w-[1080px] mx-auto px-4 sm:px-6 pb-16">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6 sm:mb-8">
+          <h2 className="mb-6 text-xl font-semibold leading-[1.1] text-[#2b2c36] sm:mb-8 sm:text-2xl">
             {t.popularTitle}
           </h2>
-          <div className="rounded-[24px] border border-border bg-card overflow-hidden divide-y divide-border">
+          <div className={`${GLASS_SURFACE} divide-y divide-[#dcdce8] overflow-hidden`} style={GLASS_GRADIENT}>
             {popular.map((article) => {
               const cat = getCategoryBySlug(article.category)
               const title = lang === 'en' ? article.title_en : article.title_fr
@@ -109,7 +110,7 @@ export default async function HelpHomePage() {
                 <Link
                   key={article.slug}
                   href={`/help/${article.category}/${article.slug}`}
-                  className="flex items-start gap-4 p-5 hover:bg-muted/40 transition-colors group"
+                  className="group flex items-start gap-4 p-5 transition-colors hover:bg-white/40"
                 >
                   {cat?.icon && (
                     <div
