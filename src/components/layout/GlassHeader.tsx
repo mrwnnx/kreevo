@@ -14,7 +14,7 @@ import { getLang, getDict } from '@/lib/i18n/lang'
 function BrandLogo() {
   return (
     <span className="flex items-center gap-[6px]">
-      <img src="/logo_kreevo.svg" alt="" aria-hidden className="h-[16px] w-auto" />
+      <img src="/logo_kreevo.svg" alt="" aria-hidden className="h-[24px] w-auto" />
       <span
         aria-hidden
         className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9aa3a8]"
