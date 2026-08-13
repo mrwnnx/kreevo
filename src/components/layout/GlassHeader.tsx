@@ -52,7 +52,7 @@ export async function GlassHeader() {
 
   return (
     <header className="relative flex items-center justify-between px-6 py-[16px] lg:px-[144px]">
-      <Link href="/dashboard-v2" aria-label="Kreevo">
+      <Link href="/dashboard" aria-label="Kreevo">
         <img src="/brand/logo-kreevo-beta.svg" alt="Kreevo" className="h-[16px] w-[102.241px]" />
       </Link>
       <HeaderNav isAdmin={profile.role === 'admin'} t={dict.header} />

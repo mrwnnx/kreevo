@@ -6,11 +6,10 @@ import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 /**
- * Route de l'accueil refondue — seule page où le menu est masqué (les cartes y
- * tiennent ce rôle). `/dashboard`, l'ancien accueil, garde le menu tant qu'il
- * existe : sans sidebar il n'aurait plus aucune navigation.
+ * Accueil — seule page où le menu central est masqué : ses cartes tiennent déjà
+ * ce rôle. Comparaison exacte, donc `/dashboard/challenges` garde bien le menu.
  */
-const HOME_PATHS = ['/dashboard-v2']
+const HOME_PATHS = ['/dashboard']
 
 /**
  * HeaderNav — navigation centrale du header, affichée sur toutes les pages
@@ -21,7 +20,7 @@ export function HeaderNav({ isAdmin, t }: { isAdmin: boolean; t: Dictionary['hea
   if (HOME_PATHS.includes(pathname)) return null
 
   const items = [
-    { href: '/dashboard-v2', label: t.nav.home, match: (p: string) => HOME_PATHS.includes(p) },
+    { href: '/dashboard', label: t.nav.home, match: (p: string) => HOME_PATHS.includes(p) },
     { href: '/dashboard/challenges', label: t.nav.challenges, match: (p: string) => p.startsWith('/dashboard/challenges') },
     { href: '/dashboard/leaderboard', label: t.nav.leagues, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
     { href: '/discover', label: t.nav.discover, match: (p: string) => p.startsWith('/discover') },

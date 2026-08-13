@@ -1,420 +1,169 @@
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { redirect } from 'next/navigation'
-import { DashboardProfileHeader } from '@/components/dashboard/DashboardProfileHeader'
-import { getDict, getLang, tx } from '@/lib/i18n/lang'
-import { localizeChallenge } from '@/lib/challenges/i18n'
-import { getTaxonomyMaps, localizeType } from '@/lib/challenges/refs'
-import { StatCards } from '@/components/dashboard/StatCards'
-import { LeagueSection, LeagueCountdownCard } from '@/components/dashboard/LeagueSection'
-import { WhatToDoNow } from '@/components/dashboard/WhatToDoNow'
-import { ContextualLeaderboard } from '@/components/dashboard/ContextualLeaderboard'
-import { InviteFriends } from '@/components/dashboard/InviteFriends'
-import { CompleteProfile } from '@/components/dashboard/CompleteProfile'
-import { Analytics } from '@/components/dashboard/Analytics'
-import { LeaguePromotionCelebration, type PromotionData } from '@/components/dashboard/LeaguePromotionCelebration'
-import { getLeagueThreshold, getScopedLeagueScores } from '@/lib/utils/leagues'
+import { GlassCard, CardBadge } from '@/components/features/dashboard/GlassCard'
+import { getScopedLeagueScores } from '@/lib/utils/leagues'
+import { getDict } from '@/lib/i18n/lang'
+import { tx } from '@/lib/i18n/tx'
 
-interface PageProps {
-  searchParams: Promise<{ submitted?: string }>
-}
+export const metadata: Metadata = { title: 'Dashboard · Kreevo' }
 
-export default async function DashboardPage({ searchParams }: PageProps) {
-  const sp = await searchParams
-  const justSubmitted = sp?.submitted === 'true'
+// Dégradé du prénom et du titre « Solo Experience » (Figma 431:5291 / 444:444).
+const NAME_GRADIENT =
+  'linear-gradient(90deg, #6040C0 0%, #A050B0 25%, #F5B8F0 50%, #A050B0 75%, #6040C0 100%)'
 
-  const supabase = await createClient()
+// Accueil refondue (Figma 431:5248). `GlassShell` et `GlassHeader` viennent du
+// layout du groupe `(dashboard)` — ne pas les remonter ici, ça les rendrait deux
+// fois (le fond pastel doublerait, comme sur la page Solo avant correction).
+export default async function DashboardPage() {
+  const [supabase, dict] = await Promise.all([createClient(), getDict()])
+  const t = dict.homeV2
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [
-    profileResult,
-    participationResult,
-    streakResult,
-    referralsResult,
-    leagueResult,
-    completedResult,
-    thisWeekResult,
-    lastSubResult,
-  ] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-
-    supabase
-      .from('participations')
-      .select('*, challenges(*, challenge_types(name_fr))')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .gt('personal_deadline', new Date().toISOString())
-      .order('personal_deadline', { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-
-    supabase.from('streaks').select('*').eq('user_id', user.id).maybeSingle(),
-
-    supabase
-      .from('referrals')
-      .select('*, referred:profiles!referred_id(username, avatar_url)')
-      .eq('referrer_id', user.id),
-
-    supabaseAdmin.from('leagues').select('*').order('order_index'),
-
-    supabase
-      .from('participations')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'submitted'),
-
-    supabase
-      .from('participations')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'submitted')
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-
-    supabase
-      .from('submissions')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ])
-
-  const profile = profileResult.data
+  const { data: profile } = await (supabase as any)
+    .from('profiles')
+    .select('first_name, full_name, username, avatar_url, xp, league, specialty_id, role, plan')
+    .eq('id', user.id)
+    .single()
   if (!profile) redirect('/login')
 
-  const participation = participationResult.data
+  const leagueName = (profile.league as string) ?? 'Stone'
+  const specialtyId = (profile.specialty_id ?? null) as string | null
 
-  // Participants for the active challenge (RLS-restricted → admin client)
-  let participantsCount = 0
-  let participantAvatars: { id: string; username: string; avatar_url: string | null }[] = []
-  if (participation?.challenge_id) {
-    const [{ count }, { data: parts }] = await Promise.all([
-      supabaseAdmin
-        .from('participations')
-        .select('id', { count: 'exact', head: true })
-        .eq('challenge_id', participation.challenge_id),
-      supabaseAdmin
-        .from('participations')
-        .select('user_id')
-        .eq('challenge_id', participation.challenge_id)
-        .limit(5),
-    ])
-    participantsCount = count ?? 0
-    const ids = (parts ?? []).map((p) => p.user_id).filter((id): id is string => !!id)
-    if (ids.length) {
-      const { data: profs } = await supabaseAdmin
-        .from('profiles')
-        .select('id, username, avatar_url')
-        .in('id', ids)
-      participantAvatars = profs ?? []
-    }
-  }
-
-  const streak = streakResult.data
-  const referrals = referralsResult.data ?? []
-  const allLeagues = leagueResult.data ?? []
-  const totalCompleted = completedResult.count ?? 0
-  const completedThisWeek = thisWeekResult.count ?? 0
-  const lastSubmissionDate = lastSubResult.data?.created_at
-    ? new Date(lastSubResult.data.created_at)
-    : null
-
-  const userLeagueName = profile?.league || 'Stone'
-  const userLeague = allLeagues.find(
-    (l) => l.name.toLowerCase() === userLeagueName.toLowerCase(),
-  ) || allLeagues.find((l) => l.name === 'Stone') || allLeagues[0]
-  const leagueIndex = userLeague?.order_index || 1
-  const nextLeague = allLeagues.find((l) => l.order_index === leagueIndex + 1)
-
-  // PHASE 2/3 — seuil scopé par spécialité (source unique getLeagueThreshold).
-  // Plus de calcul inline dupliqué.
-  const userSpecialtyId = (profile?.specialty_id ?? null) as string | null
-  const threshold = userLeague?.id && userSpecialtyId
-    ? await getLeagueThreshold(userLeague.id, userSpecialtyId)
-    : 0
-  // leagueXp scopé — SOURCE UNIQUE (getScopedLeagueScores), réutilisée par la barre
-  // de promotion ET le classement. La barre montre l'avancement DANS la ligue
-  // courante (leagueXp / seuil), cohérent avec checkAndUpdateLeague. profiles.xp
-  // (total carrière) reste affiché via <StatCards profile={profile} /> (« XP total »).
-  const scoreByUser: Record<string, number> =
-    userLeague?.id && userSpecialtyId
-      ? await getScopedLeagueScores(userLeague.id, userSpecialtyId)
-      : {}
-  const leagueXp = scoreByUser[user.id] ?? 0
-  const xpPercent = threshold > 0 ? Math.min((leagueXp / threshold) * 100, 100) : 0
-  const xpGap = Math.max(0, threshold - leagueXp)
-
-  // PHASE 3 — classement scopé leagueXp (réutilise scoreByUser, pas de 2e appel).
-  let userRank = 1
-  let totalInLeague = 0
-  let neighborUsers: {
-    rank: number
-    username: string
-    full_name: string | null
-    avatar_url: string | null
-    xp: number
-    isCurrentUser: boolean
-  }[] = []
-  let xpToTop10 = 0
-
-  if (userLeague?.id && userSpecialtyId) {
-    const { data: leagueUsers } = await supabaseAdmin
-      .from('profiles')
-      .select('id, username, full_name, avatar_url, xp')
-      .ilike('league', userLeagueName)
-      .eq('specialty_id', userSpecialtyId)
-    const ranked = [...((leagueUsers ?? []) as any[])].sort((a, b) => {
-      const diff = (scoreByUser[b.id] ?? 0) - (scoreByUser[a.id] ?? 0)
-      return diff !== 0 ? diff : (b.xp ?? 0) - (a.xp ?? 0)
-    })
-    totalInLeague = ranked.length
-    const myIdx = ranked.findIndex((u) => u.id === user.id)
-    userRank = myIdx >= 0 ? myIdx + 1 : ranked.length + 1
-
-    // Voisins autour de l'user (leagueXp scopé pour l'affichage, pas profiles.xp).
-    const start = Math.max(0, userRank - 3)
-    neighborUsers = ranked.slice(start, userRank + 1).map((u, i) => ({
-      rank: start + 1 + i,
-      username: u.username,
-      full_name: u.full_name,
-      avatar_url: u.avatar_url,
-      xp: scoreByUser[u.id] ?? 0,
-      isCurrentUser: u.id === user.id,
-    }))
-
-    // Écart leagueXp jusqu'au top 10 (en score scopé).
-    const myScore = scoreByUser[user.id] ?? 0
-    const tenth = ranked[9]
-    xpToTop10 = userRank > 10 && tenth ? Math.max(0, (scoreByUser[tenth.id] ?? 0) - myScore) : 0
-  }
-
-  // Suggested challenge
-  const { data: suggestedChallenge } = await supabaseAdmin
-    .from('challenges')
-    .select('*')
-    .eq('league_id', userLeague?.id)
-    .eq('is_published', true)
-    .order('xp_reward', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  // Completed challenges in current league+specialty (2nd progress bar).
-  // PHASE 3 — scopé par specialty_id pour rester cohérent avec le comptage
-  // min_challenges de checkAndUpdateLeague (PHASE 2).
-  let completedInLeague = 0
-  if (userLeague?.id && userSpecialtyId) {
-    const { data: leagueChallengeIds } = await supabaseAdmin
-      .from('challenges')
-      .select('id')
-      .eq('league_id', userLeague.id)
-      .eq('is_published', true)
-      .eq('specialty_id', userSpecialtyId)
-    const challengeIdList = (leagueChallengeIds ?? []).map((c) => c.id)
-    if (challengeIdList.length > 0) {
-      const { count } = await supabase
-        .from('participations')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'submitted')
-        .in('challenge_id', challengeIdList)
-      completedInLeague = count ?? 0
-    }
-  }
-  const minChallenges = userLeague?.min_challenges ?? 3
-  const minChallengesEnabled = userLeague?.min_challenges_enabled ?? true
-
-  // XP earned today
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const { data: todaySubmissions } = await supabase
-    .from('submissions')
-    .select('xp_earned')
-    .eq('user_id', user.id)
-    .gte('created_at', today.toISOString())
-
-  const xpToday =
-    todaySubmissions?.reduce((s, sub) => s + (sub.xp_earned || 0), 0) || 0
-
-  // Completed today (submitted participations updated today)
-  const { count: completedTodayCount } = await supabase
-    .from('participations')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('status', 'submitted')
-    .gte('updated_at', today.toISOString())
-
-  // (Classement scopé — userRank / totalInLeague / neighborUsers / xpToTop10 —
-  // calculé plus haut via getScopedLeagueScores.)
-
-  // Analytics — last 7 days (actual data)
-  const since = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-  since.setHours(0, 0, 0, 0)
-
-  const [{ data: subsLast7 }, { data: partsLast7 }] = await Promise.all([
-    supabase
-      .from('submissions')
-      .select('xp_earned, created_at')
-      .eq('user_id', user.id)
-      .gte('created_at', since.toISOString()),
-    supabase
-      .from('participations')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .eq('status', 'submitted')
-      .gte('created_at', since.toISOString()),
+  const [{ data: leagueRow }, { data: specialtyRow }] = await Promise.all([
+    (supabaseAdmin as any).from('leagues').select('id, name').ilike('name', leagueName).maybeSingle(),
+    specialtyId
+      ? (supabaseAdmin as any).from('specialties').select('name').eq('id', specialtyId).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
-  const xpData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(since)
-    d.setDate(since.getDate() + i)
-    const dayKey = d.toISOString().split('T')[0]
-    const xp = (subsLast7 ?? [])
-      .filter((s) => (s.created_at || '').startsWith(dayKey))
-      .reduce((acc, s) => acc + (s.xp_earned || 0), 0)
-    return {
-      day: d.toLocaleDateString('en', { weekday: 'short' }),
-      xp,
-    }
-  })
-
-  const challengeData = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(since)
-    d.setDate(since.getDate() + i)
-    const dayKey = d.toISOString().split('T')[0]
-    const count = (partsLast7 ?? []).filter((p) =>
-      (p.created_at || '').startsWith(dayKey),
-    ).length
-    return {
-      day: d.toLocaleDateString('en', { weekday: 'short' }),
-      count,
-    }
-  })
+  // Rang dans la ligue, scopé par spécialité — même source que le classement
+  // (getScopedLeagueScores), pour que les deux pages ne divergent jamais.
+  let rank = 1
+  if (leagueRow?.id && specialtyId) {
+    const scoreByUser = await getScopedLeagueScores(leagueRow.id, specialtyId)
+    const { data: peers } = await (supabaseAdmin as any)
+      .from('profiles')
+      .select('id')
+      .ilike('league', leagueName)
+      .eq('specialty_id', specialtyId)
+    const ranked = [...((peers ?? []) as { id: string }[])].sort(
+      (a, b) => (scoreByUser[b.id] ?? 0) - (scoreByUser[a.id] ?? 0),
+    )
+    const idx = ranked.findIndex((u) => u.id === user.id)
+    rank = idx >= 0 ? idx + 1 : ranked.length + 1
+  }
 
   const firstName =
-    profile?.first_name ||
-    profile?.full_name?.split(' ')[0] ||
-    profile?.username ||
-    'Designer'
-
-  const [dict, lang] = await Promise.all([getDict(), getLang()])
-
-  // League-promotion celebration: latest UNSEEN `league_up` notification (covers
-  // every path — auto-validated and admin-validated Gold+). The modal marks it
-  // seen on mount so it fires once. Promotion logic itself is untouched.
-  let promo: PromotionData | null = null
-  {
-    const { data: promoNotif } = await (supabaseAdmin as any)
-      .from('notifications')
-      .select('id, data')
-      .eq('user_id', user.id)
-      .eq('type', 'league_up')
-      .eq('is_read', false)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const d = (promoNotif?.data ?? {}) as { old_league?: string; new_league?: string }
-    if (promoNotif && d.new_league) {
-      const { data: lg } = await (supabaseAdmin as any)
-        .from('leagues').select('icon').eq('name', d.new_league).maybeSingle()
-      promo = {
-        id: promoNotif.id,
-        oldLeague: d.old_league ?? '',
-        newLeague: d.new_league,
-        newLeagueIcon: lg?.icon ?? '🏆',
-      }
-    }
-  }
-
-  const taxoMaps = await getTaxonomyMaps()
-  const suggestedChallengeL = suggestedChallenge ? localizeChallenge(suggestedChallenge as any, lang) : null
-  const suggestedType = suggestedChallenge ? localizeType(suggestedChallenge as any, lang, taxoMaps) : undefined
-  // Localize the active challenge embedded on the participation (countdown card title).
-  if (participation?.challenges) {
-    ;(participation as any).challenges = localizeChallenge((participation as any).challenges, lang)
-  }
+    (profile.first_name as string)?.trim() ||
+    (profile.full_name as string)?.trim()?.split(' ')[0] ||
+    (profile.username as string) ||
+    ''
+  const avatarUrl = (profile.avatar_url as string) ?? null
+  const isAdmin = profile.role === 'admin'
 
   return (
-    <div className="max-w-[1140px] mx-auto px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-8 space-y-4">
-
-      <LeaguePromotionCelebration promo={promo} t={dict.dashboard.leaguePromotion} />
-
-      <DashboardProfileHeader profile={profile} t={dict.dashboard.profileHeader} />
-
-      <StatCards
-        profile={profile}
-        userRank={userRank}
-        totalInLeague={totalInLeague || 1}
-        completedTotal={totalCompleted}
-        completedThisWeek={completedThisWeek}
-        xpToday={xpToday}
-        leagueIndex={leagueIndex}
-        userLeague={userLeague}
-        t={dict.dashboard.statCards}
-      />
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        <LeagueSection
-          profile={profile}
-          league={userLeague}
-          nextLeague={nextLeague}
-          userRank={userRank}
-          totalInLeague={totalInLeague || 50}
-          currentXP={leagueXp}
-          threshold={threshold}
-          suggestedChallenge={suggestedChallengeL}
-          completedInLeague={completedInLeague}
-          minChallenges={minChallenges}
-          minChallengesEnabled={minChallengesEnabled}
-          t={dict.dashboard.leagueSection}
-        />
-
-        <LeagueCountdownCard
-          participation={participation}
-          suggestedChallenge={suggestedChallengeL}
-          participantsCount={participantsCount}
-          participantAvatars={participantAvatars}
-          t={dict.dashboard.countdownCard}
-        />
+    <div className="mx-auto flex w-full max-w-[736.008px] flex-col gap-[32px] px-6 pb-16 pt-[64px] lg:px-0">
+      {/* Accroche (Figma 431:5332). */}
+      <div className="flex w-full items-center gap-[16px]">
+        <div className="relative shrink-0">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" aria-hidden className="size-[62px] rounded-full object-cover" />
+          ) : (
+            <span className="block size-[62px] rounded-full bg-secondary" />
+          )}
+          <img
+            src="/brand/badge-verified.svg"
+            alt=""
+            aria-hidden
+            className="absolute bottom-[0.89%] end-[-0.44%] size-[19px]"
+          />
+        </div>
+        <div className="flex flex-col gap-[8px] whitespace-nowrap">
+          <p className="text-[24px] font-semibold leading-[1.1] text-[#2b2c36]">
+            {tx(t.greeting, { name: '\u0000' })
+              .split('\u0000')
+              .flatMap((part, i) =>
+                i === 0
+                  ? [part]
+                  : [
+                      <span key={i} className="bg-clip-text text-transparent" style={{ backgroundImage: NAME_GRADIENT }}>
+                        {firstName}
+                      </span>,
+                      part,
+                    ],
+              )}
+          </p>
+          <p className="text-[14px] font-normal leading-[1.2] text-[#484848]">
+            {specialtyRow?.name ?? ''}
+          </p>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4">
-        <WhatToDoNow
-          suggestedChallenge={suggestedChallengeL}
-          suggestedType={suggestedType}
-          referralsCount={referrals.length}
-          profile={profile}
-          t={dict.dashboard.whatToDoNow}
-        />
-        <ContextualLeaderboard
-          users={neighborUsers}
-          userRank={userRank || 1}
-          totalInLeague={totalInLeague || 50}
-          league={userLeagueName}
-          xpToTop10={xpToTop10}
-          t={dict.dashboard.contextualLeaderboard}
-        />
+      {/* Grille 2 colonnes (Figma 440:407). */}
+      <div className="grid w-full grid-cols-1 gap-x-[16px] gap-y-[15px] sm:grid-cols-2">
+        <GlassCard
+          href="/dashboard/challenges"
+          label={t.challenges}
+          illustration="/brand/illu-challenges.png"
+          illustrationClassName="bottom-[-260px] -end-[215px] h-[640px] w-[671px] object-cover"
+          className="min-h-[353px]"
+        >
+          <p className="whitespace-nowrap text-[24px] font-semibold leading-none text-[#2b2c36]">
+            {t.challenges}
+          </p>
+        </GlassCard>
+
+        <GlassCard
+          href="/dashboard/leaderboard"
+          label={t.league}
+          illustration="/brand/illu-league.png"
+          illustrationClassName="bottom-[-218.8px] -end-[71.25px] h-[518.646px] w-[390.71px] object-cover"
+          className="min-h-[353px]"
+        >
+          <div className="flex w-full flex-col gap-[7.891px]">
+            <div className="flex items-end gap-[8px]">
+              <p className="whitespace-nowrap text-[24px] font-semibold leading-none text-[#2b2c36]">
+                {t.league}
+              </p>
+              <CardBadge label={leagueName.toUpperCase()} className="bg-[#d4e1eb] text-[#044473]" />
+            </div>
+            <p className="flex items-center gap-[4px] whitespace-nowrap text-[14px] leading-[1.2]">
+              <span className="font-normal text-[#484848]">{t.xp}</span>
+              <span className="font-semibold text-[#080808]">
+                {Number(profile.xp ?? 0).toLocaleString('en-US')}
+              </span>
+            </p>
+            <p className="flex items-center gap-[4px] whitespace-nowrap text-[14px] leading-[1.2]">
+              <span className="font-normal text-[#484848]">{t.ranking}</span>
+              <span className="font-semibold text-[#080808]">{rank}</span>
+            </p>
+          </div>
+        </GlassCard>
+
+        {/* Solo — WIP, réservé aux admins comme sur /dashboard/solo. */}
+        {isAdmin && (
+          <GlassCard
+            href="/dashboard/solo"
+            label={t.soloExperience}
+            illustration="/brand/illu-solo.png"
+            illustrationClassName="bottom-[-178.85px] -end-[18.78px] h-[356.928px] w-[371.801px] rotate-[7.99deg] object-cover"
+            className="h-[209px] sm:col-span-2"
+          >
+            <div className="flex items-center gap-[8px]">
+              <p
+                className="whitespace-nowrap bg-clip-text text-[24px] font-semibold leading-[1.1] text-transparent"
+                style={{ backgroundImage: NAME_GRADIENT }}
+              >
+                {t.soloExperience}
+              </p>
+              <CardBadge label={t.pro} className="bg-[#4b4b4b] text-white" />
+            </div>
+          </GlassCard>
+        )}
       </div>
-
-      <div id="invite">
-        <InviteFriends profile={profile} referrals={referrals} t={dict.dashboard.inviteFriends} />
-      </div>
-
-      <CompleteProfile profile={profile} t={dict.dashboard.completeProfile} />
-
-      <Analytics
-        profile={profile}
-        xpData={xpData}
-        challengeData={challengeData}
-        streak={streak}
-        totalCompleted={totalCompleted}
-        firstName={firstName}
-        t={dict.dashboard.analytics}
-      />
-
-      <p className="text-center text-xs text-muted-foreground pb-8">
-        {tx(dict.dashboard.keepGoing, { name: firstName })}
-      </p>
     </div>
   )
 }
