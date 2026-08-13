@@ -6,6 +6,26 @@ import { HeaderNav } from '@/components/layout/HeaderNav'
 import { getLang, getDict } from '@/lib/i18n/lang'
 
 /**
+ * Logo de marque. Le wordmark exporté de Figma (`/brand/logo-kreevo-beta.svg`)
+ * ne portait que le lettrage, sans le symbole étoile : on garde donc le logo
+ * officiel du produit, celui que servent déjà la landing et l'onboarding, et la
+ * mention « beta » est rendue à côté plutôt que gravée dans le fichier.
+ */
+function BrandLogo() {
+  return (
+    <span className="flex items-center gap-[6px]">
+      <img src="/logo_kreevo.svg" alt="" aria-hidden className="h-[16px] w-auto" />
+      <span
+        aria-hidden
+        className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9aa3a8]"
+      >
+        Beta
+      </span>
+    </span>
+  )
+}
+
+/**
  * GlassHeader — barre du haut de la refonte (Figma 431:5277) : logo à gauche,
  * cloche + menu profil à droite. Récupère lui-même le profil pour que chaque
  * page migrée n'ait qu'à poser <GlassHeader /> sans rien lui passer.
@@ -20,7 +40,7 @@ export async function GlassHeader() {
     return (
       <header className="relative flex items-center justify-between px-6 py-[16px] lg:px-[144px]">
         <Link href="/" aria-label="Kreevo">
-          <img src="/brand/logo-kreevo-beta.svg" alt="Kreevo" className="h-[16px] w-[102.241px]" />
+          <BrandLogo />
         </Link>
         <Link
           href="/login"
@@ -53,7 +73,7 @@ export async function GlassHeader() {
   return (
     <header className="relative flex items-center justify-between px-6 py-[16px] lg:px-[144px]">
       <Link href="/dashboard" aria-label="Kreevo">
-        <img src="/brand/logo-kreevo-beta.svg" alt="Kreevo" className="h-[16px] w-[102.241px]" />
+        <BrandLogo />
       </Link>
       <HeaderNav isAdmin={profile.role === 'admin'} t={dict.header} />
 
