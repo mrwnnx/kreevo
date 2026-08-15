@@ -30,6 +30,39 @@ export function getContactRatelimit(): Ratelimit | null {
   return cached
 }
 
+let cachedAi: Ratelimit | null | undefined
+
+/**
+ * Cap for the routes that spend money on every call (Anthropic). Keyed on the
+ * user id, not the IP: these routes are authenticated, and an IP is trivially
+ * changed while a user id is not.
+ *
+ * 10 per hour is far above real use — publishing a submission triggers one
+ * analysis — but low enough that a loop stops costing money within minutes.
+ *
+ * ⚠️ FAIL-OPEN like `getContactRatelimit`: with `UPSTASH_REDIS_REST_URL` /
+ * `_TOKEN` unset, this returns null and NOTHING is capped. Setting those two
+ * variables in Vercel is what actually turns the protection on.
+ */
+export function getAiRatelimit(): Ratelimit | null {
+  if (cachedAi !== undefined) return cachedAi
+
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) {
+    cachedAi = null
+    return cachedAi
+  }
+
+  cachedAi = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(10, '1 h'),
+    prefix: 'rl:ai',
+    analytics: false,
+  })
+  return cachedAi
+}
+
 /** Best-effort client IP from proxy headers (Vercel sets x-forwarded-for). */
 export function clientIp(request: Request): string {
   const xff = request.headers.get('x-forwarded-for')

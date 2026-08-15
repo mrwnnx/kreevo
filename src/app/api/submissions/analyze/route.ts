@@ -7,6 +7,7 @@ import {
   type ImageInput,
 } from '@/lib/utils/submissions'
 import { specialtyMismatch, SPECIALTY_GUARD_MESSAGE } from '@/lib/challenges/specialty'
+import { getAiRatelimit } from '@/lib/ratelimit'
 
 export const maxDuration = 30
 
@@ -14,6 +15,17 @@ export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Chaque appel qui arrive au bout de cette route paie une requête Anthropic, et
+  // rien ici n'est mis en cache — contrairement à la route feedback. Le plafond
+  // est posé avant tout travail.
+  const rl = getAiRatelimit()
+  if (rl) {
+    const { success } = await rl.limit(`analyze:${user.id}`)
+    if (!success) {
+      return NextResponse.json({ error: 'Trop d\'analyses en peu de temps. Réessaie dans un moment.' }, { status: 429 })
+    }
+  }
 
   const body = await req.json().catch(() => ({} as Record<string, unknown>))
   const challengeId = typeof body.challenge_id === 'string' ? body.challenge_id : null

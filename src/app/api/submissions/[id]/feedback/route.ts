@@ -4,6 +4,23 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { anthropic } from '@/lib/anthropic/client'
 import { getLang, type Lang } from '@/lib/i18n/lang'
 import { MAX_PUBLISH_IMAGES } from '@/lib/utils/submission-constants'
+import { getAiRatelimit } from '@/lib/ratelimit'
+
+/**
+ * Plafond des générations payantes, consommé UNIQUEMENT quand on s'apprête à
+ * appeler Anthropic — un renvoi depuis le cache ne coûte rien et ne doit pas
+ * entamer le quota. Renvoie une réponse 429 à propager, ou null si ça passe.
+ */
+async function aiCapExceeded(userId: string): Promise<NextResponse | null> {
+  const rl = getAiRatelimit()
+  if (!rl) return null
+  const { success } = await rl.limit(`feedback:${userId}`)
+  if (success) return null
+  return NextResponse.json(
+    { error: 'Trop de générations en peu de temps. Réessaie dans un moment.' },
+    { status: 429 },
+  )
+}
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -224,6 +241,9 @@ export async function POST(_req: Request, { params }: Params) {
     if (!needsUpgrade) {
       return NextResponse.json({ feedback: existingRow.content as Feedback, tier: existingRow.tier, cached: true })
     }
+    const capped = await aiCapExceeded(user.id)
+    if (capped) return capped
+
     let upgraded: Feedback
     try {
       upgraded = await generateFeedback(sub, lang, 'detailed')
@@ -237,6 +257,9 @@ export async function POST(_req: Request, { params }: Params) {
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
     return NextResponse.json({ feedback: upgraded, tier: 'detailed', cached: false })
   }
+
+  const capped = await aiCapExceeded(user.id)
+  if (capped) return capped
 
   let feedback: Feedback
   try {
