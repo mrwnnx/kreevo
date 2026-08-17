@@ -64,8 +64,13 @@ export async function POST(req: Request) {
   // produce an informational verdict (match / no-match) that drives XP only.
   const result = await analyzeSubmissionForPublish(challenge, images, title, description)
 
-  // Audit log (fire-and-forget)
-  void (supabaseAdmin as any).from('ai_analysis_logs').insert({
+  // Journal d'audit — ATTENDU, pas en fire-and-forget. Le `void` précédent
+  // laissait la requête en vol : en serverless la fonction gèle au `return`, et
+  // l'insertion mourait avant d'atteindre Supabase. Symptôme : 81 soumissions
+  // portent un validation_status (donc la route a tourné des dizaines de fois)
+  // alors que la table est restée vide. Le surcoût est négligeable ici — on sort
+  // d'un appel Anthropic qui dure des secondes.
+  const { error: logErr } = await (supabaseAdmin as any).from('ai_analysis_logs').insert({
     user_id: user.id,
     challenge_id: challengeId,
     submission_id: null,
@@ -75,6 +80,9 @@ export async function POST(req: Request) {
     duration_ms: result.duration_ms,
     error: result.error ?? null,
   })
+  // Un échec de journalisation ne doit pas faire échouer la publication, mais il
+  // ne doit plus être invisible : c'est ce silence qui a masqué le bug.
+  if (logErr) console.error('[ai_analysis_logs] insertion échouée:', logErr.message)
 
   return NextResponse.json({
     skipped: false,

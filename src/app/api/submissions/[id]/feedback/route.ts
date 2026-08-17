@@ -168,7 +168,7 @@ async function generateFeedback(sub: any, lang: Lang, tier: FeedbackTier): Promi
 
   const res = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: isBasic ? 600 : 1500,
+    max_tokens: isBasic ? 1000 : 1500,
     messages: [{ role: 'user', content: userContent as any }],
   })
 
@@ -248,7 +248,7 @@ export async function POST(_req: Request, { params }: Params) {
     try {
       upgraded = await generateFeedback(sub, lang, 'detailed')
     } catch (err) {
-      return NextResponse.json({ error: 'Generation failed', detail: String(err) }, { status: 500 })
+      return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
     }
     const { error: updateErr } = await (supabaseAdmin as any)
       .from('submission_feedbacks')
@@ -265,7 +265,7 @@ export async function POST(_req: Request, { params }: Params) {
   try {
     feedback = await generateFeedback(sub, lang, tier)
   } catch (err) {
-    return NextResponse.json({ error: 'Generation failed', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
   }
 
   const { error: insertErr } = await (supabaseAdmin as any)
