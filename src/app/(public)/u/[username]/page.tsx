@@ -100,6 +100,12 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 }
 
 // ── Page ───────────────────────────────────────────────────────
+// Colonnes publiques de `profiles`. Explicite plutôt que `*` : `role` et
+// `plan_expires_at` sont révoqués pour le rôle anon côté DB, et un `select('*')`
+// casserait la page dès qu'une colonne n'est plus accordée.
+const PUBLIC_PROFILE_COLUMNS =
+  'id, username, full_name, avatar_url, bio, job_title, city, country, league, links, plan, specialty, specialty_id, xp'
+
 export default async function ProfilePage({
   params,
   searchParams,
@@ -116,7 +122,11 @@ export default async function ProfilePage({
     { data: profile },
     { data: { user: viewer } },
   ] = await Promise.all([
-    supabase.from('profiles').select('*').eq('username', username).single(),
+    supabase
+      .from('profiles')
+      .select(PUBLIC_PROFILE_COLUMNS)
+      .eq('username', username)
+      .single(),
     supabase.auth.getUser(),
   ])
 
