@@ -14,15 +14,15 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
 
   const { tab = 'all' } = await searchParams
 
-  let query = (supabaseAdmin as any)
+  let query = supabaseAdmin
     .from('submissions')
-    .select('id, title, cover_url, validation_status, reports_count, created_at, validated_at, rejection_reason, profiles:user_id(username, avatar_url), challenges(title, leagues(name))')
+    .select('id, title, cover_url, validation_status, reports_count, created_at, validated_at, rejection_reason, profiles!user_id(username, avatar_url), challenges(title, leagues(name))')
     .eq('is_draft', false)
     .order('created_at', { ascending: false })
     .limit(100)
@@ -41,11 +41,11 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
     { count: rejectedCount },
     { count: contestsCount },
   ] = await Promise.all([
-    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false),
-    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'pending'),
-    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).gt('reports_count', 0),
-    (supabaseAdmin as any).from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'rejected'),
-    (supabaseAdmin as any).from('submission_contests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabaseAdmin.from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false),
+    supabaseAdmin.from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'pending'),
+    supabaseAdmin.from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).gt('reports_count', 0),
+    supabaseAdmin.from('submissions').select('*', { count: 'exact', head: true }).eq('is_draft', false).eq('validation_status', 'rejected'),
+    supabaseAdmin.from('submission_contests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
   ])
 
   const TABS: Array<{ id: string; label: string; count?: number | null }> = [
@@ -58,9 +58,9 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
 
   // Fetch contests if tab=contested
   const contests = tab === 'contested'
-    ? (await (supabaseAdmin as any)
+    ? (await supabaseAdmin
         .from('submission_contests')
-        .select('id, message, status, created_at, submissions(id, title, cover_url, validation_status, profiles:user_id(username, avatar_url), challenges(title))')
+        .select('id, message, status, created_at, submissions(id, title, cover_url, validation_status, profiles!user_id(username, avatar_url), challenges(title))')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })).data ?? []
     : []
@@ -129,12 +129,12 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="space-y-2">
-          {((submissions ?? []) as any[]).length === 0 ? (
+          {(submissions ?? []).length === 0 ? (
             <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-muted-foreground">
               Aucune soumission dans cette catégorie.
             </div>
           ) : (
-            ((submissions ?? []) as any[]).map((s) => (
+            (submissions ?? []).map((s) => (
               <Link
                 key={s.id}
                 href={`/admin/submissions/${s.id}`}
@@ -146,16 +146,16 @@ export default async function AdminSubmissionsPage({ searchParams }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">{s.title ?? s.challenges?.title}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    @{s.profiles?.username} · {s.challenges?.leagues?.name ?? '—'} · {new Date(s.created_at).toLocaleDateString('fr-FR')}
+                    @{s.profiles?.username} · {s.challenges?.leagues?.name ?? '—'} · {s.created_at ? new Date(s.created_at).toLocaleDateString('fr-FR') : '—'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {s.reports_count > 0 && s.validation_status !== 'on_hold' && (
+                  {(s.reports_count ?? 0) > 0 && s.validation_status !== 'on_hold' && (
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 whitespace-nowrap">
                       🚩 {s.reports_count}
                     </span>
                   )}
-                  <StatusBadge status={s.validation_status} reportsCount={s.reports_count} />
+                  <StatusBadge status={s.validation_status ?? 'pending'} reportsCount={s.reports_count ?? undefined} />
                 </div>
               </Link>
             ))

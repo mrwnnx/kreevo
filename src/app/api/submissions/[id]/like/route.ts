@@ -5,8 +5,6 @@ import { notify } from '@/lib/utils/notifications'
 
 interface Params { params: Promise<{ id: string }> }
 
-type LikeRow = { id: string; likes_count: number | null }
-
 /**
  * Toggle like on a submission.
  *
@@ -26,7 +24,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   const { id: submissionId } = await params
 
-  const { data: submission } = await (supabaseAdmin as any)
+  const { data: submission } = await supabaseAdmin
     .from('submissions')
     .select('user_id, total_likes')
     .eq('id', submissionId)
@@ -35,14 +33,12 @@ export async function POST(_req: Request, { params }: Params) {
 
   const isAutoLike = submission.user_id === user.id
 
-  const { data: existingRow } = await (supabaseAdmin as any)
+  const { data: existing } = await supabaseAdmin
     .from('submission_likes')
     .select('id, likes_count')
     .eq('submission_id', submissionId)
     .eq('user_id', user.id)
     .maybeSingle()
-
-  const existing = existingRow as LikeRow | null
 
   let liked: boolean
   let totalDelta: number
@@ -50,7 +46,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   if (!existing) {
     // First-ever interaction with this submission by this liker.
-    await (supabaseAdmin as any)
+    await supabaseAdmin
       .from('submission_likes')
       .insert({ submission_id: submissionId, user_id: user.id, likes_count: 1 })
     liked = true
@@ -60,7 +56,7 @@ export async function POST(_req: Request, { params }: Params) {
   } else {
     const wasActive = (existing.likes_count ?? 0) > 0
     const nextActive = !wasActive
-    await (supabaseAdmin as any)
+    await supabaseAdmin
       .from('submission_likes')
       .update({ likes_count: nextActive ? 1 : 0 })
       .eq('id', existing.id)
@@ -72,19 +68,22 @@ export async function POST(_req: Request, { params }: Params) {
 
   // Maintain the denormalized counter on the submission.
   const newTotal = Math.max(0, (submission.total_likes ?? 0) + totalDelta)
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('submissions')
     .update({ total_likes: newTotal })
     .eq('id', submissionId)
 
-  if (creditXp) {
-    const { data: ownerProf } = await (supabaseAdmin as any)
-      .from('profiles').select('xp').eq('id', submission.user_id).single()
+  // `submissions.user_id` is nullable in the schema — the `as any` that used to
+  // sit on these queries hid it. No owner means nobody to credit or notify.
+  const ownerId = submission.user_id
+  if (creditXp && ownerId) {
+    const { data: ownerProf } = await supabaseAdmin
+      .from('profiles').select('xp').eq('id', ownerId).single()
     const newXP = Math.max(0, (ownerProf?.xp ?? 0) + 2)
-    await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', submission.user_id)
+    await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
 
     try {
-      await notify(submission.user_id, 'submission_liked', {
+      await notify(ownerId, 'submission_liked', {
         submission_id: submissionId,
         liker_id: user.id,
       })

@@ -18,7 +18,7 @@ export async function POST(req: Request, { params }: Params) {
   const reason = (body.reason as string | undefined)?.trim()
   if (!reason) return NextResponse.json({ error: 'Raison requise' }, { status: 400 })
 
-  const { data: submission } = await (supabase as any)
+  const { data: submission } = await supabase
     .from('submissions')
     .select('id, user_id, created_at, reports_count, validation_status')
     .eq('id', id)
@@ -28,15 +28,20 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Tu ne peux pas signaler ta propre soumission' }, { status: 403 })
   }
 
-  // Window check
-  const submittedAt = new Date(submission.created_at)
-  const hoursDiff = (Date.now() - submittedAt.getTime()) / 1000 / 3600
+  // Window check. `created_at` is nullable in the schema — a submission without
+  // one cannot be placed in the window, so it falls outside it. That is the exact
+  // behaviour the removed `as any` produced by accident: `new Date(null)` landed
+  // on the epoch, making hoursDiff enormous.
+  const submittedAt = submission.created_at ? new Date(submission.created_at) : null
+  const hoursDiff = submittedAt
+    ? (Date.now() - submittedAt.getTime()) / 1000 / 3600
+    : Infinity
   if (hoursDiff > REPORT_WINDOW_HOURS) {
     return NextResponse.json({ error: 'Fenêtre de signalement expirée (24h)' }, { status: 403 })
   }
 
   // Insert report (UNIQUE constraint blocks duplicates)
-  const { error: insertError } = await (supabaseAdmin as any)
+  const { error: insertError } = await supabaseAdmin
     .from('submission_reports')
     .insert({ submission_id: id, user_id: user.id, reason })
 
@@ -49,28 +54,30 @@ export async function POST(req: Request, { params }: Params) {
 
   // Update count
   const newCount = (submission.reports_count ?? 0) + 1
-  await (supabaseAdmin as any)
+  await supabaseAdmin
     .from('submissions')
     .update({ reports_count: newCount })
     .eq('id', id)
 
   // Threshold reached → on_hold + revoke XP if attributed
   if (newCount >= REPORT_THRESHOLD && submission.validation_status !== 'on_hold') {
-    const { data: subFull } = await (supabaseAdmin as any)
+    const { data: subFull } = await supabaseAdmin
       .from('submissions')
       .select('xp_attributed, user_id, challenges(xp_reward)')
       .eq('id', id)
       .single()
 
-    if (subFull?.xp_attributed) {
+    // `user_id` is nullable too: no owner means no XP to take back.
+    const ownerId = subFull?.user_id
+    if (subFull?.xp_attributed && ownerId) {
       const xpReward = subFull.challenges?.xp_reward ?? 150
-      const { data: prof } = await (supabaseAdmin as any)
-        .from('profiles').select('xp').eq('id', subFull.user_id).single()
+      const { data: prof } = await supabaseAdmin
+        .from('profiles').select('xp').eq('id', ownerId).single()
       const newXP = Math.max(0, (prof?.xp ?? 0) - xpReward)
-      await (supabaseAdmin as any).from('profiles').update({ xp: newXP }).eq('id', subFull.user_id)
+      await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
     }
 
-    await (supabaseAdmin as any)
+    await supabaseAdmin
       .from('submissions')
       .update({
         validation_status: 'on_hold',
@@ -79,7 +86,9 @@ export async function POST(req: Request, { params }: Params) {
       })
       .eq('id', id)
 
-    await notify(submission.user_id, 'submission_on_hold', { submission_id: id })
+    if (submission.user_id) {
+      await notify(submission.user_id, 'submission_on_hold', { submission_id: id })
+    }
     await notifyAllAdmins('submission_reported', { submission_id: id, count: newCount })
   }
 
@@ -93,7 +102,7 @@ export async function GET(req: Request, { params }: Params) {
   if (!user) return NextResponse.json({ reported: false })
 
   const { id } = await params
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('submission_reports')
     .select('id')
     .eq('submission_id', id)
