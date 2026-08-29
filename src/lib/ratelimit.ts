@@ -69,3 +69,36 @@ export function clientIp(request: Request): string {
   if (xff) return xff.split(',')[0].trim()
   return request.headers.get('x-real-ip') ?? '127.0.0.1'
 }
+
+let cachedHelpVote: Ratelimit | null | undefined
+
+/**
+ * Cap for the help-article "helpful / not helpful" counters. The route is
+ * deliberately anonymous (no login to rate an article), so the only stable key
+ * available is the IP — paired with the article id, which makes this a
+ * de-duplication as much as a cap: one vote per IP per article per 24h.
+ *
+ * The client only guards re-votes with React state, so a page reload lets the
+ * same visitor vote again; this is where that is actually stopped.
+ *
+ * ⚠️ FAIL-OPEN like the two above: with `UPSTASH_REDIS_REST_URL` / `_TOKEN`
+ * unset, this returns null and the counters are uncapped again.
+ */
+export function getHelpVoteRatelimit(): Ratelimit | null {
+  if (cachedHelpVote !== undefined) return cachedHelpVote
+
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) {
+    cachedHelpVote = null
+    return cachedHelpVote
+  }
+
+  cachedHelpVote = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.fixedWindow(1, '24 h'),
+    prefix: 'rl:help-vote',
+    analytics: false,
+  })
+  return cachedHelpVote
+}

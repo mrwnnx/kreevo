@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getHelpVoteRatelimit, clientIp } from '@/lib/ratelimit'
 
 interface Params {
   params: Promise<{ id: string }>
@@ -12,6 +13,19 @@ export async function POST(req: Request, { params }: Params) {
 
   if (kind !== 'helpful' && kind !== 'not_helpful') {
     return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
+  }
+
+  // One vote per IP per article per 24h. Checked AFTER the `kind` validation —
+  // unlike help/contact (5/h, where burning one slot on a bad payload is cheap),
+  // the budget here is a single vote, so a malformed body must not consume it.
+  // FAIL-OPEN if Upstash isn't configured: the route stays anonymous and works,
+  // just uncapped.
+  const rl = getHelpVoteRatelimit()
+  if (rl) {
+    const { success } = await rl.limit(`${clientIp(req)}:${id}`)
+    if (!success) {
+      return NextResponse.json({ error: 'Already counted' }, { status: 429 })
+    }
   }
 
   const column = kind === 'helpful' ? 'helpful' : 'not_helpful'
