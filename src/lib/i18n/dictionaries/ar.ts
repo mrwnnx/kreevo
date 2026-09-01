@@ -696,6 +696,23 @@ export const ar: Dictionary = {
       },
     },
   },
+  publicProject: {
+    notFoundTitle: 'المشروع غير موجود | Kreevo',
+    validatedBadge: 'موثّق',
+    fromChallenge: 'مشروع منجز من أجل التحدي',
+    descriptionLabel: 'الوصف',
+    seeProject: 'عرض المشروع ←',
+    noPreview: 'لا توجد معاينة',
+    coverAlt: 'غلاف المشروع',
+    additionalAlt: 'صورة {n}',
+    lightbox: {
+      open: 'تكبير الصورة',
+      close: 'إغلاق',
+      prev: 'الصورة السابقة',
+      next: 'الصورة التالية',
+    },
+    poweredBy: 'صُنع بواسطة',
+  },
   submitForm: {
     cancel: 'إلغاء',
     step: 'الخطوة {n}/2',

@@ -689,6 +689,23 @@ export const fr = {
       },
     },
   },
+  publicProject: {
+    notFoundTitle: 'Projet introuvable | Kreevo',
+    validatedBadge: 'Validé',
+    fromChallenge: 'Projet réalisé pour le challenge',
+    descriptionLabel: 'Description',
+    seeProject: 'Voir le projet →',
+    noPreview: 'Pas de preview',
+    coverAlt: 'Cover du projet',
+    additionalAlt: 'Visuel {n}',
+    lightbox: {
+      open: 'Agrandir l\'image',
+      close: 'Fermer',
+      prev: 'Image précédente',
+      next: 'Image suivante',
+    },
+    poweredBy: 'Créé avec',
+  },
   submitForm: {
     cancel: 'Annuler',
     step: 'Étape {n}/2',

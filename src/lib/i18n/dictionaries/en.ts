@@ -692,6 +692,23 @@ export const en: Dictionary = {
       },
     },
   },
+  publicProject: {
+    notFoundTitle: 'Project not found | Kreevo',
+    validatedBadge: 'Validated',
+    fromChallenge: 'Made for the challenge',
+    descriptionLabel: 'Description',
+    seeProject: 'See the project →',
+    noPreview: 'No preview',
+    coverAlt: 'Project cover',
+    additionalAlt: 'Visual {n}',
+    lightbox: {
+      open: 'Expand image',
+      close: 'Close',
+      prev: 'Previous image',
+      next: 'Next image',
+    },
+    poweredBy: 'Powered by',
+  },
   submitForm: {
     cancel: 'Cancel',
     step: 'Step {n}/2',
