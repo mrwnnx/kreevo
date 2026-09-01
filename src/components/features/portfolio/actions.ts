@@ -178,18 +178,29 @@ export async function publishProject(id: string): Promise<
 /**
  * Owner-only delete of a portfolio project.
  *
- * Child rows (comments, likes, reports, contest requests) can belong to
- * OTHER users — someone else's comment or like on this project — and the
- * RLS policies on those tables only let a user delete their own row. A
- * user-scoped client would therefore silently leave orphans behind, which
- * can then block the submission delete if the FK isn't cascading. This is
- * the exact failure mode the security audit found on `profiles` (19/75
- * users silently undeletable) — verified live against this project's
- * actual DB on 2026-09-01 that `comments → submissions` does cascade;
- * `submission_likes` / `submission_reports` / `submission_contests` weren't
- * confirmed the same way (a safety guard blocked repeating the test), so
- * they're cleared explicitly via the admin client regardless — harmless if
- * the FK already cascades, required if it doesn't.
+ * `submissions` carries no DELETE policy (checked live in `pg_policies`,
+ * 2026-09-01: only `submissions_owner_insert`, `submissions_visible`, and
+ * `submissions_owner_update` exist) — by design, since a DELETE policy
+ * would also let a challenge submission's author delete it, which the
+ * product refuses. So a delete through the session-scoped client matches
+ * zero rows under RLS: no error, `error` stays null, and the row survives
+ * — the exact silent-no-op shape as the profiles bug (19/75 undeletable)
+ * this ticket is named after. Every other write in this repo that needs
+ * to get past RLS goes through `supabaseAdmin` (see migration 008's
+ * comment); the delete does too, but only AFTER the ownership+kind check
+ * below, which is the actual authorization gate — `supabaseAdmin` is not
+ * queried until the row is confirmed to belong to this user.
+ *
+ * All FKs pointing at submissions.id cascade (comments, feedbacks,
+ * submission_contests, submission_feedbacks, submission_likes,
+ * submission_reports; comment_likes and comments.parent_id cascade in turn
+ * off comments) — verified against pg_constraint, 2026-09-01. A single
+ * DELETE therefore cleans up every child row in one transaction; no manual
+ * per-table cleanup.
+ *
+ * `.select('id')` on the delete is what actually proves a row was removed:
+ * checking only `error` would have hidden this exact bug, since a delete
+ * that matches nothing still returns `error: null`.
  */
 export async function deleteProject(id: string): Promise<
   { ok: true } | { ok: false; error: string }
@@ -209,25 +220,15 @@ export async function deleteProject(id: string): Promise<
     return { ok: false, error: "Ce projet n'est pas un projet de portfolio" }
   }
 
-  const { data: commentRows } = await supabaseAdmin
-    .from('comments')
-    .select('id')
-    .eq('submission_id', id)
-  const commentIds = (commentRows ?? []).map((c) => c.id)
-  if (commentIds.length) {
-    await supabaseAdmin.from('comment_likes').delete().in('comment_id', commentIds)
-  }
-  await supabaseAdmin.from('comments').delete().eq('submission_id', id)
-  await supabaseAdmin.from('submission_likes').delete().eq('submission_id', id)
-  await supabaseAdmin.from('submission_reports').delete().eq('submission_id', id)
-  await supabaseAdmin.from('submission_contests').delete().eq('submission_id', id)
-
-  const { error } = await supabase
+  const { data: deleted, error } = await supabaseAdmin
     .from('submissions')
     .delete()
     .eq('id', id)
     .eq('user_id', user.id)
+    .select('id')
+    .maybeSingle()
   if (error) return { ok: false, error: error.message }
+  if (!deleted) return { ok: false, error: 'Suppression sans effet (ligne introuvable)' }
 
   revalidatePath('/dashboard/projects')
   return { ok: true }
