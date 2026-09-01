@@ -642,6 +642,24 @@ export type Database = {
         }
         Relationships: []
       }
+      hire_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       industries: {
         Row: {
           created_at: string
@@ -911,6 +929,7 @@ export type Database = {
           objectives: string[] | null
           onboarding_completed: boolean
           plan: string | null
+          plan_expires_at: string | null
           preferred_language: string
           referral_code: string | null
           referred_by: string | null
@@ -946,6 +965,7 @@ export type Database = {
           objectives?: string[] | null
           onboarding_completed?: boolean
           plan?: string | null
+          plan_expires_at?: string | null
           preferred_language?: string
           referral_code?: string | null
           referred_by?: string | null
@@ -981,6 +1001,7 @@ export type Database = {
           objectives?: string[] | null
           onboarding_completed?: boolean
           plan?: string | null
+          plan_expires_at?: string | null
           preferred_language?: string
           referral_code?: string | null
           referred_by?: string | null
@@ -1269,6 +1290,7 @@ export type Database = {
           lang: string | null
           model: string
           submission_id: string
+          tier: string
           user_id: string
         }
         Insert: {
@@ -1278,6 +1300,7 @@ export type Database = {
           lang?: string | null
           model?: string
           submission_id: string
+          tier?: string
           user_id: string
         }
         Update: {
@@ -1287,6 +1310,7 @@ export type Database = {
           lang?: string | null
           model?: string
           submission_id?: string
+          tier?: string
           user_id?: string
         }
         Relationships: [
