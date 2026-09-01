@@ -18,12 +18,13 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { getTaxonomyMaps, localizeType, localizeIndustry, localizeSpecialty } from '@/lib/challenges/refs'
-import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
+import { SUBMISSION_KIND_PORTFOLIO, SUBMISSION_KIND_CHALLENGE } from '@/lib/utils/submission-constants'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
 import { profilePageSchema } from '@/lib/seo/jsonld'
 import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
+import { ValidatedBadge } from '@/components/features/portfolio/ValidatedBadge'
 import { DashboardChrome } from '@/components/layout/DashboardChrome'
 
 // ── League display config (DB names) ───────────────────────────
@@ -155,13 +156,14 @@ export default async function ProfilePage({
   }
 
   const [
-    { data: allSubmissions, count: submissionCount },
+    { data: allSubmissions },
+    { count: challengeCount },
     { data: badges },
     { data: leagueRow },
   ] = await Promise.all([
     supabase
       .from('submissions')
-      .select('*, challenges(title, specialty, challenge_type_id, industry_id)', { count: 'exact' })
+      .select('*, challenges(title, specialty, challenge_type_id, industry_id)')
       .eq('user_id', p.id)
       .eq('is_visible', true)
       .eq('is_draft', false)
@@ -169,6 +171,18 @@ export default async function ProfilePage({
       .order('pinned_at', { ascending: false, nullsFirst: false })
       .order('portfolio_position', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false }),
+    // "Défis" stat: challenge submissions only — a personal project isn't a
+    // challenge (that's the whole point of `kind`), so it must not inflate
+    // this count. Separate head-only count query rather than reusing the
+    // list above (which now also carries portfolio rows).
+    supabase
+      .from('submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', p.id)
+      .eq('is_visible', true)
+      .eq('is_draft', false)
+      .eq('kind', SUBMISSION_KIND_CHALLENGE)
+      .eq('validation_status', 'approved'),
     supabase.from('badges').select('*').eq('user_id', p.id),
     supabase.from('leagues').select('icon').eq('name', p.league ?? 'Stone').maybeSingle(),
   ])
@@ -392,7 +406,7 @@ export default async function ProfilePage({
           <StatCard
             label={t.stats.challenges}
             icon={<Target className="w-4 h-4 text-green-500" />}
-            value={String(submissionCount ?? 0)}
+            value={String(challengeCount ?? 0)}
             valueClass="text-green-500"
           />
           <StatCard
@@ -411,7 +425,7 @@ export default async function ProfilePage({
             top3.length > 0 ? (
               <div className="grid md:grid-cols-3 gap-4">
                 {top3.map((s: any) => (
-                  <SubmissionCard key={s.id} submission={s} featured />
+                  <SubmissionCard key={s.id} submission={s} featured validatedLabel={dict.publicProject.validatedBadge} />
                 ))}
               </div>
             ) : (
@@ -423,7 +437,7 @@ export default async function ProfilePage({
               {submissions.slice(0, 3).length > 0 && (
                 <div className="grid md:grid-cols-3 gap-4 opacity-30 blur-sm pointer-events-none select-none">
                   {submissions.slice(0, 3).map((s: any) => (
-                    <SubmissionCard key={s.id} submission={s} featured />
+                    <SubmissionCard key={s.id} submission={s} featured validatedLabel={dict.publicProject.validatedBadge} />
                   ))}
                 </div>
               )}
@@ -460,6 +474,7 @@ export default async function ProfilePage({
             activeTrack={activeTrack}
             username={p.username}
             t={t}
+            validatedLabel={dict.publicProject.validatedBadge}
           />
         </section>
 
@@ -503,24 +518,32 @@ export default async function ProfilePage({
 
 // ── Sub-components ─────────────────────────────────────────────
 
-function SubmissionCard({ submission: s, featured }: { submission: any; featured?: boolean }) {
+function SubmissionCard({ submission: s, featured, validatedLabel }: { submission: any; featured?: boolean; validatedLabel: string }) {
   const title = s.displayTitle ?? 'Untitled'
   return (
     <Link href={`/p/${s.id}`} className="group block border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
-      {s.cover_url ? (
-        <div className="aspect-video bg-muted overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={s.cover_url}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        </div>
-      ) : (
-        <div className="aspect-video bg-muted flex items-center justify-center">
-          <span className="text-xs text-muted-foreground font-mono">No preview</span>
-        </div>
-      )}
+      <div className="relative">
+        {s.cover_url ? (
+          <div className="aspect-video bg-muted overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={s.cover_url}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+        ) : (
+          <div className="aspect-video bg-muted flex items-center justify-center">
+            <span className="text-xs text-muted-foreground font-mono">No preview</span>
+          </div>
+        )}
+        {/* Sober corner badge — self-guards to null for a personal project (kind !== 'challenge') */}
+        <ValidatedBadge
+          kind={s.kind}
+          label={validatedLabel}
+          className="absolute top-2 end-2 text-[10px] px-2 py-0.5 gap-1 shadow-sm"
+        />
+      </div>
       <div className="p-3 space-y-2">
         <p className="text-xs font-semibold leading-snug truncate">
           {title}
@@ -549,12 +572,14 @@ function TrackFilter({
   activeTrack,
   username,
   t,
+  validatedLabel,
 }: {
   allSubmissions: any[]
   visibleSubmissions: any[]
   activeTrack: string
   username: string
   t: Dictionary['publicProfile']
+  validatedLabel: string
 }) {
   const specialties = ['All', ...Array.from(new Set(allSubmissions.map((s: any) => s.displaySpecialty).filter(Boolean)))] as string[]
 
@@ -585,7 +610,7 @@ function TrackFilter({
       {visibleSubmissions.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {visibleSubmissions.map((s: any) => (
-            <SubmissionCard key={s.id} submission={s} />
+            <SubmissionCard key={s.id} submission={s} validatedLabel={validatedLabel} />
           ))}
         </div>
       ) : (
