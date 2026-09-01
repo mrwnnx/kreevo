@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 import sharp from 'sharp'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 export const alt = 'Kreevo project'
@@ -58,9 +58,16 @@ async function coverToPngDataUri(url: string): Promise<string | null> {
  * is fetched independently of the page (it's a separate Next handler), so
  * without this filter a draft or rejected submission's cover + title would
  * leak through the OG image even though the page itself 404s.
+ *
+ * Reads through the session client (anon-key, RLS-scoped), same as
+ * `page.tsx` — the `.eq`/`.or` chain below is defense in depth on top of
+ * the `submissions_visible` RLS policy, not the only gate.
  */
-async function getPublicSubmission(id: string): Promise<SubmissionRow | null> {
-  const { data } = await (supabaseAdmin as any)
+async function getPublicSubmission(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string,
+): Promise<SubmissionRow | null> {
+  const { data } = await (supabase as any)
     .from('submissions')
     .select('title, cover_url, kind, profiles:user_id(username, full_name, avatar_url)')
     .eq('id', id)
@@ -73,7 +80,8 @@ async function getPublicSubmission(id: string): Promise<SubmissionRow | null> {
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const submission = await getPublicSubmission(id)
+  const supabase = await createClient()
+  const submission = await getPublicSubmission(supabase, id)
 
   const title = truncate(submission?.title ?? 'Kreevo project', LAYOUT.titleMaxChars)
   const author = submission?.profiles ?? null

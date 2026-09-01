@@ -11,7 +11,7 @@ import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { ValidatedBadge } from '@/components/features/portfolio/ValidatedBadge'
 import { getDict } from '@/lib/i18n/lang'
-import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
+import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO, type SubmissionKind } from '@/lib/utils/submission-constants'
 
 // ── Public-read columns ──────────────────────────────────────────
 // Explicit select, never `*` (security-audit rule). Author + origin
@@ -39,7 +39,7 @@ interface ChallengeRow {
 interface SubmissionRow {
   id: string
   user_id: string | null
-  kind: string
+  kind: SubmissionKind
   title: string | null
   description: string | null
   cover_url: string
@@ -58,11 +58,22 @@ interface SubmissionRow {
  * The only public-read gate for a submission: not a draft, not hidden by
  * its author, and — unless it's a personal project — approved. A rejected
  * or pending challenge submission, or a draft of either kind, never
- * matches. Shared by the page and its `opengraph-image` route so both
- * enforce the exact same rule.
+ * matches. The same rule is duplicated (reduced columns) in the
+ * `opengraph-image` route — a separate Next handler, not this function.
+ *
+ * Reads through the session client (anon-key, RLS-scoped), not
+ * `supabaseAdmin` — the same client `/u/[username]/page.tsx` uses for its
+ * equivalent read. RLS's `submissions_visible` policy (tightened after the
+ * August audit) already enforces this exact shape, so the `.eq`/`.or`
+ * chain below is defense in depth, not the only thing standing between an
+ * anonymous visitor and a draft or rejected submission — if this chain is
+ * ever loosened by mistake, the database still refuses to serve the row.
  */
-async function getPublicSubmission(id: string): Promise<SubmissionRow | null> {
-  const { data } = await (supabaseAdmin as any)
+async function getPublicSubmission(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string,
+): Promise<SubmissionRow | null> {
+  const { data } = await (supabase as any)
     .from('submissions')
     .select(PUBLIC_SUBMISSION_COLUMNS)
     .eq('id', id)
@@ -77,7 +88,8 @@ async function getPublicSubmission(id: string): Promise<SubmissionRow | null> {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const dict = await getDict()
-  const submission = await getPublicSubmission(id)
+  const supabase = await createClient()
+  const submission = await getPublicSubmission(supabase, id)
 
   if (!submission) {
     return { title: dict.publicProject.notFoundTitle }
@@ -118,7 +130,7 @@ export default async function PublicProjectPage({ params }: { params: Promise<{ 
   const supabase = await createClient()
 
   const [submission, { data: { user: viewer } }] = await Promise.all([
-    getPublicSubmission(id),
+    getPublicSubmission(supabase, id),
     supabase.auth.getUser(),
   ])
 
@@ -127,7 +139,9 @@ export default async function PublicProjectPage({ params }: { params: Promise<{ 
   const isOwn = !!viewer && viewer.id === submission.user_id
   const isChallenge = submission.kind === SUBMISSION_KIND_CHALLENGE
 
-  // View count — skip the owner looking at their own page.
+  // View count — skip the owner looking at their own page. This RPC is the
+  // one legitimate use of supabaseAdmin left on this page: it must work
+  // for anonymous visitors regardless of what the `anon` role is granted.
   if (!isOwn) {
     await (supabaseAdmin as any).rpc('increment_submission_views', { sub_id: id }).then(
       () => null,
@@ -166,7 +180,7 @@ export default async function PublicProjectPage({ params }: { params: Promise<{ 
             <h1 className="text-[28px] md:text-[34px] font-semibold leading-[1.15] text-[#2b2c36]">
               {submission.title ?? t.noPreview}
             </h1>
-            {isChallenge && <ValidatedBadge label={t.validatedBadge} />}
+            <ValidatedBadge kind={submission.kind} label={t.validatedBadge} />
           </div>
 
           {isChallenge && challenge?.title && (

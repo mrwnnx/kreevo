@@ -1,25 +1,31 @@
 import { CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SUBMISSION_KIND_CHALLENGE, type SubmissionKind } from '@/lib/utils/submission-constants'
 
 interface Props {
+  kind: SubmissionKind
   label: string
   className?: string
 }
 
 /**
- * "Validated" badge — shown only for `kind === 'challenge'` submissions.
- * A personal (`portfolio`) project never carries this badge: the distinction
- * values the challenge work instead of stigmatizing the portfolio (product
- * decision, see .scratch/portfolio-projets/spec.md).
+ * "Validated" badge — self-guarded: renders only for `kind === 'challenge'`,
+ * `null` otherwise. A personal (`portfolio`) project never carries this
+ * badge: the distinction values the challenge work instead of stigmatizing
+ * the portfolio (product decision, see .scratch/portfolio-projets/spec.md).
  *
- * `kind` is structural (a DB column, not user-editable), so this badge can't
- * be faked by a portfolio project pretending to be validated.
+ * The guard lives here rather than in each caller on purpose — `kind` is
+ * structural (a DB column, not user-editable), so this badge can't be faked
+ * by a portfolio project, and a future caller (lot 08's feed cards) can pass
+ * whatever `kind` it has without needing to know the rule itself.
  *
  * Reused on the public project page (`/p/[id]`) and, from lot 08, on feed
- * cards — kept dumb (no i18n/data fetching of its own) so both call sites
- * render the exact same markup instead of drifting apart.
+ * cards — kept dumb otherwise (no i18n/data fetching of its own) so both
+ * call sites render the exact same markup instead of drifting apart.
  */
-export function ValidatedBadge({ label, className }: Props) {
+export function ValidatedBadge({ kind, label, className }: Props) {
+  if (kind !== SUBMISSION_KIND_CHALLENGE) return null
+
   return (
     <span
       className={cn(
