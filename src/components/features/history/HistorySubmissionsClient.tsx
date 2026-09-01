@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { setSubmissionVisibility } from './actions'
 import { GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/GlassShell'
+import { SUBMISSION_KIND_PORTFOLIO, type SubmissionKind } from '@/lib/utils/submission-constants'
 
 export type HistorySubmission = {
   id: string
+  kind: SubmissionKind
+  hidden_by_moderation: boolean
   cover_url: string | null
   title: string | null
   validation_status: string | null
@@ -22,7 +25,7 @@ type Filter = 'all' | 'approved' | 'drafts' | 'rejected'
 
 interface HistoryT {
   filters: { all: string; approved: string; drafts: string; rejected: string }
-  status: { approved: string; pending: string; rejected: string; draft: string; on_hold: string }
+  status: { approved: string; pending: string; rejected: string; draft: string; on_hold: string; published: string; hidden: string }
   empty: { icon: string; title: string; subtitle: string; cta: string }
   visibility: { public: string; hidden: string; lockedHint: string }
 }
@@ -41,6 +44,14 @@ function formatDate(iso: string, locale: string): string {
 
 function statusInfo(s: HistorySubmission, t: HistoryT['status']) {
   if (s.is_draft) return { label: t.draft, dot: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-400' }
+  // A personal project has validation_status = null, which fell through to
+  // the `default` branch below and labelled a live project "En attente".
+  // It is never validated: published, or taken down by moderation.
+  if (s.kind === SUBMISSION_KIND_PORTFOLIO) {
+    return s.hidden_by_moderation
+      ? { label: t.hidden, dot: 'bg-red-500', text: 'text-red-700 dark:text-red-400' }
+      : { label: t.published, dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-400' }
+  }
   switch (s.validation_status) {
     case 'approved': return { label: t.approved, dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-400' }
     case 'rejected': return { label: t.rejected, dot: 'bg-red-500', text: 'text-red-700 dark:text-red-400' }
@@ -179,9 +190,14 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
             return (
               <li key={s.id} className="relative">
                 <Link
-                  href={s.is_draft && s.challenge_id
-                    ? `/dashboard/challenges/${s.challenge_id}/submit`
-                    : `/dashboard/submissions/${s.id}?from=history`}
+                  href={s.kind === SUBMISSION_KIND_PORTFOLIO
+                    // /dashboard/submissions/[id] is the challenge detail
+                    // screen: on a personal project every one of its tools is
+                    // inert. The editor is the page that actually works.
+                    ? `/dashboard/projects/${s.id}/edit`
+                    : s.is_draft && s.challenge_id
+                      ? `/dashboard/challenges/${s.challenge_id}/submit`
+                      : `/dashboard/submissions/${s.id}?from=history`}
                   className={`${GLASS_SURFACE} group block overflow-hidden rounded-[24px] transition-[translate,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)] hover:-translate-y-[6px] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
                   style={GLASS_GRADIENT}
                 >
@@ -221,15 +237,22 @@ export function HistorySubmissionsClient({ submissions, dateLocale, t }: Props) 
                   </div>
                 </Link>
                 {/* Public-portfolio visibility — sibling of the Link so toggling
-                    never triggers card navigation. */}
-                <div className="absolute top-2 start-2 z-10">
-                  <VisibilityControl
-                    id={s.id}
-                    approved={!s.is_draft && s.validation_status === 'approved'}
-                    initialVisible={s.is_visible}
-                    t={t.visibility}
-                  />
-                </div>
+                    never triggers card navigation. Not rendered for a personal
+                    project: `setSubmissionVisibility` filters on
+                    validation_status='approved', so it would match zero rows,
+                    and the disabled state's "once validated" hint describes a
+                    step that never happens for this kind. Its visibility is
+                    driven by publish/draft in /dashboard/projects. */}
+                {s.kind !== SUBMISSION_KIND_PORTFOLIO && (
+                  <div className="absolute top-2 start-2 z-10">
+                    <VisibilityControl
+                      id={s.id}
+                      approved={!s.is_draft && s.validation_status === 'approved'}
+                      initialVisible={s.is_visible}
+                      t={t.visibility}
+                    />
+                  </div>
+                )}
               </li>
             )
           })}

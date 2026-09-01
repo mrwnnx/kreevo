@@ -9,6 +9,7 @@ import { GlassShell, GLASS_SURFACE, GLASS_GRADIENT } from '@/components/layout/G
 import { GlassHeader } from '@/components/layout/GlassHeader'
 import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
 import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
+import { ReportButton } from '@/components/features/challenge/ReportButton'
 import { ValidatedBadge } from '@/components/features/portfolio/ValidatedBadge'
 import { getDict } from '@/lib/i18n/lang'
 import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO, type SubmissionKind } from '@/lib/utils/submission-constants'
@@ -222,6 +223,21 @@ export default async function PublicProjectPage({ params }: { params: Promise<{ 
             <span className="inline-flex items-center gap-1.5">
               <Eye className="size-4" /> {viewsCount}
             </span>
+            {/* Reporting is the ONLY after-the-fact moderation lever on a
+                personal project (nothing validates it at publish time), and
+                this page is the only public surface it has. Without the
+                button here the 3-report threshold is unreachable and the
+                admin queue never sees a portfolio row. Signed-in
+                non-authors only: POST /report 401s anonymously and 403s the
+                owner. */}
+            {viewer && !isOwn && (
+              <ReportButton
+                submissionId={submission.id}
+                submissionCreatedAt={submission.created_at ?? new Date(0).toISOString()}
+                kind={submission.kind}
+                t={dict.submissionDetail.report}
+              />
+            )}
           </div>
         </header>
 

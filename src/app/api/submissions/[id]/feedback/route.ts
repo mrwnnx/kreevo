@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { anthropic } from '@/lib/anthropic/client'
 import { getLang, type Lang } from '@/lib/i18n/lang'
-import { MAX_PUBLISH_IMAGES } from '@/lib/utils/submission-constants'
+import { MAX_PUBLISH_IMAGES, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 import { getAiRatelimit } from '@/lib/ratelimit'
 
 /**
@@ -50,7 +50,7 @@ async function getSubmission(submissionId: string) {
   const { data } = await (supabaseAdmin as any)
     .from('submissions')
     .select(`
-      id, user_id, title, description, cover_url, files,
+      id, user_id, kind, title, description, cover_url, files,
       challenges:challenge_id (title, brief, context, deliverable, constraints, criteria, specialty, challenge_types(name_fr), industries(name_fr))
     `)
     .eq('id', submissionId)
@@ -216,6 +216,18 @@ export async function POST(_req: Request, { params }: Params) {
   const sub = await getSubmission(id)
   if (!sub) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (sub.user_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  // Ownership was the ONLY gate here, so an owner could trigger a real
+  // Anthropic call on a personal project — whose prompt has every
+  // "CHALLENGE BRIEF" field at N/A, since there is no challenge to judge
+  // against. The plan's constraint is: no Anthropic call for a personal
+  // project. This is where it's enforced.
+  if (sub.kind === SUBMISSION_KIND_PORTFOLIO) {
+    return NextResponse.json(
+      { error: "Le feedback IA évalue un travail face au brief d'un challenge. Un projet perso n'en a pas." },
+      { status: 400 },
+    )
+  }
 
   // Tier selon le plan : free → 'basic' (score + verdict), pro/studio → 'detailed'.
   const { data: profile } = await (supabaseAdmin as any)

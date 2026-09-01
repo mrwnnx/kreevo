@@ -2,12 +2,14 @@ import type { MetadataRoute } from 'next'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { HELP_CATEGORIES } from '@/lib/help/categories'
 import { siteUrl } from '@/lib/site'
+import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 export const dynamic = 'force-dynamic'
 
 type ApprovedSubmissionRow = { user_id: string }
 type EligibleProfileRow = { username: string; updated_at: string }
 type PublishedChallengeRow = { id: string; updated_at: string }
+type PublicProjectRow = { id: string; created_at: string | null }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
@@ -136,6 +138,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
+  // Public project pages (/p/[id]) — canonical, indexable, and the
+  // destination every /discover card points at, so they belong here.
+  // The filter is character-for-character the one `getPublicSubmission`
+  // applies in app/(public)/p/[id]/page.tsx: not a draft, not hidden, and
+  // — unless it's a personal project — approved. Anything looser would list
+  // URLs that 404.
+  const { data: projectData } = await (supabaseAdmin as any)
+    .from('submissions')
+    .select('id, created_at')
+    .eq('is_draft', false)
+    .eq('is_visible', true)
+    .or(`kind.eq.${SUBMISSION_KIND_PORTFOLIO},validation_status.eq.approved`)
+
+  const projectRows = (projectData ?? []) as PublicProjectRow[]
+  const projectRoutes: MetadataRoute.Sitemap = projectRows.map((s) => ({
+    url: siteUrl(`/p/${s.id}`),
+    lastModified: s.created_at ? new Date(s.created_at) : now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+
   // Published blog articles
   const { data: blogData } = await (supabaseAdmin as any)
     .from('articles')
@@ -156,6 +179,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articleRoutes,
     ...profileRoutes,
     ...challengeRoutes,
+    ...projectRoutes,
     ...blogRoutes,
   ]
 }

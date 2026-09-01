@@ -282,7 +282,12 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
                         {works.map((w) => (
                           <Link
                             key={w.id}
-                            href={viewer ? `/dashboard/submissions/${w.id}` : `/u/${p.username}`}
+                            // Same destination as the "Réalisations" view above:
+                            // /p/[id] serves both kinds publicly. The old
+                            // signed-in branch sent a viewer to the challenge
+                            // detail screen, the one page where every control
+                            // is dead for a personal project.
+                            href={`/p/${w.id}`}
                             className="relative aspect-[4/3] overflow-hidden"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}

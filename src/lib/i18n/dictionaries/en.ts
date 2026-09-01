@@ -379,6 +379,9 @@ export const en: Dictionary = {
       rejected: 'Rejected',
       draft: 'Draft',
       on_hold: 'Under review',
+      // Personal project: never validated — live, or taken down by moderation.
+      published: 'Live',
+      hidden: 'Hidden',
     },
     empty: {
       icon: '🚀',
@@ -397,6 +400,8 @@ export const en: Dictionary = {
     subtitle: 'Your personal portfolio projects, drafts included.',
     addCta: 'Add a project',
     draftBadge: 'Draft',
+    hiddenBadge: 'Hidden',
+    hiddenHint: 'Taken down by moderation after reports. Contact support to appeal.',
     untitled: 'Untitled',
     actions: {
       edit: 'Edit',
@@ -847,6 +852,10 @@ export const en: Dictionary = {
       draftBody: 'You can come back later to finish and publish your project.',
       publishedTitle: 'Project published 🎉',
       publishedBody: 'Your project is live on your portfolio.',
+      updatedTitle: 'Changes saved',
+      updatedBody: 'Your project has been updated.',
+      viewProject: 'View project',
+      myProjects: 'My projects',
       viewProfile: 'View my profile',
       addAnother: 'Add another project',
       backToDashboard: 'My dashboard',

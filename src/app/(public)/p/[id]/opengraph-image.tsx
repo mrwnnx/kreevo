@@ -34,19 +34,24 @@ function truncate(s: string, max: number): string {
 }
 
 /**
- * Fetches the cover and re-encodes it to a PNG data URI. `ImageResponse`
+ * Fetches a remote image and re-encodes it to a PNG data URI. `ImageResponse`
  * (satori/resvg) can't decode WebP — and `ImageUpload`'s client-side
- * compression writes WebP for every submission cover whose browser
- * supports it, which is effectively all of them. Without this, the OG
- * card silently renders with no photo (confirmed against real covers in
- * this repo's data). `sharp` ships with Next's image pipeline already.
+ * compression writes WebP for every image it uploads whose browser supports
+ * it, which is effectively all of them. Without this, the OG card silently
+ * renders with a hole where the image should be (confirmed against real
+ * covers in this repo's data). `sharp` ships with Next's image pipeline
+ * already.
+ *
+ * Applies to the AVATAR as well as the cover: avatars go through the same
+ * uploader, so a `.webp` avatar rendered an empty circle in the corner of
+ * every card. Same fix, different target size.
  */
-async function coverToPngDataUri(url: string): Promise<string | null> {
+async function imageToPngDataUri(url: string, width: number, height: number): Promise<string | null> {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
     const buf = Buffer.from(await res.arrayBuffer())
-    const png = await sharp(buf).resize(size.width, size.height, { fit: 'cover' }).png().toBuffer()
+    const png = await sharp(buf).resize(width, height, { fit: 'cover' }).png().toBuffer()
     return `data:image/png;base64,${png.toString('base64')}`
   } catch {
     return null
@@ -87,7 +92,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const author = submission?.profiles ?? null
   const authorName = author?.full_name ?? author?.username ?? null
   const isChallenge = submission?.kind === SUBMISSION_KIND_CHALLENGE
-  const coverDataUri = submission?.cover_url ? await coverToPngDataUri(submission.cover_url) : null
+  const [coverDataUri, avatarDataUri] = await Promise.all([
+    submission?.cover_url ? imageToPngDataUri(submission.cover_url, size.width, size.height) : null,
+    author?.avatar_url ? imageToPngDataUri(author.avatar_url, LAYOUT.avatarSize, LAYOUT.avatarSize) : null,
+  ])
 
   return new ImageResponse(
     (
@@ -184,10 +192,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             </div>
             {authorName && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {author?.avatar_url ? (
+                {avatarDataUri ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={author.avatar_url}
+                    src={avatarDataUri}
                     width={LAYOUT.avatarSize}
                     height={LAYOUT.avatarSize}
                     style={{

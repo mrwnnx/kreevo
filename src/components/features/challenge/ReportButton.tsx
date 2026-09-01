@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
+import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO, type SubmissionKind } from '@/lib/utils/submission-constants'
 
 const REPORT_WINDOW_HOURS = 24
 
@@ -34,10 +35,16 @@ const FALLBACK_T: ReportT = {
 export function ReportButton({
   submissionId,
   submissionCreatedAt,
+  kind = SUBMISSION_KIND_CHALLENGE,
   t = FALLBACK_T,
 }: {
   submissionId: string
   submissionCreatedAt: string
+  /** Mirrors POST /api/submissions/[id]/report: the 24h reporting window
+   *  applies to challenge submissions only. A personal project stays online
+   *  indefinitely, so it stays reportable indefinitely — hiding the button
+   *  after 24h here would make the 3-report threshold unreachable. */
+  kind?: SubmissionKind
   t?: ReportT
 }) {
   const REASONS = [
@@ -60,9 +67,9 @@ export function ReportButton({
       .catch(() => {})
   }, [submissionId])
 
-  // Within 24h window?
+  // Within 24h window? (challenge submissions only — see `kind` above)
   const hoursSince = (Date.now() - new Date(submissionCreatedAt).getTime()) / 1000 / 3600
-  if (hoursSince > REPORT_WINDOW_HOURS) return null
+  if (kind !== SUBMISSION_KIND_PORTFOLIO && hoursSince > REPORT_WINDOW_HOURS) return null
 
   function submit() {
     setError(null)

@@ -41,6 +41,37 @@ export async function PATCH(request: Request, { params }: Props) {
     return NextResponse.json({ ok: true })
   }
 
+  if (action === 'hide') {
+    // Admin take-down of a personal project, reachable from
+    // /admin/submissions/[id] before the 3-report threshold is met.
+    // Deliberately the same patch shape the threshold applies in
+    // api/submissions/[id]/report — is_visible=false + reported_at — so
+    // 'ignore' below restores it identically either way. Refused on a
+    // challenge submission: that one is gated by validation_status, and
+    // flipping is_visible there would leave it in no queue at all.
+    const { data: sub, error: fetchError } = await (admin!.supabase as any)
+      .from('submissions').select('kind').eq('id', id).single()
+    if (fetchError || !sub) {
+      return NextResponse.json({ error: fetchError?.message ?? 'Soumission introuvable' }, { status: 404 })
+    }
+    if (sub.kind !== SUBMISSION_KIND_PORTFOLIO) {
+      return NextResponse.json(
+        { error: 'Masquer ne s\u2019applique qu\u2019\u00e0 un projet perso. Utilise Rejeter pour une soumission de challenge.' },
+        { status: 409 },
+      )
+    }
+
+    const { data, error: dbError } = await (admin!.supabase as any)
+      .from('submissions')
+      .update({ is_visible: false, reported_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('id')
+    if (dbError || !data?.length) {
+      return NextResponse.json({ error: dbError?.message ?? '\u00c9chec de la mise \u00e0 jour' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true })
+  }
+
   if (action === 'ignore') {
     // "Ignorer" = lever le hold. Le champ à restaurer dépend du type : une
     // soumission de challenge est masquée par validation_status (la RLS

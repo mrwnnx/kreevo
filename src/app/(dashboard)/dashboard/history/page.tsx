@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { HistorySubmissionsClient } from '@/components/features/history/HistorySubmissionsClient'
 import type { HistorySubmission } from '@/components/features/history/HistorySubmissionsClient'
 import { getDict, getLang } from '@/lib/i18n/lang'
+import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 export default async function HistoryPage() {
   const supabase = await createClient()
@@ -13,15 +14,21 @@ export default async function HistoryPage() {
   const { data: rows } = await (supabaseAdmin as any)
     .from('submissions')
     .select(`
-      id, cover_url, title, validation_status, is_draft, is_visible, created_at, challenge_id,
+      id, kind, cover_url, title, validation_status, is_draft, is_visible, reported_at, created_at, challenge_id,
       challenges:challenge_id (title)
     `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(100)
 
+  // This page lists BOTH kinds. A portfolio row has no validation_status, so
+  // every status/visibility rule below has to branch on `kind` — otherwise a
+  // live personal project reads "En attente" and its visibility switch is
+  // disabled with a hint about a validation that will never happen.
   const submissions: HistorySubmission[] = (rows ?? []).map((r: any) => ({
     id: r.id,
+    kind: r.kind === SUBMISSION_KIND_PORTFOLIO ? SUBMISSION_KIND_PORTFOLIO : SUBMISSION_KIND_CHALLENGE,
+    hidden_by_moderation: r.is_visible === false && !!r.reported_at,
     cover_url: r.cover_url ?? null,
     title: r.title ?? null,
     validation_status: r.validation_status ?? null,

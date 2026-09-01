@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react'
 import { AdminSubmissionActions } from '@/components/admin/AdminSubmissionActions'
 import { getLang } from '@/lib/i18n/lang'
 import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
+import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -152,8 +153,10 @@ export default async function AdminSubmissionDetailPage({ params }: Props) {
           {/* Actions */}
           <AdminSubmissionActions
             submissionId={s.id}
+            kind={s.kind === SUBMISSION_KIND_PORTFOLIO ? SUBMISSION_KIND_PORTFOLIO : SUBMISSION_KIND_CHALLENGE}
             status={s.validation_status}
             hasReports={(reports ?? []).length > 0}
+            isHidden={s.is_visible === false}
             pendingContestId={contest?.status === 'pending' ? contest.id : null}
           />
         </div>

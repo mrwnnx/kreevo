@@ -191,6 +191,19 @@ export function ProjectForm({ specialties, industries, projectTypes, profileUser
   }
 
   if (success) {
+    // Editing an existing project is NOT a publication: showing "Projet publié 🎉"
+    // and "Ajouter un autre" after fixing a typo reads as if a second project
+    // had just been created. Three distinct outcomes: draft saved, project
+    // published (creation), changes saved (edit).
+    const isEdit = !!initial
+    const isUpdate = !success.draft && isEdit
+    const heading = success.draft
+      ? t.success.draftTitle
+      : isUpdate ? t.success.updatedTitle : t.success.publishedTitle
+    const body = success.draft
+      ? t.success.draftBody
+      : isUpdate ? t.success.updatedBody : t.success.publishedBody
+
     return (
       <div className="max-w-[640px] mx-auto px-6 py-16 text-center space-y-4">
         <div className={cn(
@@ -199,11 +212,20 @@ export function ProjectForm({ specialties, industries, projectTypes, profileUser
         )}>
           <CheckCircle className={cn('size-8', success.draft ? 'text-zinc-500' : 'text-green-600 dark:text-green-400')} />
         </div>
-        <h1 className="text-2xl font-bold">{success.draft ? t.success.draftTitle : t.success.publishedTitle}</h1>
-        <p className="text-sm text-muted-foreground">{success.draft ? t.success.draftBody : t.success.publishedBody}</p>
+        <h1 className="text-2xl font-bold">{heading}</h1>
+        <p className="text-sm text-muted-foreground">{body}</p>
         <div className="flex flex-wrap gap-2 justify-center pt-2">
           {success.draft ? (
             <Button onClick={() => setSuccess(null)}>{t.saveDraft}</Button>
+          ) : isUpdate ? (
+            <>
+              {savedId && (
+                <Button onClick={() => router.push(`/p/${savedId}`)}>{t.success.viewProject}</Button>
+              )}
+              <Button variant="outline" onClick={() => router.push('/dashboard/projects')}>
+                {t.success.myProjects}
+              </Button>
+            </>
           ) : (
             <>
               {profileUsername && (

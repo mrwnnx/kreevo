@@ -376,6 +376,9 @@ export const fr = {
       rejected: 'Rejetée',
       draft: 'Brouillon',
       on_hold: 'En vérification',
+      // Projet perso : jamais validé — en ligne, ou retiré par la modération.
+      published: 'En ligne',
+      hidden: 'Masqué',
     },
     empty: {
       icon: '🚀',
@@ -394,6 +397,8 @@ export const fr = {
     subtitle: 'Les projets de ton portfolio perso, brouillons compris.',
     addCta: 'Ajouter un projet',
     draftBadge: 'Brouillon',
+    hiddenBadge: 'Masqué',
+    hiddenHint: 'Retiré du public par la modération après des signalements. Contacte le support pour contester.',
     untitled: 'Sans titre',
     actions: {
       edit: 'Modifier',
@@ -844,6 +849,10 @@ export const fr = {
       draftBody: 'Tu peux revenir plus tard pour finaliser et publier ton projet.',
       publishedTitle: 'Projet publié 🎉',
       publishedBody: 'Ton projet est en ligne sur ton portfolio.',
+      updatedTitle: 'Modifications enregistrées',
+      updatedBody: 'Ton projet a été mis à jour.',
+      viewProject: 'Voir le projet',
+      myProjects: 'Mes projets',
       viewProfile: 'Voir mon profil',
       addAnother: 'Ajouter un autre projet',
       backToDashboard: 'Mon dashboard',

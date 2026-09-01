@@ -383,6 +383,9 @@ export const ar: Dictionary = {
       rejected: 'مرفوضة',
       draft: 'مسوّدة',
       on_hold: 'قيد التحقّق',
+      // مشروع شخصي: لا يمرّ بأي تحقّق — إمّا منشور أو أزالته الإدارة.
+      published: 'منشور',
+      hidden: 'مخفي',
     },
     empty: {
       icon: '🚀',
@@ -401,6 +404,8 @@ export const ar: Dictionary = {
     subtitle: 'مشاريع ملفك الشخصي، بما فيها المسودات.',
     addCta: 'إضافة مشروع',
     draftBadge: 'مسودة',
+    hiddenBadge: 'مخفي',
+    hiddenHint: 'أزالته الإدارة من العرض العام بعد بلاغات. تواصل مع الدعم للاعتراض.',
     untitled: 'بدون عنوان',
     actions: {
       edit: 'تعديل',
@@ -851,6 +856,10 @@ export const ar: Dictionary = {
       draftBody: 'يمكنك العودة لاحقًا لإنهاء مشروعك ونشره.',
       publishedTitle: 'تم نشر المشروع 🎉',
       publishedBody: 'مشروعك متاح الآن على ملفك الشخصي.',
+      updatedTitle: 'تم حفظ التعديلات',
+      updatedBody: 'تم تحديث مشروعك.',
+      viewProject: 'عرض المشروع',
+      myProjects: 'مشاريعي',
       viewProfile: 'عرض ملفي الشخصي',
       addAnother: 'إضافة مشروع آخر',
       backToDashboard: 'لوحتي',

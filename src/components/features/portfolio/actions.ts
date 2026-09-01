@@ -139,7 +139,7 @@ export async function saveProject(formData: FormData): Promise<
     // submission (or someone else's row) into a portfolio project.
     const { data: existing } = await supabase
       .from('submissions')
-      .select('id, kind')
+      .select('id, kind, reported_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .maybeSingle()
@@ -148,12 +148,27 @@ export async function saveProject(formData: FormData): Promise<
       return { ok: false, error: "Ce projet n'est pas un projet de portfolio" }
     }
 
-    const { error } = await supabase
+    // A project taken down by moderation keeps is_draft=false, so the edit
+    // form shows it as published and its only button posts publish=1. Writing
+    // `is_visible: true` here would put it back on /discover AND drop it out
+    // of the admin queue (which requires is_visible=false), reports_count
+    // still at 3 — the author cancelling their own moderation by fixing a
+    // typo. `reported_at` is the marker the report threshold and the admin
+    // "hide" action both set, and that only "restore" clears.
+    const { is_visible: _isVisible, ...rowWithoutVisibility } = row
+    const updatePatch = existing.reported_at ? rowWithoutVisibility : row
+
+    const { data: updated, error } = await supabase
       .from('submissions')
-      .update(row)
+      .update(updatePatch)
       .eq('id', id)
       .eq('user_id', user.id)
+      .select('id')
+      .maybeSingle()
     if (error) return { ok: false, error: error.message }
+    // An UPDATE whose WHERE matches nothing returns no error at all — only
+    // the empty `.select()` tells them apart.
+    if (!updated) return { ok: false, error: 'Mise à jour sans effet (projet introuvable)' }
 
     revalidatePath('/dashboard/projects')
     return { ok: true, id }
@@ -184,7 +199,7 @@ export async function publishProject(id: string): Promise<
 
   const { data: existing } = await supabase
     .from('submissions')
-    .select('id, kind, title, specialty_id, industry_id, project_type_id, tools')
+    .select('id, kind, title, specialty_id, industry_id, project_type_id, tools, reported_at')
     .eq('id', id)
     .eq('user_id', user.id)
     .maybeSingle()
@@ -195,13 +210,22 @@ export async function publishProject(id: string): Promise<
   if (!existing.title || !existing.specialty_id || !existing.industry_id || !existing.project_type_id || !existing.tools?.length) {
     return { ok: false, error: 'Titre, spécialité, industrie, type de projet et au moins un outil sont requis pour publier' }
   }
+  // Same reason as in saveProject: republishing is exactly the write that
+  // would undo a take-down. Refuse loudly rather than silently skipping
+  // is_visible, which would report a publish that never made it public.
+  if (existing.reported_at) {
+    return { ok: false, error: 'Ce projet a été masqué par la modération. Seul un admin peut le remettre en ligne.' }
+  }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('submissions')
     .update({ is_draft: false, is_visible: true })
     .eq('id', id)
     .eq('user_id', user.id)
+    .select('id')
+    .maybeSingle()
   if (error) return { ok: false, error: error.message }
+  if (!updated) return { ok: false, error: 'Publication sans effet (projet introuvable)' }
 
   revalidatePath('/dashboard/projects')
   return { ok: true }

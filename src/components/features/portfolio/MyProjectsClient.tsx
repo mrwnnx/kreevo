@@ -15,6 +15,7 @@ export type MyProject = {
   cover_url: string | null
   title: string | null
   is_draft: boolean
+  hidden_by_moderation: boolean
   created_at: string
 }
 
@@ -69,12 +70,17 @@ function ProjectCard({ project, dateLocale, t }: { project: MyProject; dateLocal
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">—</div>
             )}
-            {project.is_draft && (
+            {project.is_draft ? (
               <span className="absolute top-2 end-2 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full bg-background/90 backdrop-blur-sm text-amber-700 dark:text-amber-400">
                 <span className="size-1.5 rounded-full bg-amber-500" />
                 {t.draftBadge}
               </span>
-            )}
+            ) : project.hidden_by_moderation ? (
+              <span className="absolute top-2 end-2 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full bg-background/90 backdrop-blur-sm text-red-700 dark:text-red-400">
+                <span className="size-1.5 rounded-full bg-red-500" />
+                {t.hiddenBadge}
+              </span>
+            ) : null}
           </div>
           <div className="p-3">
             <p className="text-sm font-semibold leading-tight truncate">
@@ -83,6 +89,11 @@ function ProjectCard({ project, dateLocale, t }: { project: MyProject; dateLocal
             <p className="text-[11px] font-mono text-muted-foreground/70 mt-1">
               {formatDate(project.created_at, dateLocale)}
             </p>
+            {project.hidden_by_moderation && (
+              <p className="text-[11px] text-red-700 dark:text-red-400 mt-1.5 leading-snug">
+                {t.hiddenHint}
+              </p>
+            )}
           </div>
         </Link>
 
