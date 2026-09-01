@@ -170,6 +170,104 @@ export type Database = {
           },
         ]
       }
+      briefs: {
+        Row: {
+          access_token: string | null
+          brief: string | null
+          company_id: string
+          constraints: string | null
+          context: string | null
+          created_at: string
+          criteria: string | null
+          deadline_at: string | null
+          deliverable: string | null
+          id: string
+          industry_id: string | null
+          max_responses: number | null
+          project_type_id: string | null
+          published_at: string | null
+          rejection_reason: string | null
+          specialty_id: string | null
+          status: string
+          target_league_ids: string[]
+          title: string | null
+          visibility: string
+        }
+        Insert: {
+          access_token?: string | null
+          brief?: string | null
+          company_id: string
+          constraints?: string | null
+          context?: string | null
+          created_at?: string
+          criteria?: string | null
+          deadline_at?: string | null
+          deliverable?: string | null
+          id?: string
+          industry_id?: string | null
+          max_responses?: number | null
+          project_type_id?: string | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          specialty_id?: string | null
+          status?: string
+          target_league_ids?: string[]
+          title?: string | null
+          visibility?: string
+        }
+        Update: {
+          access_token?: string | null
+          brief?: string | null
+          company_id?: string
+          constraints?: string | null
+          context?: string | null
+          created_at?: string
+          criteria?: string | null
+          deadline_at?: string | null
+          deliverable?: string | null
+          id?: string
+          industry_id?: string | null
+          max_responses?: number | null
+          project_type_id?: string | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          specialty_id?: string | null
+          status?: string
+          target_league_ids?: string[]
+          title?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "briefs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_project_type_id_fkey"
+            columns: ["project_type_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "briefs_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_types: {
         Row: {
           created_at: string
@@ -474,6 +572,56 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          can_publish: boolean
+          created_at: string
+          description: string | null
+          first_brief_approved: boolean
+          id: string
+          location: string | null
+          logo_url: string
+          name: string
+          owner_id: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          can_publish?: boolean
+          created_at?: string
+          description?: string | null
+          first_brief_approved?: boolean
+          id?: string
+          location?: string | null
+          logo_url: string
+          name: string
+          owner_id: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          can_publish?: boolean
+          created_at?: string
+          description?: string | null
+          first_brief_approved?: boolean
+          id?: string
+          location?: string | null
+          logo_url?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           banner_position: string
@@ -639,6 +787,24 @@ export type Database = {
           title_fr?: string
           updated_at?: string | null
           views?: number | null
+        }
+        Relationships: []
+      }
+      hire_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
         }
         Relationships: []
       }
@@ -911,6 +1077,7 @@ export type Database = {
           objectives: string[] | null
           onboarding_completed: boolean
           plan: string | null
+          plan_expires_at: string | null
           preferred_language: string
           referral_code: string | null
           referred_by: string | null
@@ -946,6 +1113,7 @@ export type Database = {
           objectives?: string[] | null
           onboarding_completed?: boolean
           plan?: string | null
+          plan_expires_at?: string | null
           preferred_language?: string
           referral_code?: string | null
           referred_by?: string | null
@@ -981,6 +1149,7 @@ export type Database = {
           objectives?: string[] | null
           onboarding_completed?: boolean
           plan?: string | null
+          plan_expires_at?: string | null
           preferred_language?: string
           referral_code?: string | null
           referred_by?: string | null
@@ -1269,6 +1438,7 @@ export type Database = {
           lang: string | null
           model: string
           submission_id: string
+          tier: string
           user_id: string
         }
         Insert: {
@@ -1278,6 +1448,7 @@ export type Database = {
           lang?: string | null
           model?: string
           submission_id: string
+          tier?: string
           user_id: string
         }
         Update: {
@@ -1287,6 +1458,7 @@ export type Database = {
           lang?: string | null
           model?: string
           submission_id?: string
+          tier?: string
           user_id?: string
         }
         Relationships: [
@@ -1403,14 +1575,21 @@ export type Database = {
           description_bonus_applied: boolean
           files: Json | null
           id: string
+          industry_id: string | null
           is_draft: boolean
           is_reported: boolean | null
           is_visible: boolean | null
+          kind: string
           participation_id: string | null
+          pinned_at: string | null
+          portfolio_position: number | null
+          project_type_id: string | null
           rejection_reason: string | null
           reported_at: string | null
           reports_count: number | null
+          specialty_id: string | null
           title: string | null
+          tools: string[] | null
           total_likes: number | null
           updated_at: string | null
           user_id: string | null
@@ -1436,14 +1615,21 @@ export type Database = {
           description_bonus_applied?: boolean
           files?: Json | null
           id?: string
+          industry_id?: string | null
           is_draft?: boolean
           is_reported?: boolean | null
           is_visible?: boolean | null
+          kind?: string
           participation_id?: string | null
+          pinned_at?: string | null
+          portfolio_position?: number | null
+          project_type_id?: string | null
           rejection_reason?: string | null
           reported_at?: string | null
           reports_count?: number | null
+          specialty_id?: string | null
           title?: string | null
+          tools?: string[] | null
           total_likes?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -1469,14 +1655,21 @@ export type Database = {
           description_bonus_applied?: boolean
           files?: Json | null
           id?: string
+          industry_id?: string | null
           is_draft?: boolean
           is_reported?: boolean | null
           is_visible?: boolean | null
+          kind?: string
           participation_id?: string | null
+          pinned_at?: string | null
+          portfolio_position?: number | null
+          project_type_id?: string | null
           rejection_reason?: string | null
           reported_at?: string | null
           reports_count?: number | null
+          specialty_id?: string | null
           title?: string | null
+          tools?: string[] | null
           total_likes?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -1496,10 +1689,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "submissions_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "submissions_participation_id_fkey"
             columns: ["participation_id"]
             isOneToOne: false
             referencedRelation: "participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_project_type_id_fkey"
+            columns: ["project_type_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
           {
