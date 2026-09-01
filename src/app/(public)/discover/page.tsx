@@ -20,6 +20,8 @@ import { GlassHeader } from '@/components/layout/GlassHeader'
 import { getDict } from '@/lib/i18n/lang'
 import { XpIcon } from '@/components/ui/XpIcon'
 import { FilterBar, type FilterOption } from './FilterBar'
+import { ValidatedBadge } from '@/components/features/portfolio/ValidatedBadge'
+import { SUBMISSION_KIND_PORTFOLIO, type SubmissionKind } from '@/lib/utils/submission-constants'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,16 +108,16 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
   // ── Soumissions publiques : publiées + validées + rendues visibles ─────────
   const { data: subRows } = await (supabaseAdmin as any)
     .from('submissions')
-    .select('id, user_id, title, cover_url, created_at, total_likes, comments_count, views_count')
+    .select('id, user_id, kind, title, cover_url, created_at, total_likes, comments_count, views_count')
     .eq('is_draft', false)
     .eq('is_visible', true)
-    .eq('validation_status', 'approved')
+    .or(`kind.eq.${SUBMISSION_KIND_PORTFOLIO},validation_status.eq.approved`)
     .not('cover_url', 'is', null)
     .order('created_at', { ascending: false })
     .limit(300)
 
   const submissions = ((subRows ?? []) as {
-    id: string; user_id: string; title: string | null; cover_url: string | null
+    id: string; user_id: string; kind: SubmissionKind; title: string | null; cover_url: string | null
     created_at: string; total_likes: number | null; comments_count: number | null; views_count: number | null
   }[]).filter((s) => eligibleIds.has(s.user_id))
 
@@ -181,18 +183,21 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
             <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
               {projects.map((s) => {
                 const author = byId.get(s.user_id)
-                const href = viewer && author
-                  ? `/dashboard/submissions/${s.id}`
-                  : author ? `/u/${author.username}` : '/login'
                 return (
                   <Link
                     key={s.id}
-                    href={href}
+                    href={`/p/${s.id}`}
                     className={`group relative block overflow-clip rounded-[24px] border border-[#dcdce8] bg-white transition-[translate,box-shadow] duration-[1100ms] ease-[cubic-bezier(0,0,0,0.99)] hover:-translate-y-[6px] hover:shadow-[0px_18px_60px_0px_rgba(0,0,0,0.14)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
                   >
                     <div className="relative aspect-[4/3] w-full overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={s.cover_url ?? ''} alt={s.title ?? ''} className="size-full object-cover" />
+
+                      <ValidatedBadge
+                        kind={s.kind}
+                        label={dict.publicProject.validatedBadge}
+                        className="absolute top-2 end-2 text-[10px] px-2 py-0.5 gap-1 shadow-sm"
+                      />
 
                       {/* Auteur ET titre regroupés en bas, révélés ensemble au survol. */}
                       <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-[8px] bg-gradient-to-t from-black/75 to-transparent p-[12px] pt-[48px] opacity-0 transition-opacity duration-[600ms] ease-[cubic-bezier(0,0,0,0.99)] group-hover:opacity-100 motion-reduce:transition-none">
