@@ -17,12 +17,12 @@ import { LeagueIcon } from '@/components/features/league/LeagueIcon'
 import { StatCard } from '@/components/dashboard/StatCard'
 import type { Profile } from '@/types/database.types'
 import { getDict, getLang } from '@/lib/i18n/lang'
-import { getTaxonomyMaps, localizeType, localizeIndustry } from '@/lib/challenges/refs'
+import { getTaxonomyMaps, localizeType, localizeIndustry, localizeSpecialty } from '@/lib/challenges/refs'
+import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 import { SocialLogo } from '@/components/onboarding/SocialLogo'
 import { defForKey } from '@/components/onboarding/socials'
 import { profilePageSchema } from '@/lib/seo/jsonld'
-import { ImageLightbox } from '@/components/features/challenge/ImageLightbox'
 import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
 import { DashboardChrome } from '@/components/layout/DashboardChrome'
 
@@ -165,7 +165,9 @@ export default async function ProfilePage({
       .eq('user_id', p.id)
       .eq('is_visible', true)
       .eq('is_draft', false)
-      .eq('validation_status', 'approved')
+      .or(`kind.eq.${SUBMISSION_KIND_PORTFOLIO},validation_status.eq.approved`)
+      .order('pinned_at', { ascending: false, nullsFirst: false })
+      .order('portfolio_position', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false }),
     supabase.from('badges').select('*').eq('user_id', p.id),
     supabase.from('leagues').select('icon').eq('name', p.league ?? 'Stone').maybeSingle(),
@@ -202,12 +204,26 @@ export default async function ProfilePage({
     awards: badgeAwards,
   })
   const submissions = (allSubmissions ?? []) as any[]
-  // Pre-resolve localized type/industry labels (FK) onto each embedded challenge,
-  // so the module-level SubmissionCard can render them without taxonomy access.
+  // Pre-resolve a display title/specialty/meta onto each submission, so the
+  // module-level SubmissionCard/TrackFilter can render them without taxonomy
+  // access. Challenge submissions read their embedded `challenges` join;
+  // personal (portfolio) ones have no such join (challenge_id is null) and
+  // fall back to their own taxonomy (specialty_id/project_type_id/industry_id)
+  // instead of rendering a blank meta line.
   for (const s of submissions) {
     if (s?.challenges) {
       s.challenges.typeLabel = localizeType(s.challenges, lang, taxoMaps)
       s.challenges.industryLabel = localizeIndustry(s.challenges, lang, taxoMaps)
+      s.displayTitle = s.challenges.title
+      s.displaySpecialty = s.challenges.specialty
+      s.displayMeta = [s.challenges.specialty, s.challenges.typeLabel, s.challenges.industryLabel]
+        .filter(Boolean).join(' · ')
+    } else if (s.kind === SUBMISSION_KIND_PORTFOLIO) {
+      s.displayTitle = s.title
+      s.displaySpecialty = localizeSpecialty(s, lang, taxoMaps)
+      const ownTypeLabel = localizeType({ challenge_type_id: s.project_type_id }, lang, taxoMaps)
+      const ownIndustryLabel = localizeIndustry(s, lang, taxoMaps)
+      s.displayMeta = [s.displaySpecialty, ownTypeLabel, ownIndustryLabel].filter(Boolean).join(' · ')
     }
   }
   const top3 = [...submissions]
@@ -216,7 +232,7 @@ export default async function ProfilePage({
   const filteredSubmissions =
     activeTrack === 'All'
       ? submissions
-      : submissions.filter((s) => s.challenges?.specialty === activeTrack)
+      : submissions.filter((s) => s.displaySpecialty === activeTrack)
 
   const shell = (
     <div className="min-h-screen bg-background">
@@ -395,7 +411,7 @@ export default async function ProfilePage({
             top3.length > 0 ? (
               <div className="grid md:grid-cols-3 gap-4">
                 {top3.map((s: any) => (
-                  <SubmissionCard key={s.id} submission={s} featured lightbox={t.lightbox} />
+                  <SubmissionCard key={s.id} submission={s} featured />
                 ))}
               </div>
             ) : (
@@ -407,7 +423,7 @@ export default async function ProfilePage({
               {submissions.slice(0, 3).length > 0 && (
                 <div className="grid md:grid-cols-3 gap-4 opacity-30 blur-sm pointer-events-none select-none">
                   {submissions.slice(0, 3).map((s: any) => (
-                    <SubmissionCard key={s.id} submission={s} featured lightbox={t.lightbox} />
+                    <SubmissionCard key={s.id} submission={s} featured />
                   ))}
                 </div>
               )}
@@ -426,7 +442,18 @@ export default async function ProfilePage({
 
         {/* ── ALL SUBMISSIONS ────────────────────────────────────── */}
         <section className="space-y-4">
-          <h2 className="text-base font-bold tracking-tight">{t.allWork}</h2>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-base font-bold tracking-tight">{t.allWork}</h2>
+            {/* Owner-only — this page is public and doubles as a shareable portfolio. */}
+            {isOwnProfile && (
+              <Link
+                href="/dashboard/projects/new"
+                className="text-xs font-semibold bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity"
+              >
+                {dict.myProjectsPage.addCta}
+              </Link>
+            )}
+          </div>
           <TrackFilter
             allSubmissions={submissions}
             visibleSubmissions={filteredSubmissions}
@@ -476,22 +503,17 @@ export default async function ProfilePage({
 
 // ── Sub-components ─────────────────────────────────────────────
 
-function SubmissionCard({ submission: s, featured, lightbox }: { submission: any; featured?: boolean; lightbox: Dictionary['publicProfile']['lightbox'] }) {
+function SubmissionCard({ submission: s, featured }: { submission: any; featured?: boolean }) {
+  const title = s.displayTitle ?? 'Untitled'
   return (
-    <div className="group border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
+    <Link href={`/p/${s.id}`} className="group block border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-colors">
       {s.cover_url ? (
         <div className="aspect-video bg-muted overflow-hidden">
-          <ImageLightbox
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={s.cover_url}
-            images={[s.cover_url, ...(Array.isArray(s.files?.images) ? s.files.images : [])]}
-            index={0}
-            alt={s.challenges?.title ?? 'Submission'}
-            title={s.challenges?.title ?? 'Challenge'}
-            meta={[s.challenges?.specialty, s.challenges?.typeLabel, s.challenges?.industryLabel].filter(Boolean).join(' · ')}
-            openLabel={lightbox.open}
-            closeLabel={lightbox.close}
-            prevLabel={lightbox.prev}
-            nextLabel={lightbox.next}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
       ) : (
@@ -501,11 +523,11 @@ function SubmissionCard({ submission: s, featured, lightbox }: { submission: any
       )}
       <div className="p-3 space-y-2">
         <p className="text-xs font-semibold leading-snug truncate">
-          {s.challenges?.title ?? 'Challenge'}
+          {title}
         </p>
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-mono text-muted-foreground">
-            {[s.challenges?.specialty, s.challenges?.typeLabel, s.challenges?.industryLabel].filter(Boolean).join(' · ')}
+            {s.displayMeta ?? ''}
           </span>
           <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-0.5">
@@ -517,7 +539,7 @@ function SubmissionCard({ submission: s, featured, lightbox }: { submission: any
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -534,7 +556,7 @@ function TrackFilter({
   username: string
   t: Dictionary['publicProfile']
 }) {
-  const specialties = ['All', ...Array.from(new Set(allSubmissions.map((s: any) => s.challenges?.specialty).filter(Boolean)))] as string[]
+  const specialties = ['All', ...Array.from(new Set(allSubmissions.map((s: any) => s.displaySpecialty).filter(Boolean)))] as string[]
 
   if (allSubmissions.length === 0) return <EmptyState text={t.empty.noPublic} />
 
@@ -563,7 +585,7 @@ function TrackFilter({
       {visibleSubmissions.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {visibleSubmissions.map((s: any) => (
-            <SubmissionCard key={s.id} submission={s} lightbox={t.lightbox} />
+            <SubmissionCard key={s.id} submission={s} />
           ))}
         </div>
       ) : (
