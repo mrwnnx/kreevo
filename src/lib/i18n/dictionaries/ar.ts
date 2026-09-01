@@ -788,8 +788,8 @@ export const ar: Dictionary = {
     saving: 'جارٍ الحفظ…',
     errors: {
       coverRequired: 'صورة الغلاف مطلوبة',
-      titleRequired: 'العنوان مطلوب',
-      taxonomyRequired: 'التخصص والصناعة ونوع المشروع وأداة واحدة على الأقل مطلوبة',
+      titleRequired: 'العنوان مطلوب للنشر',
+      taxonomyRequired: 'التخصص والصناعة ونوع المشروع وأداة واحدة على الأقل مطلوبة للنشر',
     },
     success: {
       draftTitle: 'تم حفظ المسودة',

@@ -781,8 +781,8 @@ export const fr = {
     saving: 'Enregistrement…',
     errors: {
       coverRequired: 'Image de couverture requise',
-      titleRequired: 'Un titre est requis',
-      taxonomyRequired: 'Spécialité, industrie, type de projet et au moins un outil sont requis',
+      titleRequired: 'Un titre est requis pour publier',
+      taxonomyRequired: 'Spécialité, industrie, type de projet et au moins un outil sont requis pour publier',
     },
     success: {
       draftTitle: 'Brouillon enregistré',

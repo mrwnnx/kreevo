@@ -110,15 +110,20 @@ export function ProjectForm({ specialties, industries, projectTypes, profileUser
     setTools((prev) => prev.filter((x) => x !== tool))
   }
 
-  function validate(): string | null {
+  // A draft only needs a cover (submissions.cover_url is NOT NULL — that's
+  // the one thing that can never be missing). Title and taxonomy are
+  // required to PUBLISH only, so someone can start a project and come back
+  // to finish it later.
+  function validate(publish: boolean): string | null {
     if (!coverUrl) return t.errors.coverRequired
+    if (!publish) return null
     if (!title.trim()) return t.errors.titleRequired
     if (!specialtyId || !industryId || !projectTypeId || tools.length === 0) return t.errors.taxonomyRequired
     return null
   }
 
   function submit(publish: boolean) {
-    const validationError = validate()
+    const validationError = validate(publish)
     if (validationError) {
       setError(validationError)
       return

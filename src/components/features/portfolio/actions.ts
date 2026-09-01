@@ -32,8 +32,11 @@ export async function saveProject(formData: FormData): Promise<
   const projectTypeId = (formData.get('projectTypeId') as string | null) || ''
   const publish = formData.get('publish') === '1'
 
+  // A draft only needs a cover — `submissions.cover_url` is NOT NULL, so
+  // that much is unavoidable regardless of draft/publish. Everything else
+  // (title, taxonomy) is required to PUBLISH only: a draft exists precisely
+  // so someone can start a project and come back to finish it later.
   if (!coverUrl) return { ok: false, error: 'Image de couverture requise' }
-  if (!title) return { ok: false, error: 'Un titre est requis' }
 
   let photos: { url: string; caption: string }[] = []
   try {
@@ -54,8 +57,14 @@ export async function saveProject(formData: FormData): Promise<
     }
   } catch {}
 
-  if (!specialtyId || !industryId || !projectTypeId || tools.length === 0) {
-    return { ok: false, error: 'Spécialité, industrie, type de projet et au moins un outil sont requis' }
+  // Publish-only gate — never applied to a draft. The server never trusts the
+  // client's disabled-button state: this runs regardless of what validate()
+  // did (or didn't) check in ProjectForm, since a draft can be posted directly.
+  if (publish) {
+    if (!title) return { ok: false, error: 'Un titre est requis pour publier' }
+    if (!specialtyId || !industryId || !projectTypeId || tools.length === 0) {
+      return { ok: false, error: 'Spécialité, industrie, type de projet et au moins un outil sont requis pour publier' }
+    }
   }
 
   const files: Record<string, Json> = {}
@@ -67,12 +76,15 @@ export async function saveProject(formData: FormData): Promise<
     challenge_id: null,
     user_id: user.id,
     cover_url: coverUrl,
-    title,
+    title: title || null,
     description,
     files: Object.keys(files).length ? (files as Json) : null,
-    specialty_id: specialtyId,
-    industry_id: industryId,
-    project_type_id: projectTypeId,
+    // Empty string, not null, is what an unfilled <select> posts — and these
+    // are uuid columns, so '' would fail the insert with "invalid input
+    // syntax for type uuid" instead of saving the draft. Normalize to null.
+    specialty_id: specialtyId || null,
+    industry_id: industryId || null,
+    project_type_id: projectTypeId || null,
     tools,
     is_draft: !publish,
     is_visible: publish,

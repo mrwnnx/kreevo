@@ -784,8 +784,8 @@ export const en: Dictionary = {
     saving: 'Saving…',
     errors: {
       coverRequired: 'A cover image is required',
-      titleRequired: 'A title is required',
-      taxonomyRequired: 'Specialty, industry, project type and at least one tool are required',
+      titleRequired: 'A title is required to publish',
+      taxonomyRequired: 'Specialty, industry, project type and at least one tool are required to publish',
     },
     success: {
       draftTitle: 'Draft saved',
