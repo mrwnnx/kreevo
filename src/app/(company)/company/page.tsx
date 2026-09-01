@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getDict } from '@/lib/i18n/lang'
+import { getDict, tx } from '@/lib/i18n/lang'
 import { createClient } from '@/lib/supabase/server'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,11 +24,16 @@ export default async function CompanySpacePage() {
 
   const { data: company } = await supabase
     .from('companies')
-    .select('name, logo_url, description, website_url, location')
+    .select('id, name, logo_url, description, website_url, location')
     .eq('owner_id', user.id)
     .maybeSingle()
 
   if (!company) redirect('/company/onboarding')
+
+  const { count: briefsCount } = await supabase
+    .from('briefs')
+    .select('id', { count: 'exact', head: true })
+    .eq('company_id', company.id)
 
   const t = dict.company.space
 
@@ -60,9 +65,14 @@ export default async function CompanySpacePage() {
         <p className="text-sm leading-relaxed text-muted-foreground">{company.description}</p>
       )}
 
-      <div className="rounded-[24px] border border-border bg-card p-10 text-center">
-        <p className="text-sm text-muted-foreground">{t.briefsEmpty}</p>
-      </div>
+      <Link
+        href="/company/briefs"
+        className="block rounded-[24px] border border-border bg-card p-10 text-center transition-colors hover:bg-muted"
+      >
+        <span className="text-sm text-muted-foreground">
+          {briefsCount ? tx(t.briefsCount, { count: briefsCount }) : t.briefsEmpty}
+        </span>
+      </Link>
     </div>
   )
 }
