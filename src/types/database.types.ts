@@ -1427,14 +1427,21 @@ export type Database = {
           description_bonus_applied: boolean
           files: Json | null
           id: string
+          industry_id: string | null
           is_draft: boolean
           is_reported: boolean | null
           is_visible: boolean | null
+          kind: string
           participation_id: string | null
+          pinned_at: string | null
+          portfolio_position: number | null
+          project_type_id: string | null
           rejection_reason: string | null
           reported_at: string | null
           reports_count: number | null
+          specialty_id: string | null
           title: string | null
+          tools: string[] | null
           total_likes: number | null
           updated_at: string | null
           user_id: string | null
@@ -1460,14 +1467,21 @@ export type Database = {
           description_bonus_applied?: boolean
           files?: Json | null
           id?: string
+          industry_id?: string | null
           is_draft?: boolean
           is_reported?: boolean | null
           is_visible?: boolean | null
+          kind?: string
           participation_id?: string | null
+          pinned_at?: string | null
+          portfolio_position?: number | null
+          project_type_id?: string | null
           rejection_reason?: string | null
           reported_at?: string | null
           reports_count?: number | null
+          specialty_id?: string | null
           title?: string | null
+          tools?: string[] | null
           total_likes?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -1493,14 +1507,21 @@ export type Database = {
           description_bonus_applied?: boolean
           files?: Json | null
           id?: string
+          industry_id?: string | null
           is_draft?: boolean
           is_reported?: boolean | null
           is_visible?: boolean | null
+          kind?: string
           participation_id?: string | null
+          pinned_at?: string | null
+          portfolio_position?: number | null
+          project_type_id?: string | null
           rejection_reason?: string | null
           reported_at?: string | null
           reports_count?: number | null
+          specialty_id?: string | null
           title?: string | null
+          tools?: string[] | null
           total_likes?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -1520,10 +1541,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "submissions_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "industries"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "submissions_participation_id_fkey"
             columns: ["participation_id"]
             isOneToOne: false
             referencedRelation: "participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_project_type_id_fkey"
+            columns: ["project_type_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
           {

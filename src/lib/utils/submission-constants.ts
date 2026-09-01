@@ -10,3 +10,10 @@
 export const HUMAN_REVIEW_THRESHOLD = 3        // ai_rejection_count ≥ this → user can request human review
 export const MAX_PUBLISH_IMAGES = 4            // max images analysed/sent at publish (cover + 3 extras)
 export const DESCRIPTION_BONUS_MULT = 0.20     // +20% XP if description deemed relevant
+
+// database.types.ts stores `kind` as plain `string` (it's `text` + a check
+// constraint in SQL, not a Postgres enum) — regeneration can't narrow it.
+// Use this union everywhere instead of the generated Row type's `kind` field.
+export type SubmissionKind = 'challenge' | 'portfolio'
+export const SUBMISSION_KIND_CHALLENGE: SubmissionKind = 'challenge'
+export const SUBMISSION_KIND_PORTFOLIO: SubmissionKind = 'portfolio'
