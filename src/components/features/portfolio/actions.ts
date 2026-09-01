@@ -10,6 +10,26 @@ import type { Json } from '@/types/database.types'
 // the Anthropic SDK at module top-level, which breaks the client bundle this
 // file is imported from (ProjectForm is a 'use client' component).
 
+const SUBMISSIONS_BUCKET = 'submissions'
+
+/**
+ * Extracts a Storage object path from a public `submissions` bucket URL,
+ * but only when it demonstrably belongs to `userId`. Anything else — a
+ * different bucket, a malformed URL, a path that doesn't start with this
+ * user's id — returns null instead of guessing. `files.images[].url` is
+ * user-editable JSON; without this check a forged entry could delete
+ * another user's storage objects.
+ */
+function extractOwnedStoragePath(url: unknown, userId: string): string | null {
+  if (typeof url !== 'string') return null
+  const marker = `/storage/v1/object/public/${SUBMISSIONS_BUCKET}/`
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  const path = url.slice(idx + marker.length)
+  if (!path || !path.startsWith(`${userId}/`)) return null
+  return path
+}
+
 /**
  * Single write path for a portfolio project — create and edit alike.
  * A portfolio project is never validated, never earns XP, and is never
@@ -201,6 +221,13 @@ export async function publishProject(id: string): Promise<
  * `.select('id')` on the delete is what actually proves a row was removed:
  * checking only `error` would have hidden this exact bug, since a delete
  * that matches nothing still returns `error: null`.
+ *
+ * Storage cleanup (cover + `files.images[].url`) is collected BEFORE the
+ * delete — once the row is gone there is no way to know which files were
+ * ever attached to it — and removed AFTER, best-effort: a Storage failure
+ * is logged, never surfaced as a failed deletion. The row is gone, which is
+ * what the user cares about; an orphaned file is a cleanup job, not a
+ * user-facing error.
  */
 export async function deleteProject(id: string): Promise<
   { ok: true } | { ok: false; error: string }
@@ -211,13 +238,24 @@ export async function deleteProject(id: string): Promise<
 
   const { data: existing } = await supabase
     .from('submissions')
-    .select('id, kind')
+    .select('id, kind, cover_url, files')
     .eq('id', id)
     .eq('user_id', user.id)
     .maybeSingle()
   if (!existing) return { ok: false, error: 'Projet introuvable' }
   if (existing.kind !== SUBMISSION_KIND_PORTFOLIO) {
     return { ok: false, error: "Ce projet n'est pas un projet de portfolio" }
+  }
+
+  const storagePaths = new Set<string>()
+  const coverPath = extractOwnedStoragePath(existing.cover_url, user.id)
+  if (coverPath) storagePaths.add(coverPath)
+  const images = (existing.files as { images?: unknown } | null)?.images
+  if (Array.isArray(images)) {
+    for (const img of images) {
+      const path = extractOwnedStoragePath((img as { url?: unknown })?.url, user.id)
+      if (path) storagePaths.add(path)
+    }
   }
 
   const { data: deleted, error } = await supabaseAdmin
@@ -229,6 +267,19 @@ export async function deleteProject(id: string): Promise<
     .maybeSingle()
   if (error) return { ok: false, error: error.message }
   if (!deleted) return { ok: false, error: 'Suppression sans effet (ligne introuvable)' }
+
+  if (storagePaths.size) {
+    try {
+      const { error: storageError } = await supabaseAdmin.storage
+        .from(SUBMISSIONS_BUCKET)
+        .remove([...storagePaths])
+      if (storageError) {
+        console.error(`[deleteProject] storage cleanup failed for ${id}:`, storageError.message)
+      }
+    } catch (err) {
+      console.error(`[deleteProject] storage cleanup threw for ${id}:`, err)
+    }
+  }
 
   revalidatePath('/dashboard/projects')
   return { ok: true }
