@@ -63,6 +63,20 @@ function parseItems(raw: unknown): OrderItem[] | null {
  * trip that. The pin/unpin pair are each a single UPDATE statement (atomic
  * on their own, and the "clear" one already covers every previously pinned
  * row in one statement regardless of how many there are).
+ *
+ * Every UPDATE that targets a specific, already-ownership-verified id
+ * chains `.select('id')` and checks that a row actually came back —
+ * `{ error: null }` alone does NOT mean a row was touched under RLS/PostgREST:
+ * a WHERE that matches nothing still returns success with zero rows changed
+ * (the exact silent-no-op shape the DELETE-policy bug in this chantier
+ * already produced once). The ownership pre-check makes a genuine mismatch
+ * here unexpected, but "unexpected" is not "impossible" (a row could vanish
+ * between the check and the write), so it's still verified, not assumed.
+ * The bulk "clear previous pin" UPDATE is the one exception: it's filtered
+ * only by `user_id = user.id` (server-derived from the session, never
+ * client input, so there's no ownership mismatch it could hide) and zero
+ * rows is its normal outcome whenever nothing was pinned before — so its
+ * row count is observed but not treated as a failure signal.
  */
 export async function PATCH(req: Request) {
   const supabase = await createClient()
@@ -104,28 +118,51 @@ export async function PATCH(req: Request) {
         .update({ portfolio_position: item.position })
         .eq('id', item.id)
         .eq('user_id', user.id)
+        .select('id')
     )
   )
   const writeError = writes.find((w) => w.error)?.error
   if (writeError) return NextResponse.json({ error: writeError.message }, { status: 500 })
+  // `{ error: null }` is not proof of a write — a WHERE that matches nothing
+  // returns exactly that shape. Every item here already passed the ownership
+  // check above, so a 0-row result means the write silently didn't happen.
+  const unmatched = writes.find((w) => !w.data || w.data.length === 0)
+  if (unmatched) {
+    return NextResponse.json({ error: 'A position write matched no row' }, { status: 500 })
+  }
 
   if (hasPinChange) {
     const clearQuery = supabaseAdmin
       .from('submissions')
       .update({ pinned_at: null })
       .eq('user_id', user.id)
+      .not('pinned_at', 'is', null) // only rows that actually need clearing —
+      // without this, `.eq('user_id', …)` alone matches every OTHER row the
+      // user owns (touched empirically: 12 rows came back on a save with
+      // nothing else pinned), which is harmless value-wise but makes "0 rows
+      // matched" meaningless as a signal. With it, 0 really does mean
+      // "nothing was pinned before", matching the reasoning below.
+      .select('id')
     const { error: clearError } = pinnedId
       ? await clearQuery.neq('id', pinnedId)
       : await clearQuery
+    // No row-count gate here on purpose — see the doc comment above: this
+    // clears "whatever was pinned before, if anything", and 0 is a normal
+    // outcome (nothing was pinned). `.select('id')` is kept for the same
+    // prove-it discipline, just not treated as a failure signal.
     if (clearError) return NextResponse.json({ error: clearError.message }, { status: 500 })
 
     if (pinnedId) {
-      const { error: pinError } = await supabaseAdmin
+      const { data: pinData, error: pinError } = await supabaseAdmin
         .from('submissions')
         .update({ pinned_at: new Date().toISOString() })
         .eq('id', pinnedId)
         .eq('user_id', user.id)
+        .select('id')
       if (pinError) return NextResponse.json({ error: pinError.message }, { status: 500 })
+      if (!pinData || pinData.length === 0) {
+        return NextResponse.json({ error: 'Pin write matched no row' }, { status: 500 })
+      }
     }
   }
 

@@ -156,8 +156,18 @@ export function PortfolioOrganizer({
             <li
               key={item.id}
               draggable
-              onDragStart={() => setDragIndex(index)}
-              onDragOver={(e) => e.preventDefault()}
+              onDragStart={(e) => {
+                setDragIndex(index)
+                // Firefox refuses to start a drag at all unless dataTransfer
+                // carries data set during dragstart — the value itself is
+                // unused (state already tracks the source index).
+                e.dataTransfer.setData('text/plain', String(index))
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.dataTransfer.dropEffect = 'move'
+              }}
               onDrop={() => onDrop(index)}
               className={cn(
                 'relative border rounded-xl overflow-hidden bg-background transition-colors',
