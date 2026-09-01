@@ -115,7 +115,13 @@ Nouveau bucket `companies` pour les logos, **avec dès le départ** ce que le bu
 ## Parcours du B2B
 
 1. **`/hire`** cesse d'être une page « bientôt disponible » et devient la porte
-   d'entrée, avec un bouton d'inscription. La liste d'attente existante est conservée.
+   d'entrée. On y arrive par le menu **« Recruter »** de la page d'accueil, qui existe
+   déjà (`MarketingHeader.tsx` et le pied de page pointent tous deux vers `/hire`).
+   La page offre **deux chemins** : créer un compte entreprise, et **se connecter**
+   pour une entreprise déjà inscrite. La connexion réutilise `/login` — c'est le même
+   mécanisme pour tout le monde ; c'est la **découverte** du chemin qui doit être
+   évidente depuis « Recruter », pas la mécanique.
+   La liste d'attente existante est conservée.
 2. **Inscription** sur le mécanisme existant ; l'arrivée par `/hire` pose le marqueur
    `b2b`.
 3. **Écran d'informations d'entreprise** dans la foulée. Tant qu'il n'est pas rempli,

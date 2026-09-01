@@ -24,9 +24,22 @@ Champs : `name` (requis), `logoUrl` (requis), `description`, `websiteUrl`, `loca
 
 - [ ] **Étape 1 — `/hire` devient la porte d'entrée**
 
-Remplace le « bientôt disponible » par une vraie présentation et un bouton vers
-`/signup/company`. **Conserve le formulaire de liste d'attente existant** et sa table
-`hire_waitlist` : c'est le seul signal de demande qui existe, on ne le jette pas.
+Le chemin de découverte **existe déjà** : `src/components/marketing/MarketingHeader.tsx`
+et `MarketingFooter.tsx` pointent tous deux vers `/hire` sous le libellé `hireTalent`
+(« Recruter »). N'ajoute pas d'entrée de menu, elle est là.
+
+Remplace le « bientôt disponible » par une vraie présentation, avec **deux chemins
+visibles** :
+- **créer un compte entreprise** → `/signup/company` ;
+- **se connecter** → `/login`, pour une entreprise déjà inscrite.
+
+La connexion n'a rien de spécifique : c'est le même mécanisme que pour un designer, et
+c'est la redirection par rôle de l'étape 4 qui l'enverra chez elle. Ce qui compte ici,
+c'est que le chemin soit **trouvable** depuis « Recruter » — une entreprise qui revient
+une semaine plus tard ne doit pas chercher où se connecter.
+
+**Conserve le formulaire de liste d'attente existant** et sa table `hire_waitlist` :
+c'est le seul signal de demande qui existe, on ne le jette pas.
 
 - [ ] **Étape 2 — L'inscription entreprise**
 
