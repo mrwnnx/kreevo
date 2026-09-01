@@ -65,21 +65,36 @@ alter table public.companies enable row level security;
 alter table public.briefs enable row level security;
 
 -- `companies` : lecture publique du nom et du logo (ils s'affichent sur un brief),
--- écriture réservée au propriétaire.
+-- écriture réservée au propriétaire. L'insertion exige en plus `role='b2b'` : sans
+-- ça, n'importe quel designer authentifié pourrait se déclarer entreprise par un
+-- appel REST direct, hors de l'application.
+drop policy if exists "companies_public_read" on public.companies;
 create policy "companies_public_read" on public.companies for select using (true);
+drop policy if exists "companies_owner_write" on public.companies;
 create policy "companies_owner_write" on public.companies for update
   using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+drop policy if exists "companies_owner_insert" on public.companies;
 create policy "companies_owner_insert" on public.companies for insert
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'b2b')
+  );
 
 -- `briefs` : un brief PUBLIÉ et PUBLIC est lisible de tous ; sinon seul son
 -- propriétaire le voit. Le lien privé passera par le service role, pas par la RLS.
+-- Même garde-fou `role='b2b'` sur l'insertion.
+drop policy if exists "briefs_visible" on public.briefs;
 create policy "briefs_visible" on public.briefs for select using (
   (status = 'published' and visibility = 'public')
   or company_id in (select id from public.companies where owner_id = auth.uid())
 );
+drop policy if exists "briefs_owner_write" on public.briefs;
 create policy "briefs_owner_write" on public.briefs for insert
-  with check (company_id in (select id from public.companies where owner_id = auth.uid()));
+  with check (
+    company_id in (select id from public.companies where owner_id = auth.uid())
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'b2b')
+  );
+drop policy if exists "briefs_owner_update" on public.briefs;
 create policy "briefs_owner_update" on public.briefs for update
   using (company_id in (select id from public.companies where owner_id = auth.uid()));
 
