@@ -1021,6 +1021,7 @@ export const en: Dictionary = {
       passwordPlaceholder: '••••••••',
       checkEmail: 'Check your email to confirm your account.',
       resetSent: 'Password reset link sent to your email.',
+      hireCompanyCta: 'Hiring? Create a company account',
     },
     oauth: {
       google: 'Google',

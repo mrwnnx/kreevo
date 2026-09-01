@@ -1025,6 +1025,7 @@ export const ar: Dictionary = {
       passwordPlaceholder: '••••••••',
       checkEmail: 'تحقّق من بريدك لتأكيد حسابك.',
       resetSent: 'تم إرسال رابط إعادة التعيين إلى بريدك.',
+      hireCompanyCta: 'هل توظّف؟ أنشئ حساب شركة',
     },
     oauth: {
       google: 'Google',

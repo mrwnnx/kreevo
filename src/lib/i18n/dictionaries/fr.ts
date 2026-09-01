@@ -1018,6 +1018,7 @@ export const fr = {
       passwordPlaceholder: '••••••••',
       checkEmail: 'Vérifie ton email pour confirmer ton compte.',
       resetSent: 'Lien de réinitialisation envoyé à ton email.',
+      hireCompanyCta: 'Vous recrutez ? Créez un compte entreprise',
     },
     oauth: {
       google: 'Google',

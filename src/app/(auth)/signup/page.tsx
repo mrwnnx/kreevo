@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
 import { SignupForm } from '@/components/features/auth/SignupForm'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
@@ -37,6 +38,12 @@ export default async function SignupPage({
           </p>
         )}
       </div>
+      <Link
+        href="/signup/company"
+        className="block text-center text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        {tc.hireCompanyCta}
+      </Link>
       <OAuthButtons />
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
