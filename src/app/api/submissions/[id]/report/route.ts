@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify, notifyAllAdmins } from '@/lib/utils/notifications'
+import { SUBMISSION_KIND_CHALLENGE } from '@/lib/utils/submission-constants'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -63,13 +64,17 @@ export async function POST(req: Request, { params }: Params) {
   if (newCount >= REPORT_THRESHOLD && submission.validation_status !== 'on_hold') {
     const { data: subFull } = await supabaseAdmin
       .from('submissions')
-      .select('xp_attributed, user_id, challenges(xp_reward)')
+      .select('xp_attributed, user_id, kind, challenges(xp_reward)')
       .eq('id', id)
       .single()
 
     // `user_id` is nullable too: no owner means no XP to take back.
     const ownerId = subFull?.user_id
-    if (subFull?.xp_attributed && ownerId) {
+    // Defense in depth: a portfolio submission never has xp_attributed set,
+    // so there's nothing to revoke here today — but keep the `kind` check.
+    // Without it, this line is a silent trap for whoever wires XP revocation
+    // to something other than xp_attributed later.
+    if (subFull?.xp_attributed && ownerId && subFull.kind === SUBMISSION_KIND_CHALLENGE) {
       const xpReward = subFull.challenges?.xp_reward ?? 150
       const { data: prof } = await supabaseAdmin
         .from('profiles').select('xp').eq('id', ownerId).single()

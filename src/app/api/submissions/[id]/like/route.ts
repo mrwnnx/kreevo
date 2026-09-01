@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify } from '@/lib/utils/notifications'
+import { SUBMISSION_KIND_CHALLENGE } from '@/lib/utils/submission-constants'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -26,7 +27,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   const { data: submission } = await supabaseAdmin
     .from('submissions')
-    .select('user_id, total_likes')
+    .select('user_id, total_likes, kind')
     .eq('id', submissionId)
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
@@ -75,8 +76,11 @@ export async function POST(_req: Request, { params }: Params) {
 
   // `submissions.user_id` is nullable in the schema — the `as any` that used to
   // sit on these queries hid it. No owner means nobody to credit or notify.
+  //
+  // A portfolio submission never credits XP (product decision) — the like
+  // stays cosmetic, only the counter moves.
   const ownerId = submission.user_id
-  if (creditXp && ownerId) {
+  if (creditXp && ownerId && submission.kind === SUBMISSION_KIND_CHALLENGE) {
     const { data: ownerProf } = await supabaseAdmin
       .from('profiles').select('xp').eq('id', ownerId).single()
     const newXP = Math.max(0, (ownerProf?.xp ?? 0) + 2)

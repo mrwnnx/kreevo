@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { updateStreak } from '@/lib/utils/streaks'
 import { notify } from '@/lib/utils/notifications'
+import { SUBMISSION_KIND_CHALLENGE } from '@/lib/utils/submission-constants'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -64,7 +65,7 @@ export async function POST(req: Request, { params }: Params) {
 
   const { data: submission } = await supabaseAdmin
     .from('submissions')
-    .select('id, user_id, validation_status')
+    .select('id, user_id, validation_status, kind')
     .eq('id', submissionId)
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
@@ -114,10 +115,15 @@ export async function POST(req: Request, { params }: Params) {
 
   if (submission.user_id && submission.user_id !== user.id) {
     const ownerId = submission.user_id
-    const { data: ownerProf } = await supabaseAdmin
-      .from('profiles').select('xp').eq('id', ownerId).single()
-    const newXP = (ownerProf?.xp ?? 0) + 5
-    await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
+
+    // A portfolio submission never credits XP (product decision) — keep this
+    // guard even if the block below gets touched again: only challenge work pays out.
+    if (submission.kind === SUBMISSION_KIND_CHALLENGE) {
+      const { data: ownerProf } = await supabaseAdmin
+        .from('profiles').select('xp').eq('id', ownerId).single()
+      const newXP = (ownerProf?.xp ?? 0) + 5
+      await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
+    }
 
     try {
       await notify(ownerId, 'submission_commented', {
