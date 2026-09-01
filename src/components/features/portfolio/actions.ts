@@ -15,10 +15,19 @@ const SUBMISSIONS_BUCKET = 'submissions'
 /**
  * Extracts a Storage object path from a public `submissions` bucket URL,
  * but only when it demonstrably belongs to `userId`. Anything else — a
- * different bucket, a malformed URL, a path that doesn't start with this
- * user's id — returns null instead of guessing. `files.images[].url` is
- * user-editable JSON; without this check a forged entry could delete
- * another user's storage objects.
+ * different bucket, a malformed URL — returns null instead of guessing.
+ * `files.images[].url` is user-editable JSON; without this check a forged
+ * entry could delete another user's storage objects.
+ *
+ * The match is deliberately strict — exactly `<userId>/<one segment>`, no
+ * further slashes — rather than a prefix check. A prefix check
+ * (`path.startsWith(userId + '/')`) is passed by
+ * `<userId>/../<otherUserId>/cover.png`: the string does start with
+ * `<userId>/`, but Storage's flat key space would still resolve the `..`
+ * segment and could hit another user's object. Describing what IS allowed
+ * (one clean segment after the id) instead of enumerating what's
+ * forbidden avoids depending on any assumption about how the storage
+ * backend interprets `..`.
  */
 function extractOwnedStoragePath(url: unknown, userId: string): string | null {
   if (typeof url !== 'string') return null
@@ -26,7 +35,10 @@ function extractOwnedStoragePath(url: unknown, userId: string): string | null {
   const idx = url.indexOf(marker)
   if (idx === -1) return null
   const path = url.slice(idx + marker.length)
-  if (!path || !path.startsWith(`${userId}/`)) return null
+  const prefix = `${userId}/`
+  if (!path.startsWith(prefix)) return null
+  const rest = path.slice(prefix.length)
+  if (!rest || rest.includes('/')) return null
   return path
 }
 
