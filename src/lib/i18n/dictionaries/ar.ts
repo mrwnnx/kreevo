@@ -355,6 +355,17 @@ export const ar: Dictionary = {
       prev: 'الصورة السابقة',
       next: 'الصورة التالية',
     },
+    organize: {
+      toggle: 'ترتيب',
+      done: 'تم',
+      cancel: 'إلغاء',
+      pin: 'تثبيت',
+      unpin: 'إلغاء التثبيت',
+      pinnedLabel: 'مثبّت',
+      moveUp: 'تحريك للأعلى',
+      moveDown: 'تحريك للأسفل',
+      error: 'حدث خطأ، أعد المحاولة.',
+    },
     poweredBy: 'مُشغَّل بواسطة',
   },
   historyPage: {

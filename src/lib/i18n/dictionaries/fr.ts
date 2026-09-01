@@ -348,6 +348,17 @@ export const fr = {
       prev: 'Image précédente',
       next: 'Image suivante',
     },
+    organize: {
+      toggle: 'Organiser',
+      done: 'Terminer',
+      cancel: 'Annuler',
+      pin: 'Épingler',
+      unpin: 'Désépingler',
+      pinnedLabel: 'Épinglé',
+      moveUp: 'Monter',
+      moveDown: 'Descendre',
+      error: 'Une erreur est survenue, réessaie.',
+    },
     poweredBy: 'Créé avec',
   },
   historyPage: {

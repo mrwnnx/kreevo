@@ -351,6 +351,17 @@ export const en: Dictionary = {
       prev: 'Previous image',
       next: 'Next image',
     },
+    organize: {
+      toggle: 'Organize',
+      done: 'Done',
+      cancel: 'Cancel',
+      pin: 'Pin',
+      unpin: 'Unpin',
+      pinnedLabel: 'Pinned',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      error: 'Something went wrong, try again.',
+    },
     poweredBy: 'Powered by',
   },
   historyPage: {

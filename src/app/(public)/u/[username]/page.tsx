@@ -25,6 +25,7 @@ import { defForKey } from '@/components/onboarding/socials'
 import { profilePageSchema } from '@/lib/seo/jsonld'
 import { PoweredByFooter } from '@/components/layout/PoweredByFooter'
 import { ValidatedBadge } from '@/components/features/portfolio/ValidatedBadge'
+import { PortfolioOrganizer, type OrganizerItem } from '@/components/features/portfolio/PortfolioOrganizer'
 import { DashboardChrome } from '@/components/layout/DashboardChrome'
 
 // ── League display config (DB names) ───────────────────────────
@@ -248,6 +249,19 @@ export default async function ProfilePage({
       ? submissions
       : submissions.filter((s) => s.displaySpecialty === activeTrack)
 
+  // Organize mode operates on the whole showcase, unfiltered by track — an
+  // author can intercalate a challenge submission between two personal
+  // projects, so the track pills (a display-only filter) don't apply here.
+  const organizerItems: OrganizerItem[] = isOwnProfile
+    ? submissions.map((s: any) => ({
+        id: s.id,
+        title: s.displayTitle ?? '',
+        coverUrl: s.cover_url ?? null,
+        kind: s.kind === SUBMISSION_KIND_CHALLENGE ? SUBMISSION_KIND_CHALLENGE : SUBMISSION_KIND_PORTFOLIO,
+        pinned: !!s.pinned_at,
+      }))
+    : []
+
   const shell = (
     <div className="min-h-screen bg-background">
       <script
@@ -468,14 +482,27 @@ export default async function ProfilePage({
               </Link>
             )}
           </div>
-          <TrackFilter
-            allSubmissions={submissions}
-            visibleSubmissions={filteredSubmissions}
-            activeTrack={activeTrack}
-            username={p.username}
-            t={t}
-            validatedLabel={dict.publicProject.validatedBadge}
-          />
+          {isOwnProfile ? (
+            <PortfolioOrganizer items={organizerItems} t={dict.publicProfile.organize}>
+              <TrackFilter
+                allSubmissions={submissions}
+                visibleSubmissions={filteredSubmissions}
+                activeTrack={activeTrack}
+                username={p.username}
+                t={t}
+                validatedLabel={dict.publicProject.validatedBadge}
+              />
+            </PortfolioOrganizer>
+          ) : (
+            <TrackFilter
+              allSubmissions={submissions}
+              visibleSubmissions={filteredSubmissions}
+              activeTrack={activeTrack}
+              username={p.username}
+              t={t}
+              validatedLabel={dict.publicProject.validatedBadge}
+            />
+          )}
         </section>
 
         {/* ── BADGES ─────────────────────────────────────────────── */}
