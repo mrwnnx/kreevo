@@ -59,6 +59,7 @@ export const fr = {
       settings: 'Paramètres',
       notifications: 'Notifications',
       history: 'Historique',
+      myProjects: 'Mes projets',
       appearance: 'Apparence',
       switchToAdmin: 'Passer en mode admin',
       signOut: 'Se déconnecter',
@@ -375,6 +376,29 @@ export const fr = {
       public: 'Public',
       hidden: 'Caché',
       lockedHint: 'Disponible une fois la soumission validée',
+    },
+  },
+  myProjectsPage: {
+    title: 'Mes projets',
+    subtitle: 'Les projets de ton portfolio perso, brouillons compris.',
+    addCta: 'Ajouter un projet',
+    draftBadge: 'Brouillon',
+    untitled: 'Sans titre',
+    actions: {
+      edit: 'Modifier',
+      delete: 'Supprimer',
+      publish: 'Publier',
+    },
+    confirmDelete: 'Supprimer ce projet ? Cette action est irréversible.',
+    errors: {
+      deleteFailed: 'La suppression a échoué.',
+      publishFailed: 'La publication a échoué.',
+    },
+    empty: {
+      icon: '🎨',
+      title: 'Aucun projet pour le moment',
+      subtitle: 'Ajoute ton premier projet personnel à ton portfolio.',
+      cta: 'Ajouter un projet',
     },
   },
   notificationsPage: {
@@ -746,6 +770,8 @@ export const fr = {
   projectForm: {
     title: 'Ajouter un projet',
     subtitle: 'Un projet perso pour ton portfolio. Publication immédiate, sans validation ni XP.',
+    editTitle: 'Modifier le projet',
+    editSubtitle: 'Mets à jour les informations de ton projet.',
     coverLabel: 'Image de couverture *',
     coverHint: 'PNG / JPG / WebP — max 5MB. L\'image sera compressée automatiquement.',
     photosLabel: 'Photos supplémentaires',
@@ -778,6 +804,7 @@ export const fr = {
     },
     saveDraft: 'Enregistrer en brouillon',
     publish: 'Publier',
+    saveChanges: 'Enregistrer les modifications',
     saving: 'Enregistrement…',
     errors: {
       coverRequired: 'Image de couverture requise',

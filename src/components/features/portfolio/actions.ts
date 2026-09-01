@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 import type { Json } from '@/types/database.types'
@@ -135,4 +136,99 @@ export async function saveProject(formData: FormData): Promise<
 
   revalidatePath('/dashboard/projects')
   return { ok: true, id: data.id }
+}
+
+/**
+ * Owner-only publish of an existing draft, without going through the form.
+ * Re-checks the same publish gate as `saveProject` server-side (title +
+ * full taxonomy) since a draft only ever guaranteed a cover.
+ */
+export async function publishProject(id: string): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Not authenticated' }
+
+  const { data: existing } = await supabase
+    .from('submissions')
+    .select('id, kind, title, specialty_id, industry_id, project_type_id, tools')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!existing) return { ok: false, error: 'Projet introuvable' }
+  if (existing.kind !== SUBMISSION_KIND_PORTFOLIO) {
+    return { ok: false, error: "Ce projet n'est pas un projet de portfolio" }
+  }
+  if (!existing.title || !existing.specialty_id || !existing.industry_id || !existing.project_type_id || !existing.tools?.length) {
+    return { ok: false, error: 'Titre, spécialité, industrie, type de projet et au moins un outil sont requis pour publier' }
+  }
+
+  const { error } = await supabase
+    .from('submissions')
+    .update({ is_draft: false, is_visible: true })
+    .eq('id', id)
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/dashboard/projects')
+  return { ok: true }
+}
+
+/**
+ * Owner-only delete of a portfolio project.
+ *
+ * Child rows (comments, likes, reports, contest requests) can belong to
+ * OTHER users — someone else's comment or like on this project — and the
+ * RLS policies on those tables only let a user delete their own row. A
+ * user-scoped client would therefore silently leave orphans behind, which
+ * can then block the submission delete if the FK isn't cascading. This is
+ * the exact failure mode the security audit found on `profiles` (19/75
+ * users silently undeletable) — verified live against this project's
+ * actual DB on 2026-09-01 that `comments → submissions` does cascade;
+ * `submission_likes` / `submission_reports` / `submission_contests` weren't
+ * confirmed the same way (a safety guard blocked repeating the test), so
+ * they're cleared explicitly via the admin client regardless — harmless if
+ * the FK already cascades, required if it doesn't.
+ */
+export async function deleteProject(id: string): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Not authenticated' }
+
+  const { data: existing } = await supabase
+    .from('submissions')
+    .select('id, kind')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!existing) return { ok: false, error: 'Projet introuvable' }
+  if (existing.kind !== SUBMISSION_KIND_PORTFOLIO) {
+    return { ok: false, error: "Ce projet n'est pas un projet de portfolio" }
+  }
+
+  const { data: commentRows } = await supabaseAdmin
+    .from('comments')
+    .select('id')
+    .eq('submission_id', id)
+  const commentIds = (commentRows ?? []).map((c) => c.id)
+  if (commentIds.length) {
+    await supabaseAdmin.from('comment_likes').delete().in('comment_id', commentIds)
+  }
+  await supabaseAdmin.from('comments').delete().eq('submission_id', id)
+  await supabaseAdmin.from('submission_likes').delete().eq('submission_id', id)
+  await supabaseAdmin.from('submission_reports').delete().eq('submission_id', id)
+  await supabaseAdmin.from('submission_contests').delete().eq('submission_id', id)
+
+  const { error } = await supabase
+    .from('submissions')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/dashboard/projects')
+  return { ok: true }
 }

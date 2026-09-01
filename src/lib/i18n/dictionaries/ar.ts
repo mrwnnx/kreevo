@@ -66,6 +66,7 @@ export const ar: Dictionary = {
       settings: 'الإعدادات',
       notifications: 'الإشعارات',
       history: 'السجل',
+      myProjects: 'مشاريعي',
       appearance: 'المظهر',
       switchToAdmin: 'التبديل إلى وضع المشرف',
       signOut: 'تسجيل الخروج',
@@ -382,6 +383,29 @@ export const ar: Dictionary = {
       public: 'عام',
       hidden: 'مخفي',
       lockedHint: 'متاح بعد قبول العمل المسلّم',
+    },
+  },
+  myProjectsPage: {
+    title: 'مشاريعي',
+    subtitle: 'مشاريع ملفك الشخصي، بما فيها المسودات.',
+    addCta: 'إضافة مشروع',
+    draftBadge: 'مسودة',
+    untitled: 'بدون عنوان',
+    actions: {
+      edit: 'تعديل',
+      delete: 'حذف',
+      publish: 'نشر',
+    },
+    confirmDelete: 'حذف هذا المشروع؟ هذا الإجراء لا رجعة فيه.',
+    errors: {
+      deleteFailed: 'فشل الحذف.',
+      publishFailed: 'فشل النشر.',
+    },
+    empty: {
+      icon: '🎨',
+      title: 'لا توجد مشاريع بعد',
+      subtitle: 'أضف أول مشروع شخصي إلى ملفك.',
+      cta: 'إضافة مشروع',
     },
   },
   notificationsPage: {
@@ -753,6 +777,8 @@ export const ar: Dictionary = {
   projectForm: {
     title: 'إضافة مشروع',
     subtitle: 'مشروع شخصي لملفك. نشر فوري، بدون تحقق أو نقاط خبرة.',
+    editTitle: 'تعديل المشروع',
+    editSubtitle: 'حدّث معلومات مشروعك.',
     coverLabel: 'صورة الغلاف *',
     coverHint: 'PNG / JPG / WebP — الحد الأقصى 5 ميغابايت. سيتم ضغط الصورة تلقائيًا.',
     photosLabel: 'صور إضافية',
@@ -785,6 +811,7 @@ export const ar: Dictionary = {
     },
     saveDraft: 'حفظ كمسودة',
     publish: 'نشر',
+    saveChanges: 'حفظ التعديلات',
     saving: 'جارٍ الحفظ…',
     errors: {
       coverRequired: 'صورة الغلاف مطلوبة',

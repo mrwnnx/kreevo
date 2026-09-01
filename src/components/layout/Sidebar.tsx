@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { House, Trophy, BarChart3, Medal, Bell, ScrollText, ChevronRight, Shield, Sparkles } from 'lucide-react'
+import { House, Trophy, BarChart3, Medal, Bell, ScrollText, LayoutGrid, ChevronRight, Shield, Sparkles } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
 import { Logo } from '@/components/ui/Logo'
 import { cn } from '@/lib/utils'
@@ -53,6 +53,7 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
     { href: '/dashboard/leaderboard?tab=specialty',  icon: Medal,       label: t.nav.ranking,      match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab === 'specialty' },
     { href: '/dashboard/notifications',              icon: Bell,        label: t.menu.notifications, match: (p) => p.startsWith('/dashboard/notifications'), badge: unreadCount },
     { href: '/dashboard/history',                    icon: ScrollText,  label: t.menu.history,     match: (p) => p.startsWith('/dashboard/history') },
+    { href: '/dashboard/projects',                   icon: LayoutGrid,  label: t.menu.myProjects,  match: (p) => p.startsWith('/dashboard/projects') },
   ]
 
   return (

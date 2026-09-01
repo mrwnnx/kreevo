@@ -121,6 +121,9 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             <DropdownMenuItem>
               <Link href="/dashboard/history" className="w-full text-sm font-medium">{t.menu.history}</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/dashboard/projects" className="w-full text-sm font-medium">{t.menu.myProjects}</Link>
+            </DropdownMenuItem>
             {profile.role === 'admin' && (
               <>
                 <DropdownMenuSeparator />

@@ -61,6 +61,7 @@ export const en: Dictionary = {
       settings: 'Settings',
       notifications: 'Notifications',
       history: 'History',
+      myProjects: 'My projects',
       appearance: 'Appearance',
       switchToAdmin: 'Switch to admin',
       signOut: 'Sign out',
@@ -378,6 +379,29 @@ export const en: Dictionary = {
       public: 'Public',
       hidden: 'Hidden',
       lockedHint: 'Available once the submission is approved',
+    },
+  },
+  myProjectsPage: {
+    title: 'My projects',
+    subtitle: 'Your personal portfolio projects, drafts included.',
+    addCta: 'Add a project',
+    draftBadge: 'Draft',
+    untitled: 'Untitled',
+    actions: {
+      edit: 'Edit',
+      delete: 'Delete',
+      publish: 'Publish',
+    },
+    confirmDelete: 'Delete this project? This action cannot be undone.',
+    errors: {
+      deleteFailed: 'The deletion failed.',
+      publishFailed: 'Publishing failed.',
+    },
+    empty: {
+      icon: '🎨',
+      title: 'No projects yet',
+      subtitle: 'Add your first personal project to your portfolio.',
+      cta: 'Add a project',
     },
   },
   notificationsPage: {
@@ -749,6 +773,8 @@ export const en: Dictionary = {
   projectForm: {
     title: 'Add a project',
     subtitle: 'A personal project for your portfolio. Published instantly, no validation or XP.',
+    editTitle: 'Edit project',
+    editSubtitle: 'Update your project\'s information.',
     coverLabel: 'Cover image *',
     coverHint: 'PNG / JPG / WebP — max 5MB. The image will be compressed automatically.',
     photosLabel: 'Additional photos',
@@ -781,6 +807,7 @@ export const en: Dictionary = {
     },
     saveDraft: 'Save as draft',
     publish: 'Publish',
+    saveChanges: 'Save changes',
     saving: 'Saving…',
     errors: {
       coverRequired: 'A cover image is required',

@@ -21,12 +21,30 @@ interface TaxonomyOption {
   name: string
 }
 
+export interface ProjectFormInitial {
+  id: string
+  coverUrl: string | null
+  photos: { url: string; caption: string }[]
+  title: string
+  description: string
+  link: string
+  specialtyId: string
+  industryId: string
+  projectTypeId: string
+  tools: string[]
+  // A project already live when the edit page loads: the draft/publish
+  // buttons are replaced by a single "save changes" action so a routine
+  // edit can never silently flip it back to draft.
+  isPublished: boolean
+}
+
 interface Props {
   specialties: SpecialtyOption[]
   industries: TaxonomyOption[]
   projectTypes: TaxonomyOption[]
   profileUsername: string | null
   t: ProjectFormT
+  initial?: ProjectFormInitial
 }
 
 const inputClass =
@@ -34,23 +52,24 @@ const inputClass =
 
 const MAX_PHOTOS = 7
 
-export function ProjectForm({ specialties, industries, projectTypes, profileUsername, t }: Props) {
+export function ProjectForm({ specialties, industries, projectTypes, profileUsername, t, initial }: Props) {
   const router = useRouter()
 
-  const [coverUrl, setCoverUrl] = useState<string | null>(null)
-  const [photos, setPhotos] = useState<{ url: string; caption: string }[]>([])
+  const [coverUrl, setCoverUrl] = useState<string | null>(initial?.coverUrl ?? null)
+  const [photos, setPhotos] = useState<{ url: string; caption: string }[]>(initial?.photos ?? [])
   const [tempUploadKey, setTempUploadKey] = useState(0)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [link, setLink] = useState('')
-  const [specialtyId, setSpecialtyId] = useState('')
-  const [industryId, setIndustryId] = useState('')
-  const [projectTypeId, setProjectTypeId] = useState('')
-  const [tools, setTools] = useState<string[]>([])
+  const [title, setTitle] = useState(initial?.title ?? '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [link, setLink] = useState(initial?.link ?? '')
+  const [specialtyId, setSpecialtyId] = useState(initial?.specialtyId ?? '')
+  const [industryId, setIndustryId] = useState(initial?.industryId ?? '')
+  const [projectTypeId, setProjectTypeId] = useState(initial?.projectTypeId ?? '')
+  const [tools, setTools] = useState<string[]>(initial?.tools ?? [])
 
   // Tracks the row created by the first save so a later click (draft → publish,
   // or draft → draft) updates the same submission instead of duplicating it.
-  const [savedId, setSavedId] = useState<string | null>(null)
+  // Pre-set to the edited project's id so an edit always updates, never inserts.
+  const [savedId, setSavedId] = useState<string | null>(initial?.id ?? null)
 
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -203,8 +222,8 @@ export function ProjectForm({ specialties, industries, projectTypes, profileUser
     <div className="pb-10">
       <div className="max-w-[640px] mx-auto px-6 py-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">{t.title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t.subtitle}</p>
+          <h1 className="text-2xl font-bold">{initial ? t.editTitle : t.title}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{initial ? t.editSubtitle : t.subtitle}</p>
         </div>
 
         <section className={cn(GLASS_SURFACE, 'space-y-6 rounded-[24px] p-6')} style={GLASS_GRADIENT}>
@@ -432,14 +451,27 @@ export function ProjectForm({ specialties, industries, projectTypes, profileUser
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" onClick={() => submit(false)} disabled={isPending}>
-            {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t.saveDraft}
-          </Button>
-          <Button onClick={() => submit(true)} disabled={isPending}>
-            {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-            {t.publish}
-          </Button>
+          {initial?.isPublished ? (
+            // Already published: a single "save changes" action, always
+            // wired to publish=true, so a routine edit can never flip the
+            // project back to draft — that state change only ever happens
+            // through the draft/publish buttons below (new or unpublished project).
+            <Button onClick={() => submit(true)} disabled={isPending}>
+              {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t.saveChanges}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => submit(false)} disabled={isPending}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                {t.saveDraft}
+              </Button>
+              <Button onClick={() => submit(true)} disabled={isPending}>
+                {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                {t.publish}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
