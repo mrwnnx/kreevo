@@ -41,14 +41,23 @@ export async function updateSession(request: NextRequest) {
   }
 
   // onboarding gate — only meaningful for /dashboard/* and /onboarding, which are
-  // the only paths this middleware runs on besides /signup.
+  // the only paths this middleware runs on besides /signup and /company/*.
   // PHASE 5 — un user « complet » mais SANS specialty_id (legacy NULL) doit encore
   // passer par l'onboarding (choisir sa spé) : on le considère comme incomplet.
   const { data: profile } = await (supabase as any)
     .from('profiles')
-    .select('onboarding_completed, specialty_id')
+    .select('onboarding_completed, specialty_id, role')
     .eq('id', user.id)
     .single()
+
+  // Un compte b2b n'a ni ligue, ni XP, ni spécialité — la page dashboard designer
+  // (et son onboarding) ne le concernent pas. On l'envoie vers son propre espace,
+  // qui applique son propre garde-fou (fiche entreprise manquante → sa page dédiée).
+  if (profile?.role === 'b2b' && (pathname.startsWith('/dashboard') || pathname === '/onboarding')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/company'
+    return NextResponse.redirect(url)
+  }
 
   const completed = !!profile?.onboarding_completed
   const hasSpecialty = !!profile?.specialty_id

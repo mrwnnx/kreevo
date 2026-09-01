@@ -33,6 +33,30 @@ export async function signUpWithEmail(formData: FormData) {
   return { success: dict.auth.common.checkEmail }
 }
 
+// Même mécanisme que signUpWithEmail, sans username : le trigger handle_new_user()
+// en génère un depuis l'email. `role: 'b2b'` est la seule donnée qui distingue une
+// entreprise d'un designer — posée à la création, jamais mise à jour après coup.
+export async function signUpCompany(formData: FormData) {
+  const supabase = await createClient()
+  const dict = await getDict()
+  const lang = await getLang()
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { role: 'b2b', lang },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/company/onboarding`,
+    },
+  })
+
+  if (error) return { error: translateAuthError(error, dict.auth.errors) }
+  return { success: dict.auth.common.checkEmail }
+}
+
 export async function signInWithEmail(formData: FormData) {
   const supabase = await createClient()
   const dict = await getDict()
@@ -40,9 +64,20 @@ export async function signInWithEmail(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
+
+  // Le rôle décide de la destination : admin → espace admin, b2b → espace
+  // entreprise, sinon dashboard designer (comportement inchangé).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single()
+
+  if (profile?.role === 'admin') redirect('/admin')
+  if (profile?.role === 'b2b') redirect('/company')
   redirect('/dashboard')
 }
 

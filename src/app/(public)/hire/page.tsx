@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { getDict } from '@/lib/i18n/lang'
 import { siteUrl } from '@/lib/site'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
@@ -81,8 +82,13 @@ export default async function HirePage() {
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {t.heroBody}
           </p>
-          <div className="mt-8 flex justify-center">
-            <HireWaitlistCta t={t} />
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" className="h-[50px] text-base" render={<a href="/signup/company" />}>
+              {t.createCompanyAccountCta}
+            </Button>
+            <Button size="lg" variant="outline" className="h-[50px] text-base" render={<a href="/login" />}>
+              {t.loginCta}
+            </Button>
           </div>
         </section>
 
@@ -128,7 +134,15 @@ export default async function HirePage() {
               {t.ctaTitle}
             </h2>
             <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground">{t.ctaBody}</p>
-            <div className="mt-7 flex flex-col items-center gap-3">
+            <div className="mt-7 flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-3 sm:flex-row">
+                <Button size="lg" className="h-[50px] text-base" render={<a href="/signup/company" />}>
+                  {t.createCompanyAccountCta}
+                </Button>
+                <Button size="lg" variant="outline" className="h-[50px] text-base" render={<a href="/login" />}>
+                  {t.loginCta}
+                </Button>
+              </div>
               <HireWaitlistCta t={t} />
               <a
                 href="/"
