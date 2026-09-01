@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notify, notifyAllAdmins } from '@/lib/utils/notifications'
-import { SUBMISSION_KIND_CHALLENGE } from '@/lib/utils/submission-constants'
+import { SUBMISSION_KIND_CHALLENGE, SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -21,7 +21,7 @@ export async function POST(req: Request, { params }: Params) {
 
   const { data: submission } = await supabase
     .from('submissions')
-    .select('id, user_id, created_at, reports_count, validation_status')
+    .select('id, user_id, created_at, reports_count, validation_status, kind, is_visible')
     .eq('id', id)
     .single()
   if (!submission) return NextResponse.json({ error: 'Soumission introuvable' }, { status: 404 })
@@ -29,16 +29,20 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Tu ne peux pas signaler ta propre soumission' }, { status: 403 })
   }
 
-  // Window check. `created_at` is nullable in the schema — a submission without
-  // one cannot be placed in the window, so it falls outside it. That is the exact
-  // behaviour the removed `as any` produced by accident: `new Date(null)` landed
-  // on the epoch, making hoursDiff enormous.
-  const submittedAt = submission.created_at ? new Date(submission.created_at) : null
-  const hoursDiff = submittedAt
-    ? (Date.now() - submittedAt.getTime()) / 1000 / 3600
-    : Infinity
-  if (hoursDiff > REPORT_WINDOW_HOURS) {
-    return NextResponse.json({ error: 'Fenêtre de signalement expirée (24h)' }, { status: 403 })
+  // Window check — challenge submissions only. A personal project stays online
+  // indefinitely, so there's no "recent work" to contest within 24h.
+  if (submission.kind !== SUBMISSION_KIND_PORTFOLIO) {
+    // `created_at` is nullable in the schema — a submission without
+    // one cannot be placed in the window, so it falls outside it. That is the exact
+    // behaviour the removed `as any` produced by accident: `new Date(null)` landed
+    // on the epoch, making hoursDiff enormous.
+    const submittedAt = submission.created_at ? new Date(submission.created_at) : null
+    const hoursDiff = submittedAt
+      ? (Date.now() - submittedAt.getTime()) / 1000 / 3600
+      : Infinity
+    if (hoursDiff > REPORT_WINDOW_HOURS) {
+      return NextResponse.json({ error: 'Fenêtre de signalement expirée (24h)' }, { status: 403 })
+    }
   }
 
   // Insert report (UNIQUE constraint blocks duplicates)
@@ -60,8 +64,15 @@ export async function POST(req: Request, { params }: Params) {
     .update({ reports_count: newCount })
     .eq('id', id)
 
-  // Threshold reached → on_hold + revoke XP if attributed
-  if (newCount >= REPORT_THRESHOLD && submission.validation_status !== 'on_hold') {
+  // Threshold reached → hide/hold + revoke XP if attributed. What "hidden"
+  // means differs by kind: a challenge submission is gated by validation_status
+  // (RLS only serves 'approved'), a portfolio project by is_visible (RLS
+  // serves any visible portfolio row regardless of validation_status).
+  const alreadyActioned = submission.kind === SUBMISSION_KIND_PORTFOLIO
+    ? submission.is_visible === false
+    : submission.validation_status === 'on_hold'
+
+  if (newCount >= REPORT_THRESHOLD && !alreadyActioned) {
     const { data: subFull } = await supabaseAdmin
       .from('submissions')
       .select('xp_attributed, user_id, kind, challenges(xp_reward)')
@@ -82,14 +93,25 @@ export async function POST(req: Request, { params }: Params) {
       await supabaseAdmin.from('profiles').update({ xp: newXP }).eq('id', ownerId)
     }
 
-    await supabaseAdmin
-      .from('submissions')
-      .update({
-        validation_status: 'on_hold',
-        reported_at: new Date().toISOString(),
-        xp_attributed: false,
-      })
-      .eq('id', id)
+    if (submission.kind === SUBMISSION_KIND_PORTFOLIO) {
+      const { data: updated, error: updateError } = await supabaseAdmin
+        .from('submissions')
+        .update({ is_visible: false, reported_at: new Date().toISOString() })
+        .eq('id', id)
+        .select('id')
+      if (updateError || !updated?.length) {
+        return NextResponse.json({ error: updateError?.message ?? 'Échec de la mise à jour' }, { status: 500 })
+      }
+    } else {
+      await supabaseAdmin
+        .from('submissions')
+        .update({
+          validation_status: 'on_hold',
+          reported_at: new Date().toISOString(),
+          xp_attributed: false,
+        })
+        .eq('id', id)
+    }
 
     if (submission.user_id) {
       await notify(submission.user_id, 'submission_on_hold', { submission_id: id })

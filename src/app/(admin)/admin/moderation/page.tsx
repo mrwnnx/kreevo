@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { CheckCircle, Trash2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 interface ReportedComment {
   id: string
@@ -15,6 +16,8 @@ interface ReportedComment {
 
 interface ReportedSubmission {
   id: string
+  kind: string
+  title: string | null
   cover_url: string
   description: string | null
   created_at: string
@@ -73,11 +76,16 @@ export default function AdminModeration() {
   }
 
   async function act(id: string, type: string, action: 'ignore' | 'delete') {
-    await fetch(`/api/admin/moderation/${id}`, {
+    const res = await fetch(`/api/admin/moderation/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, action }),
     })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      alert(data.error ?? 'Erreur')
+      return
+    }
     load()
   }
 
@@ -166,8 +174,18 @@ export default function AdminModeration() {
                     </Avatar>
                     <span className="text-xs font-semibold">@{s.profiles?.username}</span>
                     <span className="text-[11px] font-mono text-muted-foreground">{new Date(s.created_at).toLocaleDateString('fr')}</span>
+                    <span className={cn('text-[10px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded-full',
+                      s.kind === SUBMISSION_KIND_PORTFOLIO
+                        ? 'bg-violet-500/15 text-violet-700 dark:text-violet-400'
+                        : 'bg-blue-500/15 text-blue-700 dark:text-blue-400'
+                    )}>
+                      {s.kind === SUBMISSION_KIND_PORTFOLIO ? 'projet perso' : 'challenge'}
+                    </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">{s.challenges?.title}</p>
+                  <p className="text-sm font-semibold">{s.title ?? s.challenges?.title}</p>
+                  {s.kind !== SUBMISSION_KIND_PORTFOLIO && s.challenges?.title && (
+                    <p className="text-xs text-muted-foreground">{s.challenges.title}</p>
+                  )}
                   {s.description && <p className="text-sm mt-1">{s.description}</p>}
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
+import { SUBMISSION_KIND_PORTFOLIO } from '@/lib/utils/submission-constants'
 
 export async function GET(request: Request) {
   const { error, admin } = await requireAdmin()
@@ -25,10 +26,14 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false })
     data = items ?? []
   } else {
+    // Two different "reported and hidden" shapes, by kind: a challenge
+    // submission is put on_hold; a portfolio project is hidden via
+    // is_visible=false (see report/route.ts). `reported_at` distinguishes a
+    // report-driven hide from the author's own "hide from profile" toggle.
     const { data: items } = await (admin!.supabase as any)
       .from('submissions')
-      .select('*, profiles(username, avatar_url), challenges(title)')
-      .eq('is_reported', true)
+      .select('id, kind, title, cover_url, description, reports_count, created_at, profiles(username, avatar_url), challenges(title)')
+      .or(`validation_status.eq.on_hold,and(kind.eq.${SUBMISSION_KIND_PORTFOLIO},is_visible.eq.false,reported_at.not.is.null)`)
       .order('created_at', { ascending: false })
     data = items ?? []
   }
