@@ -52,9 +52,13 @@ export async function PATCH(request: Request, { params }: Props) {
       return NextResponse.json({ error: fetchError?.message ?? 'Soumission introuvable' }, { status: 404 })
     }
 
+    // Reset the report counter with it: `reports_count` never decreases on
+    // its own, so without this a restored item is one report — not three —
+    // away from being auto-hidden again. `submission_reports` rows are kept
+    // (this only clears a denormalized counter, not the report history).
     const patch = sub.kind === SUBMISSION_KIND_PORTFOLIO
-      ? { is_visible: true }
-      : { validation_status: 'approved' }
+      ? { is_visible: true, reports_count: 0, reported_at: null }
+      : { validation_status: 'approved', reports_count: 0, reported_at: null }
 
     const { data, error: dbError } = await (admin!.supabase as any)
       .from('submissions').update(patch).eq('id', id).select('id')
