@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { House, Trophy, BarChart3, Medal, Shield } from 'lucide-react'
+import { House, Trophy, Briefcase, BarChart3, Medal, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/features/notifications/NotificationBell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -121,6 +121,16 @@ export function FloatingNav({ profile, lang, t, notifTypes }: Props) {
             <DropdownMenuItem>
               <Link href="/dashboard/history" className="w-full text-sm font-medium">{t.menu.history}</Link>
             </DropdownMenuItem>
+            {/* Réservé aux comptes plan='pro' (lot 07) — ne bloque personne
+                aujourd'hui, les 94 comptes actuels étant tous 'pro' via la
+                promo d'inscription. */}
+            {profile.plan === 'pro' && (
+              <DropdownMenuItem>
+                <Link href="/dashboard/briefs" className="w-full text-sm font-medium inline-flex items-center gap-2">
+                  <Briefcase className="size-3.5" /> {t.nav.briefs}
+                </Link>
+              </DropdownMenuItem>
+            )}
             {profile.role === 'admin' && (
               <>
                 <DropdownMenuSeparator />

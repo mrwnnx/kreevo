@@ -15,13 +15,18 @@ const HOME_PATHS = ['/dashboard']
  * HeaderNav — navigation centrale du header, affichée sur toutes les pages
  * SAUF l'accueil (où les cartes tiennent déjà ce rôle).
  */
-export function HeaderNav({ isAdmin, t }: { isAdmin: boolean; t: Dictionary['header'] }) {
+export function HeaderNav({ isAdmin, showBriefs, t }: { isAdmin: boolean; showBriefs: boolean; t: Dictionary['header'] }) {
   const pathname = usePathname()
   if (HOME_PATHS.includes(pathname)) return null
 
   const items = [
     { href: '/dashboard', label: t.nav.home, match: (p: string) => HOME_PATHS.includes(p) },
     { href: '/dashboard/challenges', label: t.nav.challenges, match: (p: string) => p.startsWith('/dashboard/challenges') },
+    // Réservé aux comptes plan='pro' (lot 07) — ne bloque personne aujourd'hui,
+    // les 94 comptes actuels étant tous 'pro' via la promo d'inscription.
+    ...(showBriefs
+      ? [{ href: '/dashboard/briefs', label: t.nav.briefs, match: (p: string) => p.startsWith('/dashboard/briefs') }]
+      : []),
     { href: '/dashboard/leaderboard', label: t.nav.leagues, match: (p: string) => p.startsWith('/dashboard/leaderboard') },
     { href: '/discover', label: t.nav.discover, match: (p: string) => p.startsWith('/discover') },
     ...(isAdmin

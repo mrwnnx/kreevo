@@ -71,3 +71,28 @@ export function validateBriefFields(input: ValidateBriefFieldsInput): BriefValid
 
   return { ok: true }
 }
+
+export interface BriefClosedInput {
+  /** ISO string, end-of-day UTC (see `endOfDayUTC`) — or null for no deadline. */
+  deadlineAt: string | null
+  maxResponses: number | null
+  /**
+   * Responses aren't built yet (spec 2) — every caller today passes 0. Kept as
+   * a parameter (not hardcoded) so this function doesn't need to change the
+   * day a response counter exists.
+   */
+  responseCount: number
+}
+
+/**
+ * A brief is CLOSED (not hidden) once its deadline has passed or its response
+ * cap is reached — lot 07, "fermé, pas caché". Same end-of-day-UTC reading of
+ * `deadline_at` as `validateBriefFields`/publish, so a brief published today
+ * with a deadline of today shows OPEN, not closed a few hours later.
+ */
+export function isBriefClosed(input: BriefClosedInput, now = Date.now()): boolean {
+  const { deadlineAt, maxResponses, responseCount } = input
+  if (deadlineAt && new Date(deadlineAt).getTime() < now) return true
+  if (maxResponses != null && responseCount >= maxResponses) return true
+  return false
+}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { House, Trophy, BarChart3, Medal, Bell, ScrollText, ChevronRight, Shield, Sparkles } from 'lucide-react'
+import { House, Trophy, Briefcase, BarChart3, Medal, Bell, ScrollText, ChevronRight, Shield, Sparkles } from 'lucide-react'
 import { XpIcon } from '@/components/ui/XpIcon'
 import { Logo } from '@/components/ui/Logo'
 import { cn } from '@/lib/utils'
@@ -49,6 +49,11 @@ export function Sidebar({ profile, unreadCount, leagueIcon, lang, t }: Props) {
   }> = [
     { href: '/dashboard',                            icon: House,       label: t.nav.dashboard,    match: (p) => p === '/dashboard' },
     { href: '/dashboard/challenges',                 icon: Trophy,      label: t.nav.challenges,   match: (p) => p.startsWith('/dashboard/challenges') },
+    // Réservé aux comptes plan='pro' (lot 07) — ne bloque personne aujourd'hui,
+    // les 94 comptes actuels étant tous 'pro' via la promo d'inscription.
+    ...(profile.plan === 'pro'
+      ? [{ href: '/dashboard/briefs', icon: Briefcase, label: t.nav.briefs, match: (p: string) => p.startsWith('/dashboard/briefs') }]
+      : []),
     { href: '/dashboard/leaderboard?tab=league',     icon: BarChart3,   label: t.nav.leagues,      match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab !== 'specialty' },
     { href: '/dashboard/leaderboard?tab=specialty',  icon: Medal,       label: t.nav.ranking,      match: (p, tab) => p.startsWith('/dashboard/leaderboard') && tab === 'specialty' },
     { href: '/dashboard/notifications',              icon: Bell,        label: t.menu.notifications, match: (p) => p.startsWith('/dashboard/notifications'), badge: unreadCount },

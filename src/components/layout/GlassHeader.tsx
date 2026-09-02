@@ -75,7 +75,9 @@ export async function GlassHeader() {
       <Link href="/dashboard" aria-label="Kreevo">
         <BrandLogo />
       </Link>
-      <HeaderNav isAdmin={profile.role === 'admin'} t={dict.header} />
+      {/* plan === 'pro' exactement (pas isPro/'!= free' ci-dessous) — c'est le
+          filtre demandé par la spec du lot 07, pas le badge Pro générique. */}
+      <HeaderNav isAdmin={profile.role === 'admin'} showBriefs={profile.plan === 'pro'} t={dict.header} />
 
       <div className="flex items-center gap-[24px]">
         <Link href="/dashboard/notifications" aria-label="Notifications" className="block size-[16px]">
