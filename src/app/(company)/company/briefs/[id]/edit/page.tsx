@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { createClient } from '@/lib/supabase/server'
 import { BriefForm } from '@/components/features/brief/BriefForm'
+import { PrivateLinkPanel } from '@/components/features/brief/PrivateLinkPanel'
 import { loadBriefTaxonomy } from '@/components/features/brief/taxonomy'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,7 +42,7 @@ export default async function EditBriefPage({ params }: Props) {
   const { data: brief } = await supabase
     .from('briefs')
     .select(
-      'id, company_id, title, context, brief, constraints, criteria, deliverable, specialty_id, industry_id, project_type_id',
+      'id, company_id, title, context, brief, constraints, criteria, deliverable, specialty_id, industry_id, project_type_id, visibility, target_league_ids, access_token, deadline_at, max_responses',
     )
     .eq('id', id)
     .maybeSingle()
@@ -57,6 +58,18 @@ export default async function EditBriefPage({ params }: Props) {
         {t.briefs.back}
       </Link>
       <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">{t.briefForm.editTitle}</h1>
+      {brief.visibility === 'private' && brief.access_token && (
+        <PrivateLinkPanel
+          briefId={brief.id}
+          token={brief.access_token}
+          labels={{
+            title: t.briefForm.privateLinkTitle,
+            regenerate: t.briefForm.privateLinkRegenerate,
+            regenerating: t.briefForm.privateLinkRegenerating,
+            error: t.briefForm.privateLinkError,
+          }}
+        />
+      )}
       <BriefForm
         t={t.briefForm}
         initial={{
@@ -70,6 +83,10 @@ export default async function EditBriefPage({ params }: Props) {
           specialtyId: brief.specialty_id,
           industryId: brief.industry_id,
           projectTypeId: brief.project_type_id,
+          visibility: brief.visibility,
+          targetLeagueIds: brief.target_league_ids,
+          deadlineAt: brief.deadline_at,
+          maxResponses: brief.max_responses,
         }}
         {...taxonomy}
       />
