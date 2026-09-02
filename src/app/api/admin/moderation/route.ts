@@ -28,9 +28,16 @@ export async function GET(request: Request) {
     // La file de modération B2B : le seul contrôle humain avant qu'un brief
     // n'atteigne les designers, donc le contenu complet (pas un extrait) et
     // les colonnes de la fiche entreprise qui l'accompagnent à l'affichage.
+    // visibility/deadline_at/max_responses/target_league_ids : l'admin doit
+    // voir si le brief part en public ciblé ou en lien privé, et pour
+    // combien de temps, AVANT d'approuver — la route d'approbation peut
+    // refuser précisément sur l'échéance (deadline_in_past), et l'écran ne
+    // montrait jusqu'ici aucune de ces colonnes.
     const { data: items } = await admin!.supabase
       .from('briefs')
-      .select('id, title, context, brief, constraints, criteria, deliverable, created_at, companies(name, logo_url)')
+      .select(
+        'id, title, context, brief, constraints, criteria, deliverable, created_at, visibility, deadline_at, max_responses, target_league_ids, companies(name, logo_url)',
+      )
       .eq('status', 'pending_review')
       .order('created_at', { ascending: true })
     data = items ?? []

@@ -14,6 +14,10 @@ interface PendingBrief {
   criteria: string | null
   deliverable: string | null
   created_at: string
+  visibility: 'public' | 'private'
+  deadline_at: string | null
+  max_responses: number | null
+  target_league_ids: string[]
   companies?: { name: string; logo_url: string } | null
 }
 
@@ -367,6 +371,26 @@ function PendingBriefCard({
           </div>
           <p className="text-sm font-semibold">{brief.title ?? '(sans titre)'}</p>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
+        <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+          {brief.visibility === 'private' ? 'Lien privé' : brief.target_league_ids.length === 0 ? 'Public — toutes les ligues' : `Public — ${brief.target_league_ids.length} ligue(s) ciblée(s)`}
+        </span>
+        {brief.deadline_at && (
+          <span className={cn(
+            'px-1.5 py-0.5 rounded-full',
+            new Date(brief.deadline_at) < new Date() ? 'bg-red-500/15 text-red-700 dark:text-red-400' : 'bg-muted text-muted-foreground',
+          )}>
+            Échéance {new Date(brief.deadline_at).toLocaleDateString('fr')}
+            {new Date(brief.deadline_at) < new Date() && ' (passée)'}
+          </span>
+        )}
+        {brief.max_responses != null && (
+          <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+            Plafond {brief.max_responses} réponse(s)
+          </span>
+        )}
       </div>
 
       <div className="space-y-2">
