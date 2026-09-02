@@ -16,15 +16,21 @@ function localize(row: LocalizedRow, lang: Lang): string {
 
 /**
  * Charge les trois listes de taxonomie du formulaire de brief (spécialité,
- * industrie, type de projet), localisées dans la langue courante. Partagé par
- * `briefs/new` et `briefs/[id]/edit` — mêmes trois requêtes, même mise en forme.
- * Colonnes explicites, jamais `select('*')`.
+ * industrie, type de projet), localisées dans la langue courante, ainsi que
+ * les ligues actives (nom unique, pas de traduction — ciblage de publication).
+ * Partagé par `briefs/new` et `briefs/[id]/edit` — mêmes requêtes, même mise
+ * en forme. Colonnes explicites, jamais `select('*')`.
  */
 export async function loadBriefTaxonomy(
   supabase: SupabaseClient<Database>,
   lang: Lang,
-): Promise<{ specialties: TaxonomyOption[]; industries: TaxonomyOption[]; projectTypes: TaxonomyOption[] }> {
-  const [specialtiesRes, industriesRes, typesRes] = await Promise.all([
+): Promise<{
+  specialties: TaxonomyOption[]
+  industries: TaxonomyOption[]
+  projectTypes: TaxonomyOption[]
+  leagues: TaxonomyOption[]
+}> {
+  const [specialtiesRes, industriesRes, typesRes, leaguesRes] = await Promise.all([
     supabase
       .from('specialties')
       .select('id, name_fr, name_en, name_ar')
@@ -32,6 +38,7 @@ export async function loadBriefTaxonomy(
       .order('order_index'),
     supabase.from('industries').select('id, name_fr, name_en, name_ar').order('display_order'),
     supabase.from('challenge_types').select('id, name_fr, name_en, name_ar').order('display_order'),
+    supabase.from('leagues').select('id, name').eq('is_active', true).order('order_index'),
   ])
 
   const toOptions = (rows: LocalizedRow[] | null): TaxonomyOption[] =>
@@ -41,5 +48,6 @@ export async function loadBriefTaxonomy(
     specialties: toOptions(specialtiesRes.data),
     industries: toOptions(industriesRes.data),
     projectTypes: toOptions(typesRes.data),
+    leagues: (leaguesRes.data ?? []).map((l) => ({ id: l.id, name: l.name })),
   }
 }
