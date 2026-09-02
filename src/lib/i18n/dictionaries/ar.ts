@@ -791,6 +791,10 @@ export const ar: Dictionary = {
     statusOpen: 'مفتوح',
     statusClosed: 'مغلق',
   },
+  privateBriefPage: {
+    notFoundTitle: 'الموجز غير موجود | Kreevo',
+    badge: 'رابط خاص',
+  },
   briefDetail: {
     back: 'الموجزات',
     deadlineLabel: 'الموعد النهائي',

@@ -787,6 +787,10 @@ export const en: Dictionary = {
     statusOpen: 'Open',
     statusClosed: 'Closed',
   },
+  privateBriefPage: {
+    notFoundTitle: 'Brief not found | Kreevo',
+    badge: 'Private link',
+  },
   briefDetail: {
     back: 'Briefs',
     deadlineLabel: 'Deadline',

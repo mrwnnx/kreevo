@@ -797,6 +797,10 @@ export const fr = {
       back: '← Retour au brief',
     },
   },
+  privateBriefPage: {
+    notFoundTitle: 'Brief introuvable | Kreevo',
+    badge: 'Lien privé',
+  },
   profileForm: {
     saving: 'Enregistrement…',
     saved: 'Enregistré',
