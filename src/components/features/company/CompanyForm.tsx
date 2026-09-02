@@ -63,7 +63,7 @@ export function CompanyForm({ t, initial }: CompanyFormProps) {
           onChange={setLogoUrl}
           maxSizeMB={2}
           accept="image/jpeg,image/png,image/webp"
-          className="size-28"
+          className="aspect-[16/9] max-w-xs"
         />
       </div>
 
