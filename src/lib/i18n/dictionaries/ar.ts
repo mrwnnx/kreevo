@@ -1345,6 +1345,8 @@ export const ar: Dictionary = {
       errorGeneric: 'حدث خطأ ما. أعد المحاولة.',
       errorIncompleteForPublish: 'العنوان والموجز والتسليم مطلوبة للنشر.',
       errorCannotPublish: 'النشر معطل لحسابك.',
+      errorDeadlineInPast: 'الموعد النهائي فات بالفعل.',
+      errorInvalidMaxResponses: 'يجب أن يكون الحد الأقصى للردود رقماً صحيحاً لا يقل عن 1.',
       privateLinkTitle: 'رابط خاص',
       privateLinkRegenerate: 'إعادة توليد الرابط',
       privateLinkRegenerating: 'جارٍ إعادة التوليد…',

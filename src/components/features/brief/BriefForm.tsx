@@ -48,6 +48,8 @@ const ERROR_KEY: Record<string, keyof T> = {
   save_failed: 'errorGeneric',
   incomplete_for_publish: 'errorIncompleteForPublish',
   cannot_publish: 'errorCannotPublish',
+  deadline_in_past: 'errorDeadlineInPast',
+  invalid_max_responses: 'errorInvalidMaxResponses',
 }
 
 const textareaClass =
@@ -72,6 +74,11 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
       ? initial.targetLeagueIds
       : leagues.map((l) => l.id),
   )
+
+  // Affordance client seulement — le serveur reste l'autorité (refus à la
+  // publication si la date est passée, y compris pour quelqu'un qui posterait
+  // directement sans passer par ce champ).
+  const todayStr = new Date().toISOString().slice(0, 10)
 
   async function handleSubmit(formData: FormData) {
     setError(null)
@@ -267,6 +274,7 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
             id="deadlineAt"
             name="deadlineAt"
             type="date"
+            min={todayStr}
             defaultValue={initial?.deadlineAt ? initial.deadlineAt.slice(0, 10) : ''}
           />
         </div>

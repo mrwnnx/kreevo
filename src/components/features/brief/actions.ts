@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { generateBriefAccessToken } from '@/lib/utils/brief-token'
+import { parseMaxResponses, validateBriefFields } from './validate'
 
 /**
  * saveBrief — crée ou met à jour un brief, brouillon ou publication. RLS
@@ -15,8 +16,13 @@ import { generateBriefAccessToken } from '@/lib/utils/brief-token'
  * Piège connu de ce chantier : un <select> non rempli poste '' — jamais un uuid
  * valide. Les trois colonnes de taxonomie sont coercées explicitement en null,
  * même logique pour `deadlineAt` (date vide) et `maxResponses` (plafond vide).
- * Un brouillon n'exige rien : tous les champs texte deviennent null s'ils sont
- * vides, ce qui correspond à des colonnes texte nullables.
+ * Un brouillon n'exige rien côté contenu : tous les champs texte deviennent null
+ * s'ils sont vides, ce qui correspond à des colonnes texte nullables.
+ *
+ * Les règles de validation (plafond < 1 toujours refusé, échéance passée
+ * refusée seulement à la publication) vivent dans `./validate.ts`, en pur —
+ * sans import Supabase/Next — pour rester exerçables par un script hors
+ * requête serveur.
  *
  * Visibilité et jeton : la contrainte `briefs_private_needs_token` impose
  * privé ⇔ jeton présent. `visibility` et `access_token` sont donc toujours
@@ -68,24 +74,22 @@ export async function saveBrief(formData: FormData): Promise<
 
   const deadlineRaw = str('deadlineAt')
   const deadlineAt = deadlineRaw ? new Date(deadlineRaw).toISOString() : null
+
   const maxResponsesRaw = str('maxResponses')
-  const maxResponsesParsed = maxResponsesRaw ? Number(maxResponsesRaw) : null
-  const maxResponses =
-    maxResponsesParsed && Number.isFinite(maxResponsesParsed) && maxResponsesParsed > 0
-      ? Math.trunc(maxResponsesParsed)
-      : null
+  const maxResponses = parseMaxResponses(maxResponsesRaw)
 
   const action = (formData.get('action') as string | null) === 'publish' ? 'publish' : 'draft'
 
-  // Un brouillon n'exige rien ; publier exige le contenu minimal — l'erreur le
-  // dit explicitement pour ne pas laisser croire que ces champs sont requis
-  // pour un simple brouillon.
-  if (action === 'publish') {
-    if (!company.can_publish) return { ok: false, error: 'cannot_publish' }
-    if (!payload.title || !payload.brief || !payload.deliverable) {
-      return { ok: false, error: 'incomplete_for_publish' }
-    }
-  }
+  const validation = validateBriefFields({
+    action,
+    title: payload.title,
+    brief: payload.brief,
+    deliverable: payload.deliverable,
+    deadlineAt,
+    maxResponsesRaw,
+    canPublish: company.can_publish,
+  })
+  if (!validation.ok) return validation
 
   const publishFields =
     action === 'publish'

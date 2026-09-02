@@ -1342,6 +1342,8 @@ export const en: Dictionary = {
       errorGeneric: 'Something went wrong. Try again.',
       errorIncompleteForPublish: 'A title, a brief and a deliverable are required to publish.',
       errorCannotPublish: 'Publishing is disabled for your account.',
+      errorDeadlineInPast: 'The deadline has already passed.',
+      errorInvalidMaxResponses: 'The response cap must be a whole number of at least 1.',
       privateLinkTitle: 'Private link',
       privateLinkRegenerate: 'Regenerate link',
       privateLinkRegenerating: 'Regenerating…',

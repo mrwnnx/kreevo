@@ -1339,6 +1339,8 @@ export const fr = {
       errorGeneric: 'Une erreur est survenue. Réessaye.',
       errorIncompleteForPublish: 'Un titre, un brief et un livrable sont requis pour publier.',
       errorCannotPublish: 'La publication est désactivée pour votre compte.',
+      errorDeadlineInPast: 'La date limite est déjà passée.',
+      errorInvalidMaxResponses: 'Le plafond de réponses doit être un nombre entier d’au moins 1.',
       privateLinkTitle: 'Lien privé',
       privateLinkRegenerate: 'Régénérer le lien',
       privateLinkRegenerating: 'Régénération…',
