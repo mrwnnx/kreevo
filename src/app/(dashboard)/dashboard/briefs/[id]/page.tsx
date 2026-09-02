@@ -22,13 +22,15 @@ interface BriefDetailRow {
   deliverable: string | null
   deadline_at: string | null
   max_responses: number | null
-  companies: {
-    name: string
-    logo_url: string
-    description: string | null
-    website_url: string | null
-  } | null
+  company_id: string
   specialties: { name_fr: string | null; name_en: string | null; name_ar: string | null } | null
+}
+
+interface CompanyPublicRow {
+  name: string
+  logo_url: string
+  description: string | null
+  website_url: string | null
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -57,6 +59,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  *
  * Le bouton « Réaliser cet exercice » mène à un écran « bientôt » — couture
  * assumée avec la spec 2 (réponses aux briefs), pas encore construite.
+ *
+ * Nom/logo/description/site de l'entreprise : lus via `companies_public`
+ * (vue, lot 017), pas via l'embed PostgREST `companies(...)` — la RLS de
+ * `companies` ne rend plus visible que la propre fiche du lecteur, et cette
+ * page est vue par un designer, jamais par l'entreprise elle-même.
  */
 export default async function BriefDetailPage({ params }: Props) {
   const { id } = await params
@@ -92,7 +99,7 @@ export default async function BriefDetailPage({ params }: Props) {
   const { data } = await supabase
     .from('briefs')
     .select(
-      'id, title, brief, context, constraints, criteria, deliverable, deadline_at, max_responses, companies(name, logo_url, description, website_url), specialties(name_fr, name_en, name_ar)',
+      'id, title, brief, context, constraints, criteria, deliverable, deadline_at, max_responses, company_id, specialties(name_fr, name_en, name_ar)',
     )
     .eq('id', id)
     .eq('status', 'published')
@@ -100,9 +107,15 @@ export default async function BriefDetailPage({ params }: Props) {
     .maybeSingle()
 
   const brief = data as unknown as BriefDetailRow | null
-  if (!brief || !brief.companies) notFound()
+  if (!brief) notFound()
 
-  const company = brief.companies
+  const { data: companyData } = await supabase
+    .from('companies_public')
+    .select('name, logo_url, description, website_url')
+    .eq('id', brief.company_id)
+    .maybeSingle()
+  const company = companyData as unknown as CompanyPublicRow | null
+  if (!company) notFound()
   const specialtyLabel = brief.specialties
     ? (lang === 'ar' ? brief.specialties.name_ar : lang === 'en' ? brief.specialties.name_en : brief.specialties.name_fr) || ''
     : ''

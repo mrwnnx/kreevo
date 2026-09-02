@@ -20,7 +20,7 @@ interface BriefListRow {
   deadline_at: string | null
   max_responses: number | null
   target_league_ids: string[]
-  companies: { name: string; logo_url: string } | null
+  company_id: string
   specialties: { name_fr: string | null; name_en: string | null; name_ar: string | null } | null
 }
 
@@ -36,6 +36,13 @@ interface BriefListRow {
  * côté serveur en JS après lecture — la table ne contient aujourd'hui aucune
  * ligne, et une poignée de briefs publiés ne justifie pas un filtre `.or()`
  * sur colonne tableau.
+ *
+ * Nom/logo de l'entreprise : lus via `companies_public` (vue, lot 017), pas
+ * via l'embed PostgREST `companies(...)`. La RLS de la table `companies` ne
+ * rend plus visible que la propre fiche du lecteur — un embed suivrait cette
+ * même RLS et rendrait `null` pour toute entreprise autre que celle du
+ * designer connecté (qui n'en a pas). D'où un second aller, groupé par
+ * `company_id`, vers la vue qui n'expose que les colonnes publiques.
  *
  * « Fermé, pas caché » : un brief dont l'échéance est passée ou dont le
  * plafond de réponses est atteint reste dans la liste, marqué fermé. Le
@@ -78,7 +85,7 @@ export default async function BriefsPage() {
     supabase
       .from('briefs')
       .select(
-        'id, title, deadline_at, max_responses, target_league_ids, companies(name, logo_url), specialties(name_fr, name_en, name_ar)',
+        'id, title, deadline_at, max_responses, target_league_ids, company_id, specialties(name_fr, name_en, name_ar)',
       )
       .eq('status', 'published')
       .eq('visibility', 'public')
@@ -95,9 +102,19 @@ export default async function BriefsPage() {
 
   const rows = (briefsData ?? []) as unknown as BriefListRow[]
 
-  const visibleBriefs: BriefCardData[] = rows
-    .filter((b) => b.target_league_ids.length === 0 || (userLeagueId != null && b.target_league_ids.includes(userLeagueId)))
-    .filter((b) => b.companies != null)
+  const targetedRows = rows.filter(
+    (b) => b.target_league_ids.length === 0 || (userLeagueId != null && b.target_league_ids.includes(userLeagueId)),
+  )
+
+  const companyIds = [...new Set(targetedRows.map((b) => b.company_id))]
+  const { data: companiesData } = companyIds.length
+    ? await supabase.from('companies_public').select('id, name, logo_url').in('id', companyIds)
+    : { data: [] as { id: string; name: string; logo_url: string }[] }
+  const companyById = new Map((companiesData ?? []).map((c) => [c.id, c]))
+
+  const visibleBriefs: BriefCardData[] = targetedRows
+    .map((b) => ({ ...b, company: companyById.get(b.company_id) }))
+    .filter((b) => b.company != null)
     .map((b) => ({
       id: b.id,
       title: b.title,
@@ -106,8 +123,8 @@ export default async function BriefsPage() {
       // Le nombre de réponses n'existe pas encore (spec 2) — toujours 0 ici,
       // volontairement, plutôt qu'un compteur inventé.
       closed: isBriefClosed({ deadlineAt: b.deadline_at, maxResponses: b.max_responses, responseCount: 0 }),
-      companyName: b.companies!.name,
-      companyLogoUrl: b.companies!.logo_url,
+      companyName: b.company!.name,
+      companyLogoUrl: b.company!.logo_url,
       specialtyLabel: localizeSpecialty(b.specialties),
     }))
 

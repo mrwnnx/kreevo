@@ -1817,7 +1817,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      companies_public: {
+        Row: {
+          description: string | null
+          id: string
+          location: string | null
+          logo_url: string
+          name: string
+          website_url: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       increment_submission_views: {
