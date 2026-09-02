@@ -5,6 +5,18 @@ import { CheckCircle, Trash2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
+interface PendingBrief {
+  id: string
+  title: string | null
+  context: string | null
+  brief: string | null
+  constraints: string | null
+  criteria: string | null
+  deliverable: string | null
+  created_at: string
+  companies?: { name: string; logo_url: string } | null
+}
+
 interface ReportedComment {
   id: string
   content: string
@@ -37,24 +49,27 @@ interface HumanReviewSubmission {
 }
 
 export default function AdminModeration() {
-  const [tab, setTab] = useState<'comments' | 'submissions' | 'human_review'>('comments')
+  const [tab, setTab] = useState<'comments' | 'submissions' | 'human_review' | 'briefs'>('comments')
   const [comments, setComments] = useState<ReportedComment[]>([])
   const [submissions, setSubmissions] = useState<ReportedSubmission[]>([])
   const [humanReview, setHumanReview] = useState<HumanReviewSubmission[]>([])
+  const [pendingBriefs, setPendingBriefs] = useState<PendingBrief[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     setLoading(true)
-    const [cr, sr, hr] = await Promise.all([
+    const [cr, sr, hr, br] = await Promise.all([
       fetch('/api/admin/moderation?type=comments').then(r => r.json()),
       fetch('/api/admin/moderation?type=submissions').then(r => r.json()),
       fetch('/api/admin/moderation?type=human_review').then(r => r.json()),
+      fetch('/api/admin/moderation?type=briefs').then(r => r.json()),
     ])
     setComments(cr.items ?? [])
     setSubmissions(sr.items ?? [])
     setHumanReview(hr.items ?? [])
+    setPendingBriefs(br.items ?? [])
     setLoading(false)
   }
 
@@ -63,6 +78,20 @@ export default function AdminModeration() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, feedback }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      alert(data.error ?? 'Erreur')
+      return
+    }
+    load()
+  }
+
+  async function reviewBrief(id: string, action: 'approve' | 'reject', reason = '') {
+    const res = await fetch(`/api/admin/briefs/${id}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, reason }),
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
@@ -105,6 +134,7 @@ export default function AdminModeration() {
           { key: 'comments', label: `Commentaires (${comments.length})` },
           { key: 'submissions', label: `Soumissions (${submissions.length})` },
           { key: 'human_review', label: `Review humaine (${humanReview.length})` },
+          { key: 'briefs', label: `Briefs (${pendingBriefs.length})` },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
             className={cn('shrink-0 px-4 py-2 text-sm font-medium transition-colors',
@@ -148,7 +178,7 @@ export default function AdminModeration() {
             </div>
           ))}
         </div>
-      ) : (
+      ) : tab === 'submissions' ? (
         <div className="space-y-3">
           {submissions.length === 0 ? (
             <EmptyState text="Aucune soumission signalée" />
@@ -178,7 +208,7 @@ export default function AdminModeration() {
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       {!loading && tab === 'human_review' && (
         <div className="space-y-3">
@@ -186,6 +216,16 @@ export default function AdminModeration() {
             <EmptyState text="Aucune soumission en attente de review humaine" />
           ) : humanReview.map(s => (
             <HumanReviewCard key={s.id} sub={s} onValidate={validate} />
+          ))}
+        </div>
+      )}
+
+      {!loading && tab === 'briefs' && (
+        <div className="space-y-3">
+          {pendingBriefs.length === 0 ? (
+            <EmptyState text="Aucun brief en attente de validation" />
+          ) : pendingBriefs.map(b => (
+            <PendingBriefCard key={b.id} brief={b} onReview={reviewBrief} />
           ))}
         </div>
       )}
@@ -280,6 +320,86 @@ function HumanReviewCard({
           className="flex items-center gap-1.5 text-xs font-mono text-destructive bg-destructive/5 hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
         >
           <Trash2 className="size-3.5" /> {busy === 'reject' ? '…' : 'Rejeter'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PendingBriefCard({
+  brief,
+  onReview,
+}: {
+  brief: PendingBrief
+  onReview: (id: string, action: 'approve' | 'reject', reason?: string) => Promise<void>
+}) {
+  const [reason, setReason] = useState('')
+  const [busy, setBusy] = useState<'approve' | 'reject' | null>(null)
+
+  async function handle(action: 'approve' | 'reject') {
+    if (action === 'reject' && !reason.trim()) {
+      alert('Motif obligatoire pour un refus')
+      return
+    }
+    setBusy(action)
+    try { await onReview(brief.id, action, reason) } finally { setBusy(null) }
+  }
+
+  const sections: Array<[string, string | null]> = [
+    ['Contexte', brief.context],
+    ['Brief', brief.brief],
+    ['Contraintes', brief.constraints],
+    ['Critères de réussite', brief.criteria],
+    ['Livrable attendu', brief.deliverable],
+  ]
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+      <div className="flex items-start gap-3">
+        <Avatar className="size-8 rounded-md shrink-0">
+          <AvatarImage src={brief.companies?.logo_url ?? undefined} />
+          <AvatarFallback className="rounded-md text-[10px]">{brief.companies?.name?.[0]?.toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <span className="text-xs font-semibold">{brief.companies?.name ?? '—'}</span>
+            <span className="text-[11px] font-mono text-muted-foreground">{new Date(brief.created_at).toLocaleDateString('fr')}</span>
+          </div>
+          <p className="text-sm font-semibold">{brief.title ?? '(sans titre)'}</p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {sections.map(([label, value]) => value && (
+          <div key={label}>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</p>
+            <p className="text-sm whitespace-pre-line leading-snug">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <textarea
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Motif (obligatoire si refus)…"
+        rows={2}
+        className="w-full rounded-[var(--radius-input)] border border-input bg-transparent dark:bg-input/30 p-2 text-base md:text-sm placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-colors"
+      />
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => handle('approve')}
+          disabled={busy !== null}
+          className="flex items-center gap-1.5 text-xs font-mono text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+        >
+          <CheckCircle className="size-3.5" /> {busy === 'approve' ? '…' : 'Approuver'}
+        </button>
+        <button
+          onClick={() => handle('reject')}
+          disabled={busy !== null}
+          className="flex items-center gap-1.5 text-xs font-mono text-destructive bg-destructive/5 hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+        >
+          <Trash2 className="size-3.5" /> {busy === 'reject' ? '…' : 'Refuser'}
         </button>
       </div>
     </div>

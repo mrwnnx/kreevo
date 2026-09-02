@@ -40,7 +40,7 @@ export default async function CompanyBriefsPage() {
 
   const { data: briefs } = await supabase
     .from('briefs')
-    .select('id, title, status, created_at')
+    .select('id, title, status, rejection_reason, created_at')
     .eq('company_id', company.id)
     .order('created_at', { ascending: false })
 
@@ -73,12 +73,23 @@ export default async function CompanyBriefsPage() {
             <li key={b.id}>
               <Link
                 href={`/company/briefs/${b.id}/edit`}
-                className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card px-5 py-4 transition-colors hover:bg-muted"
+                className="flex flex-col gap-1 rounded-2xl border border-border bg-card px-5 py-4 transition-colors hover:bg-muted"
               >
-                <span className="truncate font-medium text-foreground">{b.title || t.untitled}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {t[STATUS_KEY[b.status] ?? 'statusDraft']}
+                <span className="flex items-center justify-between gap-4">
+                  <span className="truncate font-medium text-foreground">{b.title || t.untitled}</span>
+                  <span
+                    className={
+                      b.status === 'rejected'
+                        ? 'shrink-0 text-xs font-medium text-destructive'
+                        : 'shrink-0 text-xs text-muted-foreground'
+                    }
+                  >
+                    {t[STATUS_KEY[b.status] ?? 'statusDraft']}
+                  </span>
                 </span>
+                {b.status === 'rejected' && b.rejection_reason && (
+                  <span className="text-xs text-muted-foreground leading-relaxed">{b.rejection_reason}</span>
+                )}
               </Link>
             </li>
           ))}

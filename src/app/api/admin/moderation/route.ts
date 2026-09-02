@@ -24,6 +24,16 @@ export async function GET(request: Request) {
       .eq('validation_status', 'pending_human_review')
       .order('created_at', { ascending: false })
     data = items ?? []
+  } else if (type === 'briefs') {
+    // La file de modération B2B : le seul contrôle humain avant qu'un brief
+    // n'atteigne les designers, donc le contenu complet (pas un extrait) et
+    // les colonnes de la fiche entreprise qui l'accompagnent à l'affichage.
+    const { data: items } = await admin!.supabase
+      .from('briefs')
+      .select('id, title, context, brief, constraints, criteria, deliverable, created_at, companies(name, logo_url)')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: true })
+    data = items ?? []
   } else {
     const { data: items } = await (admin!.supabase as any)
       .from('submissions')
