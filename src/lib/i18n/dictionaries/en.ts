@@ -1360,4 +1360,8 @@ export const en: Dictionary = {
       },
     },
   },
+  adminModeration: {
+    briefDeadlinePast:
+      "This brief's deadline has already passed. Reject it with an explanation — the company will be able to fix the date and republish.",
+  },
 }

@@ -1357,6 +1357,10 @@ export const fr = {
       },
     },
   },
+  adminModeration: {
+    briefDeadlinePast:
+      'La date limite de ce brief est déjà passée. Refuse-le en l’expliquant : l’entreprise pourra corriger la date puis republier.',
+  },
 } as const
 
 type DeepStringify<T> = {

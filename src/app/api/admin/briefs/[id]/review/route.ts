@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin'
 import { validateBriefFields } from '@/components/features/brief/validate'
+import { getDict } from '@/lib/i18n/lang'
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -89,10 +90,17 @@ export async function POST(request: Request, { params }: Params) {
     canPublish: company.can_publish,
   })
   if (!validation.ok) {
+    // deadline_in_past est plausible, pas un cas limite : la revue admin n'est
+    // pas bornée dans le temps, et une entreprise peut légitimement soumettre
+    // avec une échéance proche. Le message ne se contente donc pas de nommer la
+    // cause — il dit la conduite à tenir (refuser + motif, l'entreprise corrige
+    // et republie), seule sortie possible puisqu'on ne republie jamais un brief
+    // déjà expiré à l'insu de l'entreprise.
+    const dict = await getDict()
     const messages: Record<string, string> = {
       cannot_publish: 'La publication est désactivée pour cette entreprise.',
       incomplete_for_publish: 'Ce brief est incomplet (titre, brief et livrable requis).',
-      deadline_in_past: 'La date limite de ce brief est déjà passée.',
+      deadline_in_past: dict.adminModeration.briefDeadlinePast,
       invalid_max_responses: 'Plafond de réponses invalide.',
     }
     return NextResponse.json({ error: messages[validation.error] ?? 'Validation échouée' }, { status: 400 })
