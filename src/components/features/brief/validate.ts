@@ -24,6 +24,23 @@ export function parseMaxResponses(raw: string | null): number | null {
   return raw !== null ? Math.trunc(Number(raw)) : null
 }
 
+/**
+ * Une échéance saisie « 2 septembre » s'entend comme « jusqu'à la fin du 2
+ * septembre », pas son tout début. Un `<input type="date">` rend une chaîne
+ * `YYYY-MM-DD`, que `new Date(...)` interprète comme minuit UTC pile — donc
+ * déjà passée dès que l'heure serveur dépasse minuit ce jour-là, ce qui
+ * refuserait "aujourd'hui" à tous les coups (et parfois "demain" selon le
+ * fuseau). Convertit vers la fin de la journée calendaire UTC de la date
+ * reçue (23:59:59.999 UTC), en ISO. C'est cette valeur, fin de journée, qui
+ * est à la fois comparée à l'instant présent ET stockée en base — pour que
+ * la lecture de `deadline_at` par un autre lot (ex. lot 07, "fermé" quand la
+ * date est dépassée) retombe sur la même interprétation que la publication.
+ */
+export function endOfDayUTC(dateStr: string): string {
+  const d = new Date(dateStr)
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999)).toISOString()
+}
+
 export interface ValidateBriefFieldsInput {
   action: 'draft' | 'publish'
   title: string | null

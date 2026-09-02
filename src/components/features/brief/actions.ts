@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { generateBriefAccessToken } from '@/lib/utils/brief-token'
-import { parseMaxResponses, validateBriefFields } from './validate'
+import { endOfDayUTC, parseMaxResponses, validateBriefFields } from './validate'
 
 /**
  * saveBrief — crée ou met à jour un brief, brouillon ou publication. RLS
@@ -22,7 +22,11 @@ import { parseMaxResponses, validateBriefFields } from './validate'
  * Les règles de validation (plafond < 1 toujours refusé, échéance passée
  * refusée seulement à la publication) vivent dans `./validate.ts`, en pur —
  * sans import Supabase/Next — pour rester exerçables par un script hors
- * requête serveur.
+ * requête serveur. `deadlineAt` est stockée comme la FIN de la journée
+ * calendaire UTC choisie (`endOfDayUTC`), pas son début — sinon "aujourd'hui"
+ * serait toujours déjà "passé" au moment de publier, et un futur lot qui lit
+ * la même colonne (fermeture à l'échéance) verrait une date différente de
+ * celle validée ici.
  *
  * Visibilité et jeton : la contrainte `briefs_private_needs_token` impose
  * privé ⇔ jeton présent. `visibility` et `access_token` sont donc toujours
@@ -73,7 +77,7 @@ export async function saveBrief(formData: FormData): Promise<
   const targetLeagueIds = formData.getAll('targetLeagueIds').map(String).filter(Boolean)
 
   const deadlineRaw = str('deadlineAt')
-  const deadlineAt = deadlineRaw ? new Date(deadlineRaw).toISOString() : null
+  const deadlineAt = deadlineRaw ? endOfDayUTC(deadlineRaw) : null // fin de journée, cf. validate.ts
 
   const maxResponsesRaw = str('maxResponses')
   const maxResponses = parseMaxResponses(maxResponsesRaw)
