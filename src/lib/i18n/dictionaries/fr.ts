@@ -800,6 +800,7 @@ export const fr = {
   privateBriefPage: {
     notFoundTitle: 'Brief introuvable | Kreevo',
     badge: 'Lien privé',
+    signUpCta: "S'inscrire",
   },
   profileForm: {
     saving: 'Enregistrement…',

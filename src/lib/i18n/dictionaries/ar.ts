@@ -794,6 +794,7 @@ export const ar: Dictionary = {
   privateBriefPage: {
     notFoundTitle: 'الموجز غير موجود | Kreevo',
     badge: 'رابط خاص',
+    signUpCta: 'إنشاء حساب',
   },
   briefDetail: {
     back: 'الموجزات',

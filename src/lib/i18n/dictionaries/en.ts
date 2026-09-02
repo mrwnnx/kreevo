@@ -790,6 +790,7 @@ export const en: Dictionary = {
   privateBriefPage: {
     notFoundTitle: 'Brief not found | Kreevo',
     badge: 'Private link',
+    signUpCta: 'Sign up',
   },
   briefDetail: {
     back: 'Briefs',
