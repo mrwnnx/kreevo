@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { saveBrief } from './actions'
+import { ImproveButton, type BriefField } from './ImproveButton'
 import type { Dictionary } from '@/lib/i18n/dictionaries/fr'
 
 type T = Dictionary['company']['briefForm']
@@ -41,7 +42,7 @@ interface BriefFormProps {
   leagues: TaxonomyOption[]
 }
 
-const ERROR_KEY: Record<string, keyof T> = {
+const ERROR_KEY: Record<string, keyof Omit<T, 'improve'>> = {
   not_authenticated: 'errorAuth',
   no_company: 'errorGeneric',
   not_found: 'errorNotFound',
@@ -65,6 +66,33 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
     initial?.visibility === 'private' ? 'private' : 'public',
   )
   const [isPending, startTransition] = useTransition()
+
+  // Amélioration IA par champ — cf. ImproveButton. `formRef` sert à lire les
+  // AUTRES champs tels que tapés (pas leur defaultValue) au moment du clic,
+  // via `new FormData(form)` : les six champs restent non contrôlés, aucun
+  // changement à leur fonctionnement existant. `busyField` est partagé par
+  // les six boutons pour qu'un seul appel soit en vol à la fois pour tout le
+  // formulaire.
+  const formRef = useRef<HTMLFormElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const contextRef = useRef<HTMLTextAreaElement>(null)
+  const briefRef = useRef<HTMLTextAreaElement>(null)
+  const constraintsRef = useRef<HTMLTextAreaElement>(null)
+  const criteriaRef = useRef<HTMLTextAreaElement>(null)
+  const deliverableRef = useRef<HTMLTextAreaElement>(null)
+  const [busyField, setBusyField] = useState<BriefField | null>(null)
+
+  function collectContext(exclude: BriefField): Record<string, string> {
+    const fd = formRef.current ? new FormData(formRef.current) : null
+    const fields: BriefField[] = ['title', 'context', 'brief', 'constraints', 'criteria', 'deliverable']
+    const ctx: Record<string, string> = {}
+    for (const f of fields) {
+      if (f === exclude) continue
+      const v = ((fd?.get(f) as string | null) ?? '').trim()
+      if (v) ctx[f] = v
+    }
+    return ctx
+  }
 
   // Toutes cochées par défaut : un brief neuf, ou un brief déjà enregistré
   // avec target_league_ids vide (= "toutes" en base), affiche toutes les
@@ -101,7 +129,7 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
   }
 
   return (
-    <form action={handleSubmit} className="space-y-5">
+    <form ref={formRef} action={handleSubmit} className="space-y-5">
       <p className="text-xs text-muted-foreground">{t.draftNotice}</p>
 
       <div className="space-y-2">
@@ -109,8 +137,18 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <Input
           id="title"
           name="title"
+          ref={titleRef}
           defaultValue={initial?.title ?? ''}
           placeholder={t.titlePlaceholder}
+        />
+        <ImproveButton
+          field="title"
+          getValue={() => titleRef.current?.value ?? ''}
+          applyValue={(v) => { if (titleRef.current) titleRef.current.value = v }}
+          getContext={() => collectContext('title')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 
@@ -164,10 +202,20 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <textarea
           id="context"
           name="context"
+          ref={contextRef}
           rows={4}
           defaultValue={initial?.context ?? ''}
           placeholder={t.contextPlaceholder}
           className={textareaClass}
+        />
+        <ImproveButton
+          field="context"
+          getValue={() => contextRef.current?.value ?? ''}
+          applyValue={(v) => { if (contextRef.current) contextRef.current.value = v }}
+          getContext={() => collectContext('context')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 
@@ -176,10 +224,20 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <textarea
           id="brief"
           name="brief"
+          ref={briefRef}
           rows={6}
           defaultValue={initial?.brief ?? ''}
           placeholder={t.briefPlaceholder}
           className={textareaClass}
+        />
+        <ImproveButton
+          field="brief"
+          getValue={() => briefRef.current?.value ?? ''}
+          applyValue={(v) => { if (briefRef.current) briefRef.current.value = v }}
+          getContext={() => collectContext('brief')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 
@@ -188,9 +246,19 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <textarea
           id="constraints"
           name="constraints"
+          ref={constraintsRef}
           rows={4}
           defaultValue={initial?.constraints ?? ''}
           className={textareaClass}
+        />
+        <ImproveButton
+          field="constraints"
+          getValue={() => constraintsRef.current?.value ?? ''}
+          applyValue={(v) => { if (constraintsRef.current) constraintsRef.current.value = v }}
+          getContext={() => collectContext('constraints')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 
@@ -199,9 +267,19 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <textarea
           id="criteria"
           name="criteria"
+          ref={criteriaRef}
           rows={4}
           defaultValue={initial?.criteria ?? ''}
           className={textareaClass}
+        />
+        <ImproveButton
+          field="criteria"
+          getValue={() => criteriaRef.current?.value ?? ''}
+          applyValue={(v) => { if (criteriaRef.current) criteriaRef.current.value = v }}
+          getContext={() => collectContext('criteria')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 
@@ -210,9 +288,19 @@ export function BriefForm({ t, initial, specialties, industries, projectTypes, l
         <textarea
           id="deliverable"
           name="deliverable"
+          ref={deliverableRef}
           rows={3}
           defaultValue={initial?.deliverable ?? ''}
           className={textareaClass}
+        />
+        <ImproveButton
+          field="deliverable"
+          getValue={() => deliverableRef.current?.value ?? ''}
+          applyValue={(v) => { if (deliverableRef.current) deliverableRef.current.value = v }}
+          getContext={() => collectContext('deliverable')}
+          busyField={busyField}
+          setBusyField={setBusyField}
+          t={t.improve}
         />
       </div>
 

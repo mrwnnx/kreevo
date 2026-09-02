@@ -1351,6 +1351,16 @@ export const ar: Dictionary = {
       privateLinkRegenerate: 'إعادة توليد الرابط',
       privateLinkRegenerating: 'جارٍ إعادة التوليد…',
       privateLinkError: 'فشلت إعادة التوليد. أعد المحاولة.',
+      improve: {
+        trigger: 'تحسين بالذكاء الاصطناعي',
+        loading: 'جارٍ التحسين…',
+        suggestionLabel: 'اقتراح الذكاء الاصطناعي',
+        accept: 'قبول',
+        reject: 'رفض',
+        errorEmpty: 'اكتب شيئاً في هذا الحقل أولاً.',
+        errorRateLimit: 'طلبات ذكاء اصطناعي كثيرة خلال وقت قصير. أعد المحاولة بعد قليل.',
+        errorGeneric: 'فشل التحسين. أعد المحاولة.',
+      },
     },
   },
 }

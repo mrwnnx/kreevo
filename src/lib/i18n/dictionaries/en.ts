@@ -1348,6 +1348,16 @@ export const en: Dictionary = {
       privateLinkRegenerate: 'Regenerate link',
       privateLinkRegenerating: 'Regenerating…',
       privateLinkError: 'Regeneration failed. Try again.',
+      improve: {
+        trigger: 'Improve with AI',
+        loading: 'Improving…',
+        suggestionLabel: 'AI suggestion',
+        accept: 'Accept',
+        reject: 'Reject',
+        errorEmpty: 'Write something in this field first.',
+        errorRateLimit: 'Too many AI requests in a short time. Try again in a moment.',
+        errorGeneric: 'The improvement failed. Try again.',
+      },
     },
   },
 }

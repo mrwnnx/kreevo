@@ -1345,6 +1345,16 @@ export const fr = {
       privateLinkRegenerate: 'Régénérer le lien',
       privateLinkRegenerating: 'Régénération…',
       privateLinkError: 'La régénération a échoué. Réessaye.',
+      improve: {
+        trigger: 'Améliorer avec l’IA',
+        loading: 'Amélioration…',
+        suggestionLabel: 'Proposition de l’IA',
+        accept: 'Accepter',
+        reject: 'Refuser',
+        errorEmpty: 'Écris d’abord quelque chose dans ce champ.',
+        errorRateLimit: 'Trop de demandes IA en peu de temps. Réessaye dans un moment.',
+        errorGeneric: 'L’amélioration a échoué. Réessaye.',
+      },
     },
   },
 } as const

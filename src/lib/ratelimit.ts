@@ -63,6 +63,40 @@ export function getAiRatelimit(): Ratelimit | null {
   return cachedAi
 }
 
+let cachedBriefImprove: Ratelimit | null | undefined
+
+/**
+ * Cap for `/api/briefs/improve` — the only route of the briefs-b2b build that
+ * spends money on every call (Anthropic). Own prefix and own bucket,
+ * deliberately NOT shared with `getAiRatelimit()` (submission routes): the two
+ * caps must never add up to or mask each other. Same 10/hour ceiling as
+ * `getAiRatelimit()` — far above real use (one rewrite per field, on demand),
+ * low enough that a runaway loop stops costing money within the hour. Keyed
+ * on the user id (authenticated route).
+ *
+ * ⚠️ FAIL-OPEN like the three caps above: with `UPSTASH_REDIS_REST_URL` /
+ * `_TOKEN` unset, this returns null and NOTHING is capped. A deployed limiter
+ * does not prove it is actually limiting anything — check the env vars.
+ */
+export function getBriefImproveRatelimit(): Ratelimit | null {
+  if (cachedBriefImprove !== undefined) return cachedBriefImprove
+
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) {
+    cachedBriefImprove = null
+    return cachedBriefImprove
+  }
+
+  cachedBriefImprove = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(10, '1 h'),
+    prefix: 'rl:brief-improve',
+    analytics: false,
+  })
+  return cachedBriefImprove
+}
+
 /** Best-effort client IP from proxy headers (Vercel sets x-forwarded-for). */
 export function clientIp(request: Request): string {
   const xff = request.headers.get('x-forwarded-for')
