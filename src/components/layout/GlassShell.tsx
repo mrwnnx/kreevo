@@ -1,6 +1,15 @@
 import { MovingGradientBackground } from '@/components/marketing/MovingGradientBackground'
 
 /**
+ * Voile de verre posé par-dessus les blobs (Figma `504:5110`). Extrait pour que
+ * les pages qui portent DÉJÀ leur propre `MovingGradientBackground` — le groupe
+ * (company) le pose dans son layout — puissent reprendre le voile sans empiler
+ * un second fond animé.
+ */
+export const GLASS_VEIL =
+  'pointer-events-none absolute inset-0 z-0 rounded-b-[32px] border-x-2 border-b-2 border-white bg-gradient-to-t from-white/0 to-white/[0.32] shadow-[0px_4px_45px_0px_rgba(0,0,0,0.1)] backdrop-blur-[32px]'
+
+/**
  * GlassShell — enveloppe visuelle de la refonte : blobs pastel animés en fond,
  * panneau verre par-dessus, contenu au-dessus. Utilisé par l'accueil refondue
  * et le Help Center.
@@ -15,10 +24,7 @@ export function GlassShell({
   return (
     <div className={`relative min-h-screen overflow-x-clip bg-background ${className ?? ''}`}>
       <MovingGradientBackground intensity="strong" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-b-[32px] border-x-2 border-b-2 border-white bg-gradient-to-t from-white/0 to-white/[0.32] shadow-[0px_4px_45px_0px_rgba(0,0,0,0.1)] backdrop-blur-[32px]"
-      />
+      <div aria-hidden className={GLASS_VEIL} />
       <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
     </div>
   )

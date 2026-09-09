@@ -160,3 +160,82 @@ export async function saveBrief(formData: FormData): Promise<
   revalidatePath('/company/briefs')
   return { ok: true, id: data.id }
 }
+
+/**
+ * Fenêtres de la question « délai » du wizard, en jours. `unsure` n'est pas
+ * dans la table : une réponse « je ne sais pas » ne doit poser AUCUNE
+ * échéance — mieux vaut une date absente qu'une date inventée, que
+ * l'entreprise ne verrait jamais avant qu'elle ne fasse fermer son brief.
+ */
+const WIZARD_TIMELINE_DAYS: Record<string, number> = { days: 7, weeks: 21, month: 45 }
+
+/**
+ * createBriefFromWizard — crée le BROUILLON issu du wizard (maquette Figma
+ * `579:475`), puis rend la main au formulaire complet pour la publication.
+ *
+ * Le wizard ne couvre pas les réglages de diffusion (visibilité, ligues
+ * ciblées, plafond de réponses) : la maquette n'en montre aucun. Ils gardent
+ * donc les défauts de la table (`visibility='public'`, aucune ligue = toutes)
+ * et se règlent à l'étape suivante, dans `BriefForm`. Rien n'est publiable
+ * d'ici : `status` reste `draft`, le trigger `guard_brief_publish` reste le
+ * seul chemin vers `published`.
+ *
+ * Les libellés composés (titre, contraintes) arrivent déjà écrits du client :
+ * lui seul connaît la langue affichée et le nom traduit des options. Le
+ * serveur ne refait pas ce travail, il ne recalcule que ce qui ne doit pas
+ * dépendre de l'horloge du visiteur — l'échéance.
+ */
+export async function createBriefFromWizard(formData: FormData): Promise<
+  { ok: true; id: string } | { ok: false; error: string }
+> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'not_authenticated' }
+
+  const { data: company } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('owner_id', user.id)
+    .maybeSingle()
+  if (!company) return { ok: false, error: 'no_company' }
+
+  const str = (key: string) => {
+    const v = ((formData.get(key) as string | null) ?? '').trim()
+    return v || null
+  }
+
+  // Budget : facultatif, jamais négatif (la contrainte `briefs_budget_non_
+  // negative` dirait la même chose, mais en 23514 illisible côté écran).
+  const budgetRaw = str('budget')
+  let budget: number | null = null
+  if (budgetRaw !== null) {
+    const parsed = Number(budgetRaw.replace(/\s/g, ''))
+    if (!Number.isFinite(parsed) || parsed < 0) return { ok: false, error: 'invalid_budget' }
+    budget = parsed
+  }
+
+  const timelineDays = WIZARD_TIMELINE_DAYS[str('timeline') ?? '']
+  const deadlineAt =
+    timelineDays === undefined
+      ? null
+      : endOfDayUTC(new Date(Date.now() + timelineDays * 86_400_000).toISOString().slice(0, 10))
+
+  const { data, error } = await supabase
+    .from('briefs')
+    .insert({
+      company_id: company.id,
+      title: str('title'),
+      context: str('context'),
+      brief: str('brief'),
+      constraints: str('constraints'),
+      project_type_id: str('projectTypeId'),
+      budget,
+      deadline_at: deadlineAt,
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) return { ok: false, error: 'save_failed' }
+  revalidatePath('/company/briefs')
+  return { ok: true, id: data.id }
+}

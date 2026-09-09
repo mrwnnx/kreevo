@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { createClient } from '@/lib/supabase/server'
-import { BriefForm } from '@/components/features/brief/BriefForm'
+import { GlassHeader } from '@/components/layout/GlassHeader'
+import { GLASS_VEIL } from '@/components/layout/GlassShell'
+import { BriefWizard } from '@/components/features/brief/BriefWizard'
 import { loadBriefTaxonomy } from '@/components/features/brief/taxonomy'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,9 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Rédaction d'un nouveau brief. Enregistrer laisse le brief en `status='draft'`
- * — rien n'est exigé pour un brouillon. Le layout (company) garantit déjà
- * l'auth + le rôle b2b.
+ * Rédaction guidée d'un nouveau brief (maquette Figma `579:475`). Le wizard
+ * crée un BROUILLON puis redirige vers `/company/briefs/[id]/edit`, où vivent
+ * les réglages de diffusion. Le layout (company) garantit déjà l'auth + le
+ * rôle b2b, et pose le fond animé — cette page n'ajoute que le voile de verre
+ * et l'en-tête que montre la maquette.
  */
 export default async function NewBriefPage() {
   const [dict, lang, supabase] = await Promise.all([getDict(), getLang(), createClient()])
@@ -26,21 +29,29 @@ export default async function NewBriefPage() {
 
   const { data: company } = await supabase
     .from('companies')
-    .select('id')
+    .select('id, name, description, website_url')
     .eq('owner_id', user.id)
     .maybeSingle()
   if (!company) redirect('/company/onboarding')
 
-  const taxonomy = await loadBriefTaxonomy(supabase, lang)
-  const t = dict.company
+  const { projectTypes } = await loadBriefTaxonomy(supabase, lang)
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-16">
-      <Link href="/company/briefs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-        {t.briefs.back}
-      </Link>
-      <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">{t.briefForm.newTitle}</h1>
-      <BriefForm t={t.briefForm} initial={null} {...taxonomy} />
-    </div>
+    <>
+      <div aria-hidden className={GLASS_VEIL} />
+      <div className="relative z-10">
+        <GlassHeader />
+        <BriefWizard
+          t={dict.company.briefWizard}
+          lang={lang}
+          company={{
+            name: company.name,
+            description: company.description,
+            websiteUrl: company.website_url,
+          }}
+          projectTypes={projectTypes}
+        />
+      </div>
+    </>
   )
 }

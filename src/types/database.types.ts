@@ -174,6 +174,7 @@ export type Database = {
         Row: {
           access_token: string | null
           brief: string | null
+          budget: number | null
           company_id: string
           constraints: string | null
           context: string | null
@@ -196,6 +197,7 @@ export type Database = {
         Insert: {
           access_token?: string | null
           brief?: string | null
+          budget?: number | null
           company_id: string
           constraints?: string | null
           context?: string | null
@@ -218,6 +220,7 @@ export type Database = {
         Update: {
           access_token?: string | null
           brief?: string | null
+          budget?: number | null
           company_id?: string
           constraints?: string | null
           context?: string | null
