@@ -17,7 +17,7 @@ export function BadgeGrid({ badges }: Props) {
   if (badges.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground font-mono">
-        Aucun badge pour l'instant. Soumets un challenge pour débloquer le premier.
+        Aucun badge pour l’instant. Soumets un challenge pour débloquer le premier.
       </div>
     )
   }

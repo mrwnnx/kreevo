@@ -59,8 +59,8 @@ export default function AdminSettings() {
         <h2 className="text-sm font-semibold">Mode maintenance</h2>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm">Afficher une bannière de maintenance sur l'app</p>
-            <p className="text-xs text-muted-foreground">Les users verront un message d'avertissement</p>
+            <p className="text-sm">Afficher une bannière de maintenance sur l’app</p>
+            <p className="text-xs text-muted-foreground">Les users verront un message d’avertissement</p>
           </div>
           <button
             onClick={() => {

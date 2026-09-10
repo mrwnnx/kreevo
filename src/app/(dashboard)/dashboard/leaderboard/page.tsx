@@ -169,7 +169,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         ) : (
           <div className="text-center py-8 space-y-2">
             <p className="text-2xl font-bold">Leaderboard</p>
-            <p className="text-sm text-muted-foreground">Tu n'es pas encore dans une ligue du nouveau système.</p>
+            <p className="text-sm text-muted-foreground">Tu n’es pas encore dans une ligue du nouveau système.</p>
           </div>
         )
       ) : (
@@ -368,7 +368,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
       {/* Empty state */}
       {userLeagueRow && userSpecialtyId && rankedUsers.length === 0 && (
         <div className="rounded-[24px] border border-dashed border-[#dcdce8] bg-white/40 p-12 text-center text-sm text-[#484848] backdrop-blur-[59.18px]">
-          Aucun designer dans cette ligue pour l'instant.
+          Aucun designer dans cette ligue pour l’instant.
         </div>
       )}
 

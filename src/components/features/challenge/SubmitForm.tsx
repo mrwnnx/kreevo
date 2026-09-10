@@ -76,7 +76,7 @@ export function SubmitForm({ challengeId, existing, isClosed, participationId, a
           onChange={setCoverUrl}
           className="h-48"
         />
-        <p className="text-xs text-muted-foreground">PNG/JPG/WebP — max 5MB. L'image sera compressée automatiquement.</p>
+        <p className="text-xs text-muted-foreground">PNG/JPG/WebP — max 5MB. L’image sera compressée automatiquement.</p>
       </div>
 
       <div className="space-y-2">

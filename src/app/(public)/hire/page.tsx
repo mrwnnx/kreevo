@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { getDict } from '@/lib/i18n/lang'
 import { siteUrl } from '@/lib/site'
@@ -144,13 +145,13 @@ export default async function HirePage() {
                 </Button>
               </div>
               <HireWaitlistCta t={t} />
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="size-4" />
                 {t.backHome}
-              </a>
+              </Link>
             </div>
           </div>
         </section>

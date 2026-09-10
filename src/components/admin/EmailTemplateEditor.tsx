@@ -222,7 +222,7 @@ export function EmailTemplateEditor({
               <Label className="mb-0">Bouton</Label>
               {auth ? (
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Lock className="size-3" /> lien verrouillé (lien d'action)
+                  <Lock className="size-3" /> lien verrouillé (lien d’action)
                 </span>
               ) : (
                 <label className="inline-flex items-center gap-2 text-sm cursor-pointer">
@@ -270,9 +270,9 @@ export function EmailTemplateEditor({
 
           {auth && !patConfigured && (
             <p className="text-xs text-amber-600 dark:text-amber-400">
-              ⚠️ Cet email est géré par Supabase. La synchro automatique nécessite la variable d'env
-              <code className="mx-1">SUPABASE_MANAGEMENT_PAT</code>. Sans elle, l'enregistrement reste en base mais
-              n'est pas poussé vers Supabase.
+              ⚠️ Cet email est géré par Supabase. La synchro automatique nécessite la variable d’env
+              <code className="mx-1">SUPABASE_MANAGEMENT_PAT</code>. Sans elle, l’enregistrement reste en base mais
+              n’est pas poussé vers Supabase.
             </p>
           )}
 

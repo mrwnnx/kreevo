@@ -118,7 +118,7 @@ export default function AdminEmails() {
           {confirmed ? (
             <>
               <p className="text-sm text-muted-foreground flex-1">
-                Confirmer l'envoi à <strong>{RECIPIENT_OPTIONS.find(o => o.value === recipients)?.label}</strong> ?
+                Confirmer l’envoi à <strong>{RECIPIENT_OPTIONS.find(o => o.value === recipients)?.label}</strong> ?
               </p>
               <button onClick={() => setConfirmed(false)} className="text-sm text-muted-foreground px-4 py-2 hover:text-foreground">
                 Annuler
@@ -129,7 +129,7 @@ export default function AdminEmails() {
                 className="flex items-center gap-2 bg-destructive text-destructive-foreground text-sm font-semibold px-5 py-2 rounded-lg hover:opacity-90 disabled:opacity-60"
               >
                 {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-                Confirmer l'envoi
+                Confirmer l’envoi
               </button>
             </>
           ) : (

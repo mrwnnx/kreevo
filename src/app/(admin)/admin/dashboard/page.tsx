@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
     <div className="p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Vue d'ensemble Kreevo</p>
+        <p className="text-sm text-muted-foreground">Vue d’ensemble Kreevo</p>
       </div>
 
       {/* Stats grid */}

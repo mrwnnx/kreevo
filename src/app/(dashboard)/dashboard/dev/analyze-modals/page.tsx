@@ -61,9 +61,9 @@ export default function AnalyzeModalsPreview() {
   return (
     <div className="max-w-[720px] mx-auto px-6 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Preview — Modals d'analyse IA</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Preview — Modals d’analyse IA</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Aperçu des 3 modals (case A succès / case B warning / case C blocking) sans appeler l'IA.
+          Aperçu des 3 modals (case A succès / case B warning / case C blocking) sans appeler l’IA.
         </p>
       </div>
 
@@ -105,7 +105,7 @@ export default function AnalyzeModalsPreview() {
           ))}
         </div>
         <p className="text-[11px] text-muted-foreground">
-          (En case C blocking, le hint affiche "encore N tentatives avant review humaine" basé sur ce compteur.)
+          (En case C blocking, le hint affiche « encore N tentatives avant review humaine » basé sur ce compteur.)
         </p>
       </div>
 
