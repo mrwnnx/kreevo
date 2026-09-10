@@ -167,7 +167,7 @@ async function generateFeedback(sub: any, lang: Lang, tier: FeedbackTier): Promi
   userContent.push({ type: 'text', text: isBasic ? buildBasicPrompt(sub, lang) : buildPrompt(sub, lang) })
 
   const res = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-sonnet-5',
     max_tokens: isBasic ? 1000 : 1500,
     messages: [{ role: 'user', content: userContent as any }],
   })

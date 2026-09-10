@@ -1,6 +1,18 @@
-# Révoquer la clé `service_role` (à faire dans le dashboard Supabase)
+# Révoquer la clé `service_role` — ✅ FAIT LE 2026-08-28
 
-## Pourquoi
+> **CE DOCUMENT EST UN HISTORIQUE, PAS UNE TÂCHE OUVERTE.**
+>
+> La rotation a été exécutée le **2026-08-28** : la clé compromise est
+> **supprimée**, la clé active est `service_role_2026_08_28` (`sb_secret_9ezo0…`),
+> présente dans `.env.local` et dans les variables Vercel de production, et le
+> projet a été redéployé. Les deux clés héritées (JWT `eyJ…`) restent révoquées.
+>
+> Un audit du 2026-09-09 a relu ce fichier, l'a pris pour une tâche en cours et
+> a classé la clé « single highest-severity open item ». D'où cet encadré :
+> **ne rouvrez pas ce sujet sans une preuve fraîche.** Ce qui suit décrit l'état
+> d'AVANT la rotation, et se garde pour la méthode.
+
+## Pourquoi (état d'avant la rotation)
 
 La clé `service_role` **actuellement active** est présente dans l'historique git,
 dans 4 commits — dont `e93e08f`, intitulé *« chore(security): read Supabase

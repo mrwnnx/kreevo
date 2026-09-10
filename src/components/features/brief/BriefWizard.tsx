@@ -228,7 +228,10 @@ export function BriefWizard({ t, lang, company, projectTypes }: BriefWizardProps
     'w-full bg-transparent text-[14px] outline-none placeholder:text-[#a1a1aa]'
 
   return (
-    <div className="mx-auto flex w-full max-w-[736px] flex-col gap-[56px] px-4 pt-[88px] pb-24">
+    // 768 = les 736 px de colonne de la maquette + les 2×16 px de marge : c'est
+    // le CONTENU qui doit faire 736, sinon la rangée de 4 cartes (4×172 + 3×16)
+    // ne tient pas et les cartes retombent par 3.
+    <div className="mx-auto flex w-full max-w-[768px] flex-col gap-[56px] px-4 pt-[88px] pb-24">
       <div className="flex w-full flex-col items-center justify-center gap-[32px]">
         <div className="flex w-full flex-col items-center gap-[16px] text-center leading-[1.2]">
           <h1 className="text-[32px] font-semibold" style={{ color: INK }}>

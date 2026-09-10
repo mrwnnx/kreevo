@@ -11,7 +11,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { anthropic } from '@/lib/anthropic/client'
 
-const TRANSLATE_MODEL = 'claude-sonnet-4-6'
+const TRANSLATE_MODEL = 'claude-sonnet-5'
 
 export type FeedbackLang = 'fr' | 'en' | 'ar'
 

@@ -36,7 +36,7 @@ const FIELD_LABEL: Record<Field, string> = {
   deliverable: 'le livrable attendu',
 }
 
-const MODEL = 'claude-sonnet-4-6'
+const MODEL = 'claude-sonnet-5'
 const MAX_VALUE_LENGTH = 4000
 // Troncature défensive du contexte (pas un refus — le champ demandé, lui, est
 // borné par un vrai 400) : un `context.<field>` disproportionné ferait gonfler

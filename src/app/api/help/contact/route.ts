@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { getContactRatelimit, clientIp } from '@/lib/ratelimit'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+/**
+ * Instancié dans le handler, pas au niveau module : `new Resend(undefined)`
+ * lève À L'IMPORT, donc pendant la collecte des pages du `next build`. Un clone
+ * frais ou un environnement de preview sans `RESEND_API_KEY` faisait échouer la
+ * build entière — alors que seule cette route a besoin de la clé.
+ */
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL ?? 'support@kreevo.online'
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'noreply@kreevo.online'
 
@@ -100,7 +108,7 @@ export async function POST(request: Request) {
 </div>`.trim()
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: SUPPORT_EMAIL,
       replyTo: email,

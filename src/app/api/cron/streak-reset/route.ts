@@ -2,9 +2,14 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET(req: Request) {
+  // Refuse to run if no CRON_SECRET is configured — prevents silent open
+  // access in environments where the env var was forgotten.
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
+  }
+
   const auth = req.headers.get('authorization')
   if (
-    process.env.CRON_SECRET &&
     auth !== `Bearer ${process.env.CRON_SECRET}` &&
     auth !== process.env.CRON_SECRET
   ) {

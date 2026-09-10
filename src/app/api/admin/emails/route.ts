@@ -5,7 +5,15 @@ import { getTemplate } from '@/lib/email/store'
 import { renderEmail } from '@/lib/email/render'
 import { DEFAULT_TEMPLATES } from '@/lib/email/defaults'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+/**
+ * Instancié dans le handler, pas au niveau module : `new Resend(undefined)`
+ * lève À L'IMPORT, donc pendant la collecte des pages du `next build`. Un clone
+ * frais ou un environnement de preview sans `RESEND_API_KEY` faisait échouer la
+ * build entière — alors que seule cette route a besoin de la clé.
+ */
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function POST(request: Request) {
   const { error, admin } = await requireAdmin()
@@ -50,6 +58,7 @@ export async function POST(request: Request) {
   const html = renderEmail(tpl, { vars: { titre: subject, message: content } })
 
   // Send in batches of 50
+  const resend = getResend()
   let sent = 0
   for (let i = 0; i < emails.length; i += 50) {
     const batch = emails.slice(i, i + 50)

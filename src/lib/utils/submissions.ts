@@ -8,7 +8,7 @@ import {
 } from './submission-constants'
 
 const AUTO_VALIDATE_LEAGUES = ['Stone', 'Bronze', 'Silver']
-const ANALYZE_MODEL = 'claude-sonnet-4-6'
+const ANALYZE_MODEL = 'claude-sonnet-5'
 const MAX_IMAGES = MAX_PUBLISH_IMAGES
 export { DESCRIPTION_BONUS_MULT }
 

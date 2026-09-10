@@ -12,7 +12,7 @@
 import { requireAdmin } from '@/lib/admin'
 import { anthropic } from '@/lib/anthropic/client'
 
-const TRANSLATE_MODEL = 'claude-sonnet-4-6'
+const TRANSLATE_MODEL = 'claude-sonnet-5'
 
 export type ChallengeLang = 'fr' | 'en' | 'ar'
 
