@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
-import type { Lang } from '@/lib/i18n/tx'
+import { localizeName, type Lang } from '@/lib/i18n/tx'
 import type { TaxonomyOption } from './BriefForm'
 
 interface LocalizedRow {
@@ -8,10 +8,6 @@ interface LocalizedRow {
   name_fr: string | null
   name_en: string | null
   name_ar: string | null
-}
-
-function localize(row: LocalizedRow, lang: Lang): string {
-  return (lang === 'ar' ? row.name_ar : lang === 'en' ? row.name_en : row.name_fr) || ''
 }
 
 /**
@@ -42,7 +38,7 @@ export async function loadBriefTaxonomy(
   ])
 
   const toOptions = (rows: LocalizedRow[] | null): TaxonomyOption[] =>
-    (rows ?? []).map((r) => ({ id: r.id, name: localize(r, lang) })).filter((o) => o.name)
+    (rows ?? []).map((r) => ({ id: r.id, name: localizeName(r, lang) })).filter((o) => o.name)
 
   return {
     specialties: toOptions(specialtiesRes.data),
