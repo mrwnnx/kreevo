@@ -2,6 +2,7 @@ import { TrendingUp } from 'lucide-react'
 import { ALL_LEAGUE_STYLES, getLeagueStyle, type LeagueStyle } from '@/lib/utils/league-style'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { LeagueIcon } from '@/components/features/league/LeagueIcon'
+import { devOnly } from '@/lib/dev-only'
 
 function LeagueCardPreview({
   style,
@@ -64,6 +65,7 @@ function LeagueCardPreview({
 export const dynamic = 'force-dynamic'
 
 export default async function LeaguesPreviewPage() {
+  devOnly()
   const { data: dbLeagues } = await (supabaseAdmin as any)
     .from('leagues')
     .select('name, icon')

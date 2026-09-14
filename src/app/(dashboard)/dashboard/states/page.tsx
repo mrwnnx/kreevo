@@ -5,6 +5,7 @@ import { CountdownTimer } from '@/components/features/challenge/CountdownTimer'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Lock, Sparkles, PartyPopper, ArrowRight, Rocket, Star, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { devOnly } from '@/lib/dev-only'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 
@@ -380,6 +381,7 @@ function StateProche() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function StatesDemoPage() {
+  devOnly()
   const [active, setActive] = useState(1)
 
   return (

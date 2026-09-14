@@ -5,12 +5,14 @@ import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { FeaturesSection } from '@/components/marketing/FeaturesSection'
 import { PricingSection } from '@/components/marketing/PricingSection'
+import { devOnly } from '@/lib/dev-only'
 
 /**
  * Preview DEV (non commitée) — landing en contexte + FeaturesSection sous le hero.
  * Sert uniquement à valider visuellement la nouvelle section.
  */
 export default async function HeroPreview() {
+  devOnly()
   const dict = await getDict()
   const t = dict.landing
   return (

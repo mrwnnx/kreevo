@@ -1,5 +1,7 @@
 'use client'
 
+import { devOnly } from '@/lib/dev-only'
+
 import {
   Pencil, ExternalLink, Zap, Play, Trash2, ArrowRight, Plus, Save,
   Settings, Star, Bell, Check, ChevronRight, Info, AlertCircle,
@@ -92,6 +94,7 @@ function CodeSnip({ code }: { code: string }) {
 // ─── Page ──────────────────────────────────────────────────────
 
 export default function DesignSystemPage() {
+  devOnly()
   return (
     <TooltipProvider>
       <div className="flex min-h-screen">

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { AnalysisResultModal } from '@/components/features/challenge/MultiStepSubmitForm'
 import { cn } from '@/lib/utils'
+import { devOnly } from '@/lib/dev-only'
 
 type Mode = 'success' | 'warning' | 'blocking'
 
@@ -55,6 +56,7 @@ const MODAL_T = {
 }
 
 export default function AnalyzeModalsPreview() {
+  devOnly()
   const [mode, setMode] = useState<Mode | null>(null)
   const [rejectionCount, setRejectionCount] = useState(0)
 

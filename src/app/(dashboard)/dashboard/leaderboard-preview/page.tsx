@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { LeaguesRow } from '@/components/features/league/LeaguesRow'
+import { devOnly } from '@/lib/dev-only'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,7 @@ interface League {
 }
 
 export default async function LeaderboardPreviewPage() {
+  devOnly()
   const { data: dbLeagues } = await (supabaseAdmin as any)
     .from('leagues')
     .select('id, name, icon, color, order_index, is_active')

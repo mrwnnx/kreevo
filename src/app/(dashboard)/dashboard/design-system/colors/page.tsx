@@ -1,3 +1,5 @@
+import { devOnly } from '@/lib/dev-only'
+
 function Swatch({
   label,
   value,
@@ -34,6 +36,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function ColorsPage() {
+  devOnly()
   return (
     <div className="p-8 max-w-[960px] mx-auto space-y-12 pb-20">
 
