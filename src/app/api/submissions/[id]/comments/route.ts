@@ -105,12 +105,12 @@ export async function POST(req: Request, { params }: Params) {
 
   try { await updateStreak(user.id, supabaseAdmin) } catch { /* ignore */ }
 
-  const { data: sub } = await supabaseAdmin
-    .from('submissions').select('comments_count').eq('id', submissionId).single()
-  await supabaseAdmin
-    .from('submissions')
-    .update({ comments_count: (sub?.comments_count ?? 0) + 1 })
-    .eq('id', submissionId)
+  // Une seule instruction SQL : lire puis écrire en deux requêtes perdait un
+  // commentaire sur deux postés au même instant (cf. migration 023).
+  await (supabaseAdmin as any).rpc('bump_comments_count', {
+    p_submission_id: submissionId,
+    p_delta: 1,
+  })
 
   if (submission.user_id && submission.user_id !== user.id) {
     const ownerId = submission.user_id

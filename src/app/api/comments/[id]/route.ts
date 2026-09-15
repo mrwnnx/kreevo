@@ -21,17 +21,19 @@ export async function DELETE(_req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Tu ne peux supprimer que tes propres commentaires' }, { status: 403 })
   }
 
-  if (!comment.parent_id) {
-    const { data: sub } = await (supabaseAdmin as any)
-      .from('submissions').select('comments_count').eq('id', comment.submission_id).single()
-    await (supabaseAdmin as any)
-      .from('submissions')
-      .update({ comments_count: Math.max(0, (sub?.comments_count ?? 0) - 1) })
-      .eq('id', comment.submission_id)
-  }
-
   const { error } = await (supabaseAdmin as any).from('comments').delete().eq('id', commentId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Décrément APRÈS la suppression, et en une seule instruction SQL : avant, le
+  // compteur baissait d'abord, si bien qu'une suppression en échec laissait un
+  // commentaire visible décompté — et deux suppressions simultanées lisaient la
+  // même valeur pour écrire le même résultat (cf. migration 023).
+  if (!comment.parent_id) {
+    await (supabaseAdmin as any).rpc('bump_comments_count', {
+      p_submission_id: comment.submission_id,
+      p_delta: -1,
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }
