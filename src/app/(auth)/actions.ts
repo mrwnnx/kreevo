@@ -46,13 +46,31 @@ export async function confirmEmail(formData: FormData) {
   const supabase = await createClient()
   const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
   if (error) redirect('/login?error=link_expired')
-  // Jeton PKCE (`pkce_…`, cas des inscriptions faites via notre action) : GoTrue active
-  // le compte mais n'ouvre PAS de session. L'utilisateur se connecte, et
-  // signInWithEmail applique alors le parrainage.
+  // Filet de sécurité : verifyOtp renvoie normalement une session (vérifié en prod, y
+  // compris pour les jetons `pkce_…`). Sans session, on explique au lieu de renvoyer
+  // vers /dashboard, qui rebondirait sur /login sans message.
   if (!data.session) redirect('/login?confirmed=1')
 
   await finalizeProfile(supabase, await cookies())
   redirect('/dashboard')
+}
+
+// Renvoi du lien d'activation depuis /login (lien expiré). Réponse identique que
+// l'adresse existe ou non : ne révèle pas quels emails ont un compte.
+export async function resendConfirmation(formData: FormData) {
+  const supabase = await createClient()
+  const dict = await getDict()
+  const email = ((formData.get('email') as string | null) ?? '').trim()
+  if (!email) return { error: dict.auth.errors.validationFailed }
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback` },
+  })
+  // Plafond d'envoi Supabase : seule erreur utile à montrer.
+  if (error?.status === 429) return { error: translateAuthError(error, dict.auth.errors) }
+  return { success: dict.auth.login.resendSent }
 }
 
 export async function signInWithEmail(formData: FormData) {

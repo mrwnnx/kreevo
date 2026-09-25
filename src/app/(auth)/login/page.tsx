@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Separator } from '@/components/ui/separator'
 import { LoginForm } from '@/components/features/auth/LoginForm'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
+import { ResendConfirmationForm } from '@/components/features/auth/ResendConfirmationForm'
 import { getDict } from '@/lib/i18n/lang'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,9 +32,7 @@ export default async function LoginPage({
       {confirmed === '1' && (
         <p className="text-sm text-green-600">{t.accountConfirmed}</p>
       )}
-      {error === 'link_expired' && (
-        <p className="text-sm text-destructive">{t.linkExpired}</p>
-      )}
+      {error === 'link_expired' && <ResendConfirmationForm t={t} tc={tc} />}
       <OAuthButtons />
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
