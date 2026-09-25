@@ -6,7 +6,7 @@
 // GoTrue placeholders ({{ .ConfirmationURL }}, {{ .Email }}…) start with a dot and are left
 // untouched so Supabase can substitute them when it sends Auth emails.
 
-import { type EmailTemplate, isAuthType, AUTH_ACTION_URL } from './types'
+import { type EmailTemplate, isAuthType, AUTH_ACTION_URL, CONFIRMATION_ACTION_URL } from './types'
 
 const FONT = "'Plus Jakarta Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
 
@@ -65,7 +65,8 @@ export function renderEmail(tpl: EmailTemplate, opts: RenderOptions = {}): strin
     : ''
 
   // Button. Auth emails: forced on, link locked to the action URL. App emails: respect toggle + url.
-  const buttonUrl = auth ? (opts.actionUrl ?? AUTH_ACTION_URL) : (tpl.button_url ?? '#')
+  const lockedUrl = tpl.type === 'confirmation' ? CONFIRMATION_ACTION_URL : AUTH_ACTION_URL
+  const buttonUrl = auth ? (opts.actionUrl ?? lockedUrl) : (tpl.button_url ?? '#')
   const showButton = auth || (tpl.button_enabled && !!tpl.button_label.trim())
   const buttonLabel = prepare(tpl.button_label || 'Continuer', vars)
   const button = showButton

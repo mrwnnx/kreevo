@@ -12,7 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
   const dict = await getDict()
   const t = dict.auth.login
   const tc = dict.auth.common
@@ -23,6 +28,9 @@ export default async function LoginPage() {
         <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
         <p className="text-xs text-muted-foreground font-mono">{t.subtitle}</p>
       </div>
+      {error === 'link_expired' && (
+        <p className="text-sm text-destructive">{t.linkExpired}</p>
+      )}
       <OAuthButtons />
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />

@@ -1034,6 +1034,12 @@ export const en: Dictionary = {
       submitting: 'Signing in…',
       noAccount: 'No account?',
       signupCta: 'Sign up',
+      linkExpired: 'This link has expired or was already used. If you were activating your account, it is probably active already: sign in.',
+    },
+    confirmEmail: {
+      title: 'Activate your account',
+      subtitle: 'One last click to confirm your email address.',
+      submit: 'Activate my account',
     },
     signup: {
       title: 'Join the arena',

@@ -1,10 +1,13 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { translateAuthError } from '@/lib/auth-errors'
 import { isValidUsername } from '@/lib/username'
+import { finalizeProfile } from '@/lib/auth/finalize-profile'
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -31,6 +34,21 @@ export async function signUpWithEmail(formData: FormData) {
 
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
   return { success: dict.auth.common.checkEmail }
+}
+
+// Activation d'email par bouton (page /confirm-email) : le jeton n'est consommé qu'au
+// clic de l'utilisateur, jamais par le GET d'un scanner de liens.
+export async function confirmEmail(formData: FormData) {
+  const tokenHash = (formData.get('token_hash') as string | null) ?? ''
+  const type = ((formData.get('type') as string | null) || 'email') as EmailOtpType
+  if (!tokenHash) redirect('/login?error=link_expired')
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+  if (error) redirect('/login?error=link_expired')
+
+  await finalizeProfile(supabase, await cookies())
+  redirect('/dashboard')
 }
 
 export async function signInWithEmail(formData: FormData) {
