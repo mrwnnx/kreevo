@@ -33,4 +33,6 @@ export const PREVIEW_GOTRUE: Record<string, string> = {
   '.NewEmail': 'nouveau@exemple.com',
   '.Token': '123456',
   '.SiteURL': 'https://www.kreevo.online',
+  '.RedirectTo': 'https://www.kreevo.online/auth/callback',
+  '.TokenHash': 'exemple',
 }

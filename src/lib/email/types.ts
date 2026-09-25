@@ -31,3 +31,9 @@ export function isAuthType(type: EmailTemplateType): boolean {
 
 // For Auth emails the primary button MUST point to the GoTrue action URL — locked, non-disablable.
 export const AUTH_ACTION_URL = '{{ .ConfirmationURL }}'
+
+// Confirmation d'inscription : PAS `.ConfirmationURL`, qui active le compte dès le premier
+// GET — les scanners de liens (Gmail) le brûlaient ~45 s après l'envoi. On passe le
+// `token_hash` à `/auth/callback` (= `.RedirectTo`, déjà autorisé côté Supabase), qui
+// renvoie vers /confirm-email : l'activation n'a lieu qu'au clic sur le bouton.
+export const CONFIRMATION_ACTION_URL = '{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email'

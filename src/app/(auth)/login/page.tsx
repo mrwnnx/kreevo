@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
 import { LoginForm } from '@/components/features/auth/LoginForm'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
+import { ResendConfirmationForm } from '@/components/features/auth/ResendConfirmationForm'
 import { getDict } from '@/lib/i18n/lang'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,7 +14,12 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; confirmed?: string }>
+}) {
+  const { error, confirmed } = await searchParams
   const dict = await getDict()
   const t = dict.auth.login
   const tc = dict.auth.common
@@ -30,6 +36,10 @@ export default async function LoginPage() {
       >
         {tc.hireCompanyCta}
       </Link>
+      {confirmed === '1' && (
+        <p className="text-sm text-green-600">{t.accountConfirmed}</p>
+      )}
+      {error === 'link_expired' && <ResendConfirmationForm t={t} tc={tc} />}
       <OAuthButtons />
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />

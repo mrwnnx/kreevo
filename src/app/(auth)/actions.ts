@@ -1,10 +1,23 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { getDict, getLang } from '@/lib/i18n/lang'
 import { translateAuthError } from '@/lib/auth-errors'
 import { isValidUsername } from '@/lib/username'
+import { finalizeProfile } from '@/lib/auth/finalize-profile'
+
+// Destination après connexion ou activation : admin → espace admin, b2b → espace
+// entreprise (qui renvoie vers l'onboarding sans fiche), sinon dashboard designer.
+// Non exportée : un fichier 'use server' ne doit exporter que des actions.
+async function homeForRole(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+  if (profile?.role === 'admin') return '/admin'
+  if (profile?.role === 'b2b') return '/company'
+  return '/dashboard'
+}
 
 export async function signUpWithEmail(formData: FormData) {
   const supabase = await createClient()
@@ -49,12 +62,51 @@ export async function signUpCompany(formData: FormData) {
     password,
     options: {
       data: { role: 'b2b', lang },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/company/onboarding`,
+      // Pas de ?next= ici : le lien d'activation ajoute `?token_hash=` à cette URL
+      // (CONFIRMATION_ACTION_URL). C'est confirmEmail qui oriente selon le rôle.
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     },
   })
 
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
   return { success: dict.auth.common.checkEmail }
+}
+
+// Activation d'email par bouton (page /confirm-email) : le jeton n'est consommé qu'au
+// clic de l'utilisateur, jamais par le GET d'un scanner de liens.
+export async function confirmEmail(formData: FormData) {
+  const tokenHash = (formData.get('token_hash') as string | null) ?? ''
+  const type = ((formData.get('type') as string | null) || 'email') as EmailOtpType
+  if (!tokenHash) redirect('/login?error=link_expired')
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+  if (error) redirect('/login?error=link_expired')
+  // Filet de sécurité : verifyOtp renvoie normalement une session (vérifié en prod, y
+  // compris pour les jetons `pkce_…`). Sans session, on explique au lieu de renvoyer
+  // vers /dashboard, qui rebondirait sur /login sans message.
+  if (!data.session) redirect('/login?confirmed=1')
+
+  await finalizeProfile(supabase, await cookies())
+  redirect(await homeForRole(supabase, data.session.user.id))
+}
+
+// Renvoi du lien d'activation depuis /login (lien expiré). Réponse identique que
+// l'adresse existe ou non : ne révèle pas quels emails ont un compte.
+export async function resendConfirmation(formData: FormData) {
+  const supabase = await createClient()
+  const dict = await getDict()
+  const email = ((formData.get('email') as string | null) ?? '').trim()
+  if (!email) return { error: dict.auth.errors.validationFailed }
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback` },
+  })
+  // Plafond d'envoi Supabase : seule erreur utile à montrer.
+  if (error?.status === 429) return { error: translateAuthError(error, dict.auth.errors) }
+  return { success: dict.auth.login.resendSent }
 }
 
 export async function signInWithEmail(formData: FormData) {
@@ -68,17 +120,10 @@ export async function signInWithEmail(formData: FormData) {
 
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
 
-  // Le rôle décide de la destination : admin → espace admin, b2b → espace
-  // entreprise, sinon dashboard designer (comportement inchangé).
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', data.user.id)
-    .single()
-
-  if (profile?.role === 'admin') redirect('/admin')
-  if (profile?.role === 'b2b') redirect('/company')
-  redirect('/dashboard')
+  // Première connexion après activation : complète le profil + parrainage. Idempotent
+  // (ne remplit que les champs vides, un parrainage déjà posé n'est pas repris).
+  await finalizeProfile(supabase, await cookies())
+  redirect(await homeForRole(supabase, data.user.id))
 }
 
 export async function signInWithGoogle() {

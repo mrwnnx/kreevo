@@ -1062,6 +1062,15 @@ export const fr = {
       submitting: 'Connexion…',
       noAccount: 'Pas de compte ?',
       signupCta: 'Créer un compte',
+      linkExpired: 'Ce lien a expiré ou a déjà servi. Si tu ne peux pas te connecter, demande un nouveau lien d\'activation.',
+      resendCta: 'Renvoyer le lien d\'activation',
+      resendSent: 'Si un compte attend son activation à cette adresse, un nouveau lien vient de partir.',
+      accountConfirmed: 'Ton compte est activé. Connecte-toi pour commencer.',
+    },
+    confirmEmail: {
+      title: 'Active ton compte',
+      subtitle: 'Un dernier clic pour confirmer ton adresse email.',
+      submit: 'Activer mon compte',
     },
     signup: {
       title: 'Rejoins l\'arène',
