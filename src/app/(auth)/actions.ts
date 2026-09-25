@@ -44,8 +44,12 @@ export async function confirmEmail(formData: FormData) {
   if (!tokenHash) redirect('/login?error=link_expired')
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
   if (error) redirect('/login?error=link_expired')
+  // Jeton PKCE (`pkce_…`, cas des inscriptions faites via notre action) : GoTrue active
+  // le compte mais n'ouvre PAS de session. L'utilisateur se connecte, et
+  // signInWithEmail applique alors le parrainage.
+  if (!data.session) redirect('/login?confirmed=1')
 
   await finalizeProfile(supabase, await cookies())
   redirect('/dashboard')
@@ -61,6 +65,9 @@ export async function signInWithEmail(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) return { error: translateAuthError(error, dict.auth.errors) }
+  // Première connexion après activation : complète le profil + parrainage. Idempotent
+  // (ne remplit que les champs vides, un parrainage déjà posé n'est pas repris).
+  await finalizeProfile(supabase, await cookies())
   redirect('/dashboard')
 }
 

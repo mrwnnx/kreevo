@@ -15,9 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; confirmed?: string }>
 }) {
-  const { error } = await searchParams
+  const { error, confirmed } = await searchParams
   const dict = await getDict()
   const t = dict.auth.login
   const tc = dict.auth.common
@@ -28,6 +28,9 @@ export default async function LoginPage({
         <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
         <p className="text-xs text-muted-foreground font-mono">{t.subtitle}</p>
       </div>
+      {confirmed === '1' && (
+        <p className="text-sm text-green-600">{t.accountConfirmed}</p>
+      )}
       {error === 'link_expired' && (
         <p className="text-sm text-destructive">{t.linkExpired}</p>
       )}

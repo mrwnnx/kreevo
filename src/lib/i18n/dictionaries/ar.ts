@@ -1039,6 +1039,7 @@ export const ar: Dictionary = {
       noAccount: 'ليس لديك حساب؟',
       signupCta: 'إنشاء حساب',
       linkExpired: 'انتهت صلاحية هذا الرابط أو سبق استخدامه. إن كنت تفعّل حسابك، فهو على الأرجح مفعّل بالفعل: سجّل الدخول.',
+      accountConfirmed: 'تم تفعيل حسابك. سجّل الدخول للبدء.',
     },
     confirmEmail: {
       title: 'فعّل حسابك',

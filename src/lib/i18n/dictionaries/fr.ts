@@ -1032,6 +1032,7 @@ export const fr = {
       noAccount: 'Pas de compte ?',
       signupCta: 'Créer un compte',
       linkExpired: 'Ce lien a expiré ou a déjà servi. Si tu venais d\'activer ton compte, il est sans doute déjà actif : connecte-toi.',
+      accountConfirmed: 'Ton compte est activé. Connecte-toi pour commencer.',
     },
     confirmEmail: {
       title: 'Active ton compte',
