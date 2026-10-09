@@ -1,0 +1,21 @@
+{
+  "name": "kreevo-remotion",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render KreevoIntro out/kreevo-intro.mp4",
+    "still": "remotion still KreevoIntro out/kreevo-intro.png --frame=60",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
