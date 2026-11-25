@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/admin'
 import { notFound } from 'next/navigation'
 import { ChallengeForm } from '@/components/admin/ChallengeForm'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -33,10 +34,14 @@ function timeAgo(date: string): string {
 
 export default async function EditChallenge({ params }: Props) {
   const { id } = await params
+  // Own admin check: this page reads with the service-role client (RLS bypass,
+  // needed so drafts load), so it must not rely on the layout guard alone.
+  const { admin } = await requireAdmin()
+  if (!admin) notFound()
   const supabase = await createClient()
 
   const [{ data }, { data: participations }, stats] = await Promise.all([
-    (supabase as any).from('challenges').select('*, challenge_types(name_fr), industries(name_fr)').eq('id', id).single(),
+    (admin.supabase as any).from('challenges').select('*, challenge_types(name_fr), industries(name_fr)').eq('id', id).single(),
     (supabase as any)
       .from('participations')
       .select('*, profiles(username, avatar_url, league)')
